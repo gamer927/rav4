@@ -406,10 +406,21 @@ The console LED shows the state:
 | **Corner hold** | ✓ | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own [+]/[−] and the over-rev upshift always work |
 | **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 3 km/h/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
 | **Coast unlock** | – | – | ✓ | Lockup released on a closed throttle (< 2 %, re-allowed at 5 %), so the converter is already slipping when you get back on the throttle |
+| **Throttle smoothing** | 0.8 s | 0.25 s | off | The shift map sees a smoothed throttle, so a quick stab of the pedal doesn't cause a downshift; only a sustained push does. That's what makes ECO feel calm. Flooring it (≥ 80 %) bypasses the smoothing, so kickdown is never delayed |
+| **Tip-in release** | – | – | ✓ | A fast stab (≥ 150 %/s) releases lockup at once, even below SPORT's lockup throttle limit, so the converter's torque multiplication is there immediately. Not when the ATF is hot |
 | Lockup released on the brake | ✓ | ✓ | ✓ | Always (stall protection) |
 
-Each one is a per-mode switch in `config.h` (`CORNER_HOLD`, `BRAKE_DOWNSHIFT`,
-`LU_COAST_RELEASE`), so you can turn them on or off for any mode.
+Each one is a per-mode setting in `config.h` (`CORNER_HOLD`, `BRAKE_DOWNSHIFT`,
+`LU_COAST_RELEASE`, `SHIFT_TPS_SMOOTH_MS`, `LU_TIPIN_RELEASE`), so you can turn them on or off
+for any mode.
+
+How each mode feels, overall:
+- **ECO (calm):** early upshifts, early lockup that stays on when you lift, and a 0.8 s
+  smoothed throttle for shift decisions. It ignores pedal stabs and settles into the
+  highest sensible gear.
+- **NORMAL:** in between, with light smoothing.
+- **SPORT (sharp):** holds gears, kicks down on any real push, releases lockup on a fast stab
+  and on a closed throttle, and pre-selects the exit gear under braking.
 
 On engine braking with this transaxle: in D, **1st and 2nd drive through one-way clutches and
 freewheel on a closed throttle**. Only a 4→3 downshift adds engine braking. Brake downshifts
@@ -423,9 +434,14 @@ handles those).
   unlocked before every shift, and its fluid coupling absorbs the speed difference. That
   cushioning is what the blip does in a manual. Hijacking the idle-air valve for this would be
   unsafe and wouldn't give enough air.
-- **Throttle mapping.** Also needs drive-by-wire. The controller only reads the throttle
+- **Engine throttle mapping.** Also needs drive-by-wire. The controller only reads the throttle
   sensor and never changes what the pedal does, so the pedal stays exactly as linear as the
-  factory made it.
+  factory made it. The modes change response through the transmission instead (gear choice,
+  kickdown eagerness, converter slip), which on an automatic is most of what you feel.
+- **Don't modify the throttle linkage** (progressive cams, pedal spacers) to soften the pedal:
+  on this transaxle the throttle (TV) cable to the transmission sets line pressure from throttle
+  opening. Changing the linkage geometry changes line pressure and shift firmness, and can
+  cause slipping.
 
 ## 7. Built-in test and console screen
 

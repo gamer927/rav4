@@ -146,6 +146,7 @@ class Controller {
   void updateLockup(const Inputs& in);
   void updateCorner(const Inputs& in);
   void updateDecel(const Inputs& in);
+  void updateThrottle(const Inputs& in);
   bool cornerHoldActive() const;
   bool brakeDownshift(const Inputs& in);
   void setLockup(bool on);
@@ -179,6 +180,11 @@ class Controller {
   bool brakeHold_ = false;
   uint32_t brakeReleasedMs_ = 0;
   bool prevBrake_ = false;
+  float tpsShift_ = 0.0f;  // smoothed throttle the shift map sees
+  uint32_t lastStepMs_ = 0;
+  float tpsRef_ = 0.0f;
+  uint32_t tpsRefMs_ = 0;
+  bool tipIn_ = false;
 
   bool prevUp_ = false, prevDown_ = false;
   bool upEdge_ = false, downEdge_ = false, upLong_ = false, upLongFired_ = false;

@@ -11,8 +11,9 @@ plus a 0.96"/1.3" OLED in the dash.
 **Sensors added to the car:** a DS18B20 ATF temperature probe in the cooler line and an MPU-6050
 gyro in the TCU box (corner detection). Everything else is tapped from existing wiring.
 
-**Per mode** (spec §6.8): corner hold in all modes; in SPORT, brake downshifts with an exit-gear
-hold and lockup release on a closed throttle.
+**Per mode** (spec §6.8): corner hold in all modes; ECO smooths the throttle for shift decisions
+(calm, ignores pedal stabs); SPORT does brake downshifts with an exit-gear hold, releases lockup
+on a closed throttle and on a fast stab of the pedal.
 
 | Document | Contents |
 |---|---|

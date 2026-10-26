@@ -500,6 +500,64 @@ static void test_coast_unlock() {
   }
 }
 
+static void test_eco_throttle_smoothing() {
+  std::printf("ECO: a quick pedal stab doesn't downshift; a sustained push or floor does\n");
+  auto setup = [](Sim& s) {
+    s.in.eco = true;
+    s.arm();
+    s.in.tpsPct = 15;
+    s.cruise(70);
+    s.step(3000);
+  };
+  Sim s;
+  setup(s);
+  CHECK(s.c.outputs().gear == 4);
+  s.in.tpsPct = 60;  // 0.3 s stab
+  s.step(300);
+  s.in.tpsPct = 15;
+  s.step(2000);
+  CHECK(s.c.outputs().gear == 4);
+
+  Sim t;
+  setup(t);
+  t.in.tpsPct = 60;  // held: the driver wants more
+  t.step(3000);
+  CHECK(t.c.outputs().gear == 3);
+
+  Sim f;
+  setup(f);
+  f.in.tpsPct = 100;  // floored: kickdown is never smoothed
+  f.step(30);
+  CHECK(!f.c.outputs().sl);  // lockup lets go at once...
+  f.step(cfg::LOCKUP_RELEASE_BEFORE_SHIFT_MS);
+  CHECK(f.c.outputs().gear == 3);  // ...and 3rd follows 0.2 s later
+}
+
+static void test_sport_tipin_release() {
+  std::printf("SPORT: a fast stab releases lockup at once; a slow squeeze doesn't\n");
+  auto setup = [](Sim& s) {
+    s.in.sport = true;
+    s.arm();
+    s.in.tpsPct = 15;
+    s.cruise(100);
+    s.step(3000);
+  };
+  Sim s;
+  setup(s);
+  CHECK(s.c.outputs().gear == 4 && s.c.outputs().sl);
+  s.in.tpsPct = 35;  // +20 % at once, still under SPORT's 45 % lockup limit
+  s.step(120);
+  CHECK(!s.c.outputs().sl);
+
+  Sim t;
+  setup(t);
+  for (int i = 0; i < 200; i++) {  // +20 % over 2 s
+    t.in.tpsPct += 0.1f;
+    t.step(10);
+  }
+  CHECK(t.c.outputs().sl);
+}
+
 static void test_lockup_rules() {
   std::printf("lockup: gear/speed/brake/cold/hot/shift sequencing\n");
   Sim s;
@@ -764,6 +822,8 @@ int main() {
   test_corner_hold();
   test_brake_downshift();
   test_coast_unlock();
+  test_eco_throttle_smoothing();
+  test_sport_tipin_release();
   test_lockup_rules();
   test_hot_atf_widens_lockup();
   test_vss_faults();

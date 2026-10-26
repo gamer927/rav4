@@ -230,4 +230,15 @@ constexpr bool LU_COAST_RELEASE[3] = {false, false, true};
 constexpr float COAST_TPS_OFF = 2.0f;             // release below this throttle
 constexpr float COAST_TPS_ON = 5.0f;              // allow re-lock above this
 
+// Throttle smoothing for shift decisions: the shift map sees a low-passed
+// throttle with this time constant, so a quick stab of the pedal doesn't
+// cause a downshift; only a sustained push does. Flooring it (>= KICKDOWN_TPS)
+// always uses the raw throttle, so kickdown is never delayed.
+constexpr uint32_t SHIFT_TPS_SMOOTH_MS[3] = {800, 250, 0};
+
+// Tip-in release: a fast stab of the pedal releases lockup at once, even
+// below the mode's TPS limit, so the converter multiplies torque right away.
+constexpr bool LU_TIPIN_RELEASE[3] = {false, false, true};
+constexpr float TIPIN_RATE_PCT_PER_S = 150.0f;    // e.g. +15 % throttle within 0.1 s
+
 }  // namespace cfg

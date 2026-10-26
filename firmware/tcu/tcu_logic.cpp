@@ -66,6 +66,7 @@ void Controller::begin(uint32_t nowMs, bool watchdogReset) {
   upSince_ = downSince_ = nowMs;
   dropRefMs_ = nowMs;
   decelRefMs_ = nowMs;
+  lastStepMs_ = tpsRefMs_ = nowMs;
 }
 
 const Outputs& Controller::step(const Inputs& in) {
@@ -74,6 +75,7 @@ const Outputs& Controller::step(const Inputs& in) {
   updateButtons(in);
   updateCorner(in);
   updateDecel(in);
+  updateThrottle(in);
   updateWarnings(in);
   active_ = evaluateFaults(in);
   updateArming(in);
@@ -350,6 +352,21 @@ void Controller::updateDecel(const Inputs& in) {
   }
 }
 
+void Controller::updateThrottle(const Inputs& in) {
+  // Smoothed throttle for the shift map (first-order low-pass, per mode).
+  const uint32_t tau = cfg::SHIFT_TPS_SMOOTH_MS[out_.mode];
+  const uint32_t dt = now_ - lastStepMs_;
+  lastStepMs_ = now_;
+  tpsShift_ = tau == 0 ? in.tpsPct : tpsShift_ + (in.tpsPct - tpsShift_) * ((float)dt / (float)(tau + dt));
+  // Tip-in: throttle rising faster than TIPIN_RATE over a ~100 ms window.
+  if (elapsed(now_, tpsRefMs_, 100)) {
+    const float rate = (in.tpsPct - tpsRef_) * 1000.0f / (float)(now_ - tpsRefMs_);
+    tipIn_ = rate >= cfg::TIPIN_RATE_PCT_PER_S;
+    tpsRef_ = in.tpsPct;
+    tpsRefMs_ = now_;
+  }
+}
+
 bool Controller::brakeDownshift(const Inputs& in) {
   const uint8_t m = out_.mode;
   if (!cfg::BRAKE_DOWNSHIFT[m] || !in.brake || cornering_ || gear_ <= 1) return false;
@@ -373,10 +390,11 @@ void Controller::autoSchedule(const Inputs& in) {
   // No automatic shifts mid-corner (manual and over-rev shifts still work).
   if (cornerHoldActive()) return;
   if (brakeDownshift(in)) return;
-  const float tps = in.tpsPct;
   // A kickdown must not wait out the anti-hunting dwell, so 4->3->2 takes
-  // about one shift interval per step instead of over a second.
-  const bool kickdown = tps >= cfg::KICKDOWN_TPS;
+  // about one shift interval per step instead of over a second. It also
+  // bypasses the throttle smoothing.
+  const bool kickdown = in.tpsPct >= cfg::KICKDOWN_TPS;
+  const float tps = kickdown ? in.tpsPct : tpsShift_;
   if (!kickdown && !elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS)) return;
   if (gear_ < 4 && in.speedKmh >= upshiftKmh(out_.mode, gear_, tps)) {
     if (!brakeHold_ && (!kickdown || elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS))) {
@@ -407,8 +425,9 @@ void Controller::updateLockup(const Inputs& in) {
   const bool coast = cfg::LU_COAST_RELEASE[m] && in.tpsPct < (slCmd_ ? cfg::COAST_TPS_OFF : cfg::COAST_TPS_ON);
   const bool blocked = pendingGear_ || gear_ < cfg::LU_MIN_GEAR || in.brake || cold_ || coast ||
                        !elapsed(now_, gearSinceMs_, cfg::LOCKUP_SETTLE_AFTER_SHIFT_MS);
+  const bool tipIn = cfg::LU_TIPIN_RELEASE[m] && tipIn_ && !hot_;
   if (slCmd_) {
-    if (blocked || in.speedKmh < offKmh || in.tpsPct > tpsOff) setLockup(false);
+    if (blocked || tipIn || in.speedKmh < offKmh || in.tpsPct > tpsOff) setLockup(false);
   } else if (!blocked && in.speedKmh >= onKmh && in.tpsPct <= tpsOn &&
              elapsed(now_, lastLockupChangeMs_, cfg::LOCKUP_MIN_OFF_MS)) {
     setLockup(true);
