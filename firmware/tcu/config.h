@@ -71,7 +71,10 @@ constexpr uint32_t CONTROL_PERIOD_MS = 10;
 constexpr uint16_t DEBOUNCE_SWITCH_MS = 25;       // console switches (A-pillar run)
 constexpr uint16_t DEBOUNCE_OPTO_MS = 40;         // brake / lever / ECU sense
 constexpr uint32_t MIN_SHIFT_INTERVAL_MS = 700;   // one shift must finish first
-constexpr uint32_t AUTO_MIN_TIME_IN_GEAR_MS = 1200;
+constexpr uint32_t AUTO_MIN_TIME_IN_GEAR_MS = 1200;  // anti-hunting dwell
+// Throttle at or above this is a kickdown: AUTO downshifts skip the dwell
+// above and only wait for the previous shift to finish (MIN_SHIFT_INTERVAL).
+constexpr float KICKDOWN_TPS = 80.0f;
 constexpr uint32_t LOCKUP_RELEASE_BEFORE_SHIFT_MS = 200;
 constexpr uint32_t LOCKUP_SETTLE_AFTER_SHIFT_MS = 1500;
 constexpr uint32_t LOCKUP_MIN_OFF_MS = 1000;      // anti-chatter before re-apply

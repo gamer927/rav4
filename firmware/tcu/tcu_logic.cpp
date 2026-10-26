@@ -309,10 +309,16 @@ void Controller::revLimitGuard(const Inputs& in) {
 }
 
 void Controller::autoSchedule(const Inputs& in) {
-  if (pendingGear_ || !elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS)) return;
+  if (pendingGear_) return;
   const float tps = in.tpsPct;
+  // A kickdown must not wait out the anti-hunting dwell, so 4->3->2 takes
+  // about one shift interval per step instead of over a second.
+  const bool kickdown = tps >= cfg::KICKDOWN_TPS;
+  if (!kickdown && !elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS)) return;
   if (gear_ < 4 && in.speedKmh >= upshiftKmh(out_.mode, gear_, tps)) {
-    requestShift(gear_ + 1, in.speedKmh, false);
+    if (!kickdown || elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS)) {
+      requestShift(gear_ + 1, in.speedKmh, false);
+    }
   } else if (gear_ > 1 && in.speedKmh < downshiftKmh(out_.mode, gear_, tps)) {
     // Kickdowns that would over-rev are refused by requestShift().
     requestShift(gear_ - 1, in.speedKmh, false);

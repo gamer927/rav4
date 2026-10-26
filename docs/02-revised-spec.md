@@ -247,7 +247,12 @@ If the request is accepted with lockup applied, SL releases first and the gear c
 - **Downshift** when `speed < upshift(tps) − hysteresis[mode]` (ECO 11, NORMAL 12, SPORT 7 km/h).
   Opening the throttle raises the downshift line, which gives kickdown; the over-rev guard
   refuses any kickdown that would over-rev.
-- At least **1.2 s** in gear between automatic shifts.
+- At least **1.2 s** in gear between automatic shifts, so the box doesn't hunt between gears at
+  part throttle.
+- **Kickdown** (throttle ≥ 80 %) skips that 1.2 s wait. Downshifts then only wait for the
+  previous shift to finish (700 ms), so 4→3 is immediate and 3→2 follows 0.7 s later. Example
+  in SPORT, flooring it in 4th at 65 km/h: 3rd at once, 2nd at 0.7 s, then upshift to 3rd at
+  110 km/h.
 
 | Upshift km/h at 0 / 25 / 50 / 75 / 100 % TPS | 1→2 | 2→3 | 3→4 |
 |---|---|---|---|

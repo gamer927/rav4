@@ -324,6 +324,37 @@ static void test_auto_schedule() {
   CHECK(s.c.outputs().gear == 3);
 }
 
+static void test_kickdown_is_immediate() {
+  std::printf("kickdown right after a shift goes 4->3->2 without the dwell\n");
+  Sim s;
+  s.in.sport = true;
+  s.cruise(65);
+  s.setEcuGear(4);
+  s.arm();
+  CHECK(s.c.outputs().gear == 4);
+  s.step(300);  // only 0.3 s in 4th: a part-throttle downshift would still wait
+  s.in.tpsPct = 100;
+  s.step(20);
+  CHECK(s.c.outputs().gear == 3);
+  s.step(cfg::MIN_SHIFT_INTERVAL_MS);
+  CHECK(s.c.outputs().gear == 2);  // 2nd at 65 km/h is under the rpm limit
+  s.step(2000);
+  CHECK(s.c.outputs().gear == 2);  // and it doesn't go on to 1st (45 km/h cap)
+
+  // Part throttle in the same spot still respects the dwell.
+  Sim t;
+  t.in.sport = true;
+  t.cruise(65);
+  t.setEcuGear(4);
+  t.arm();
+  t.step(300);
+  t.in.tpsPct = 70;
+  t.step(20);
+  CHECK(t.c.outputs().gear == 4);
+  t.step(cfg::AUTO_MIN_TIME_IN_GEAR_MS);
+  CHECK(t.c.outputs().gear == 3);
+}
+
 static void test_lockup_rules() {
   std::printf("lockup: gear/speed/brake/cold/hot/shift sequencing\n");
   Sim s;
@@ -546,6 +577,7 @@ int main() {
   test_manual_auto_downshift_to_stop();
   test_long_press_resumes_auto();
   test_auto_schedule();
+  test_kickdown_is_immediate();
   test_lockup_rules();
   test_hot_atf_widens_lockup();
   test_vss_faults();
