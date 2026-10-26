@@ -1,0 +1,13 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Host unit tests
+        run: make test
+      - name: Install AVR toolchain + Arduino core
+        run: sudo apt-get update && sudo apt-get install -y gcc-avr avr-libc arduino-core-avr
+      - name: Compile firmware for ATmega2560
+        run: make avr
