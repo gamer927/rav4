@@ -3,6 +3,7 @@
 #include <cstdio>
 
 #include "../firmware/tcu/config.h"
+#include "../firmware/tcu/ds18b20.h"
 #include "../firmware/tcu/tcu_logic.h"
 
 using namespace tcu;
@@ -353,6 +354,152 @@ static void test_kickdown_is_immediate() {
   CHECK(t.c.outputs().gear == 3);
 }
 
+static void test_corner_hold() {
+  std::printf("corner hold: no automatic shifts mid-corner, manual still works\n");
+  Sim s;
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(40);
+  CHECK(s.c.outputs().gear == 2);
+  s.in.latValid = true;
+  s.in.latG = -0.35f;  // turning left
+  s.step(50);
+  CHECK(s.c.outputs().cornerHold);
+  s.cruise(60);  // past the 2->3 point, but mid-corner
+  s.step(1000);
+  CHECK(s.c.outputs().gear == 2);
+  s.in.latG = 0.05f;  // straightening out
+  s.step(cfg::CORNER_EXIT_MS - 100);
+  CHECK(s.c.outputs().gear == 2);
+  s.step(400);
+  CHECK(!s.c.outputs().cornerHold);
+  CHECK(s.c.outputs().gear == 3);
+
+  // A long sweeper (or a stuck sensor) only holds for CORNER_HOLD_MAX_MS.
+  Sim t;
+  t.arm();
+  t.in.tpsPct = 20;
+  t.cruise(40);
+  t.in.latValid = true;
+  t.in.latG = 0.3f;
+  t.step(20);
+  t.cruise(60);
+  t.step(cfg::CORNER_HOLD_MAX_MS - 2000);
+  CHECK(t.c.outputs().gear == 2);
+  t.step(2500);
+  CHECK(t.c.outputs().gear == 3);
+
+  // The driver's own shift is always honoured.
+  Sim u;
+  u.arm();
+  u.in.tpsPct = 20;
+  u.cruise(40);
+  u.in.latValid = true;
+  u.in.latG = 0.4f;
+  u.step(20);
+  u.tap(u.in.up);
+  CHECK(u.c.outputs().gear == 3);
+
+  // No gyro data: no hold.
+  Sim v;
+  v.arm();
+  v.in.tpsPct = 20;
+  v.cruise(40);
+  v.in.latValid = false;
+  v.in.latG = 0.5f;
+  v.cruise(60);
+  v.step(1500);
+  CHECK(v.c.outputs().gear == 3);
+}
+
+static void test_brake_downshift() {
+  std::printf("SPORT brake downshift: gear ready for the exit, held until throttle\n");
+  Sim s;
+  s.in.sport = true;
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(100);
+  s.step(1500);
+  CHECK(s.c.outputs().gear == 4);
+  s.in.tpsPct = 0;
+  s.in.brake = true;
+  s.rampTo(85, 15.0f);  // hard braking
+  CHECK(s.c.outputs().gear == 3);
+  s.rampTo(60, 15.0f);
+  CHECK(s.c.outputs().gear == 2);
+  CHECK(s.in.speedKmh * cfg::RPM_PER_KMH[2] <= cfg::BRAKE_DOWNSHIFT_RPM[2]);
+  s.rampTo(50, 15.0f);
+  CHECK(s.c.outputs().gear == 2);  // 1st only below the 4200 rpm / 45 km/h line
+  s.in.brake = false;              // corner entry: off the brake, off the throttle
+  s.step(cfg::BRAKE_HOLD_MS - 500);
+  CHECK(s.c.outputs().gear == 2);  // the 0 % map would have gone back to 3rd at 50
+  s.in.tpsPct = 40;                // exit: back on the throttle
+  s.step(100);
+  CHECK(s.c.outputs().gear == 2);  // 40 % in SPORT holds 2nd at 50 km/h
+
+  // Hold also ends on its own if the driver just coasts.
+  Sim t;
+  t.in.sport = true;
+  t.arm();
+  t.in.tpsPct = 20;
+  t.cruise(100);
+  t.step(1500);
+  t.in.tpsPct = 0;
+  t.in.brake = true;
+  t.rampTo(60, 15.0f);
+  CHECK(t.c.outputs().gear == 2);
+  t.in.brake = false;
+  t.step(cfg::BRAKE_HOLD_MS + 1500);
+  CHECK(t.c.outputs().gear == 3);
+
+  // NORMAL doesn't brake-downshift; SPORT doesn't do it mid-corner.
+  Sim n;
+  n.arm();
+  n.in.tpsPct = 20;
+  n.cruise(100);
+  n.step(1500);
+  n.in.tpsPct = 0;
+  n.in.brake = true;
+  n.rampTo(60, 15.0f);
+  CHECK(n.c.outputs().gear == 4);
+  Sim c;
+  c.in.sport = true;
+  c.arm();
+  c.in.tpsPct = 20;
+  c.cruise(100);
+  c.step(1500);
+  c.in.latValid = true;
+  c.in.latG = 0.4f;
+  c.in.tpsPct = 0;
+  c.in.brake = true;
+  c.rampTo(70, 10.0f);
+  CHECK(c.c.outputs().gear == 4);
+}
+
+static void test_coast_unlock() {
+  std::printf("SPORT releases lockup on a closed throttle; ECO keeps it\n");
+  for (int mode = 0; mode < 2; mode++) {
+    Sim s;
+    s.in.sport = mode == 1;
+    s.in.eco = mode == 0;
+    s.arm();
+    s.in.tpsPct = 20;
+    s.cruise(100);
+    s.step(3000);
+    CHECK(s.c.outputs().gear == 4);
+    CHECK(s.c.outputs().sl);
+    s.in.tpsPct = 0;
+    s.step(50);
+    CHECK(s.c.outputs().sl == (mode == 0));
+    s.in.tpsPct = 3;  // inside the hysteresis band: stays as it is
+    s.step(1500);
+    CHECK(s.c.outputs().sl == (mode == 0));
+    s.in.tpsPct = 15;
+    s.step(1500);
+    CHECK(s.c.outputs().sl);
+  }
+}
+
 static void test_lockup_rules() {
   std::printf("lockup: gear/speed/brake/cold/hot/shift sequencing\n");
   Sim s;
@@ -546,6 +693,44 @@ static void test_debouncer() {
   CHECK(d.state());
 }
 
+static void test_ds18b20_decode() {
+  std::printf("DS18B20: CRC, temperature decode, fault patterns\n");
+  // Maxim application note 27 example ROM: CRC of these 7 bytes is 0xA2.
+  const uint8_t rom[7] = {0x02, 0x1C, 0xB8, 0x01, 0x00, 0x00, 0x00};
+  CHECK(ds18b20::crc8(rom, 7) == 0xA2);
+
+  auto pad = [](int16_t raw, uint8_t* sp) {
+    const uint8_t base[9] = {0, 0, 0x4B, 0x46, 0x7F, 0xFF, 0x0C, 0x10, 0};
+    for (int i = 0; i < 9; i++) sp[i] = base[i];
+    sp[0] = (uint8_t)(raw & 0xFF);
+    sp[1] = (uint8_t)((uint16_t)raw >> 8);
+    sp[8] = ds18b20::crc8(sp, 8);
+  };
+  struct Case { int16_t raw; float c; };
+  const Case cases[] = {{0x07D0, 125.0f}, {0x0191, 25.0625f}, {0x06E0, 110.0f}, {(int16_t)0xFF5E, -10.125f},
+                        {(int16_t)0xFC90, -55.0f}};
+  uint8_t sp[9];
+  float c = 0;
+  for (const Case& k : cases) {
+    pad(k.raw, sp);
+    CHECK(ds18b20::decode(sp, c) == ds18b20::OK);
+    CHECK(std::fabs(c - k.c) < 1e-4f);
+  }
+  pad(0x0550, sp);  // 85.0 C: also the power-on reset value
+  CHECK(ds18b20::decode(sp, c) == ds18b20::POWER_ON_VALUE);
+  CHECK(c == 85.0f);
+  pad(0x06E0, sp);
+  sp[0] ^= 0x01;  // a flipped bit on a noisy line
+  CHECK(ds18b20::decode(sp, c) == ds18b20::BAD_CRC);
+  uint8_t ones[9], zeros[9];
+  for (int i = 0; i < 9; i++) {
+    ones[i] = 0xFF;
+    zeros[i] = 0x00;
+  }
+  CHECK(ds18b20::decode(ones, c) == ds18b20::NO_DEVICE);   // unplugged
+  CHECK(ds18b20::decode(zeros, c) == ds18b20::NO_DEVICE);  // shorted (CRC of zeros is 0)
+}
+
 static void test_maps_are_sane() {
   std::printf("shift maps: hysteresis, monotonic, WOT points below rev limit\n");
   for (int m = 0; m < 3; m++) {
@@ -576,6 +761,9 @@ int main() {
   test_long_press_resumes_auto();
   test_auto_schedule();
   test_kickdown_is_immediate();
+  test_corner_hold();
+  test_brake_downshift();
+  test_coast_unlock();
   test_lockup_rules();
   test_hot_atf_widens_lockup();
   test_vss_faults();
@@ -584,6 +772,7 @@ int main() {
   test_rev_limit_upshift();
   test_mode_switch_fault_and_stuck_button();
   test_debouncer();
+  test_ds18b20_decode();
   test_maps_are_sane();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;

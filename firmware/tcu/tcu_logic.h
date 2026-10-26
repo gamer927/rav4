@@ -66,6 +66,11 @@ struct Inputs {
   // (index 0 = S1, 1 = S2, 2 = SL). Only meaningful when solSenseValid.
   bool solSenseValid = false;
   float solAmps[3] = {0.0f, 0.0f, 0.0f};
+  // Lateral acceleration (g, either sign) from the gyro; latValid = false when
+  // there's no gyro or its bias hasn't been learned yet.
+  bool latValid = false;
+  float latG = 0.0f;
+  bool imuPresent = false;  // gyro answered on the bus (for the self-test)
 };
 
 struct Outputs {
@@ -73,6 +78,7 @@ struct Outputs {
   bool s1 = false, s2 = false, sl = false;
   uint8_t gear = 0;          // TCU gear in CUSTOM, ECU's gear in STOCK, 0 = unknown
   bool lockup = false;       // converter lockup commanded (by TCU or ECU)
+  bool cornerHold = false;   // automatic shifts paused: cornering
   Control control = CTRL_STOCK;
   DriveMode mode = MODE_NORMAL;
   bool armed = false;        // master switch cycled into CUSTOM since boot
@@ -138,6 +144,10 @@ class Controller {
   void autoSchedule(const Inputs& in);
   void manualSafety(const Inputs& in);
   void updateLockup(const Inputs& in);
+  void updateCorner(const Inputs& in);
+  void updateDecel(const Inputs& in);
+  bool cornerHoldActive() const;
+  bool brakeDownshift(const Inputs& in);
   void setLockup(bool on);
   void compose(const Inputs& in);
   void raise(Event ev, bool always);
@@ -159,6 +169,16 @@ class Controller {
   uint32_t lastLockupChangeMs_ = 0;
   bool hot_ = false;
   bool cold_ = false;
+
+  bool cornering_ = false;
+  uint32_t cornerSinceMs_ = 0;
+  Persist straight_;
+  float decelRefKmh_ = 0.0f;
+  uint32_t decelRefMs_ = 0;
+  float decelKmhPerS_ = 0.0f;
+  bool brakeHold_ = false;
+  uint32_t brakeReleasedMs_ = 0;
+  bool prevBrake_ = false;
 
   bool prevUp_ = false, prevDown_ = false;
   bool upEdge_ = false, downEdge_ = false, upLong_ = false, upLongFired_ = false;

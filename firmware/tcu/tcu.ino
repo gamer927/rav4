@@ -19,6 +19,8 @@
 #include <string.h>
 
 #include "config.h"
+#include "ds18b20.h"
+#include "imu.h"
 #include "oled.h"
 #include "self_test.h"
 #include "tcu_logic.h"
@@ -43,14 +45,15 @@ constexpr uint8_t LEVER_D = 28;      // opto from park/neutral switch "D" output
 constexpr uint8_t ECU_S1 = 29;       // opto from ECU S1 output (ECU side of relay)
 constexpr uint8_t ECU_S2 = 30;
 constexpr uint8_t ECU_SL = 31;
-constexpr uint8_t TEST = 32;         // console TEST button (spare core 8)
+constexpr uint8_t TEST = 32;         // console TEST button
+constexpr uint8_t ATF_PROBE = 33;    // DS18B20 1-Wire data (4.7k pull-up to 5 V)
 constexpr uint8_t TPS = A0;
 constexpr uint8_t ATF = A2;
 constexpr uint8_t VBAT = A3;
 constexpr uint8_t IS_S1 = A4;        // high-side driver current-sense outputs
 constexpr uint8_t IS_S2 = A5;
 constexpr uint8_t IS_SL = A6;
-// Console OLED on I2C: SDA = 20, SCL = 21.
+// I2C (SDA = 20, SCL = 21): console OLED (0x3C) and MPU-6050 gyro (0x68).
 }  // namespace pin
 
 // USB serial carries a CSV log for calibration (docs/02-revised-spec.md §8).
@@ -87,6 +90,8 @@ uint8_t savedBitChecksum() {
 tcu::Controller controller;
 tcu::SelfTest selfTest;
 Oled oled;
+Imu imu;
+Ds18b20Bus atfBus;
 tcu::Inputs lastIn;
 bool unexpectedWdtReset = false;
 
@@ -138,6 +143,82 @@ uint16_t readRaw(uint8_t p) {
 }
 float rawToVolts(uint16_t raw) { return raw * (cfg::ADC_VREF / 1023.0f); }
 
+// --------------------------------------------------------------- ATF probe
+// One 12-bit conversion per second: start it, read it 800 ms later. A few
+// bad reads in a row (unplugged, shorted, noise) = sensor fault.
+struct {
+  float celsius = 0.0f;
+  bool valid = false;
+  bool have = false;
+  uint8_t misses = 0;
+  bool converting = false;
+  uint32_t startMs = 0;
+} atfProbe;
+
+void atfMiss() {
+  if (++atfProbe.misses >= cfg::DS18B20_MAX_MISSES) atfProbe.valid = false;
+}
+
+void serviceAtfProbe(uint32_t now) {
+  if (cfg::ATF_SENSOR != cfg::ATF_DS18B20) return;
+  if (!atfProbe.converting) {
+    if ((uint32_t)(now - atfProbe.startMs) < cfg::DS18B20_PERIOD_MS) return;
+    atfProbe.startMs = now;
+    if (!atfBus.reset()) return atfMiss();
+    atfBus.writeByte(0xCC);  // skip ROM: one probe on the bus
+    atfBus.writeByte(0x44);  // convert T
+    atfProbe.converting = true;
+    return;
+  }
+  if ((uint32_t)(now - atfProbe.startMs) < 800) return;  // 12-bit conversion: 750 ms
+  atfProbe.converting = false;
+  if (!atfBus.reset()) return atfMiss();
+  atfBus.writeByte(0xCC);
+  atfBus.writeByte(0xBE);  // read scratchpad
+  uint8_t sp[9];
+  for (uint8_t i = 0; i < 9; i++) sp[i] = atfBus.readByte();
+  float c;
+  const ds18b20::Result r = ds18b20::decode(sp, c);
+  // 85.0 C is also the chip's power-on value. Accept it only when it agrees
+  // with the previous reading (85 C is a perfectly normal ATF temperature).
+  const bool ok = r == ds18b20::OK ||
+                  (r == ds18b20::POWER_ON_VALUE && atfProbe.have && fabs(atfProbe.celsius - c) < 5.0f);
+  if (!ok) return atfMiss();
+  atfProbe.celsius = c;
+  atfProbe.valid = atfProbe.have = true;
+  atfProbe.misses = 0;
+}
+
+// --------------------------------------------------------------- gyro
+// Yaw rate x speed = lateral acceleration. The gyro's zero offset drifts, so
+// it is re-learned whenever the car is stopped; until it has been learned
+// (about 3 s stationary after power-up) lateral g is reported invalid and
+// corner hold stays off.
+struct {
+  float biasDps = 0.0f;
+  uint16_t stillSamples = 0;
+  uint8_t misses = 0;
+  float latG = 0.0f;
+  uint32_t lastMs = 0;
+} gyro;
+
+void serviceGyro(uint32_t now) {
+  if (!cfg::IMU_INSTALLED || (uint32_t)(now - gyro.lastMs) < 20) return;
+  gyro.lastMs = now;
+  float dps;
+  if (!imu.readYawDps(dps)) {
+    if (gyro.misses < 255) gyro.misses++;
+    return;
+  }
+  gyro.misses = 0;
+  if (lastIn.speedKmh < 1.0f && fabs(dps - gyro.biasDps) < 10.0f) {
+    gyro.biasDps = gyro.stillSamples ? gyro.biasDps + 0.02f * (dps - gyro.biasDps) : dps;
+    if (gyro.stillSamples < 1000) gyro.stillSamples++;
+  }
+  const float yawRadS = (dps - gyro.biasDps) * (3.14159265f / 180.0f);
+  gyro.latG = (lastIn.speedKmh / 3.6f) * yawRadS / 9.81f;
+}
+
 // --------------------------------------------------------------- switches
 tcu::Debouncer dbUp, dbDown, dbEco, dbSport, dbMaster, dbBrake, dbLeverD, dbEcuS1, dbEcuS2, dbEcuSL, dbTest;
 
@@ -186,16 +267,25 @@ tcu::Inputs readInputs(uint32_t now) {
   float tps = (tpsV - cfg::TPS_CLOSED_V) / (cfg::TPS_WOT_V - cfg::TPS_CLOSED_V) * 100.0f;
   in.tpsPct = tps < 0.0f ? 0.0f : (tps > 100.0f ? 100.0f : tps);
 
-  const uint16_t atfRaw = readRaw(pin::ATF);
-  in.atfValid = atfRaw > cfg::ATF_ADC_SHORT && atfRaw < cfg::ATF_ADC_OPEN;
-  if (in.atfValid) {
-    const float v = rawToVolts(atfRaw);
+  if (cfg::ATF_SENSOR == cfg::ATF_DS18B20) {
+    in.atfValid = atfProbe.valid;
+    in.atfC = atfProbe.celsius;
+  } else {
+    const uint16_t atfRaw = readRaw(pin::ATF);
+    in.atfValid = atfRaw > cfg::ATF_ADC_SHORT && atfRaw < cfg::ATF_ADC_OPEN;
+  }
+  if (cfg::ATF_SENSOR == cfg::ATF_NTC && in.atfValid) {
+    const float v = rawToVolts(readRaw(pin::ATF));
     const float r = cfg::ATF_PULLUP_OHMS * v / (cfg::ADC_VREF - v);
     const float kelvin = 1.0f / (1.0f / 298.15f + log(r / cfg::ATF_R25_OHMS) / cfg::ATF_BETA);
     in.atfC = atfF.update(kelvin - 273.15f, 0.05f);
   }
 
   in.batteryV = vbatF.update(rawToVolts(readRaw(pin::VBAT)) * cfg::VBAT_DIVIDER, 0.1f);
+
+  in.imuPresent = imu.present();
+  in.latValid = cfg::IMU_INSTALLED && imu.present() && gyro.stillSamples >= 150 && gyro.misses < 5;
+  in.latG = gyro.latG;
 
   in.solSenseValid = cfg::SOLENOID_SENSE_INSTALLED;
   const uint8_t isPins[3] = {pin::IS_S1, pin::IS_S2, pin::IS_SL};
@@ -453,8 +543,12 @@ void renderMain(const tcu::Outputs& o, uint32_t now) {
   oled.setBig(big.buf);
   Text r2, r3, r4, r5, r6, r7;
   r2.s(controlText(o.control)).pad(7);
-  if (!cfg::CALIBRATED) r2.s("NOT CALIBRATED");
-  else if (o.lockup) r2.s("LOCKUP");
+  if (!cfg::CALIBRATED) {
+    r2.s("NOT CALIBRATED");
+  } else {
+    if (o.lockup) r2.s("LOCKUP ");
+    if (o.cornerHold) r2.s("CORNER");
+  }
   r3.s("BIT  ");
   bitStatus(r3);
   r4.s("FLT  ");
@@ -486,7 +580,9 @@ void renderSensors() {
   r5.s("ATF TEMP").pad(9);
   if (lastIn.atfValid) r5.n((int32_t)lastIn.atfC).s(" C");
   else r5.s("FAULT");
-  r6.s("BATTERY").pad(9).fixed(lastIn.batteryV, 1).s(" V");
+  r6.s("BATT ").fixed(lastIn.batteryV, 1).s("V").pad(11).s("LAT ");
+  if (lastIn.latValid) r6.fixed(lastIn.latG < 0 ? -lastIn.latG : lastIn.latG, 2).s("g");
+  else r6.s("--");
   if (lastIn.solSenseValid) {
     r7.s("SOL A ");
     for (uint8_t i = 0; i < 3; i++) r7.fixed(lastIn.solAmps[i], 2).s(" ");
@@ -688,6 +784,11 @@ void setup() {
   unexpectedWdtReset = wdtReset && !bitSaved;
 
   if (cfg::OLED_INSTALLED) oled.begin(cfg::OLED_I2C_ADDR, cfg::OLED_SH1106);
+  if (cfg::IMU_INSTALLED) imu.begin();
+  if (cfg::ATF_SENSOR == cfg::ATF_DS18B20) {
+    atfBus.begin(pin::ATF_PROBE);
+    atfProbe.startMs = millis() - cfg::DS18B20_PERIOD_MS;  // first reading before PBIT
+  }
 
   const uint32_t now = millis();
   controller.begin(now, unexpectedWdtReset);
@@ -733,6 +834,8 @@ void loop() {
     }
   }
 
+  serviceAtfProbe(now);
+  serviceGyro(now);
   serviceOled(now);
   serviceUsbLog(now);
 }

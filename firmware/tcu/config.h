@@ -46,6 +46,14 @@ constexpr float TPS_WOT_V = 4.00f;
 constexpr float TPS_VALID_MIN_V = 0.15f;          // below = shorted / open ground
 constexpr float TPS_VALID_MAX_V = 4.85f;          // above = open signal / short to VC
 
+// ATF temperature sensor. DS18B20 = digital 1-Wire probe in the cooler line
+// (pin D33, 4.7k pull-up to 5 V); reads -55..125 C, factory-calibrated.
+// NTC = analog thermistor sender on A2 (constants below).
+enum AtfSensor : uint8_t { ATF_DS18B20, ATF_NTC };
+constexpr AtfSensor ATF_SENSOR = ATF_DS18B20;
+constexpr uint32_t DS18B20_PERIOD_MS = 1000;      // one 12-bit reading per second
+constexpr uint8_t DS18B20_MAX_MISSES = 3;         // bad reads in a row before "sensor fault"
+
 // ATF NTC thermistor, read through a pull-up to ADC_VREF. A 1 k pull-up puts
 // best resolution around 90-110 C where it matters. VERIFY R25/Beta for your
 // sender (datasheet or 3-point calibration).
@@ -187,5 +195,39 @@ constexpr float UPSHIFT_KMH[3][3][TPS_POINTS] = {
 // Downshift = upshift(tps) - hysteresis. Small hysteresis = eager kickdown.
 constexpr float DOWNSHIFT_HYST_KMH[3] = {11.0f, 12.0f, 7.0f};
 constexpr float MIN_DOWNSHIFT_KMH = 3.0f;
+
+// ----------------------------------------------- per-mode driving features
+// Index: 0 = ECO, 1 = NORMAL, 2 = SPORT.
+
+// Corner hold: no automatic shifts (up or down, kickdown included) while the
+// car is cornering, so a shift can't unsettle it mid-turn. Manual [+]/[-] and
+// the over-rev upshift still work. Lateral g comes from the gyro's yaw rate x
+// road speed (MPU-6050 on I2C). No gyro, or no bias learned yet = no hold.
+constexpr bool IMU_INSTALLED = true;
+constexpr bool CORNER_HOLD[3] = {true, true, true};
+constexpr float CORNER_ENTER_G = 0.25f;
+constexpr float CORNER_EXIT_G = 0.12f;
+constexpr uint32_t CORNER_EXIT_MS = 700;          // straight this long before shifting resumes
+constexpr uint32_t CORNER_HOLD_MAX_MS = 10000;    // long sweeper or bad sensor: stop holding
+constexpr float CORNER_MIN_KMH = 20.0f;
+
+// Brake downshift: while braking in a straight line, step down one gear at a
+// time as long as the lower gear lands at or below this rpm, so the car is in
+// the right gear for the exit. After it, the gear is held until the driver
+// opens the throttle or BRAKE_HOLD_MS pass after releasing the brake.
+// Note: in D, 1st and 2nd freewheel on one-way clutches, so only 4->3 adds
+// engine braking; lower steps just pre-select the exit gear.
+constexpr bool BRAKE_DOWNSHIFT[3] = {false, false, true};
+constexpr float BRAKE_DOWNSHIFT_RPM[3] = {0.0f, 0.0f, 4200.0f};
+constexpr float BRAKE_DOWNSHIFT_MIN_DECEL = 3.0f;  // km/h per second
+constexpr uint32_t BRAKE_HOLD_MS = 3000;
+constexpr float BRAKE_HOLD_TPS = 20.0f;
+
+// Coast unlock: release the converter clutch on a closed throttle, so the
+// converter is already slipping (multiplying torque) when you get back on it.
+// ECO keeps lockup on the coast for fuel cut.
+constexpr bool LU_COAST_RELEASE[3] = {false, false, true};
+constexpr float COAST_TPS_OFF = 2.0f;             // release below this throttle
+constexpr float COAST_TPS_ON = 5.0f;              // allow re-lock above this
 
 }  // namespace cfg

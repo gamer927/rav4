@@ -38,6 +38,7 @@ struct Bench {
     in.atfValid = true;
     in.atfC = 20;
     in.batteryV = 12.5f;  // ignition on, engine off: not charging
+    in.imuPresent = true;
   }
   void physics() {
     const TestOutputs& o = t.outputs();

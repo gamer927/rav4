@@ -65,12 +65,15 @@ void Controller::begin(uint32_t nowMs, bool watchdogReset) {
   wdtReset_ = watchdogReset;
   upSince_ = downSince_ = nowMs;
   dropRefMs_ = nowMs;
+  decelRefMs_ = nowMs;
 }
 
 const Outputs& Controller::step(const Inputs& in) {
   now_ = in.nowMs;
   updateMode(in);
   updateButtons(in);
+  updateCorner(in);
+  updateDecel(in);
   updateWarnings(in);
   active_ = evaluateFaults(in);
   updateArming(in);
@@ -228,6 +231,7 @@ void Controller::tryEnterCustom(const Inputs& in) {
   gearSinceMs_ = now_;
   lastShiftMs_ = now_ - cfg::MIN_SHIFT_INTERVAL_MS;
   slCmd_ = in.ecuSenseValid && in.ecuSL && g >= cfg::LU_MIN_GEAR && !in.brake;
+  brakeHold_ = false;
   lastLockupChangeMs_ = now_;
   overRev_ = Persist();
   out_.control = cfg::ENTER_IN_MANUAL ? CTRL_MANUAL : CTRL_AUTO;
@@ -314,15 +318,68 @@ void Controller::revLimitGuard(const Inputs& in) {
   }
 }
 
+void Controller::updateCorner(const Inputs& in) {
+  if (!in.latValid || in.speedKmh < cfg::CORNER_MIN_KMH) {
+    cornering_ = false;
+    straight_.active = false;
+    return;
+  }
+  const float g = absf(in.latG);
+  if (!cornering_) {
+    if (g >= cfg::CORNER_ENTER_G) {
+      cornering_ = true;
+      cornerSinceMs_ = now_;
+      straight_.active = false;
+    }
+  } else if (straight_.update(g < cfg::CORNER_EXIT_G, now_, cfg::CORNER_EXIT_MS)) {
+    cornering_ = false;
+  }
+}
+
+bool Controller::cornerHoldActive() const {
+  return cfg::CORNER_HOLD[out_.mode] && cornering_ && !elapsed(now_, cornerSinceMs_, cfg::CORNER_HOLD_MAX_MS);
+}
+
+void Controller::updateDecel(const Inputs& in) {
+  // Deceleration over ~300 ms windows, km/h per second (positive = slowing).
+  if (elapsed(now_, decelRefMs_, 300)) {
+    const float dt = (now_ - decelRefMs_) / 1000.0f;
+    decelKmhPerS_ = (decelRefKmh_ - in.speedKmh) / dt;
+    decelRefKmh_ = in.speedKmh;
+    decelRefMs_ = now_;
+  }
+}
+
+bool Controller::brakeDownshift(const Inputs& in) {
+  const uint8_t m = out_.mode;
+  if (!cfg::BRAKE_DOWNSHIFT[m] || !in.brake || cornering_ || gear_ <= 1) return false;
+  if (decelKmhPerS_ < cfg::BRAKE_DOWNSHIFT_MIN_DECEL) return false;
+  if (in.speedKmh * cfg::RPM_PER_KMH[gear_ - 1] > cfg::BRAKE_DOWNSHIFT_RPM[m]) return false;
+  if (!requestShift(gear_ - 1, in.speedKmh, false)) return false;
+  brakeHold_ = true;
+  return true;
+}
+
 void Controller::autoSchedule(const Inputs& in) {
   if (pendingGear_) return;
+  // Brake hold: after a brake downshift, keep the gear for the corner exit
+  // until the driver opens the throttle or has been off the brake a while.
+  if (prevBrake_ && !in.brake) brakeReleasedMs_ = now_;
+  prevBrake_ = in.brake;
+  if (brakeHold_ && !in.brake &&
+      (in.tpsPct >= cfg::BRAKE_HOLD_TPS || elapsed(now_, brakeReleasedMs_, cfg::BRAKE_HOLD_MS))) {
+    brakeHold_ = false;
+  }
+  // No automatic shifts mid-corner (manual and over-rev shifts still work).
+  if (cornerHoldActive()) return;
+  if (brakeDownshift(in)) return;
   const float tps = in.tpsPct;
   // A kickdown must not wait out the anti-hunting dwell, so 4->3->2 takes
   // about one shift interval per step instead of over a second.
   const bool kickdown = tps >= cfg::KICKDOWN_TPS;
   if (!kickdown && !elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS)) return;
   if (gear_ < 4 && in.speedKmh >= upshiftKmh(out_.mode, gear_, tps)) {
-    if (!kickdown || elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS)) {
+    if (!brakeHold_ && (!kickdown || elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS))) {
       requestShift(gear_ + 1, in.speedKmh, false);
     }
   } else if (gear_ > 1 && in.speedKmh < downshiftKmh(out_.mode, gear_, tps)) {
@@ -346,7 +403,9 @@ void Controller::updateLockup(const Inputs& in) {
   const float tpsOff = hot_ ? cfg::HOT_LU_TPS_OFF : cfg::LU_TPS_OFF[m];
 
   // Brake and low speed always release: a locked converter stalls the engine.
-  const bool blocked = pendingGear_ || gear_ < cfg::LU_MIN_GEAR || in.brake || cold_ ||
+  // Coast release (per mode) keeps the converter slipping, ready for throttle.
+  const bool coast = cfg::LU_COAST_RELEASE[m] && in.tpsPct < (slCmd_ ? cfg::COAST_TPS_OFF : cfg::COAST_TPS_ON);
+  const bool blocked = pendingGear_ || gear_ < cfg::LU_MIN_GEAR || in.brake || cold_ || coast ||
                        !elapsed(now_, gearSinceMs_, cfg::LOCKUP_SETTLE_AFTER_SHIFT_MS);
   if (slCmd_) {
     if (blocked || in.speedKmh < offKmh || in.tpsPct > tpsOff) setLockup(false);
@@ -367,6 +426,7 @@ void Controller::compose(const Inputs& in) {
   out_.relayCustom = custom;
   out_.armed = armed_;
   out_.faults = latched_ | active_;
+  out_.cornerHold = custom && out_.control == CTRL_AUTO && cornerHoldActive();
   if (custom) {
     solenoidsForGear(gear_, out_.s1, out_.s2);
     out_.sl = slCmd_;

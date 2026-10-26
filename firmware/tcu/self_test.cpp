@@ -9,7 +9,7 @@ namespace {
 inline bool elapsed(uint32_t now, uint32_t since, uint32_t ms) { return (uint32_t)(now - since) >= ms; }
 
 const char* const kNames[T_COUNT] = {
-    "SUPPLY", "TPS",     "ATF SENS", "SWITCHES", "CALIBRATN", "LAST RST", "LAMPS",    "SOL S1",
+    "SUPPLY", "TPS",     "ATF SENS", "GYRO",     "SWITCHES", "CALIBRATN", "LAST RST", "LAMPS",    "SOL S1",
     "SOL S2", "SOL SL",  "RELAY REL", "BTN [+]", "BTN [-]",   "ECO SW",   "SPORT SW", "BRAKE SW",
     "WATCHDOG",
 };
@@ -43,6 +43,7 @@ void SelfTest::runPassive(const Inputs& in) {
       in.batteryV);
   set(T_TPS, in.tpsValid ? TR_PASS : TR_FAIL, in.tpsPct);
   set(T_ATF, in.atfValid ? TR_PASS : TR_FAIL, in.atfC);
+  set(T_IMU, !cfg::IMU_INSTALLED ? TR_SKIP : in.imuPresent ? TR_PASS : TR_FAIL);
   // A shift button held at boot is stuck.
   set(T_SWITCHES, !in.up && !in.down ? TR_PASS : TR_FAIL);
   set(T_CALIBRATED, cfg::CALIBRATED ? TR_PASS : TR_FAIL);

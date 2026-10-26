@@ -8,6 +8,12 @@ fail-safe fallback: switch it OFF, or let anything go wrong, and the car is stoc
 **Console:** ON/OFF switch · ECO switch · SPORT switch · [+] · [−] · TEST button · status LED,
 plus a 0.96"/1.3" OLED in the dash.
 
+**Sensors added to the car:** a DS18B20 ATF temperature probe in the cooler line and an MPU-6050
+gyro in the TCU box (corner detection). Everything else is tapped from existing wiring.
+
+**Per mode** (spec §6.8): corner hold in all modes; in SPORT, brake downshifts with an exit-gear
+hold and lockup release on a closed throttle.
+
 | Document | Contents |
 |---|---|
 | [`docs/01-audit.md`](docs/01-audit.md) | Review of the original (rev 0) spec: 6 critical, 9 high, 7 medium and 2 low findings, each with its fix. Historical: rev 0 still had the oil sender and Nextion |
@@ -20,6 +26,8 @@ firmware/tcu/tcu.ino        hardware layer: pins, ISRs, ADC, relays, watchdog, O
 firmware/tcu/tcu_logic.*    all control decisions (no Arduino deps, unit-tested on the host)
 firmware/tcu/self_test.*    built-in test: power-up, continuous and press-to-test (unit-tested)
 firmware/tcu/oled.*         non-blocking console OLED driver (SSD1306 / SH1106)
+firmware/tcu/ds18b20.*      ATF probe: 1-Wire driver + tested decoding
+firmware/tcu/imu.*          MPU-6050 yaw-rate reader
 firmware/tcu/config.h       calibration & tuning constants (VERIFY / CALIBRATE before use)
 test/                       host unit tests
 tools/avr_build.sh          compile-check for ATmega2560 without the Arduino IDE

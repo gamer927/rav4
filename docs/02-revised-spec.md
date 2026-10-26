@@ -171,7 +171,7 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 | VSS | SPD signal to the ECU (meter output, about 4 pulses/rev) | Comparator with hysteresis (LM393) or a 6N137 opto. High-impedance tap; never load the line |
 | Tach | ECU/DLC TAC signal | 10 kΩ series resistor + 5.1 V zener, or an opto. **Never the coil primary** (hundreds of volts) |
 | TPS | ECU VTA (tapped) | 10 kΩ series resistor (keeps the ECU's reading intact), 100 nF at the pin, BAT54S clamp |
-| ATF temperature | Inline NTC in the cooler line | 1 kΩ 0.1 % pull-up to 5 V, 100 nF |
+| ATF temperature | DS18B20 probe in the cooler line (§3.8) | 4.7 kΩ pull-up DQ→5 V at the TCU, 100 Ω series, 5.1 V TVS to ground. (Alternative: analog NTC sender on A2 with a 1 kΩ pull-up; set `ATF_SENSOR = ATF_NTC`) |
 | Battery | IG feed | 47 kΩ / 10 kΩ divider, 100 nF, 5.1 V zener |
 
 ### 3.6 Console cable (8-core shielded)
@@ -197,6 +197,50 @@ reads as "off": ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
 - Don't run I²C up the A-pillar: it isn't built for long cables. That's why the TEST button goes
   in the console cable but the screen sits in the dash.
 
+### 3.8 ATF temperature probe (DS18B20 in the cooler line)
+Yes, this works, with these corrections to the usual "Option B" write-up:
+
+- **Use pin D33, not D2.** D2 is the speed-sensor interrupt.
+- **Buy the high-temperature version.** The DS18B20 chip reads up to **125 °C**, and the
+  firmware's warnings sit at 110 °C (hot) and 125 °C (critical). Many cheap "waterproof" probes
+  use PVC cable rated for only 80–105 °C, which goes soft next to a hot cooler line. Get a
+  **threaded stainless probe** (1/8" NPT or M10 thread) with **PTFE or silicone cable rated
+  125 °C or more**. Above 125 °C the reading isn't guaranteed, but by then the critical warning
+  has been showing for a while.
+- **Fitting:** a brass or aluminium barbed tee with a threaded side port, sized to the hose
+  (measure the inside diameter; 5/16" and 3/8" are common). Seal the probe thread with
+  ATF-resistant sealant, and use fuel-injection-style clamps on both barbs. If you replace any
+  hose, use transmission-cooler hose (SAE J1532), not heater hose.
+- **Which line:** the line *from* the transaxle *to* the radiator carries the hottest fluid
+  and gives the most useful reading. Confirm which one it is in the RM, or warm the engine and
+  feel or IR-check which hose heats first. Keep the probe away from the exhaust.
+- **Fluid:** cutting the hose loses some ATF. Top up with the fluid listed in your owner's
+  manual, and check the level hot, on the dipstick, as the manual describes.
+- **Wiring:** this is a 2–3 m run from the engine bay to the TCU behind the glovebox. Use
+  3-core shielded cable through a firewall grommet, with the shield grounded at the TCU only.
+  Fit the 4.7 kΩ pull-up at the TCU end; if readings drop out on the long run, try 2.2 kΩ.
+- **"No calibration needed"** is essentially true: ±0.5 °C up to 85 °C, ±2 °C above. Note it
+  reads cooler-line temperature, which lags the pan slightly.
+
+How the firmware reads it:
+- One reading per second (start a conversion, read it 800 ms later). This blocks the loop for
+  about 7 ms once a second, and interrupts are paused for no more than ~70 µs at a time.
+- Every reading is CRC-checked, and an unplugged or shorted probe is detected.
+- 85.0 °C is also the chip's power-on value, so it's only accepted when it agrees with the
+  previous reading. 85 °C is a normal ATF temperature, so it can't simply be rejected.
+- Three bad readings in a row raise `WARN_ATF_SENSOR`, and lockup falls back to the normal
+  rules.
+
+### 3.9 Gyro for corner detection (MPU-6050)
+- A GY-521 (MPU-6050) module on the same I²C bus as the OLED, at address 0x68. Mount it firmly
+  inside or next to the TCU box with its chip **flat**, so the Z axis is vertical; which way it
+  points doesn't matter.
+- Only the yaw rate is used. Lateral g = yaw rate × road speed, which ignores road camber and a
+  tilted mounting (an accelerometer would read both as cornering).
+- The gyro's zero offset drifts, so it is re-learned every time the car is stopped. After
+  power-up, corner hold only activates after about 3 s stationary. Until then, or if the gyro
+  stops answering, it is off and the car shifts normally.
+
 ## 4. Pin matrix (Arduino Mega 2560)
 
 | Pin | Dir | Signal | Active | Notes |
@@ -220,9 +264,10 @@ reads as "off": ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
 | D30 | in | ECU S2 sense | LOW = ECU S2 on | Opto |
 | D31 | in | ECU SL sense | LOW = ECU SL on | Opto |
 | D32 | in | TEST button | LOW = pressed | Console core 8 |
-| D20 / D21 | I²C | OLED SDA / SCL | – | 100 kHz |
+| D33 | 1-Wire | ATF probe (DS18B20) DQ | – | 4.7 k pull-up to 5 V |
+| D20 / D21 | I²C | OLED (0x3C) and gyro (0x68) SDA / SCL | – | 100 kHz |
 | A0 | an | TPS | – | 10 k series tap |
-| A2 | an | ATF thermistor | – | 1 k pull-up |
+| A2 | an | ATF thermistor (only if `ATF_SENSOR = ATF_NTC`) | – | 1 k pull-up |
 | A3 | an | Battery | – | ×5.7 divider |
 | A4 / A5 / A6 | an | S1 / S2 / SL current sense | – | Driver IS pins |
 | USB | – | CSV log, 115200 baud | – | Calibration (§8) |
@@ -319,6 +364,8 @@ SL is **released immediately** when any of these happens:
 | ON / OFF speed (km/h) | 50 / 44 | 58 / 52 | 70 / 64 | 40 / 34 |
 | ON / OFF TPS (%) | 45 / 55 | 55 / 65 | 35 / 45 | 85 / 95 |
 
+Coast release (SPORT, §6.8) also counts as a release condition.
+
 ### 6.6 Thermal strategy (directive 2, corrected)
 - **Cold** (ATF below 35 °C, clears at 40 °C): lockup is inhibited.
 - **Hot** (110 °C and above, clears below 105 °C): the HOT column applies, so lockup engages
@@ -351,13 +398,42 @@ The console LED shows the state:
 - **Slow blink:** armed and waiting to stop before engaging.
 - **Fast blink:** fault (turn the ON/OFF switch OFF to acknowledge).
 
+### 6.8 Per-mode driving features
+
+| Feature | ECO | NORMAL | SPORT | What it does |
+|---|---|---|---|---|
+| Hold gears longer, shift near the top at full throttle | – | – | ✓ | The SPORT shift map (§6.3): full-throttle upshifts at about 5,600–5,700 rpm (peak power is 5,400). Raise it once the redline is confirmed |
+| **Corner hold** | ✓ | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own [+]/[−] and the over-rev upshift always work |
+| **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 3 km/h/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
+| **Coast unlock** | – | – | ✓ | Lockup released on a closed throttle (< 2 %, re-allowed at 5 %), so the converter is already slipping when you get back on the throttle |
+| Lockup released on the brake | ✓ | ✓ | ✓ | Always (stall protection) |
+
+Each one is a per-mode switch in `config.h` (`CORNER_HOLD`, `BRAKE_DOWNSHIFT`,
+`LU_COAST_RELEASE`), so you can turn them on or off for any mode.
+
+On engine braking with this transaxle: in D, **1st and 2nd drive through one-way clutches and
+freewheel on a closed throttle**. Only a 4→3 downshift adds engine braking. Brake downshifts
+into 2nd or 1st just pre-select the exit gear without pulling the car down, so they can't jerk
+the car. For real engine braking in 2nd/1st, use the lever's 2 or L positions (the factory ECU
+handles those).
+
+**Not possible on this car:**
+- **Throttle blip / rev-matching on downshifts.** The 1999 RAV4 has a cable throttle; there's
+  nothing for the controller to open. It isn't needed in an automatic anyway: the converter is
+  unlocked before every shift, and its fluid coupling absorbs the speed difference. That
+  cushioning is what the blip does in a manual. Hijacking the idle-air valve for this would be
+  unsafe and wouldn't give enough air.
+- **Throttle mapping.** Also needs drive-by-wire. The controller only reads the throttle
+  sensor and never changes what the pedal does, so the pedal stays exactly as linear as the
+  factory made it.
+
 ## 7. Built-in test and console screen
 
 The system tests itself in three ways, modelled on aircraft built-in test (BIT):
 
 | Level | When | What it checks | Moves anything? |
 |---|---|---|---|
-| **PBIT** (power-up) | Automatically, 1.5 s after every boot | Battery, TPS and ATF sensor in range, no shift button stuck, calibration done, last reset wasn't a crash | No |
+| **PBIT** (power-up) | Automatically, 1.5 s after every boot | Battery, TPS and ATF probe reading, gyro answering, no shift button stuck, calibration done, last reset wasn't a crash | No |
 | **CBIT** (continuous) | Always, while running | Every fault and warning in §6.7, including solenoid current | Hands back to the ECU on a fault |
 | **IBIT** (press-to-test) | Hold TEST for 2 s | Everything below | Yes, so it's interlocked |
 
@@ -465,3 +541,4 @@ Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, vol
 | Tach source | ECU/DLC TAC, 2 pulses/rev | EWD |
 | PNP "D" signal | +12 V in D | EWD |
 | Redline / fuel cut | Guard at 5,800, forced upshift at 6,200 | RM |
+| ATF cooler "out" line and hose size | Line from transaxle to radiator | RM; measure the hose ID |

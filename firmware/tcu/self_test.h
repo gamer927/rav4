@@ -17,6 +17,7 @@ enum TestId : uint8_t {
   T_SUPPLY,
   T_TPS,
   T_ATF,
+  T_IMU,
   T_SWITCHES,
   T_CALIBRATED,
   T_LAST_RESET,
