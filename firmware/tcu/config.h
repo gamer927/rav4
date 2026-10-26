@@ -46,13 +46,6 @@ constexpr float TPS_WOT_V = 4.00f;
 constexpr float TPS_VALID_MIN_V = 0.15f;          // below = shorted / open ground
 constexpr float TPS_VALID_MAX_V = 4.85f;          // above = open signal / short to VC
 
-// 0-100 psi ratiometric oil transducer (0.5-4.5 V).
-constexpr float OIL_V_ZERO = 0.5f;
-constexpr float OIL_V_FULL = 4.5f;
-constexpr float OIL_PSI_FULL = 100.0f;
-constexpr float OIL_VALID_MIN_V = 0.25f;
-constexpr float OIL_VALID_MAX_V = 4.75f;
-
 // ATF NTC thermistor, read through a pull-up to ADC_VREF. A 1 k pull-up puts
 // best resolution around 90-110 C where it matters. VERIFY R25/Beta for your
 // sender (datasheet or 3-point calibration).
@@ -87,11 +80,12 @@ constexpr uint32_t IBIT_SOLENOID_ON_MS = 400;
 constexpr uint32_t IBIT_SOLENOID_GAP_MS = 200;
 constexpr uint32_t IBIT_PROMPT_TIMEOUT_MS = 8000;
 constexpr bool IBIT_WATCHDOG_TEST = true;         // last IBIT step: deliberate watchdog reset
-constexpr float IBIT_OIL_ZERO_MAX_PSI = 3.0f;     // engine off: sender should read ~0
+// "Engine running" for the IBIT interlock: tach above this, OR the battery
+// above the charging voltage (alternator working). Two independent signs, so a
+// dead tach wire can't let the solenoid test run on a running engine.
 constexpr float TEST_ENGINE_RUNNING_RPM = 100.0f;
-constexpr float TEST_ENGINE_RUNNING_PSI = 5.0f;
+constexpr float TEST_CHARGING_V = 13.4f;
 constexpr float TEST_SUPPLY_MIN_V = 11.0f;
-constexpr float TEST_SUPPLY_MAX_V = 15.5f;
 
 // Console OLED (128x64, I2C). 0.96" modules are usually SSD1306; many 1.3"
 // modules are SH1106.
@@ -159,10 +153,6 @@ constexpr float HOT_LU_ON_KMH = 40.0f;
 constexpr float HOT_LU_OFF_KMH = 34.0f;
 constexpr float HOT_LU_TPS_ON = 85.0f;
 constexpr float HOT_LU_TPS_OFF = 95.0f;
-
-constexpr float OIL_LOW_PSI = 5.0f;
-constexpr float OIL_CHECK_RPM = 600.0f;
-constexpr uint32_t OIL_LOW_MS = 2000;
 
 // ------------------------------------------------------- per-mode lockup map
 // Index: 0 = ECO, 1 = NORMAL, 2 = SPORT.

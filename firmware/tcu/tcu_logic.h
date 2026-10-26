@@ -23,11 +23,9 @@ enum WarnBits : uint16_t {
   WARN_ATF_SENSOR = 1u << 0,
   WARN_ATF_HOT = 1u << 1,
   WARN_ATF_CRITICAL = 1u << 2,
-  WARN_OIL_SENSOR = 1u << 3,
-  WARN_OIL_LOW = 1u << 4,
-  WARN_MODE_SWITCH = 1u << 5,
-  WARN_BUTTON_STUCK = 1u << 6,
-  WARN_WDT_RESET = 1u << 7,
+  WARN_MODE_SWITCH = 1u << 3,   // ECO and SPORT both on: running NORMAL
+  WARN_BUTTON_STUCK = 1u << 4,
+  WARN_WDT_RESET = 1u << 5,
 };
 
 enum Event : uint8_t {
@@ -63,8 +61,6 @@ struct Inputs {
   bool tpsValid = false;
   float atfC = 0.0f;
   bool atfValid = false;
-  float oilPsi = 0.0f;
-  bool oilValid = false;
   float batteryV = 0.0f;
   // Solenoid current from the high-side drivers' current-sense pins
   // (index 0 = S1, 1 = S2, 2 = SL). Only meaningful when solSenseValid.
@@ -168,7 +164,7 @@ class Controller {
   bool upEdge_ = false, downEdge_ = false, upLong_ = false, upLongFired_ = false;
   uint32_t upSince_ = 0, downSince_ = 0;
 
-  Persist supplyBad_, tpsBad_, vssStall_, ratioBad_, oilLow_, overRev_, solBad_[3];
+  Persist supplyBad_, tpsBad_, vssStall_, ratioBad_, overRev_, solBad_[3];
   float dropRefKmh_ = 0.0f;
   uint32_t dropRefMs_ = 0;
 };

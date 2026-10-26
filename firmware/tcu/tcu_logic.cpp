@@ -94,7 +94,7 @@ const Outputs& Controller::step(const Inputs& in) {
 
 void Controller::updateMode(const Inputs& in) {
   if (in.eco && in.sport) {
-    out_.mode = MODE_NORMAL;  // impossible on a rotary switch: wiring fault
+    out_.mode = MODE_NORMAL;  // both switches on: no single mode wins
   } else if (in.eco) {
     out_.mode = MODE_ECO;
   } else if (in.sport) {
@@ -137,10 +137,6 @@ void Controller::updateWarnings(const Inputs& in) {
     cold_ = hot_ = false;
     w |= WARN_ATF_SENSOR;
   }
-
-  if (!in.oilValid) w |= WARN_OIL_SENSOR;
-  const bool oilLow = in.oilValid && in.rpmValid && in.engineRpm > cfg::OIL_CHECK_RPM && in.oilPsi < cfg::OIL_LOW_PSI;
-  if (oilLow_.update(oilLow, now_, cfg::OIL_LOW_MS)) w |= WARN_OIL_LOW;
 
   if (in.eco && in.sport) w |= WARN_MODE_SWITCH;
   if ((in.up && elapsed(now_, upSince_, cfg::STUCK_BUTTON_MS)) ||

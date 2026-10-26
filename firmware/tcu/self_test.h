@@ -17,21 +17,19 @@ enum TestId : uint8_t {
   T_SUPPLY,
   T_TPS,
   T_ATF,
-  T_OIL,
   T_SWITCHES,
   T_CALIBRATED,
   T_LAST_RESET,
   // Active: IBIT only.
   T_LAMPS,
-  T_OIL_ZERO,
   T_SOL_S1,
   T_SOL_S2,
   T_SOL_SL,
   T_RELAY_RELEASE,
   T_BTN_UP,
   T_BTN_DOWN,
-  T_KNOB_ECO,
-  T_KNOB_SPORT,
+  T_SW_ECO,
+  T_SW_SPORT,
   T_BRAKE,
   T_WATCHDOG,
   T_COUNT
@@ -51,8 +49,8 @@ enum TestInhibit : uint8_t {
   INH_MASTER,   // master switch not at STOCK
   INH_LEVER_D,  // lever in D
   INH_MOVING,
-  INH_ENGINE,   // engine running (rpm or oil pressure)
-  INH_SUPPLY,   // battery out of 11.0-15.5 V
+  INH_ENGINE,   // engine running (tach, or battery at charging voltage)
+  INH_SUPPLY,   // battery below 11.0 V
 };
 
 enum TestPhase : uint8_t {

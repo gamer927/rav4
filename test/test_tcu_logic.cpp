@@ -34,8 +34,6 @@ struct Sim {
     in.tpsValid = true;
     in.atfValid = true;
     in.atfC = 80;
-    in.oilValid = true;
-    in.oilPsi = 40;
     in.batteryV = 14.2f;
     c.begin(in.nowMs, wdt);
   }

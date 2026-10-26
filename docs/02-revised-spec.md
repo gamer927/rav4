@@ -1,9 +1,22 @@
-# Engineering Specification rev 1: Unified TCU & Telemetry Dashboard
+# Engineering Specification rev 2: RAV4 Transmission Controller
 
 **Vehicle:** 1999 Toyota RAV4 (first generation, SXA10 2WD / SXA11 4WD), 4-speed ECT automatic,
 3S-FE 2.0 L engine
 **Controller:** Arduino Mega 2560 (`firmware/tcu/`)
-**Supersedes:** rev 0. The defects found in rev 0 are listed in [`01-audit.md`](01-audit.md).
+**Supersedes:** rev 0 (audit: [`01-audit.md`](01-audit.md)) and rev 1. Rev 2 is
+transmission-only: the oil-pressure sender and the Nextion dashboard are gone, and the console is
+an ON/OFF switch, an ECO switch, a SPORT switch, [+]/[−] shift buttons and a TEST button, with a
+small OLED screen.
+
+**Console controls**
+
+| Control | Type | What it does |
+|---|---|---|
+| ON/OFF | Toggle switch | OFF = factory transmission control (STOCK). ON = this controller drives the shifts (CUSTOM) |
+| ECO | Toggle switch | Early upshifts, early lockup |
+| SPORT | Toggle switch | Holds gears longer, quick kickdown. ECO and SPORT both off = NORMAL; both on = NORMAL plus an `ECO+SPT` warning |
+| [+] / [−] | Push buttons | Manual shifts (tiptronic-style). Hold [+] 1 s to go back to automatic |
+| TEST | Push button | Tap: next screen. Hold 2 s: run the self-test (§7) |
 
 > **Safety.** This system takes control of the drivetrain. Everything marked **VERIFY** must
 > be confirmed against the factory repair manual (RM) and electrical wiring diagram (EWD) for
@@ -41,36 +54,36 @@ What this means:
 
 | State | Who drives the solenoids | How you get there |
 |---|---|---|
-| **STOCK** | Factory ECU (relays de-energised) | Power-up, master switch at STOCK, lever not in D, any fault, MCU reset |
-| **CUSTOM-AUTO** | TCU, using the ECO/NORMAL/SPORT shift and lockup maps | Master switch flipped STOCK→CUSTOM with the lever in D; or hold [+] for 1 s while in MANUAL |
+| **STOCK** | Factory ECU (relays de-energised) | Power-up, ON/OFF switch OFF, lever not in D, any fault, MCU reset |
+| **CUSTOM-AUTO** | TCU, using the ECO/NORMAL/SPORT shift and lockup maps | ON/OFF switch flipped OFF→ON with the lever in D; or hold [+] for 1 s while in MANUAL |
 | **CUSTOM-MANUAL** | TCU, holding the gear you selected | Tap [+] or [-] while in CUSTOM |
 
 Rules that never change:
-1. **De-energised = factory.** Power loss, reset, watchdog, firmware hang or a broken master
+1. **De-energised = factory.** Power loss, reset, watchdog, firmware hang or a broken ON/OFF
    switch wire all leave the factory ECU in control.
-2. **CUSTOM must be armed by a fresh STOCK→CUSTOM flip** after every boot. Leaving the switch in
-   CUSTOM doesn't arm it at key-on, and a reset mid-drive doesn't re-engage.
+2. **CUSTOM must be armed by a fresh OFF→ON flip** after every boot. Leaving the switch ON
+   doesn't arm it at key-on, and a reset mid-drive doesn't re-engage.
 3. **The lever must be in D.** Outside D, the ECU handles P/R/N/2/L. Returning to D re-enters
    CUSTOM, synced to the ECU's current gear.
 4. **Bumpless handover.** CUSTOM starts in the gear and lockup state the ECU is commanding at
    that moment, sensed from the ECU outputs. If it can't sense them, it only engages at a
    standstill, in 1st.
-5. **Faults latch.** A critical fault hands control back to the ECU until the master switch is
-   returned to STOCK, which acknowledges the fault.
+5. **Faults latch.** A critical fault hands control back to the ECU until the ON/OFF switch is
+   turned OFF, which acknowledges the fault.
 
 ## 2. Architecture
 
 ```
  OVERHEAD CONSOLE                        8-core shielded (shield grounded at TCU end only)
- [STOCK|CUSTOM] [ECO|NORM|SPORT] [+][-] LED ────────────────────────────────┐
+ [ON/OFF] [ECO] [SPORT] [+] [-] [TEST]  LED ────────────────────────────────┐
                                                                             v
  ┌──────────────────────────── UNDER-DASH TCU ENCLOSURE ───────────────────────────────┐
- │  Fused IG feed → reverse-polarity + TVS → 5 V/3 A automotive buck → Mega 5 V, Nextion │
+ │  Fused IG feed → reverse-polarity + TVS → 5 V/3 A automotive buck → Mega 5 V, OLED    │
  │                                                                                       │
  │  Arduino Mega 2560 ── input conditioning (RC + clamps, optos for 12 V signals)        │
  │        │  D8/D9/D10 → 3 × high-side smart switch (PROFET) ──┐                         │
  │        │  D6 → MOSFET/ULN → 3 × DPDT relay coils             │                         │
- │        │  TX1 → Nextion 3.5"                                 v                         │
+ │        │  I²C → console OLED (dash)                          v                         │
  │        │                           ┌── DPDT ×3 (S1, S2, SL) ─────────────┐             │
  │        │   ECU S1/S2/SL outputs ───┤ NC: ECU → solenoid    (de-energised) │             │
  │        │   (sensed via optos) ─────┤ NO: ECU → 15 Ω/50 W dummy            │             │
@@ -79,7 +92,7 @@ Rules that never change:
  └────────┼──────────────────────────────────────────┼─────────────────────────────────────┘
           │                                          v
    Sensors: TPS tap, VSS, tach (TAC),        Transaxle solenoids S1, S2, SL
-   brake (STP), PNP "D", oil, ATF, battery    (single-wire, case-grounded)
+   brake (STP), PNP "D", ATF temp, battery    (single-wire, case-grounded)
 ```
 
 ## 3. Hardware
@@ -87,7 +100,7 @@ Rules that never change:
 ### 3.1 Controller
 **Arduino Mega 2560** (or a quality clone with an ATmega16U2 USB bridge).
 - 5 V-tolerant I/O, so the 0.5–4.5 V sensors connect directly through protection.
-- 16 ADC channels, 4 UARTs (USB log + Nextion), 6 external interrupts (VSS + tach).
+- 16 ADC channels, USB serial for the calibration log, 6 external interrupts (VSS + tach).
 - The Pico is rejected: its pins are 3.3 V and not 5 V-tolerant, and it has only 3 ADC inputs.
 
 Power the Mega from the regulated 5 V rail into its **5 V pin**. Don't feed 12 V into VIN: the
@@ -114,7 +127,7 @@ and ground.
   over-temperature protection, and a current-sense (IS) pin.
 - Wire each IS pin to the Mega (A4/A5/A6) through its datasheet sense resistor (R_IS to
   ground), plus 1 kΩ series and 100 nF. The firmware uses it to prove each solenoid circuit
-  draws its rated current, both in the self-test and continuously while driving (§7.5).
+  draws its rated current, both in the self-test and continuously while driving (§7).
   `IS_AMPS_PER_VOLT = kILIS / R_IS`; calibrate it on the bench with a 15 Ω load.
 - Put a 10 kΩ pull-down on every IN pin, so the drivers are off during reset.
 - If you use a discrete P-FET instead: add an NPN level shifter, a gate pull-up to +B (off), and
@@ -151,29 +164,28 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 
 | Signal | Source (VERIFY in the EWD) | Conditioning |
 |---|---|---|
-| Console switches (UP, DOWN, ECO, SPORT, MASTER, TEST) | Switch to ground | 2.2 kΩ pull-up to 5 V, 1 kΩ series, 100 nF to ground at the MCU, BAT54S clamp |
+| Console controls (UP, DOWN, ECO, SPORT, ON/OFF, TEST) | Switch to ground | 2.2 kΩ pull-up to 5 V, 1 kΩ series, 100 nF to ground at the MCU, BAT54S clamp |
 | Brake | Stop-lamp switch STP (+12 V when pressed) | PC817 opto (LED + 2.2 kΩ), output pulls the MCU pin low |
 | Lever in D | PNP switch "D" output (feeds the D indicator) | PC817 opto as above |
 | ECU S1/S2/SL sense | ECU side of each relay (COM-A) | PC817 opto with 3.3 kΩ (about 4 mA load) |
 | VSS | SPD signal to the ECU (meter output, about 4 pulses/rev) | Comparator with hysteresis (LM393) or a 6N137 opto. High-impedance tap; never load the line |
 | Tach | ECU/DLC TAC signal | 10 kΩ series resistor + 5.1 V zener, or an opto. **Never the coil primary** (hundreds of volts) |
 | TPS | ECU VTA (tapped) | 10 kΩ series resistor (keeps the ECU's reading intact), 100 nF at the pin, BAT54S clamp |
-| Oil pressure | 0–100 psi, 0.5–4.5 V sender powered from TCU 5 V (ratiometric) | 1 kΩ series resistor, 100 nF, clamp |
 | ATF temperature | Inline NTC in the cooler line | 1 kΩ 0.1 % pull-up to 5 V, 100 nF |
 | Battery | IG feed | 47 kΩ / 10 kΩ divider, 100 nF, 5.1 V zener |
 
 ### 3.6 Console cable (8-core shielded)
-1. UP
-2. DOWN
-3. ECO
-4. SPORT
-5. MASTER
-6. Switch common (ground)
-7. LED (+, via a transistor in the TCU)
-8. TEST button (§7.5)
+1. [+] button
+2. [−] button
+3. ECO switch
+4. SPORT switch
+5. ON/OFF switch
+6. TEST button
+7. Switch common (ground)
+8. LED (+, via a transistor in the TCU)
 
-Ground the shield drain at the TCU end only. The rotary mode switch uses two wires: ECO and
-SPORT both open means NORMAL, so a broken wire degrades to NORMAL.
+Ground the shield drain at the TCU end only. Every control switches to ground, so a broken wire
+reads as "off": ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
 
 ### 3.7 Console display (OLED)
 - A 0.96" or 1.3" 128×64 I²C OLED, mounted in the dash or centre console within about 1 m of
@@ -197,12 +209,11 @@ SPORT both open means NORMAL, so a broken wire degrades to NORMAL.
 | D9 | out | S2 high-side IN | HIGH = on | 10 k pull-down |
 | D10 | out | SL high-side IN | HIGH = on | 10 k pull-down |
 | D13 | out | Status LED (on-board) | HIGH | Mirrors D7 |
-| D18 (TX1) | out | Nextion RX | – | D19/RX1 ← Nextion TX (unused) |
 | D22 | in | Upshift [+] | LOW | Edge-triggered |
 | D23 | in | Downshift [-] | LOW | Edge-triggered |
 | D24 | in | Mode ECO | LOW | |
 | D25 | in | Mode SPORT | LOW | |
-| D26 | in | Master switch | LOW = CUSTOM | Open = STOCK (fail-safe) |
+| D26 | in | ON/OFF switch | LOW = ON (CUSTOM) | Open = STOCK (fail-safe) |
 | D27 | in | Brake | LOW = pressed | Opto |
 | D28 | in | Lever in D | LOW = in D | Opto; open = "not D" (fail-safe) |
 | D29 | in | ECU S1 sense | LOW = ECU S1 on | Opto |
@@ -211,15 +222,13 @@ SPORT both open means NORMAL, so a broken wire degrades to NORMAL.
 | D32 | in | TEST button | LOW = pressed | Console core 8 |
 | D20 / D21 | I²C | OLED SDA / SCL | – | 100 kHz |
 | A0 | an | TPS | – | 10 k series tap |
-| A1 | an | Oil pressure | – | |
 | A2 | an | ATF thermistor | – | 1 k pull-up |
 | A3 | an | Battery | – | ×5.7 divider |
 | A4 / A5 / A6 | an | S1 / S2 / SL current sense | – | Driver IS pins |
 | USB | – | CSV log, 115200 baud | – | Calibration (§8) |
 
-The shift buttons moved off D2/D3 because VSS and tach need interrupt pins. Serial1 (the
-Nextion) already occupies interrupt pins 18/19, so D2/D3 are the natural choice. The buttons
-don't need interrupts; they're polled and debounced.
+VSS and tach use the interrupt pins D2/D3. The buttons don't need interrupts; they're polled and
+debounced.
 
 ## 5. Solenoid logic (1999 RAV4, D range)
 
@@ -243,7 +252,7 @@ don't need interrupts; they're polled and debounced.
 - Switches are sampled on every pass and debounced: 25 ms for console switches, 40 ms for optos.
 - The controller runs every **10 ms**: it reads the inputs, steps the logic and applies the
   outputs.
-- Nextion telemetry is serviced every 20 ms without blocking.
+- The OLED is redrawn every 100 ms, sent in small chunks so it never blocks the loop.
 - The USB CSV log runs at 10 Hz.
 - The 250 ms watchdog is kicked on every pass.
 
@@ -331,57 +340,36 @@ SL is **released immediately** when any of these happens:
 
 | Warning | Condition |
 |---|---|
-| `WARN_ATF_SENSOR` / `WARN_OIL_SENSOR` | Open or short |
+| `WARN_ATF_SENSOR` | ATF thermistor open or short |
 | `WARN_ATF_HOT` / `WARN_ATF_CRITICAL` | 110 °C / 125 °C |
-| `WARN_OIL_LOW` | Below 5 psi with the engine above 600 rpm for 2 s |
-| `WARN_MODE_SWITCH` | ECO and SPORT both active (wiring fault); mode forced to NORMAL |
+| `WARN_MODE_SWITCH` | ECO and SPORT both on; running NORMAL |
 | `WARN_BUTTON_STUCK` | [+] or [-] held for 10 s |
 | `WARN_WDT_RESET` | The last reset was caused by the watchdog |
 
 The console LED shows the state:
 - **Solid:** TCU in control.
 - **Slow blink:** armed and waiting to stop before engaging.
-- **Fast blink:** fault (return the master switch to STOCK to acknowledge).
+- **Fast blink:** fault (turn the ON/OFF switch OFF to acknowledge).
 
-## 7. Display (Nextion 3.5" on Serial1)
-At boot the firmware sends `baud=115200` at 9600 baud (the factory default). It's held in RAM
-only, so there's no EEPROM wear. It then switches to 115200. Commands end in `FF FF FF`.
-Only changed values are sent, plus a full refresh every 2 s.
-
-| Object | Type | Content |
-|---|---|---|
-| `gear` | Number | 1–4; 0 = unknown/not in D |
-| `spd` | Number | km/h |
-| `rpm` | Number | rpm in steps of 50; −1 = invalid |
-| `tps` | Number | % (−1 = fault) |
-| `oil` | Number | psi (−1 = fault) |
-| `atf` | Number | °C (−1 = fault) |
-| `volt` | Number | Volts ×10 (142 = 14.2 V); use an Xfloat with 1 decimal |
-| `lu` | Number | 1 = lockup applied |
-| `flt`, `wrn` | Number | Fault and warning bitmasks (§6.7, `tcu_logic.h`) |
-| `ctrl` | Text | `STOCK` / `AUTO` / `MAN` |
-| `mode` | Text | `ECO` / `NORM` / `SPORT` |
-| `msg` | Text | Event text, e.g. `DENIED: OVER-REV`, `STOP TO ENGAGE`, `FAULT - FACTORY ECU`; self-test prompts while testing |
-| `bit` | Text | Built-in test status, e.g. `BIT PASS 18`, `BIT FAIL 1 CHK 1`, `BIT TESTING` |
-
-### 7.5 Built-in test and console screen
+## 7. Built-in test and console screen
 
 The system tests itself in three ways, modelled on aircraft built-in test (BIT):
 
 | Level | When | What it checks | Moves anything? |
 |---|---|---|---|
-| **PBIT** (power-up) | Automatically, 1.5 s after every boot | Battery, TPS, ATF and oil sensors in range, no button stuck, mode knob wiring, calibration done, last reset wasn't a crash | No |
+| **PBIT** (power-up) | Automatically, 1.5 s after every boot | Battery, TPS and ATF sensor in range, no shift button stuck, calibration done, last reset wasn't a crash | No |
 | **CBIT** (continuous) | Always, while running | Every fault and warning in §6.7, including solenoid current | Hands back to the ECU on a fault |
 | **IBIT** (press-to-test) | Hold TEST for 2 s | Everything below | Yes, so it's interlocked |
 
 **IBIT interlock** (the equivalent of an aircraft's weight-on-wheels check). The test refuses
 to start, and aborts immediately if any condition changes mid-test, unless all of these hold:
-- The master switch is at STOCK.
+- The ON/OFF switch is OFF.
 - The lever is not in D.
 - Speed is 0.
-- The engine is off: tach below 100 rpm **and** oil pressure below 5 psi. Two independent
-  checks, so a missing tach can't let it run on a running engine.
-- The battery is between 11.0 and 15.5 V.
+- The engine is off: tach below 100 rpm **and** battery below 13.4 V (the alternator isn't
+  charging). Two independent checks, so a missing tach can't let it run on a running engine.
+  A battery charger connected also reads as "engine running".
+- The battery is at least 11.0 V.
 
 On an abort, every output switches off at once.
 
@@ -390,10 +378,10 @@ On an abort, every output switches off at once.
 | # | Step | Pass condition |
 |---|---|---|
 | 1 | Lamp test: console LED, status LED and the OLED (screen inverts) for 1.5 s | You look. Recorded as CHK |
-| 2 | Re-run the PBIT checks; **oil zero**: with the engine off, the sender must read ≤ 3 psi | Catches a drifting sender |
+| 2 | Re-run the PBIT checks | As PBIT |
 | 3 | Relays on; pulse S1, then S2, then SL for 0.4 s each, one at a time | 0.6–1.6 A on the pulsed solenoid. Engine off means no line pressure, so the valves only click |
 | 4 | Relays off; all drivers on for 0.4 s | ≤ 0.2 A. Current here means a welded or stuck relay |
-| 5 | Prompts: PRESS [+], PRESS [-], KNOB TO ECO, KNOB TO SPORT, PRESS BRAKE | Detected within 8 s. TEST skips a prompt (SKIP); a timeout is a FAIL. Covers the whole A-pillar cable |
+| 5 | Prompts: PRESS [+], PRESS [−], ECO ON SPORT OFF, SPORT ON ECO OFF, PRESS BRAKE | Detected within 8 s. TEST skips a prompt (SKIP); a timeout is a FAIL. Covers the whole A-pillar cable |
 | 6 | Watchdog: the board deliberately stops servicing the watchdog | It must reboot within 0.25 s; the results survive the reset and the test records PASS. If the screen freezes on `WATCHDOG TEST`, it failed |
 
 Results are PASS, FAIL, CHK (needs a human: lamps, or solenoids without current sense) or SKIP.
@@ -406,8 +394,8 @@ The full table also prints on the USB log.
 
 **Screens** (rendered from the real firmware in a simulator: [`oled-screens.png`](oled-screens.png)):
 - **MAIN:** gear and mode in large text; control state (STOCK/AUTO/MAN) and lockup; BIT
-  status; active faults and warnings; the event line; battery, ATF and oil.
-- **SENSORS:** speed, rpm, throttle, ATF, oil, battery and solenoid currents.
+  status; active faults and warnings; the event line; speed and ATF temperature.
+- **SENSORS:** speed, rpm, throttle, ATF temperature, battery and solenoid currents.
 - **TEST:** test progress and prompts, then the summary with FAIL items first, then CHK items.
 
 
@@ -415,7 +403,7 @@ The full table also prints on the USB log.
 The CSV log on USB (115200 baud) works in STOCK. While the ECU is in control, gear and lockup
 come from the ECU sense inputs, so you can calibrate everything while the factory ECU drives.
 
-Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, oil, volts, faults, warnings`
+Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, volts, faults, warnings`
 
 1. **TPS:** with the engine off and the ignition on, log closed throttle and WOT. Set
    `TPS_CLOSED_V` and `TPS_WOT_V`.
@@ -432,14 +420,14 @@ Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, oil
      That's conservative (safe) for the over-rev guard.
    - **The over-rev guard is only as good as these numbers.**
    - When every step is done, set `CALIBRATED = true` in `config.h` and reflash. Until then the
-     master switch is ignored and the display shows `NOT CALIBRATED`.
+     ON/OFF switch is ignored and the display shows `NOT CALIBRATED`.
 4. **ATF thermistor:** check the reading at ambient and at hot operating temperature against an
    IR thermometer on the cooler line, then adjust `ATF_R25_OHMS` and `ATF_BETA`.
 5. **Battery:** compare with a multimeter, then trim `VBAT_DIVIDER`.
 
 ## 9. Bring-up and test plan
 1. **Host tests:** `make test`. Every logic rule in §6, and the self-test sequence and interlocks
-   in §7.5, has a unit test.
+   in §7, has a unit test.
 2. **Bench:**
    - Mega + drivers + relays, with 15 Ω power resistors and LEDs standing in for the solenoids.
    - Use a function generator or a second Arduino for VSS and tach.

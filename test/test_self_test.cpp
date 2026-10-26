@@ -37,9 +37,7 @@ struct Bench {
     in.tpsPct = 0;
     in.atfValid = true;
     in.atfC = 20;
-    in.oilValid = true;
-    in.oilPsi = 0.3f;
-    in.batteryV = 12.5f;
+    in.batteryV = 12.5f;  // ignition on, engine off: not charging
   }
   void physics() {
     const TestOutputs& o = t.outputs();
@@ -100,7 +98,7 @@ static void test_interlocks() {
       {"lever in D", [](Inputs& i) { i.leverInD = true; }, INH_LEVER_D},
       {"moving", [](Inputs& i) { i.speedKmh = 5; }, INH_MOVING},
       {"engine rpm", [](Inputs& i) { i.engineRpm = 750; }, INH_ENGINE},
-      {"oil pressure (no tach)", [](Inputs& i) { i.rpmValid = false; i.oilPsi = 30; }, INH_ENGINE},
+      {"charging voltage (no tach)", [](Inputs& i) { i.rpmValid = false; i.batteryV = 14.1f; }, INH_ENGINE},
       {"low battery", [](Inputs& i) { i.batteryV = 10.2f; }, INH_SUPPLY},
   };
   for (const Case& k : cases) {
@@ -129,7 +127,6 @@ static void test_full_ibit_pass() {
     CHECK(b.t.value((TestId)i) > 0.9f);
   }
   CHECK(b.t.result(T_RELAY_RELEASE) == TR_PASS);
-  CHECK(b.t.result(T_OIL_ZERO) == TR_PASS);
   CHECK(b.t.result(T_LAMPS) == TR_CHECK);
   for (uint8_t i = T_BTN_UP; i <= T_BRAKE; i++) CHECK(b.t.result((TestId)i) == TR_PASS);
 
@@ -182,10 +179,6 @@ static void test_detects_faults() {
   CHECK(n.t.result(T_SOL_SL) == TR_CHECK);
   CHECK(n.t.result(T_RELAY_RELEASE) == TR_SKIP);
 
-  Bench o;
-  o.in.oilPsi = 4.0f;  // engine off but sender reads 4 psi: offset
-  o.runAll();
-  CHECK(o.t.result(T_OIL_ZERO) == TR_FAIL);
 }
 
 static void test_prompts_timeout_and_skip() {
@@ -200,9 +193,9 @@ static void test_prompts_timeout_and_skip() {
   b.step(30, true);  // operator presses TEST
   CHECK(b.t.result(T_BTN_DOWN) == TR_SKIP);
   CHECK(b.t.prompt() == PR_ECO);
-  b.in.eco = b.in.sport = true;  // both at once = wiring fault, not a pass
+  b.in.eco = b.in.sport = true;
   b.step(100);
-  CHECK(b.t.result(T_KNOB_ECO) == TR_NONE);
+  CHECK(b.t.result(T_SW_ECO) == TR_NONE);  // ECO+SPORT both on doesn't pass "ECO on"
 }
 
 static void test_abort() {
@@ -232,8 +225,6 @@ static void test_cbit_solenoid_fault() {
   in.tpsValid = true;
   in.atfValid = true;
   in.atfC = 80;
-  in.oilValid = true;
-  in.oilPsi = 40;
   in.batteryV = 14.2f;
   in.solSenseValid = true;
   c.begin(in.nowMs, false);

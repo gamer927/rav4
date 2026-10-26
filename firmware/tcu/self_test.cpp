@@ -9,9 +9,9 @@ namespace {
 inline bool elapsed(uint32_t now, uint32_t since, uint32_t ms) { return (uint32_t)(now - since) >= ms; }
 
 const char* const kNames[T_COUNT] = {
-    "SUPPLY",   "TPS",     "ATF SENS", "OIL SENS", "SWITCHES", "CALIBRATN", "LAST RST",
-    "LAMPS",    "OIL ZERO", "SOL S1",  "SOL S2",   "SOL SL",   "RELAY REL", "BTN [+]",
-    "BTN [-]",  "KNOB ECO", "KNOB SPT", "BRAKE SW", "WATCHDOG",
+    "SUPPLY", "TPS",     "ATF SENS", "SWITCHES", "CALIBRATN", "LAST RST", "LAMPS",    "SOL S1",
+    "SOL S2", "SOL SL",  "RELAY REL", "BTN [+]", "BTN [-]",   "ECO SW",   "SPORT SW", "BRAKE SW",
+    "WATCHDOG",
 };
 
 constexpr uint8_t kPromptCount = PR_BRAKE - PR_UP + 1;
@@ -26,11 +26,10 @@ TestInhibit testInhibit(const Inputs& in) {
   if (in.speedKmh > 1.0f) return INH_MOVING;
   // Two independent "engine running" indicators, so a missing tach can't
   // let the solenoid test run on a running engine.
-  if ((in.rpmValid && in.engineRpm > cfg::TEST_ENGINE_RUNNING_RPM) ||
-      (in.oilValid && in.oilPsi > cfg::TEST_ENGINE_RUNNING_PSI)) {
+  if ((in.rpmValid && in.engineRpm > cfg::TEST_ENGINE_RUNNING_RPM) || in.batteryV > cfg::TEST_CHARGING_V) {
     return INH_ENGINE;
   }
-  if (in.batteryV < cfg::TEST_SUPPLY_MIN_V || in.batteryV > cfg::TEST_SUPPLY_MAX_V) return INH_SUPPLY;
+  if (in.batteryV < cfg::TEST_SUPPLY_MIN_V) return INH_SUPPLY;
   return INH_NONE;
 }
 
@@ -44,9 +43,8 @@ void SelfTest::runPassive(const Inputs& in) {
       in.batteryV);
   set(T_TPS, in.tpsValid ? TR_PASS : TR_FAIL, in.tpsPct);
   set(T_ATF, in.atfValid ? TR_PASS : TR_FAIL, in.atfC);
-  set(T_OIL, in.oilValid ? TR_PASS : TR_FAIL, in.oilPsi);
-  // A shift button held at boot is stuck; ECO+SPORT together is a wiring fault.
-  set(T_SWITCHES, !in.up && !in.down && !(in.eco && in.sport) ? TR_PASS : TR_FAIL);
+  // A shift button held at boot is stuck.
+  set(T_SWITCHES, !in.up && !in.down ? TR_PASS : TR_FAIL);
   set(T_CALIBRATED, cfg::CALIBRATED ? TR_PASS : TR_FAIL);
 }
 
@@ -102,8 +100,6 @@ void SelfTest::step(const Inputs& in, bool testEdge) {
       if (inPhase >= cfg::IBIT_LAMP_MS) {
         out_.lamps = false;
         set(T_LAMPS, TR_CHECK);  // the operator saw them, or didn't
-        // Engine is off (interlock), so the oil sender must read ~0: catches offset drift.
-        set(T_OIL_ZERO, in.oilValid && in.oilPsi <= cfg::IBIT_OIL_ZERO_MAX_PSI ? TR_PASS : TR_FAIL, in.oilPsi);
         out_.relay = true;
         enter(PH_RELAY_ON, now);
       }

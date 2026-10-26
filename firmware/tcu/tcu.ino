@@ -3,7 +3,7 @@
   Vehicle: 1999 Toyota RAV4 (SXA10/SXA11), 4-speed ECT automatic, 3S-FE
   Target:  Arduino Mega 2560 (5 V I/O, 16 ADC channels, 4 UARTs)
 
-  This file only conditions inputs, drives outputs and talks to the displays.
+  This file only conditions inputs, drives outputs and runs the console screen.
   Every decision is made in tcu_logic.cpp (driving) and self_test.cpp (built-in
   test), which are unit-tested on the host.
 
@@ -33,11 +33,11 @@ constexpr uint8_t S2 = 9;            // high-side driver IN, shift solenoid 2
 constexpr uint8_t SL = 10;           // high-side driver IN, lockup solenoid
 constexpr uint8_t STATUS_LED = 13;
 // Active-LOW inputs: console switches close to ground, optos pull low.
-constexpr uint8_t UP = 22;
-constexpr uint8_t DOWN = 23;
-constexpr uint8_t ECO = 24;
-constexpr uint8_t SPORT = 25;
-constexpr uint8_t MASTER = 26;       // closed = CUSTOM; open/broken wire = STOCK
+constexpr uint8_t UP = 22;           // [+] shift button
+constexpr uint8_t DOWN = 23;         // [-] shift button
+constexpr uint8_t ECO = 24;          // ECO switch
+constexpr uint8_t SPORT = 25;        // SPORT switch (both off = NORMAL)
+constexpr uint8_t MASTER = 26;       // ON/OFF switch: closed = ON (CUSTOM); open/broken wire = STOCK
 constexpr uint8_t BRAKE = 27;        // opto from stop-lamp switch (STP)
 constexpr uint8_t LEVER_D = 28;      // opto from park/neutral switch "D" output
 constexpr uint8_t ECU_S1 = 29;       // opto from ECU S1 output (ECU side of relay)
@@ -45,7 +45,6 @@ constexpr uint8_t ECU_S2 = 30;
 constexpr uint8_t ECU_SL = 31;
 constexpr uint8_t TEST = 32;         // console TEST button (spare core 8)
 constexpr uint8_t TPS = A0;
-constexpr uint8_t OIL = A1;
 constexpr uint8_t ATF = A2;
 constexpr uint8_t VBAT = A3;
 constexpr uint8_t IS_S1 = A4;        // high-side driver current-sense outputs
@@ -54,11 +53,7 @@ constexpr uint8_t IS_SL = A6;
 // Console OLED on I2C: SDA = 20, SCL = 21.
 }  // namespace pin
 
-// Nextion on Serial1 (TX1 = pin 18). USB Serial is kept for the CSV log.
-#define NEXTION Serial1
-constexpr uint32_t NEXTION_BAUD = 115200;
-constexpr uint32_t TELEMETRY_PERIOD_MS = 20;
-constexpr uint32_t TELEMETRY_REFRESH_MS = 2000;
+// USB serial carries a CSV log for calibration (docs/02-revised-spec.md §8).
 constexpr bool USB_LOG_ENABLED = true;
 constexpr uint32_t USB_LOG_PERIOD_MS = 100;
 
@@ -134,7 +129,7 @@ struct Ema {
     return y;
   }
 };
-Ema tpsF, oilF, atfF, vbatF, speedF, rpmF, solF[3];
+Ema tpsF, atfF, vbatF, speedF, rpmF, solF[3];
 
 uint16_t readRaw(uint8_t p) {
   uint16_t sum = 0;
@@ -190,11 +185,6 @@ tcu::Inputs readInputs(uint32_t now) {
   in.tpsValid = tpsV >= cfg::TPS_VALID_MIN_V && tpsV <= cfg::TPS_VALID_MAX_V;
   float tps = (tpsV - cfg::TPS_CLOSED_V) / (cfg::TPS_WOT_V - cfg::TPS_CLOSED_V) * 100.0f;
   in.tpsPct = tps < 0.0f ? 0.0f : (tps > 100.0f ? 100.0f : tps);
-
-  const float oilV = oilF.update(rawToVolts(readRaw(pin::OIL)), 0.2f);
-  in.oilValid = oilV >= cfg::OIL_VALID_MIN_V && oilV <= cfg::OIL_VALID_MAX_V;
-  const float psi = (oilV - cfg::OIL_V_ZERO) * (cfg::OIL_PSI_FULL / (cfg::OIL_V_FULL - cfg::OIL_V_ZERO));
-  in.oilPsi = psi < 0.0f ? 0.0f : psi;
 
   const uint16_t atfRaw = readRaw(pin::ATF);
   in.atfValid = atfRaw > cfg::ATF_ADC_SHORT && atfRaw < cfg::ATF_ADC_OPEN;
@@ -253,7 +243,7 @@ void updateLeds(const tcu::Outputs& o, uint32_t now) {
   digitalWrite(pin::STATUS_LED, on ? HIGH : LOW);
 }
 
-// --------------------------------------------------------------- telemetry
+// --------------------------------------------------------------- text
 const char* controlText(tcu::Control c) {
   switch (c) {
     case tcu::CTRL_AUTO: return "AUTO";
@@ -323,11 +313,11 @@ struct Text {
 
 const char* inhibitText(tcu::TestInhibit i) {
   switch (i) {
-    case tcu::INH_MASTER: return "SWITCH TO STOCK";
+    case tcu::INH_MASTER: return "ON/OFF SWITCH IS ON";
     case tcu::INH_LEVER_D: return "SHIFT OUT OF D";
     case tcu::INH_MOVING: return "VEHICLE MOVING";
-    case tcu::INH_ENGINE: return "ENGINE RUNNING";
-    case tcu::INH_SUPPLY: return "BATTERY OUT OF RANGE";
+    case tcu::INH_ENGINE: return "ENGINE RUNNING";  // or a charger connected
+    case tcu::INH_SUPPLY: return "BATTERY LOW";
     default: return "";
   }
 }
@@ -346,8 +336,8 @@ const char* promptText(tcu::TestPrompt p) {
   switch (p) {
     case tcu::PR_UP: return "PRESS [+]";
     case tcu::PR_DOWN: return "PRESS [-]";
-    case tcu::PR_ECO: return "KNOB TO ECO";
-    case tcu::PR_SPORT: return "KNOB TO SPORT";
+    case tcu::PR_ECO: return "ECO ON, SPORT OFF";
+    case tcu::PR_SPORT: return "SPORT ON, ECO OFF";
     case tcu::PR_BRAKE: return "PRESS BRAKE";
     default: return "";
   }
@@ -364,8 +354,6 @@ Text itemLine(tcu::TestId id) {
     case tcu::T_SUPPLY: t.fixed(v, 1).s("V"); break;
     case tcu::T_TPS: t.n((int32_t)v).s("%"); break;
     case tcu::T_ATF: t.n((int32_t)v).s("C"); break;
-    case tcu::T_OIL:
-    case tcu::T_OIL_ZERO: t.fixed(v, 1).s("psi"); break;
     case tcu::T_SOL_S1:
     case tcu::T_SOL_S2:
     case tcu::T_SOL_SL:
@@ -402,31 +390,11 @@ void appendFlags(Text& t, uint16_t bits, const char* const* names, uint8_t count
   }
 }
 const char* const kFaultNames[] = {"SUPPLY", "VSS", "TPS", "RATIO", "SOLND"};
-const char* const kWarnNames[] = {"ATFSNS", "HOT", "CRIT", "OILSNS", "OILLOW", "MODE", "BTN", "WDT"};
+const char* const kWarnNames[] = {"ATFSNS", "HOT", "CRIT", "ECO+SPT", "BTN", "WDT"};
 
 uint32_t inhibitShownUntil = 0;  // show an IBIT refusal for a few seconds
 
-void nexEnd() {
-  NEXTION.write(0xFF);
-  NEXTION.write(0xFF);
-  NEXTION.write(0xFF);
-}
-
-// Display fields; names must match the objects on the Nextion page.
-// Numeric fields come first, then text fields (from F_CTRL on).
-enum Field : uint8_t {
-  F_GEAR, F_SPD, F_RPM, F_TPS, F_OIL, F_ATF, F_VOLT, F_LU, F_FLT, F_WRN, F_CTRL, F_MODE, F_MSG, F_BIT, F_COUNT
-};
-const char* const kFieldName[F_COUNT] = {"gear", "spd", "rpm",  "tps",  "oil", "atf", "volt",
-                                         "lu",   "flt", "wrn", "ctrl", "mode", "msg", "bit"};
-
-int32_t textHash(const char* t) {
-  uint32_t h = 2166136261u;
-  while (*t) h = (h ^ (uint8_t)*t++) * 16777619u;
-  return (int32_t)h;
-}
-
-// Message line shared by the Nextion and the OLED.
+// Event / prompt line on the MAIN page.
 void messageText(Text& t, const tcu::Outputs& o, uint32_t now) {
   if (selfTest.active()) {
     const tcu::TestPrompt pr = selfTest.prompt();
@@ -439,73 +407,6 @@ void messageText(Text& t, const tcu::Outputs& o, uint32_t now) {
     t.s(eventText(o.event));
   }
 }
-int32_t fieldValue[F_COUNT];
-bool fieldDirty[F_COUNT];
-
-void serviceTelemetry(uint32_t now) {
-  static uint32_t lastTick = 0, lastRefresh = 0;
-  static bool first = true;
-  static uint8_t cursor = 0;
-  if ((uint32_t)(now - lastTick) < TELEMETRY_PERIOD_MS) return;
-  lastTick = now;
-  // Periodic full refresh in case the display rebooted or dropped a command.
-  const bool refresh = first || (uint32_t)(now - lastRefresh) >= TELEMETRY_REFRESH_MS;
-  if (refresh) lastRefresh = now;
-  first = false;
-
-  const tcu::Outputs& o = controller.outputs();
-  int32_t v[F_COUNT];
-  v[F_GEAR] = o.gear;
-  v[F_SPD] = (int32_t)(lastIn.speedKmh + 0.5f);
-  v[F_RPM] = lastIn.rpmValid ? (int32_t)(lastIn.engineRpm / 50.0f + 0.5f) * 50 : -1;
-  v[F_TPS] = lastIn.tpsValid ? (int32_t)(lastIn.tpsPct + 0.5f) : -1;
-  v[F_OIL] = lastIn.oilValid ? (int32_t)(lastIn.oilPsi + 0.5f) : -1;
-  v[F_ATF] = lastIn.atfValid ? (int32_t)(lastIn.atfC + 0.5f) : -1;
-  v[F_VOLT] = (int32_t)(lastIn.batteryV * 10.0f + 0.5f);  // 142 = 14.2 V
-  v[F_LU] = o.lockup ? 1 : 0;
-  v[F_FLT] = o.faults;
-  v[F_WRN] = o.warnings;
-  Text msg, bit;
-  messageText(msg, o, now);
-  bit.s("BIT ");
-  bitStatus(bit);
-  v[F_CTRL] = o.control;
-  v[F_MODE] = o.mode;
-  v[F_MSG] = textHash(msg.buf) ^ ((int32_t)o.eventSeq << 24);  // repeat events re-send
-  v[F_BIT] = textHash(bit.buf);
-  for (uint8_t i = 0; i < F_COUNT; i++) {
-    if (refresh || v[i] != fieldValue[i]) {
-      fieldValue[i] = v[i];
-      fieldDirty[i] = true;
-    }
-  }
-
-  // Never block the control loop: at most two commands per tick, only when the
-  // UART buffer has room, round-robin so fast-changing fields can't starve
-  // the rest.
-  uint8_t budget = 2;
-  for (uint8_t n = 0; n < F_COUNT && budget; n++) {
-    const uint8_t i = (cursor + n) % F_COUNT;
-    if (!fieldDirty[i]) continue;
-    if (NEXTION.availableForWrite() < 40) return;
-    NEXTION.print(kFieldName[i]);
-    if (i < F_CTRL) {
-      NEXTION.print(F(".val="));
-      NEXTION.print(v[i]);
-    } else {
-      NEXTION.print(F(".txt=\""));
-      NEXTION.print(i == F_CTRL   ? controlText(o.control)
-                    : i == F_MODE ? modeText(o.mode)
-                    : i == F_MSG  ? msg.buf
-                                  : bit.buf);
-      NEXTION.print('"');
-    }
-    nexEnd();
-    fieldDirty[i] = false;
-    cursor = (i + 1) % F_COUNT;
-    budget--;
-  }
-}
 
 void serviceUsbLog(uint32_t now) {
   static uint32_t last = 0;
@@ -513,7 +414,7 @@ void serviceUsbLog(uint32_t now) {
   if (Serial.availableForWrite() < 60) return;  // never block on a slow host
   last = now;
   const tcu::Outputs& o = controller.outputs();
-  // ms,ctrl,mode,gear,lockup,kmh,rpm,rpm_per_kmh,tps,atf,oil,volts,faults,warnings
+  // ms,ctrl,mode,gear,lockup,kmh,rpm,rpm_per_kmh,tps,atf,volts,faults,warnings
   Serial.print(now);
   Serial.print(',');
   Serial.print(o.control);
@@ -533,8 +434,6 @@ void serviceUsbLog(uint32_t now) {
   Serial.print((int16_t)lastIn.tpsPct);
   Serial.print(',');
   Serial.print((int16_t)lastIn.atfC);
-  Serial.print(',');
-  Serial.print((int16_t)lastIn.oilPsi);
   Serial.print(',');
   Serial.print(lastIn.batteryV, 1);
   Serial.print(',');
@@ -561,13 +460,10 @@ void renderMain(const tcu::Outputs& o, uint32_t now) {
   r4.s("FLT  ");
   appendFlags(r4, o.faults, kFaultNames, 5);
   r5.s("WRN  ");
-  appendFlags(r5, o.warnings, kWarnNames, 8);
+  appendFlags(r5, o.warnings, kWarnNames, 6);
   messageText(r6, o, now);
-  r7.fixed(lastIn.batteryV, 1).s("V ATF ");
+  r7.n((int32_t)(lastIn.speedKmh + 0.5f)).s("km/h  ATF ");
   if (lastIn.atfValid) r7.n((int32_t)lastIn.atfC).s("C");
-  else r7.s("--");
-  r7.s(" OIL ");
-  if (lastIn.oilValid) r7.n((int32_t)lastIn.oilPsi);
   else r7.s("--");
   oled.setLine(2, r2.buf);
   oled.setLine(3, r3.buf);
@@ -587,12 +483,9 @@ void renderSensors() {
   r4.s("THROTTLE").pad(9);
   if (lastIn.tpsValid) r4.n((int32_t)(lastIn.tpsPct + 0.5f)).s(" %");
   else r4.s("FAULT");
-  r5.s("ATF ");
-  if (lastIn.atfValid) r5.n((int32_t)lastIn.atfC).s("C");
-  else r5.s("--");
-  r5.pad(10).s("OIL ");
-  if (lastIn.oilValid) r5.n((int32_t)lastIn.oilPsi).s("psi");
-  else r5.s("--");
+  r5.s("ATF TEMP").pad(9);
+  if (lastIn.atfValid) r5.n((int32_t)lastIn.atfC).s(" C");
+  else r5.s("FAULT");
   r6.s("BATTERY").pad(9).fixed(lastIn.batteryV, 1).s(" V");
   if (lastIn.solSenseValid) {
     r7.s("SOL A ");
@@ -626,7 +519,7 @@ void renderTest(uint32_t now) {
     line("");
     line("NEEDS: PARKED, ENGINE");
     line("OFF, LEVER NOT IN D,");
-    line("MASTER AT STOCK");
+    line("ON/OFF SWITCH OFF");
     return;
   }
   if (selfTest.active()) {
@@ -778,15 +671,6 @@ void setup() {
   pinMode(pin::TACH, INPUT);
 
   Serial.begin(115200);
-  // Nextion powers up at its saved baud (factory 9600). Ask it to switch for
-  // this session with `baud=` (RAM only, no EEPROM wear), then follow it.
-  NEXTION.begin(9600);
-  NEXTION.print(F("baud="));
-  NEXTION.print(NEXTION_BAUD);
-  nexEnd();
-  NEXTION.flush();
-  delay(50);
-  NEXTION.begin(NEXTION_BAUD);
 
   attachInterrupt(digitalPinToInterrupt(pin::VSS), isrVss, FALLING);
   attachInterrupt(digitalPinToInterrupt(pin::TACH), isrTach, FALLING);
@@ -850,6 +734,5 @@ void loop() {
   }
 
   serviceOled(now);
-  serviceTelemetry(now);
   serviceUsbLog(now);
 }
