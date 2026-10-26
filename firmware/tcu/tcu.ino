@@ -3,8 +3,9 @@
   Vehicle: 1999 Toyota RAV4 (SXA10/SXA11), 4-speed ECT automatic, 3S-FE
   Target:  Arduino Mega 2560 (5 V I/O, 16 ADC channels, 4 UARTs)
 
-  This file only conditions inputs, drives outputs and talks to the display.
-  Every decision is made in tcu_logic.cpp, which is unit-tested on the host.
+  This file only conditions inputs, drives outputs and talks to the displays.
+  Every decision is made in tcu_logic.cpp (driving) and self_test.cpp (built-in
+  test), which are unit-tested on the host.
 
   Fail-safe contract (hardware must honour it too - see docs/02-revised-spec.md):
     * Relay coil de-energised  => factory ECU drives the real solenoids.
@@ -13,8 +14,13 @@
 */
 #include <Arduino.h>
 #include <avr/wdt.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
+#include "oled.h"
+#include "self_test.h"
 #include "tcu_logic.h"
 
 namespace pin {
@@ -37,10 +43,15 @@ constexpr uint8_t LEVER_D = 28;      // opto from park/neutral switch "D" output
 constexpr uint8_t ECU_S1 = 29;       // opto from ECU S1 output (ECU side of relay)
 constexpr uint8_t ECU_S2 = 30;
 constexpr uint8_t ECU_SL = 31;
+constexpr uint8_t TEST = 32;         // console TEST button (spare core 8)
 constexpr uint8_t TPS = A0;
 constexpr uint8_t OIL = A1;
 constexpr uint8_t ATF = A2;
 constexpr uint8_t VBAT = A3;
+constexpr uint8_t IS_S1 = A4;        // high-side driver current-sense outputs
+constexpr uint8_t IS_S2 = A5;
+constexpr uint8_t IS_SL = A6;
+// Console OLED on I2C: SDA = 20, SCL = 21.
 }  // namespace pin
 
 // Nextion on Serial1 (TX1 = pin 18). USB Serial is kept for the CSV log.
@@ -60,8 +71,29 @@ void captureResetFlags() {
   wdt_disable();
 }
 
+// Built-in test results survive the deliberate watchdog reset at the end of
+// IBIT in .noinit RAM, guarded by a magic number and checksum.
+constexpr uint16_t kWdtTestMagic = 0xB17E;
+struct SavedBit {
+  uint16_t magic;
+  uint8_t results[tcu::T_COUNT];
+  float values[tcu::T_COUNT];
+  uint8_t check;
+};
+SavedBit savedBit __attribute__((section(".noinit")));
+
+uint8_t savedBitChecksum() {
+  const uint8_t* p = reinterpret_cast<const uint8_t*>(&savedBit);
+  uint8_t sum = 0x5A;
+  for (size_t i = 0; i < offsetof(SavedBit, check); i++) sum = (uint8_t)((sum << 1 | sum >> 7) ^ p[i]);
+  return sum;
+}
+
 tcu::Controller controller;
+tcu::SelfTest selfTest;
+Oled oled;
 tcu::Inputs lastIn;
+bool unexpectedWdtReset = false;
 
 // --------------------------------------------------------------- pulse inputs
 struct PulseInput {
@@ -102,7 +134,7 @@ struct Ema {
     return y;
   }
 };
-Ema tpsF, oilF, atfF, vbatF, speedF, rpmF;
+Ema tpsF, oilF, atfF, vbatF, speedF, rpmF, solF[3];
 
 uint16_t readRaw(uint8_t p) {
   uint16_t sum = 0;
@@ -112,7 +144,7 @@ uint16_t readRaw(uint8_t p) {
 float rawToVolts(uint16_t raw) { return raw * (cfg::ADC_VREF / 1023.0f); }
 
 // --------------------------------------------------------------- switches
-tcu::Debouncer dbUp, dbDown, dbEco, dbSport, dbMaster, dbBrake, dbLeverD, dbEcuS1, dbEcuS2, dbEcuSL;
+tcu::Debouncer dbUp, dbDown, dbEco, dbSport, dbMaster, dbBrake, dbLeverD, dbEcuS1, dbEcuS2, dbEcuSL, dbTest;
 
 inline bool activeLow(uint8_t p) { return digitalRead(p) == LOW; }
 
@@ -127,6 +159,7 @@ void sampleSwitches(uint32_t now) {
   dbEcuS1.update(activeLow(pin::ECU_S1), now, cfg::DEBOUNCE_OPTO_MS);
   dbEcuS2.update(activeLow(pin::ECU_S2), now, cfg::DEBOUNCE_OPTO_MS);
   dbEcuSL.update(activeLow(pin::ECU_SL), now, cfg::DEBOUNCE_OPTO_MS);
+  dbTest.update(activeLow(pin::TEST), now, cfg::DEBOUNCE_SWITCH_MS);
 }
 
 tcu::Inputs readInputs(uint32_t now) {
@@ -173,6 +206,12 @@ tcu::Inputs readInputs(uint32_t now) {
   }
 
   in.batteryV = vbatF.update(rawToVolts(readRaw(pin::VBAT)) * cfg::VBAT_DIVIDER, 0.1f);
+
+  in.solSenseValid = cfg::SOLENOID_SENSE_INSTALLED;
+  const uint8_t isPins[3] = {pin::IS_S1, pin::IS_S2, pin::IS_SL};
+  for (uint8_t i = 0; i < 3; i++) {
+    in.solAmps[i] = solF[i].update(rawToVolts(readRaw(isPins[i])) * cfg::IS_AMPS_PER_VOLT, 0.5f);
+  }
   return in;
 }
 
@@ -191,6 +230,17 @@ void applyOutputs(const tcu::Outputs& o) {
     digitalWrite(pin::S2, LOW);
     digitalWrite(pin::SL, LOW);
   }
+}
+
+// Self-test needs drivers on with the relay off (relay-release check), which
+// applyOutputs() deliberately never does, so it writes the pins directly.
+void applyTestOutputs(const tcu::TestOutputs& t) {
+  digitalWrite(pin::RELAY, t.relay ? HIGH : LOW);
+  digitalWrite(pin::S1, t.s1 ? HIGH : LOW);
+  digitalWrite(pin::S2, t.s2 ? HIGH : LOW);
+  digitalWrite(pin::SL, t.sl ? HIGH : LOW);
+  digitalWrite(pin::CONSOLE_LED, t.lamps ? HIGH : LOW);
+  digitalWrite(pin::STATUS_LED, t.lamps ? HIGH : LOW);
 }
 
 void updateLeds(const tcu::Outputs& o, uint32_t now) {
@@ -238,6 +288,124 @@ const char* eventText(tcu::Event e) {
   }
 }
 
+// Small fixed-width text builder (AVR printf has no %f).
+struct Text {
+  char buf[Oled::LINE_CHARS + 1];
+  uint8_t len = 0;
+  Text() { buf[0] = '\0'; }
+  Text& s(const char* t) {
+    while (*t && len < Oled::LINE_CHARS) buf[len++] = *t++;
+    buf[len] = '\0';
+    return *this;
+  }
+  Text& n(int32_t v) {
+    char tmp[12];
+    ltoa(v, tmp, 10);
+    return s(tmp);
+  }
+  Text& fixed(float v, uint8_t decimals) {
+    const int32_t scale = decimals == 2 ? 100 : 10;
+    int32_t t = (int32_t)(v * scale + (v < 0 ? -0.5f : 0.5f));
+    if (t < 0) {
+      s("-");
+      t = -t;
+    }
+    n(t / scale).s(".");
+    if (decimals == 2 && t % scale < 10) s("0");
+    return n(t % scale);
+  }
+  Text& pad(uint8_t col) {
+    while (len < col && len < Oled::LINE_CHARS) buf[len++] = ' ';
+    buf[len] = '\0';
+    return *this;
+  }
+};
+
+const char* inhibitText(tcu::TestInhibit i) {
+  switch (i) {
+    case tcu::INH_MASTER: return "SWITCH TO STOCK";
+    case tcu::INH_LEVER_D: return "SHIFT OUT OF D";
+    case tcu::INH_MOVING: return "VEHICLE MOVING";
+    case tcu::INH_ENGINE: return "ENGINE RUNNING";
+    case tcu::INH_SUPPLY: return "BATTERY OUT OF RANGE";
+    default: return "";
+  }
+}
+
+const char* resultText(tcu::TestResult r) {
+  switch (r) {
+    case tcu::TR_PASS: return "PASS";
+    case tcu::TR_FAIL: return "FAIL";
+    case tcu::TR_CHECK: return "CHK";
+    case tcu::TR_SKIP: return "SKIP";
+    default: return "--";
+  }
+}
+
+const char* promptText(tcu::TestPrompt p) {
+  switch (p) {
+    case tcu::PR_UP: return "PRESS [+]";
+    case tcu::PR_DOWN: return "PRESS [-]";
+    case tcu::PR_ECO: return "KNOB TO ECO";
+    case tcu::PR_SPORT: return "KNOB TO SPORT";
+    case tcu::PR_BRAKE: return "PRESS BRAKE";
+    default: return "";
+  }
+}
+
+// "SOL S2    FAIL 0.02A"
+Text itemLine(tcu::TestId id) {
+  Text t;
+  const tcu::TestResult r = selfTest.result(id);
+  t.s(tcu::testName(id)).pad(10).s(resultText(r)).pad(15);
+  if (r == tcu::TR_NONE || r == tcu::TR_SKIP) return t;
+  const float v = selfTest.value(id);
+  switch (id) {
+    case tcu::T_SUPPLY: t.fixed(v, 1).s("V"); break;
+    case tcu::T_TPS: t.n((int32_t)v).s("%"); break;
+    case tcu::T_ATF: t.n((int32_t)v).s("C"); break;
+    case tcu::T_OIL:
+    case tcu::T_OIL_ZERO: t.fixed(v, 1).s("psi"); break;
+    case tcu::T_SOL_S1:
+    case tcu::T_SOL_S2:
+    case tcu::T_SOL_SL:
+    case tcu::T_RELAY_RELEASE:
+      if (r != tcu::TR_CHECK) t.fixed(v, 2).s("A");
+      break;
+    default: break;
+  }
+  return t;
+}
+
+void bitStatus(Text& t) {
+  if (selfTest.active()) {
+    t.s("TESTING");
+  } else if (selfTest.aborted()) {
+    t.s("ABORTED");
+  } else if (!selfTest.hasRun()) {
+    t.s("NOT RUN");
+  } else {
+    const tcu::TestSummary m = selfTest.summary();
+    if (m.fail) t.s("FAIL ").n(m.fail);
+    else t.s("PASS ").n(m.pass);
+    if (m.check) t.s(" CHK ").n(m.check);
+  }
+}
+
+void appendFlags(Text& t, uint16_t bits, const char* const* names, uint8_t count) {
+  if (!bits) {
+    t.s("none");
+    return;
+  }
+  for (uint8_t i = 0; i < count; i++) {
+    if (bits & (1u << i)) t.s(names[i]).s(" ");
+  }
+}
+const char* const kFaultNames[] = {"SUPPLY", "VSS", "TPS", "RATIO", "SOLND"};
+const char* const kWarnNames[] = {"ATFSNS", "HOT", "CRIT", "OILSNS", "OILLOW", "MODE", "BTN", "WDT"};
+
+uint32_t inhibitShownUntil = 0;  // show an IBIT refusal for a few seconds
+
 void nexEnd() {
   NEXTION.write(0xFF);
   NEXTION.write(0xFF);
@@ -247,10 +415,30 @@ void nexEnd() {
 // Display fields; names must match the objects on the Nextion page.
 // Numeric fields come first, then text fields (from F_CTRL on).
 enum Field : uint8_t {
-  F_GEAR, F_SPD, F_RPM, F_TPS, F_OIL, F_ATF, F_VOLT, F_LU, F_FLT, F_WRN, F_CTRL, F_MODE, F_MSG, F_COUNT
+  F_GEAR, F_SPD, F_RPM, F_TPS, F_OIL, F_ATF, F_VOLT, F_LU, F_FLT, F_WRN, F_CTRL, F_MODE, F_MSG, F_BIT, F_COUNT
 };
-const char* const kFieldName[F_COUNT] = {"gear", "spd",  "rpm", "tps", "oil",  "atf", "volt",
-                                         "lu",   "flt",  "wrn", "ctrl", "mode", "msg"};
+const char* const kFieldName[F_COUNT] = {"gear", "spd", "rpm",  "tps",  "oil", "atf", "volt",
+                                         "lu",   "flt", "wrn", "ctrl", "mode", "msg", "bit"};
+
+int32_t textHash(const char* t) {
+  uint32_t h = 2166136261u;
+  while (*t) h = (h ^ (uint8_t)*t++) * 16777619u;
+  return (int32_t)h;
+}
+
+// Message line shared by the Nextion and the OLED.
+void messageText(Text& t, const tcu::Outputs& o, uint32_t now) {
+  if (selfTest.active()) {
+    const tcu::TestPrompt pr = selfTest.prompt();
+    t.s(pr ? promptText(pr) : "SELF TEST RUNNING");
+  } else if ((int32_t)(inhibitShownUntil - now) > 0) {
+    t.s("NO TEST: ").s(inhibitText(selfTest.inhibit()));
+  } else if (!cfg::CALIBRATED && dbMaster.state()) {
+    t.s("NOT CALIBRATED");
+  } else {
+    t.s(eventText(o.event));
+  }
+}
 int32_t fieldValue[F_COUNT];
 bool fieldDirty[F_COUNT];
 
@@ -277,10 +465,14 @@ void serviceTelemetry(uint32_t now) {
   v[F_LU] = o.lockup ? 1 : 0;
   v[F_FLT] = o.faults;
   v[F_WRN] = o.warnings;
+  Text msg, bit;
+  messageText(msg, o, now);
+  bit.s("BIT ");
+  bitStatus(bit);
   v[F_CTRL] = o.control;
   v[F_MODE] = o.mode;
-  const bool uncalibrated = !cfg::CALIBRATED && dbMaster.state();
-  v[F_MSG] = uncalibrated ? -1 : o.eventSeq;
+  v[F_MSG] = textHash(msg.buf) ^ ((int32_t)o.eventSeq << 24);  // repeat events re-send
+  v[F_BIT] = textHash(bit.buf);
   for (uint8_t i = 0; i < F_COUNT; i++) {
     if (refresh || v[i] != fieldValue[i]) {
       fieldValue[i] = v[i];
@@ -304,8 +496,8 @@ void serviceTelemetry(uint32_t now) {
       NEXTION.print(F(".txt=\""));
       NEXTION.print(i == F_CTRL   ? controlText(o.control)
                     : i == F_MODE ? modeText(o.mode)
-                    : uncalibrated ? "NOT CALIBRATED"
-                                   : eventText(o.event));
+                    : i == F_MSG  ? msg.buf
+                                  : bit.buf);
       NEXTION.print('"');
     }
     nexEnd();
@@ -351,6 +543,218 @@ void serviceUsbLog(uint32_t now) {
   Serial.println(o.warnings);
 }
 
+// --------------------------------------------------------------- console OLED
+enum Page : uint8_t { PG_MAIN, PG_SENSORS, PG_TEST, PG_COUNT };
+uint8_t page = PG_MAIN;
+
+void renderMain(const tcu::Outputs& o, uint32_t now) {
+  const char gear[2] = {o.gear ? (char)('0' + o.gear) : '-', '\0'};
+  Text big;
+  big.s(gear).s("  ").s(modeText(o.mode));
+  oled.setBig(big.buf);
+  Text r2, r3, r4, r5, r6, r7;
+  r2.s(controlText(o.control)).pad(7);
+  if (!cfg::CALIBRATED) r2.s("NOT CALIBRATED");
+  else if (o.lockup) r2.s("LOCKUP");
+  r3.s("BIT  ");
+  bitStatus(r3);
+  r4.s("FLT  ");
+  appendFlags(r4, o.faults, kFaultNames, 5);
+  r5.s("WRN  ");
+  appendFlags(r5, o.warnings, kWarnNames, 8);
+  messageText(r6, o, now);
+  r7.fixed(lastIn.batteryV, 1).s("V ATF ");
+  if (lastIn.atfValid) r7.n((int32_t)lastIn.atfC).s("C");
+  else r7.s("--");
+  r7.s(" OIL ");
+  if (lastIn.oilValid) r7.n((int32_t)lastIn.oilPsi);
+  else r7.s("--");
+  oled.setLine(2, r2.buf);
+  oled.setLine(3, r3.buf);
+  oled.setLine(4, r4.buf);
+  oled.setLine(5, r5.buf);
+  oled.setLine(6, r6.buf);
+  oled.setLine(7, r7.buf);
+}
+
+void renderSensors() {
+  oled.setBig("SENSORS");
+  Text r2, r3, r4, r5, r6, r7;
+  r2.s("SPEED").pad(9).n((int32_t)(lastIn.speedKmh + 0.5f)).s(" km/h");
+  r3.s("ENGINE").pad(9);
+  if (lastIn.rpmValid) r3.n((int32_t)lastIn.engineRpm).s(" rpm");
+  else r3.s("--");
+  r4.s("THROTTLE").pad(9);
+  if (lastIn.tpsValid) r4.n((int32_t)(lastIn.tpsPct + 0.5f)).s(" %");
+  else r4.s("FAULT");
+  r5.s("ATF ");
+  if (lastIn.atfValid) r5.n((int32_t)lastIn.atfC).s("C");
+  else r5.s("--");
+  r5.pad(10).s("OIL ");
+  if (lastIn.oilValid) r5.n((int32_t)lastIn.oilPsi).s("psi");
+  else r5.s("--");
+  r6.s("BATTERY").pad(9).fixed(lastIn.batteryV, 1).s(" V");
+  if (lastIn.solSenseValid) {
+    r7.s("SOL A ");
+    for (uint8_t i = 0; i < 3; i++) r7.fixed(lastIn.solAmps[i], 2).s(" ");
+  } else {
+    r7.s("SOL A  not wired");
+  }
+  oled.setLine(2, r2.buf);
+  oled.setLine(3, r3.buf);
+  oled.setLine(4, r4.buf);
+  oled.setLine(5, r5.buf);
+  oled.setLine(6, r6.buf);
+  oled.setLine(7, r7.buf);
+}
+
+void renderTest(uint32_t now) {
+  Text big;
+  if (selfTest.active()) big.s("TESTING");
+  else if (selfTest.aborted()) big.s("ABORTED");
+  else if (!selfTest.hasRun()) big.s("BIT");
+  else big.s(selfTest.ibitDone() ? "BIT " : "PBIT ").s(selfTest.summary().fail ? "FAIL" : "PASS");
+  oled.setBig(big.buf);
+  uint8_t row = 2;
+  auto line = [&](const char* t) {
+    if (row <= 7) oled.setLine(row++, t);
+  };
+
+  if ((int32_t)(inhibitShownUntil - now) > 0) {
+    line("CAN'T TEST:");
+    line(inhibitText(selfTest.inhibit()));
+    line("");
+    line("NEEDS: PARKED, ENGINE");
+    line("OFF, LEVER NOT IN D,");
+    line("MASTER AT STOCK");
+    return;
+  }
+  if (selfTest.active()) {
+    Text t;
+    const tcu::TestPrompt pr = selfTest.prompt();
+    if (pr) {
+      line(promptText(pr));
+      t.n((int32_t)((selfTest.promptRemainingMs(now) + 999) / 1000)).s("s  (TEST = SKIP)");
+      line(t.buf);
+    } else if (selfTest.phase() == tcu::PH_LAMPS) {
+      line("LAMP TEST: CHECK LEDS");
+      line("AND SCREEN");
+    } else {
+      line(tcu::testName(selfTest.currentTest()));
+      line("");
+    }
+  } else if (selfTest.aborted()) {
+    line("ABORTED:");
+    line(inhibitText(selfTest.inhibit()));
+  } else if (selfTest.hasRun()) {
+    const tcu::TestSummary m = selfTest.summary();
+    Text t;
+    t.s("P").n(m.pass).s(" F").n(m.fail).s(" CHK").n(m.check).s(" SKIP").n(m.skip);
+    line(t.buf);
+  } else {
+    line("HOLD TEST 2s TO RUN");
+    line("");
+  }
+  // Remaining rows: failures first, then items needing a human check.
+  uint8_t ids[tcu::T_COUNT];
+  uint8_t count = 0;
+  const tcu::TestResult order[] = {tcu::TR_FAIL, tcu::TR_CHECK};
+  for (tcu::TestResult want : order) {
+    for (uint8_t i = 0; i < tcu::T_COUNT; i++) {
+      if (selfTest.result((tcu::TestId)i) == want) ids[count++] = i;
+    }
+  }
+  const uint8_t rowsLeft = 8 - row;
+  const uint8_t shown = count <= rowsLeft ? count : rowsLeft - 1;  // keep a row for "+n more"
+  for (uint8_t k = 0; k < shown; k++) line(itemLine((tcu::TestId)ids[k]).buf);
+  if (shown < count) {
+    Text t;
+    t.s("+").n(count - shown).s(" MORE (USB LOG)");
+    line(t.buf);
+  }
+  if (!selfTest.active() && !selfTest.aborted() && selfTest.hasRun() && !count) line("ALL CHECKS PASSED");
+  if (!selfTest.active()) line(selfTest.hasRun() ? "HOLD TEST 2s = RUN" : "");
+  while (row <= 7) line("");
+}
+
+void serviceOled(uint32_t now) {
+  if (!cfg::OLED_INSTALLED) return;
+  static uint32_t lastRender = 0;
+  if ((uint32_t)(now - lastRender) >= 100) {
+    lastRender = now;
+    if (page == PG_MAIN) renderMain(controller.outputs(), now);
+    else if (page == PG_SENSORS) renderSensors();
+    else renderTest(now);
+  }
+  oled.service(now);
+}
+
+void logBitTable(const char* title) {
+  if (!USB_LOG_ENABLED) return;
+  Serial.print(F("# "));
+  Serial.println(title);
+  for (uint8_t i = 0; i < tcu::T_COUNT; i++) {
+    Serial.print(F("#   "));
+    Serial.println(itemLine((tcu::TestId)i).buf);
+  }
+}
+
+// --------------------------------------------------------------- TEST button
+// Short press: next OLED page. Hold 2 s: start IBIT. During IBIT: skip prompt.
+bool testEdgePending = false;
+
+void handleTestButton(uint32_t now) {
+  static bool prev = false, longFired = false;
+  static uint32_t since = 0;
+  const bool down = dbTest.state();
+  if (down && !prev) {
+    since = now;
+    longFired = false;
+    if (selfTest.active()) testEdgePending = true;
+  }
+  if (down && !longFired && !selfTest.active() && (uint32_t)(now - since) >= cfg::TEST_LONG_PRESS_MS) {
+    longFired = true;
+    page = PG_TEST;
+    tcu::Inputs tin = lastIn;
+    tin.customRequested = dbMaster.state();  // the raw switch, even when uncalibrated
+    if (selfTest.start(tin)) {
+      inhibitShownUntil = now;
+      if (USB_LOG_ENABLED) Serial.println(F("# IBIT start"));
+    } else {
+      inhibitShownUntil = now + 3000;
+    }
+  }
+  if (!down && prev && !longFired && !selfTest.active()) page = (page + 1) % PG_COUNT;
+  prev = down;
+}
+
+// Last IBIT step: save results, then stop kicking the watchdog. A working
+// watchdog resets the board within 250 ms; setup() restores the results and
+// records the pass. If the screen stays on "WATCHDOG TEST", it failed.
+void runWatchdogTest() {
+  applyTestOutputs(tcu::TestOutputs());
+  savedBit.magic = kWdtTestMagic;
+  memcpy(savedBit.results, selfTest.results(), sizeof(savedBit.results));
+  memcpy(savedBit.values, selfTest.values(), sizeof(savedBit.values));
+  savedBit.check = savedBitChecksum();
+  if (USB_LOG_ENABLED) {
+    Serial.println(F("# IBIT watchdog test: expecting a reset"));
+    Serial.flush();
+  }
+  if (cfg::OLED_INSTALLED) {
+    oled.setBig("WATCHDOG");
+    oled.setLine(2, "TEST: BOARD SHOULD");
+    oled.setLine(3, "RESTART NOW");
+    for (uint8_t i = 0; i < 40 && oled.present(); i++) {  // flush the changed pages
+      wdt_reset();
+      oled.service(millis());
+    }
+  }
+  wdt_enable(WDTO_250MS);
+  for (;;) {
+  }
+}
+
 // --------------------------------------------------------------- setup / loop
 void setup() {
   // Outputs to the safe state before anything else (external pull-downs hold
@@ -367,8 +771,8 @@ void setup() {
   pinMode(pin::STATUS_LED, OUTPUT);
 
   // External 2.2k pull-ups do the real work; internal ones are a backstop.
-  const uint8_t inputs[] = {pin::UP,      pin::DOWN,   pin::ECO,    pin::SPORT,  pin::MASTER,
-                            pin::BRAKE,   pin::LEVER_D, pin::ECU_S1, pin::ECU_S2, pin::ECU_SL};
+  const uint8_t inputs[] = {pin::UP,     pin::DOWN,    pin::ECO,    pin::SPORT,  pin::MASTER, pin::BRAKE,
+                            pin::LEVER_D, pin::ECU_S1, pin::ECU_S2, pin::ECU_SL, pin::TEST};
   for (uint8_t p : inputs) pinMode(p, INPUT_PULLUP);
   pinMode(pin::VSS, INPUT);
   pinMode(pin::TACH, INPUT);
@@ -387,8 +791,22 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(pin::VSS), isrVss, FALLING);
   attachInterrupt(digitalPinToInterrupt(pin::TACH), isrTach, FALLING);
 
+  // Was this reset the IBIT watchdog test, or a real hang?
+  const bool wdtReset = resetFlags & _BV(WDRF);
+  const bool bitSaved = savedBit.magic == kWdtTestMagic && savedBit.check == savedBitChecksum();
+  if (bitSaved) {
+    // Saved results + watchdog reset = the watchdog works. Saved results +
+    // any other reset = it didn't fire and someone pressed reset/power.
+    selfTest.restoreAfterWatchdog(savedBit.results, savedBit.values, wdtReset);
+    page = PG_TEST;
+  }
+  savedBit.magic = 0;
+  unexpectedWdtReset = wdtReset && !bitSaved;
+
+  if (cfg::OLED_INSTALLED) oled.begin(cfg::OLED_I2C_ADDR, cfg::OLED_SH1106);
+
   const uint32_t now = millis();
-  controller.begin(now, resetFlags & _BV(WDRF));
+  controller.begin(now, unexpectedWdtReset);
   if (USB_LOG_ENABLED) {
     Serial.print(F("# TCU boot, reset flags 0x"));
     Serial.println(resetFlags, HEX);
@@ -401,16 +819,37 @@ void loop() {
   wdt_reset();
   const uint32_t now = millis();
   sampleSwitches(now);
+  handleTestButton(now);
 
   static uint32_t lastControl = 0;
+  static bool pbitDone = false;
   if ((uint32_t)(now - lastControl) >= cfg::CONTROL_PERIOD_MS) {
     lastControl = now;
     lastIn = readInputs(now);
     const tcu::Outputs& out = controller.step(lastIn);
-    applyOutputs(out);
-    updateLeds(out, now);
+    if (!pbitDone && now >= cfg::PBIT_DELAY_MS) {
+      pbitDone = true;
+      selfTest.runPowerOn(lastIn, unexpectedWdtReset);
+      logBitTable(selfTest.ibitDone() ? "IBIT done (after watchdog reset)" : "PBIT");
+    }
+    if (selfTest.active()) {
+      // IBIT owns the outputs. Its interlock requires the master switch at
+      // STOCK, so the controller is not driving anything meanwhile.
+      tcu::Inputs tin = lastIn;
+      tin.customRequested = dbMaster.state();
+      selfTest.step(tin, testEdgePending);
+      testEdgePending = false;
+      if (selfTest.outputs().triggerWatchdog) runWatchdogTest();  // does not return
+      applyTestOutputs(selfTest.outputs());
+      if (cfg::OLED_INSTALLED) oled.setInvert(selfTest.outputs().lamps);
+      if (!selfTest.active()) logBitTable(selfTest.aborted() ? "IBIT aborted" : "IBIT done");
+    } else {
+      applyOutputs(out);
+      updateLeds(out, now);
+    }
   }
 
+  serviceOled(now);
   serviceTelemetry(now);
   serviceUsbLog(now);
 }

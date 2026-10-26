@@ -66,6 +66,39 @@ constexpr uint16_t ATF_ADC_OPEN = 1018;           // raw ADC at/above = open
 // the input clamp described in the spec.
 constexpr float VBAT_DIVIDER = 5.7f;
 
+// Solenoid current sense: high-side driver IS pins on A4/A5/A6.
+// amps = volts x IS_AMPS_PER_VOLT, where IS_AMPS_PER_VOLT = kILIS / R_IS from
+// the driver datasheet. CALIBRATE on the bench with a 15 ohm load.
+// Set false if the IS pins aren't wired; the circuit tests then report CHK.
+constexpr bool SOLENOID_SENSE_INSTALLED = true;
+constexpr float IS_AMPS_PER_VOLT = 1.0f;
+// A healthy 11-15 ohm solenoid at 11.5-14.5 V draws 0.77-1.32 A.
+constexpr float SOL_MIN_A = 0.6f;
+constexpr float SOL_MAX_A = 1.6f;
+constexpr float SOL_OFF_MAX_A = 0.2f;
+constexpr uint32_t SOL_FAULT_MS = 300;
+
+// ------------------------------------------------------------- built-in test
+constexpr uint32_t PBIT_DELAY_MS = 1500;          // let sensor filters settle after boot
+constexpr uint32_t TEST_LONG_PRESS_MS = 2000;     // hold TEST this long to start IBIT
+constexpr uint32_t IBIT_LAMP_MS = 1500;
+constexpr uint32_t IBIT_RELAY_SETTLE_MS = 150;
+constexpr uint32_t IBIT_SOLENOID_ON_MS = 400;
+constexpr uint32_t IBIT_SOLENOID_GAP_MS = 200;
+constexpr uint32_t IBIT_PROMPT_TIMEOUT_MS = 8000;
+constexpr bool IBIT_WATCHDOG_TEST = true;         // last IBIT step: deliberate watchdog reset
+constexpr float IBIT_OIL_ZERO_MAX_PSI = 3.0f;     // engine off: sender should read ~0
+constexpr float TEST_ENGINE_RUNNING_RPM = 100.0f;
+constexpr float TEST_ENGINE_RUNNING_PSI = 5.0f;
+constexpr float TEST_SUPPLY_MIN_V = 11.0f;
+constexpr float TEST_SUPPLY_MAX_V = 15.5f;
+
+// Console OLED (128x64, I2C). 0.96" modules are usually SSD1306; many 1.3"
+// modules are SH1106.
+constexpr bool OLED_INSTALLED = true;
+constexpr bool OLED_SH1106 = false;
+constexpr uint8_t OLED_I2C_ADDR = 0x3C;
+
 // ------------------------------------------------------------------- timing
 constexpr uint32_t CONTROL_PERIOD_MS = 10;
 constexpr uint16_t DEBOUNCE_SWITCH_MS = 25;       // console switches (A-pillar run)

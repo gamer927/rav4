@@ -111,7 +111,11 @@ and ground.
 
 - Use 3 × **high-side smart switches** (PROFET class, for example Infineon BTS6143D or
   BTS50085), each rated 3 A continuous or more. They have a built-in inductive clamp, short and
-  over-temperature protection, and a current-sense (IS) pin for future open/short diagnostics.
+  over-temperature protection, and a current-sense (IS) pin.
+- Wire each IS pin to the Mega (A4/A5/A6) through its datasheet sense resistor (R_IS to
+  ground), plus 1 kΩ series and 100 nF. The firmware uses it to prove each solenoid circuit
+  draws its rated current, both in the self-test and continuously while driving (§7.5).
+  `IS_AMPS_PER_VOLT = kILIS / R_IS`; calibrate it on the bench with a 15 Ω load.
 - Put a 10 kΩ pull-down on every IN pin, so the drivers are off during reset.
 - If you use a discrete P-FET instead: add an NPN level shifter, a gate pull-up to +B (off), and
   a freewheel diode across the solenoid (cathode to the driver output, anode to ground).
@@ -147,7 +151,7 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 
 | Signal | Source (VERIFY in the EWD) | Conditioning |
 |---|---|---|
-| Console switches (UP, DOWN, ECO, SPORT, MASTER) | Switch to ground | 2.2 kΩ pull-up to 5 V, 1 kΩ series, 100 nF to ground at the MCU, BAT54S clamp |
+| Console switches (UP, DOWN, ECO, SPORT, MASTER, TEST) | Switch to ground | 2.2 kΩ pull-up to 5 V, 1 kΩ series, 100 nF to ground at the MCU, BAT54S clamp |
 | Brake | Stop-lamp switch STP (+12 V when pressed) | PC817 opto (LED + 2.2 kΩ), output pulls the MCU pin low |
 | Lever in D | PNP switch "D" output (feeds the D indicator) | PC817 opto as above |
 | ECU S1/S2/SL sense | ECU side of each relay (COM-A) | PC817 opto with 3.3 kΩ (about 4 mA load) |
@@ -166,10 +170,20 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 5. MASTER
 6. Switch common (ground)
 7. LED (+, via a transistor in the TCU)
-8. Spare
+8. TEST button (§7.5)
 
 Ground the shield drain at the TCU end only. The rotary mode switch uses two wires: ECO and
 SPORT both open means NORMAL, so a broken wire degrades to NORMAL.
+
+### 3.7 Console display (OLED)
+- A 0.96" or 1.3" 128×64 I²C OLED, mounted in the dash or centre console within about 1 m of
+  the TCU box. 0.96" modules are usually SSD1306; many 1.3" modules are SH1106. Set
+  `OLED_SH1106` to match.
+- Use a 4-wire shielded cable (5 V, GND, SDA, SCL). The firmware runs I²C at 100 kHz for the
+  long run and uses a 3 ms bus timeout, so a damaged cable can't hang the controller. If the
+  module lacks pull-ups, add 4.7 kΩ on SDA and SCL at the TCU end.
+- Don't run I²C up the A-pillar: it isn't built for long cables. That's why the TEST button goes
+  in the console cable but the screen sits in the dash.
 
 ## 4. Pin matrix (Arduino Mega 2560)
 
@@ -194,10 +208,13 @@ SPORT both open means NORMAL, so a broken wire degrades to NORMAL.
 | D29 | in | ECU S1 sense | LOW = ECU S1 on | Opto |
 | D30 | in | ECU S2 sense | LOW = ECU S2 on | Opto |
 | D31 | in | ECU SL sense | LOW = ECU SL on | Opto |
+| D32 | in | TEST button | LOW = pressed | Console core 8 |
+| D20 / D21 | I²C | OLED SDA / SCL | – | 100 kHz |
 | A0 | an | TPS | – | 10 k series tap |
 | A1 | an | Oil pressure | – | |
 | A2 | an | ATF thermistor | – | 1 k pull-up |
 | A3 | an | Battery | – | ×5.7 divider |
+| A4 / A5 / A6 | an | S1 / S2 / SL current sense | – | Driver IS pins |
 | USB | – | CSV log, 115200 baud | – | Calibration (§8) |
 
 The shift buttons moved off D2/D3 because VSS and tach need interrupt pins. Serial1 (the
@@ -310,6 +327,7 @@ SL is **released immediately** when any of these happens:
 | `FAULT_TPS` | TPS voltage outside 0.15–4.85 V for 200 ms |
 | `FAULT_VSS` | Speed drops more than 8 km/h in 100 ms from 15 km/h or above (signal loss), **or** more than 2,500 rpm and 15 % TPS in a gear of 2nd or higher, brake off, at 0 km/h for 3 s |
 | `FAULT_RATIO` | Lockup applied for 1.5 s, 30 km/h or more, and rpm differs from `km/h × RPM_PER_KMH[gear]` by more than 25 % for 1.5 s (wrong gear engaged, swapped S1/S2 wiring, bad VSS or tach) |
+| `FAULT_SOLENOID` | For 300 ms, a solenoid commanded on draws less than 0.6 A, or one commanded off draws more than 0.2 A (broken wire, relay didn't switch, shorted driver). Needs the current-sense wiring |
 
 | Warning | Condition |
 |---|---|
@@ -343,7 +361,55 @@ Only changed values are sent, plus a full refresh every 2 s.
 | `flt`, `wrn` | Number | Fault and warning bitmasks (§6.7, `tcu_logic.h`) |
 | `ctrl` | Text | `STOCK` / `AUTO` / `MAN` |
 | `mode` | Text | `ECO` / `NORM` / `SPORT` |
-| `msg` | Text | Event text, e.g. `DENIED: OVER-REV`, `STOP TO ENGAGE`, `FAULT - FACTORY ECU` |
+| `msg` | Text | Event text, e.g. `DENIED: OVER-REV`, `STOP TO ENGAGE`, `FAULT - FACTORY ECU`; self-test prompts while testing |
+| `bit` | Text | Built-in test status, e.g. `BIT PASS 18`, `BIT FAIL 1 CHK 1`, `BIT TESTING` |
+
+### 7.5 Built-in test and console screen
+
+The system tests itself in three ways, modelled on aircraft built-in test (BIT):
+
+| Level | When | What it checks | Moves anything? |
+|---|---|---|---|
+| **PBIT** (power-up) | Automatically, 1.5 s after every boot | Battery, TPS, ATF and oil sensors in range, no button stuck, mode knob wiring, calibration done, last reset wasn't a crash | No |
+| **CBIT** (continuous) | Always, while running | Every fault and warning in §6.7, including solenoid current | Hands back to the ECU on a fault |
+| **IBIT** (press-to-test) | Hold TEST for 2 s | Everything below | Yes, so it's interlocked |
+
+**IBIT interlock** (the equivalent of an aircraft's weight-on-wheels check). The test refuses
+to start, and aborts immediately if any condition changes mid-test, unless all of these hold:
+- The master switch is at STOCK.
+- The lever is not in D.
+- Speed is 0.
+- The engine is off: tach below 100 rpm **and** oil pressure below 5 psi. Two independent
+  checks, so a missing tach can't let it run on a running engine.
+- The battery is between 11.0 and 15.5 V.
+
+On an abort, every output switches off at once.
+
+**IBIT sequence** (about 20 s, most of it the switch prompts):
+
+| # | Step | Pass condition |
+|---|---|---|
+| 1 | Lamp test: console LED, status LED and the OLED (screen inverts) for 1.5 s | You look. Recorded as CHK |
+| 2 | Re-run the PBIT checks; **oil zero**: with the engine off, the sender must read ≤ 3 psi | Catches a drifting sender |
+| 3 | Relays on; pulse S1, then S2, then SL for 0.4 s each, one at a time | 0.6–1.6 A on the pulsed solenoid. Engine off means no line pressure, so the valves only click |
+| 4 | Relays off; all drivers on for 0.4 s | ≤ 0.2 A. Current here means a welded or stuck relay |
+| 5 | Prompts: PRESS [+], PRESS [-], KNOB TO ECO, KNOB TO SPORT, PRESS BRAKE | Detected within 8 s. TEST skips a prompt (SKIP); a timeout is a FAIL. Covers the whole A-pillar cable |
+| 6 | Watchdog: the board deliberately stops servicing the watchdog | It must reboot within 0.25 s; the results survive the reset and the test records PASS. If the screen freezes on `WATCHDOG TEST`, it failed |
+
+Results are PASS, FAIL, CHK (needs a human: lamps, or solenoids without current sense) or SKIP.
+The full table also prints on the USB log.
+
+**TEST button:**
+- Short press: next screen (MAIN → SENSORS → TEST).
+- Hold 2 s: run IBIT.
+- During IBIT, a press skips the current prompt.
+
+**Screens** (rendered from the real firmware in a simulator: [`oled-screens.png`](oled-screens.png)):
+- **MAIN:** gear and mode in large text; control state (STOCK/AUTO/MAN) and lockup; BIT
+  status; active faults and warnings; the event line; battery, ATF and oil.
+- **SENSORS:** speed, rpm, throttle, ATF, oil, battery and solenoid currents.
+- **TEST:** test progress and prompts, then the summary with FAIL items first, then CHK items.
+
 
 ## 8. Calibration (do this in STOCK mode first)
 The CSV log on USB (115200 baud) works in STOCK. While the ECU is in control, gear and lockup
@@ -372,14 +438,18 @@ Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, oil
 5. **Battery:** compare with a multimeter, then trim `VBAT_DIVIDER`.
 
 ## 9. Bring-up and test plan
-1. **Host tests:** `make test`. Every logic rule in §6 has a unit test.
+1. **Host tests:** `make test`. Every logic rule in §6, and the self-test sequence and interlocks
+   in §7.5, has a unit test.
 2. **Bench:**
    - Mega + drivers + relays, with 15 Ω power resistors and LEDs standing in for the solenoids.
    - Use a function generator or a second Arduino for VSS and tach.
-   - Check the truth table, the handover, every fault in §6.7, and that the watchdog drops the
-     relays. To test the watchdog, temporarily add `while(1);` behind a test switch. If it
-     boot-loops, reflash a bootloader that handles watchdog resets.
+   - Calibrate `IS_AMPS_PER_VOLT` with a 15 Ω load, then run IBIT (hold TEST). Every line
+     should PASS, including WATCHDOG. If the board boot-loops after the watchdog step, reflash a
+     bootloader that handles watchdog resets.
+   - Check the truth table, the handover and every fault in §6.7.
 3. **In the car, static:**
+   - Ignition on, engine off, lever in P: run IBIT. It checks the real solenoids, relays and the
+     whole console cable.
    - Engine off: verify that every relay drops on power loss.
    - Measure ECU outputs into the dummies.
    - Confirm that no DTCs are set after a drive in STOCK with the TCU connected (OBD-II scan

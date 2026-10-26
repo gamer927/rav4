@@ -15,6 +15,7 @@ enum FaultBits : uint16_t {
   FAULT_VSS = 1u << 1,
   FAULT_TPS = 1u << 2,
   FAULT_RATIO = 1u << 3,
+  FAULT_SOLENOID = 1u << 4,  // solenoid current doesn't match the command
 };
 
 // Warnings are shown on the display; CUSTOM control continues.
@@ -65,6 +66,10 @@ struct Inputs {
   float oilPsi = 0.0f;
   bool oilValid = false;
   float batteryV = 0.0f;
+  // Solenoid current from the high-side drivers' current-sense pins
+  // (index 0 = S1, 1 = S2, 2 = SL). Only meaningful when solSenseValid.
+  bool solSenseValid = false;
+  float solAmps[3] = {0.0f, 0.0f, 0.0f};
 };
 
 struct Outputs {
@@ -163,7 +168,7 @@ class Controller {
   bool upEdge_ = false, downEdge_ = false, upLong_ = false, upLongFired_ = false;
   uint32_t upSince_ = 0, downSince_ = 0;
 
-  Persist supplyBad_, tpsBad_, vssStall_, ratioBad_, oilLow_, overRev_;
+  Persist supplyBad_, tpsBad_, vssStall_, ratioBad_, oilLow_, overRev_, solBad_[3];
   float dropRefKmh_ = 0.0f;
   uint32_t dropRefMs_ = 0;
 };

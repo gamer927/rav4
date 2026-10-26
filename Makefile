@@ -1,14 +1,17 @@
 CXX ?= g++
 CXXFLAGS ?= -std=c++11 -Wall -Wextra -Werror -O1 -g
+LOGIC := firmware/tcu/tcu_logic.cpp firmware/tcu/self_test.cpp
+HEADERS := $(wildcard firmware/tcu/*.h)
 
 .PHONY: test avr clean
 
-test: build/test_tcu_logic
+test: build/test_tcu_logic build/test_self_test
 	./build/test_tcu_logic
+	./build/test_self_test
 
-build/test_tcu_logic: test/test_tcu_logic.cpp firmware/tcu/tcu_logic.cpp firmware/tcu/tcu_logic.h firmware/tcu/config.h
+build/%: test/%.cpp $(LOGIC) $(HEADERS)
 	@mkdir -p build
-	$(CXX) $(CXXFLAGS) -o $@ test/test_tcu_logic.cpp firmware/tcu/tcu_logic.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LOGIC)
 
 avr:
 	tools/avr_build.sh

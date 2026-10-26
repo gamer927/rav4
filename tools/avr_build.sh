@@ -27,9 +27,19 @@ for src in "$CORE"/cores/arduino/*.S; do
 done
 
 SK="$ROOT/firmware/tcu"
-avr-g++ "${FLAGS[@]}" "${CXXFLAGS[@]}" -x c++ -c "$SK/tcu.ino" -o "$OUT/tcu.o"
-avr-g++ "${FLAGS[@]}" "${CXXFLAGS[@]}" -c "$SK/tcu_logic.cpp" -o "$OUT/tcu_logic.o"
-avr-gcc "${FLAGS[@]}" -Wl,--gc-sections -o "$OUT/tcu.elf" "$OUT/tcu.o" "$OUT/tcu_logic.o" "${objs[@]}" -lm
+WIRE="$CORE/libraries/Wire/src"
+# Wire library (console OLED).
+avr-g++ "${FLAGS[@]}" "${CXXFLAGS[@]}" -I"$WIRE" -w -c "$WIRE/Wire.cpp" -o "$OUT/core/Wire.o"
+avr-gcc "${FLAGS[@]}" -I"$WIRE" -w -c "$WIRE/utility/twi.c" -o "$OUT/core/twi.o"
+objs+=("$OUT/core/Wire.o" "$OUT/core/twi.o")
+
+sk_objs=()
+for src in "$SK/tcu.ino" "$SK"/*.cpp; do
+  o="$OUT/$(basename "$src").o"
+  avr-g++ "${FLAGS[@]}" "${CXXFLAGS[@]}" -I"$WIRE" -x c++ -c "$src" -o "$o"
+  sk_objs+=("$o")
+done
+avr-gcc "${FLAGS[@]}" -Wl,--gc-sections -o "$OUT/tcu.elf" "${sk_objs[@]}" "${objs[@]}" -lm
 avr-objcopy -O ihex -R .eeprom "$OUT/tcu.elf" "$OUT/tcu.hex"
 avr-size -C --mcu=atmega2560 "$OUT/tcu.elf" 2>/dev/null || avr-size "$OUT/tcu.elf"
 echo "OK: $OUT/tcu.hex"

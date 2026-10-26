@@ -188,6 +188,16 @@ uint16_t Controller::evaluateFaults(const Inputs& in) {
     ratioBad = absf(in.engineRpm - expected) > expected * cfg::RATIO_TOLERANCE;
   }
   if (cfg::RATIO_CHECK_ENABLED && ratioBad_.update(ratioBad, now_, cfg::RATIO_FAULT_MS)) f |= FAULT_RATIO;
+
+  // Continuous solenoid circuit check: commanded on must draw current, commanded
+  // off must not. Catches a broken wire, a relay that didn't switch, or a
+  // shorted driver. out_ still holds last step's commands here.
+  const bool cmd[3] = {out_.s1, out_.s2, out_.sl};
+  for (uint8_t i = 0; i < 3; i++) {
+    const bool bad = in.solSenseValid && custom && out_.relayCustom &&
+                     (cmd[i] ? in.solAmps[i] < cfg::SOL_MIN_A : in.solAmps[i] > cfg::SOL_OFF_MAX_A);
+    if (solBad_[i].update(bad, now_, cfg::SOL_FAULT_MS)) f |= FAULT_SOLENOID;
+  }
   return f;
 }
 

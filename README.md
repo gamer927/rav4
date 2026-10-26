@@ -14,8 +14,10 @@ lockup maps, and a Nextion telemetry display. The factory ECU stays wired in as 
 ```
 firmware/tcu/tcu.ino        hardware layer: pins, ISRs, ADC, relays, watchdog, Nextion, CSV log
 firmware/tcu/tcu_logic.*    all control decisions (no Arduino deps, unit-tested on the host)
+firmware/tcu/self_test.*    built-in test: power-up, continuous and press-to-test (unit-tested)
+firmware/tcu/oled.*         non-blocking console OLED driver (SSD1306 / SH1106)
 firmware/tcu/config.h       calibration & tuning constants (VERIFY / CALIBRATE before use)
-test/test_tcu_logic.cpp     host unit tests
+test/                       host unit tests
 tools/avr_build.sh          compile-check for ATmega2560 without the Arduino IDE
 ```
 
@@ -36,7 +38,10 @@ To flash, open `firmware/tcu/tcu.ino` in the Arduino IDE (board: Arduino Mega 25
 2. Calibrate in **STOCK** mode first (spec §8). The over-rev guard is only as accurate as
    `RPM_PER_KMH` and `VSS_PULSES_PER_KM`, so CUSTOM stays locked out until you set
    `CALIBRATED = true` in `config.h`.
-3. Follow the bring-up plan in spec §9: bench, then static, then lift (all four wheels up),
+3. Hold the console TEST button for 2 s with the car parked and the engine off to run the
+   built-in self-test (spec §7.5). [`docs/oled-screens.png`](docs/oled-screens.png) shows what
+   each screen looks like.
+4. Follow the bring-up plan in spec §9: bench, then static, then lift (all four wheels up),
    then a closed lot, then the road.
 
 This modifies drivetrain control. Test off public roads, and check your local regulations and
