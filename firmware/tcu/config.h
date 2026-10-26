@@ -1,4 +1,4 @@
-// Calibration & tuning constants for the RAV4 A241 TCU.
+// Calibration & tuning constants for the 1999 Toyota RAV4 TCU.
 //
 // Everything marked VERIFY or CALIBRATE is a starting estimate, not a known
 // value for your vehicle. See docs/02-revised-spec.md §8 (calibration) before
@@ -8,13 +8,18 @@
 
 namespace cfg {
 
+// CUSTOM mode cannot be armed until this is true. Set it only after the
+// driveline and sensor calibration in docs/02-revised-spec.md §8 is done:
+// the over-rev guard is only as good as RPM_PER_KMH and VSS_PULSES_PER_KM.
+constexpr bool CALIBRATED = false;
+
 // ---------------------------------------------------------------- driveline
 // Engine RPM per km/h in each gear with the torque converter LOCKED.
-// Index 0 is unused. Defaults come from nominal A241 ratios
-// 3.643 / 2.008 / 1.296 / 0.892, final drive 4.176 and 215/70R16 tyres
-// (~450 rev/km). VERIFY the ratios + final drive for your transaxle code and
-// CALIBRATE from logged data (§8.3). The over-rev guard depends on these.
-constexpr float RPM_PER_KMH[5] = {0.0f, 114.1f, 62.9f, 40.6f, 27.9f};
+// Index 0 is unused. Defaults: 1999 RAV4 automatic ratios as published
+// (2.810 / 1.549 / 1.000 / 0.734, final drive ~4.40) on the factory
+// 215/70R16 tyres (~455 rev/km). Published final-drive figures for this car
+// disagree (3.18-4.40), so CALIBRATE from logged data (§8.3) before arming.
+constexpr float RPM_PER_KMH[5] = {0.0f, 93.8f, 51.7f, 33.4f, 24.5f};
 
 // ------------------------------------------------------------------ sensors
 constexpr float ADC_VREF = 5.0f;
@@ -82,7 +87,7 @@ constexpr uint32_t REV_LIMIT_HOLD_MS = 150;
 constexpr bool MANUAL_REV_LIMIT_UPSHIFT = true;
 // MANUAL: forced downshift below these speeds (index = current gear) so the
 // car never stops in 3rd/4th. Set [2] to 0 to allow 2nd-gear (snow) starts.
-constexpr float MANUAL_MIN_KMH[5] = {0.0f, 0.0f, 8.0f, 18.0f, 30.0f};
+constexpr float MANUAL_MIN_KMH[5] = {0.0f, 0.0f, 8.0f, 18.0f, 35.0f};
 constexpr float UPSHIFT_MARGIN_KMH = 4.0f;        // no upshift into a forced-downshift zone
 constexpr bool ENTER_IN_MANUAL = false;           // CUSTOM starts in AUTO map
 
@@ -138,23 +143,23 @@ constexpr float LU_TPS_OFF[3] = {55.0f, 65.0f, 45.0f};
 constexpr uint8_t TPS_POINTS = 5;
 constexpr float UPSHIFT_KMH[3][3][TPS_POINTS] = {
     {  // ECO: short-shift
-        {14.0f, 16.0f, 24.0f, 38.0f, 46.0f},
-        {26.0f, 30.0f, 45.0f, 66.0f, 86.0f},
-        {40.0f, 44.0f, 62.0f, 90.0f, 125.0f},
+        {17.0f, 19.0f, 29.0f, 46.0f, 55.0f},
+        {31.0f, 36.0f, 54.0f, 79.0f, 103.0f},
+        {48.0f, 53.0f, 74.0f, 108.0f, 150.0f},
     },
     {  // NORMAL
-        {15.0f, 20.0f, 32.0f, 44.0f, 48.0f},
-        {30.0f, 40.0f, 58.0f, 78.0f, 88.0f},
-        {45.0f, 55.0f, 78.0f, 105.0f, 130.0f},
+        {18.0f, 24.0f, 38.0f, 53.0f, 58.0f},
+        {36.0f, 48.0f, 70.0f, 94.0f, 106.0f},
+        {54.0f, 66.0f, 94.0f, 126.0f, 156.0f},
     },
     {  // SPORT: hold gears
-        {18.0f, 28.0f, 42.0f, 48.0f, 50.0f},
-        {35.0f, 50.0f, 70.0f, 85.0f, 92.0f},
-        {55.0f, 70.0f, 95.0f, 125.0f, 140.0f},
+        {22.0f, 34.0f, 50.0f, 58.0f, 60.0f},
+        {42.0f, 60.0f, 84.0f, 102.0f, 110.0f},
+        {66.0f, 84.0f, 114.0f, 150.0f, 168.0f},
     },
 };
 // Downshift = upshift(tps) - hysteresis. Small hysteresis = eager kickdown.
-constexpr float DOWNSHIFT_HYST_KMH[3] = {9.0f, 10.0f, 6.0f};
+constexpr float DOWNSHIFT_HYST_KMH[3] = {11.0f, 12.0f, 7.0f};
 constexpr float MIN_DOWNSHIFT_KMH = 3.0f;
 
 }  // namespace cfg

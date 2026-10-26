@@ -1,6 +1,6 @@
 /*
   Unified TCU & Telemetry Controller - hardware layer
-  Vehicle: 1999 Toyota RAV4, A241E/A241H 4-speed ECT, 3S-FE
+  Vehicle: 1999 Toyota RAV4 (SXA10/SXA11), 4-speed ECT automatic, 3S-FE
   Target:  Arduino Mega 2560 (5 V I/O, 16 ADC channels, 4 UARTs)
 
   This file only conditions inputs, drives outputs and talks to the display.
@@ -136,7 +136,8 @@ tcu::Inputs readInputs(uint32_t now) {
   in.down = dbDown.state();
   in.eco = dbEco.state();
   in.sport = dbSport.state();
-  in.customRequested = dbMaster.state();
+  // Until the car is calibrated the master switch is ignored (STOCK only).
+  in.customRequested = cfg::CALIBRATED && dbMaster.state();
   in.brake = dbBrake.state();
   in.leverInD = dbLeverD.state();
   in.ecuSenseValid = cfg::ECU_SENSE_INSTALLED;
@@ -278,7 +279,8 @@ void serviceTelemetry(uint32_t now) {
   v[F_WRN] = o.warnings;
   v[F_CTRL] = o.control;
   v[F_MODE] = o.mode;
-  v[F_MSG] = o.eventSeq;
+  const bool uncalibrated = !cfg::CALIBRATED && dbMaster.state();
+  v[F_MSG] = uncalibrated ? -1 : o.eventSeq;
   for (uint8_t i = 0; i < F_COUNT; i++) {
     if (refresh || v[i] != fieldValue[i]) {
       fieldValue[i] = v[i];
@@ -300,7 +302,10 @@ void serviceTelemetry(uint32_t now) {
       NEXTION.print(v[i]);
     } else {
       NEXTION.print(F(".txt=\""));
-      NEXTION.print(i == F_CTRL ? controlText(o.control) : i == F_MODE ? modeText(o.mode) : eventText(o.event));
+      NEXTION.print(i == F_CTRL   ? controlText(o.control)
+                    : i == F_MODE ? modeText(o.mode)
+                    : uncalibrated ? "NOT CALIBRATED"
+                                   : eventText(o.event));
       NEXTION.print('"');
     }
     nexEnd();

@@ -90,7 +90,7 @@ struct Sim {
 };
 
 static void test_solenoid_table() {
-  std::printf("solenoid truth table (A241E)\n");
+  std::printf("solenoid truth table (1999 RAV4)\n");
   bool s1, s2;
   solenoidsForGear(1, s1, s2); CHECK(s1 && !s2);
   solenoidsForGear(2, s1, s2); CHECK(s1 && s2);
@@ -214,22 +214,23 @@ static void test_downshift_overrev_guard() {
   s.cruise(100);
   s.tap(s.in.up); s.step(800);
   CHECK(s.c.outputs().gear == 4);
-  s.cruise(160);  // 3rd would be ~6500 rpm
+  // Just above the speed where 3rd would exceed the downshift rpm limit.
+  s.cruise(cfg::MAX_DOWNSHIFT_RPM / cfg::RPM_PER_KMH[3] + 5);
   s.tap(s.in.down);
   CHECK(s.c.outputs().gear == 4);
   CHECK(s.c.outputs().event == EV_DENY_OVERREV);
   s.step(800);
-  s.cruise(110);  // 3rd ~4470 rpm: fine
+  s.cruise(110);  // 3rd well under the limit
   s.tap(s.in.down);
   s.step(300);
   CHECK(s.c.outputs().gear == 3);
   s.step(800);
-  s.cruise(80);  // 2nd ~5030 rpm: fine
+  s.cruise(80);  // 2nd under the limit
   s.tap(s.in.down);
   s.step(300);
   CHECK(s.c.outputs().gear == 2);
   s.step(800);
-  s.cruise(80);  // 1st would be ~9100 rpm
+  s.cruise(80);  // 1st would be far over the limit
   s.tap(s.in.down);
   CHECK(s.c.outputs().gear == 2);
   CHECK(s.c.outputs().event == EV_DENY_OVERREV);
@@ -318,7 +319,7 @@ static void test_auto_schedule() {
   }
   s.step(3000);
   CHECK(s.c.outputs().gear == 4);
-  s.in.tpsPct = 100;  // kickdown at 100 km/h -> 3rd (2nd would be > 5800 rpm)
+  s.in.tpsPct = 100;  // kickdown at 100 km/h -> 3rd, but not on to 2nd
   s.step(3000);
   CHECK(s.c.outputs().gear == 3);
 }

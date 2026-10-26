@@ -11,9 +11,10 @@ Severity:
 - **MEDIUM**: works badly or is fragile.
 - **LOW**: cosmetic or a portability issue.
 
-Items marked *verify* are things I'm confident of from Toyota A140E/A241E documentation. You
-still need to confirm them against the factory repair manual (RM) and electrical wiring diagram
-(EWD) for your exact VIN and transaxle code before wiring anything.
+Toyota service text for the 1999 RAV4 confirms the two most important corrections: the
+solenoid logic (C1) and the +12 V high-side drive (C2). Items still marked *verify* must be
+confirmed against the factory repair manual (RM) and electrical wiring diagram (EWD) for your
+VIN before wiring anything. See `02-revised-spec.md` §0 for what is and isn't confirmed.
 
 ---
 
@@ -21,7 +22,7 @@ still need to confirm them against the factory repair manual (RM) and electrical
 
 | # | Severity | Finding |
 |---|---|---|
-| C1 | CRITICAL | Solenoid truth table is wrong for the A241E: every gear maps to a different real gear |
+| C1 | CRITICAL | Solenoid truth table is wrong for the 1999 RAV4: every gear maps to a different real gear |
 | C2 | CRITICAL | Low-side N-MOSFET drivers can't switch Toyota's case-grounded, high-side-driven solenoids; no flyback protection |
 | C3 | CRITICAL | Lockup has no speed or brake condition, so the engine stalls when you stop in 3rd/4th |
 | C4 | CRITICAL | SL latches HIGH when you change modes, and is never released for shifts or low gears |
@@ -51,8 +52,9 @@ still need to confirm them against the factory repair manual (RM) and electrical
 ## CRITICAL
 
 ### C1. Solenoid truth table is wrong
-The spec's table is 1st = S1+S2, 2nd = S1, 3rd = none, 4th = S2. The A241E (an A140E derivative)
-uses (*verify*):
+The spec's table is 1st = S1+S2, 2nd = S1, 3rd = none, 4th = S2. Toyota's service text for the
+1999 RAV4 has S1 on in 1st and 2nd, with S2 joining it in 2nd, which matches the standard
+Toyota 4-speed table:
 
 | Gear (D range) | S1 | S2 |
 |---|---|---|
@@ -75,9 +77,9 @@ locked-converter ratio check trips if the gear actually engaged doesn't match th
 (for example, S1 and S2 swapped in the harness).
 
 ### C2. The driver topology can't work on this transaxle
-Toyota ECT shift and lockup solenoids are **single-wire** parts, grounded through the
-transaxle case, and the ECU switches **+B** to them (*verify* on the EWD: you should see
-battery voltage on S1/S2/SL relative to ground when they're energised). An IRLZ44N used as a
+On the 1999 RAV4, current flows from the ECM's S1/S2/SL terminals through each solenoid to
+ground (Toyota service text). In other words, the solenoids are **single-wire** parts grounded
+through the transaxle case, and the ECM switches **+12 V** to them. An IRLZ44N used as a
 low-side switch has no return path to interrupt. Wired anyway, it either does nothing or ends
 up shorting the ECU's high-side output. The spec also leaves out flyback protection: each
 solenoid (11–15 Ω, roughly 1 A) dumps its stored energy into the switch at turn-off. And with a
@@ -119,8 +121,8 @@ reset, fault) = factory ECU in control, enforced by hardware pull-downs.
 ### C6. No over-rev protection, and no VSS
 Directive 1 asks for a 1st-gear guard "using VSS interrupt data", but VSS isn't in the I/O
 matrix and the code has no guard at all. The directive is also too narrow. With nominal
-ratios, a 4→3 downshift at 160 km/h puts the engine around 6,500 rpm, and a 3→2 downshift
-above about 92 km/h already exceeds 5,800 rpm. In D, 1st and 2nd drive through one-way clutches, so a high-speed downshift
+1999 RAV4 ratios, a 3→2 downshift at 130 km/h puts the engine around 6,700 rpm, and a
+2→1 downshift at 90 km/h about 8,400 rpm. In D, 1st and 2nd drive through one-way clutches, so a high-speed downshift
 into them won't always over-rev on a closed throttle. It does the moment you open the
 throttle, though, and in the 2/L ranges the engine-braking bands apply.
 
@@ -165,7 +167,7 @@ interrupts. Using an RP2040 later would mean level shifting plus an external ADC
 
 ### H3. Cooldown is not debounce
 The 250 ms cooldown re-fires while the button is held: holding [+] for 0.75 s shifts 1→2→3→4.
-250 ms is also shorter than an A241 shift takes to complete hydraulically (about 0.5–1 s), so
+250 ms is also shorter than a shift on this transaxle takes to complete hydraulically (about 0.5–1 s), so
 commands can overlap. The inputs use only the AVR's internal 20–50 kΩ pull-ups on a cable run
 of a few metres up the A-pillar, alongside ignition and blower-motor noise.
 
@@ -178,8 +180,8 @@ of a few metres up the A-pillar, alongside ignition and blower-motor noise.
 - A stuck-button warning.
 
 ### H4. No gear sync at handover
-`currentGear = 1` at boot. Flip to CUSTOM at 100 km/h and the TCU immediately commands "1st".
-With C1, that's actually 2nd, at about 6,300 rpm.
+`currentGear = 1` at boot. Flip to CUSTOM at 120 km/h and the TCU immediately commands "1st".
+With C1, that's actually 2nd, at about 6,200 rpm.
 
 **Fix:** the TCU senses the ECU's own S1/S2/SL outputs on the ECU side of the relays. CUSTOM
 starts in the gear and lockup state the ECU is holding (a bumpless handover). Without sensing,

@@ -1,4 +1,4 @@
-// Pure control logic for the RAV4 A241 TCU. No Arduino dependencies, so it
+// Pure control logic for the 1999 RAV4 TCU. No Arduino dependencies, so it
 // builds for AVR and for the host unit tests (test/test_tcu_logic.cpp).
 #pragma once
 #include <stdint.h>
@@ -81,7 +81,7 @@ struct Outputs {
   uint8_t eventSeq = 0;      // increments whenever an event is (re)raised
 };
 
-// A241E/A241H shift-solenoid truth table (D range).
+// 1999 RAV4 (Toyota 4-speed ECT) shift-solenoid truth table, D range.
 void solenoidsForGear(uint8_t gear, bool& s1, bool& s2);
 uint8_t gearFromSolenoids(bool s1, bool s2);
 float upshiftKmh(DriveMode mode, uint8_t fromGear, float tpsPct);

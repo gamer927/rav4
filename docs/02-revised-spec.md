@@ -1,6 +1,7 @@
 # Engineering Specification rev 1: Unified TCU & Telemetry Dashboard
 
-**Vehicle:** 1999 Toyota RAV4, A241E/A241H 4-speed ECT transaxle, 3S-FE engine
+**Vehicle:** 1999 Toyota RAV4 (first generation, SXA10 2WD / SXA11 4WD), 4-speed ECT automatic,
+3S-FE 2.0 L engine
 **Controller:** Arduino Mega 2560 (`firmware/tcu/`)
 **Supersedes:** rev 0. The defects found in rev 0 are listed in [`01-audit.md`](01-audit.md).
 
@@ -8,6 +9,31 @@
 > be confirmed against the factory repair manual (RM) and electrical wiring diagram (EWD) for
 > your VIN. Calibrate everything marked **CALIBRATE** (§8) before you first select CUSTOM.
 > Do all early testing off public roads (§9).
+
+## 0. The 1999 RAV4: what's confirmed and what isn't
+
+These are the facts the design depends on, with how sure each one is.
+
+| Item | 1999 RAV4 value | Status |
+|---|---|---|
+| Engine | 3S-FE 2.0 L, 127 hp @ 5,400 rpm, 132 lb-ft @ 4,600 rpm | Published specs |
+| Tyres | 215/70R16 (~455 rev/km) | Published specs and VIN decodes |
+| Solenoid drive | ECM output S1/S2/SL → solenoid → transaxle case → ground (ECM switches +12 V) | Toyota service text for this car |
+| Shift logic | S1 on in 1st and 2nd; S2 joins in 2nd; SL = lockup | Toyota service text for this car; full table in §5 |
+| Solenoid connector | S1 / S2 / SL = terminals A3 / A1 / A2 (2WD), B3 / B6 / B5 (4WD) | Toyota service text; **VERIFY** on your harness |
+| ECM inputs it shifts from | SPD (speed) and THW (coolant temperature), plus throttle | Toyota service text |
+| Gear ratios | 2.810 / 1.549 / 1.000 / 0.734, reverse 2.296 (3rd is direct 1:1) | Two spec databases agree; **VERIFY** |
+| Final drive | ~4.40 | Sources disagree (3.18–4.40); **CALIBRATE** |
+| Transaxle code | 4WD sources say A540H or A241H; 2WD differs | **Read the ID plate** |
+| Diagnostics | OBD-II (DLC3 under the dash) | 1996+ |
+
+What this means:
+- **The solenoid table and the +12 V high-side drive are confirmed for this car.** Those were the
+  two most dangerous errors in rev 0, and they're fixed.
+- **The ratios and final drive aren't confirmed.** The firmware therefore ships with
+  `CALIBRATED = false`, and CUSTOM can't be armed until you've measured them (§8). Toyota's
+  4-speed families (A140/A240/A540) all use the same S1/S2 table, so the transaxle-code
+  question doesn't change the wiring or the logic, only the ratios.
 
 ---
 
@@ -52,7 +78,7 @@ Rules that never change:
  │        │                           └──────────────┬───────────────────────┘             │
  └────────┼──────────────────────────────────────────┼─────────────────────────────────────┘
           │                                          v
-   Sensors: TPS tap, VSS, tach (TAC),        A241 solenoids S1, S2, SL
+   Sensors: TPS tap, VSS, tach (TAC),        Transaxle solenoids S1, S2, SL
    brake (STP), PNP "D", oil, ATF, battery    (single-wire, case-grounded)
 ```
 
@@ -78,9 +104,10 @@ on-board linear regulator overheats and has no transient protection.
   (E1), because the TPS is measured against the ECU's sensor ground.
 
 ### 3.3 Solenoid drivers (replaces the IRLZ44N low-side board)
-VERIFY first: Toyota A241 solenoids are single-terminal and case-grounded, and the ECU
-**switches +B to them**. With the ignition on and the ECU commanding a solenoid, you should
-measure about 12 V between the ECU's S1 terminal and ground.
+On the 1999 RAV4 the ECM **switches +12 V** to each solenoid, and current returns through the
+transaxle case to ground (Toyota service text, §0). Confirm on your car: with the ignition on
+and the ECM commanding a solenoid, you should measure about 12 V between the ECM's S1 terminal
+and ground.
 
 - Use 3 × **high-side smart switches** (PROFET class, for example Infineon BTS6143D or
   BTS50085), each rated 3 A continuous or more. They have a built-in inductive clamp, short and
@@ -177,7 +204,7 @@ The shift buttons moved off D2/D3 because VSS and tach need interrupt pins. Seri
 Nextion) already occupies interrupt pins 18/19, so D2/D3 are the natural choice. The buttons
 don't need interrupts; they're polled and debounced.
 
-## 5. Solenoid logic (A241E/A241H, D range). VERIFY in the RM
+## 5. Solenoid logic (1999 RAV4, D range)
 
 | Gear | S1 | S2 | SL (lockup) |
 |---|---|---|---|
@@ -191,7 +218,7 @@ don't need interrupts; they're polled and debounced.
 - Line pressure stays mechanical, controlled by the throttle cable, so the TCU doesn't touch it.
 - VERIFY that SL is an on/off solenoid on your unit. If your ECU drives it with a duty cycle,
   the sense opto will flicker, and the lockup output needs rethinking.
-- A241H (AWD): leave any transfer or centre-diff circuits on the factory ECU.
+- 4WD (SXA11): leave any transfer or centre-diff circuits on the factory ECU.
 
 ## 6. Control logic (`firmware/tcu/tcu_logic.cpp`)
 
@@ -217,25 +244,25 @@ If the request is accepted with lockup applied, SL releases first and the gear c
 ### 6.3 CUSTOM-AUTO
 - **Upshift** when `speed ≥ UPSHIFT_KMH[mode][gear](tps)`. The tables are interpolated at
   0/25/50/75/100 % throttle.
-- **Downshift** when `speed < upshift(tps) − hysteresis[mode]` (ECO 9, NORMAL 10, SPORT 6 km/h).
+- **Downshift** when `speed < upshift(tps) − hysteresis[mode]` (ECO 11, NORMAL 12, SPORT 7 km/h).
   Opening the throttle raises the downshift line, which gives kickdown; the over-rev guard
   refuses any kickdown that would over-rev.
 - At least **1.2 s** in gear between automatic shifts.
 
 | Upshift km/h at 0 / 25 / 50 / 75 / 100 % TPS | 1→2 | 2→3 | 3→4 |
 |---|---|---|---|
-| ECO (short-shift) | 14/16/24/38/46 | 26/30/45/66/86 | 40/44/62/90/125 |
-| NORMAL | 15/20/32/44/48 | 30/40/58/78/88 | 45/55/78/105/130 |
-| SPORT (hold) | 18/28/42/48/50 | 35/50/70/85/92 | 55/70/95/125/140 |
+| ECO (short-shift) | 17/19/29/46/55 | 31/36/54/79/103 | 48/53/74/108/150 |
+| NORMAL | 18/24/38/53/58 | 36/48/70/94/106 | 54/66/94/126/156 |
+| SPORT (hold) | 22/34/50/58/60 | 42/60/84/102/110 | 66/84/114/150/168 |
 
-The WOT points sit at about 5.0–5.8 k rpm with the default ratios. These are starting maps:
-tune them after calibration.
+With the 1999 RAV4 default ratios, the WOT points sit at about 5.0–5.7 k rpm (peak power is at
+5,400). These are starting maps: re-check them against your calibrated `RPM_PER_KMH`.
 
 ### 6.4 CUSTOM-MANUAL
 - A tap on [+] or [-] gives one shift. Holding a button never repeats. Any tap while in AUTO
   switches to MANUAL.
 - Hold [+] for **1 s** to return to AUTO.
-- **Forced downshift** when slowing below 30 km/h (4th), 18 km/h (3rd) or 8 km/h (2nd), so the
+- **Forced downshift** when slowing below 35 km/h (4th), 18 km/h (3rd) or 8 km/h (2nd), so the
   car never stops in a high gear. To allow 2nd-gear snow starts, set `MANUAL_MIN_KMH[2] = 0`.
 - **Forced upshift** at 6,200 rpm held for 150 ms (configurable).
 - Refused requests show on the display: `DENIED: OVER-REV`, `DENIED: TOO SLOW` or
@@ -325,11 +352,16 @@ Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, oil
    matches.
 3. **RPM_PER_KMH:**
    - Cruise at a steady speed in 3rd and in 4th with `lockup = 1` and average `rpm_per_kmh`.
-   - Derive 1st and 2nd from the ratios: K1 = K3 × 3.643/1.296, K2 = K3 × 2.008/1.296
-     (VERIFY the ratios).
+     Because 3rd is direct (1.000), K3 is the final drive × tyre factor on its own, so it's the
+     cleanest number to measure.
+   - Check 4th: K4 / K3 should be about 0.734. If it isn't, your ratios differ from the
+     published set; find out why before going further.
+   - Derive 1st and 2nd: K1 = K3 × 2.810, K2 = K3 × 1.549.
    - Values measured in 1st/2nd with the converter unlocked read slightly high because of slip.
      That's conservative (safe) for the over-rev guard.
    - **The over-rev guard is only as good as these numbers.**
+   - When every step is done, set `CALIBRATED = true` in `config.h` and reflash. Until then the
+     master switch is ignored and the display shows `NOT CALIBRATED`.
 4. **ATF thermistor:** check the reading at ambient and at hot operating temperature against an
    IR thermometer on the cooler line, then adjust `ATF_R25_OHMS` and `ATF_BETA`.
 5. **Battery:** compare with a multimeter, then trim `VBAT_DIVIDER`.
@@ -347,8 +379,8 @@ Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, oil
    - Measure ECU outputs into the dummies.
    - Confirm that no DTCs are set after a drive in STOCK with the TCU connected (OBD-II scan
      tool).
-4. **Lift:** all four wheels off the ground. This is mandatory for A241H AWD; never test on
-   two stands. Run through gears 1–4 in CUSTOM-MANUAL and check `FAULT_RATIO` stays clear with
+4. **Lift:** all four wheels off the ground. This is mandatory for the 4WD (full-time AWD) car;
+   never test on two stands. Run through gears 1–4 in CUSTOM-MANUAL and check `FAULT_RATIO` stays clear with
    lockup applied.
 5. **Closed lot, low speed:** handover at a standstill, 1↔2↔3 manual shifts, forced downshifts
    to a stop, brake releasing lockup.
@@ -359,12 +391,13 @@ Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, oil
 
 | Item | Default assumed | Where |
 |---|---|---|
-| Transaxle code (ID plate) | A241E/A241H | RM |
-| S1/S2/SL truth table | §5 | RM, ECT section |
-| Solenoid drive polarity | ECU high-side (+B), case-grounded | EWD; measure |
+| Transaxle code (ID plate) | 4WD: A540H or A241H (sources differ) | ID plate on the transaxle |
+| S1/S2/SL truth table | §5 (consistent with Toyota service text) | RM, ECT section |
+| Solenoid drive polarity | ECM high-side (+12 V), case-grounded (confirmed in service text) | Measure |
+| Solenoid connector pins | A3/A1/A2 (2WD), B3/B6/B5 (4WD) | EWD; your harness |
 | Solenoid resistance | 11–15 Ω | RM; measure |
 | SL on/off vs duty-cycle | on/off | RM; scope the ECU output |
-| Gear ratios and final drive | 3.643/2.008/1.296/0.892, FD 4.176 | RM; then calibrate (§8) |
+| Gear ratios and final drive | 2.810/1.549/1.000/0.734, FD ~4.40 | RM; then calibrate (§8) |
 | VSS pulses/km | 2548 | Calibrate (§8) |
 | Tach source | ECU/DLC TAC, 2 pulses/rev | EWD |
 | PNP "D" signal | +12 V in D | EWD |
