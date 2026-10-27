@@ -58,16 +58,17 @@ struct Bench {
   void runAll() {
     if (!t.active()) CHECK(t.start(in));
     while (t.active() && t.phase() != PH_PROMPT) step(10);
-    for (int p = 0; p < 5 && t.phase() == PH_PROMPT; p++) {
+    for (int p = 0; p < 6 && t.phase() == PH_PROMPT; p++) {
       const TestPrompt pr = t.prompt();
       in.up = pr == PR_UP;
       in.down = pr == PR_DOWN;
       in.eco = pr == PR_ECO;
       in.sport = pr == PR_SPORT;
+      in.manual = pr == PR_MANUAL;
       in.brake = pr == PR_BRAKE;
       step(20);
     }
-    in.up = in.down = in.eco = in.sport = in.brake = false;
+    in.up = in.down = in.eco = in.sport = in.manual = in.brake = false;
   }
 };
 
@@ -197,6 +198,22 @@ static void test_prompts_timeout_and_skip() {
   b.in.eco = b.in.sport = true;
   b.step(100);
   CHECK(b.t.result(T_SW_ECO) == TR_NONE);  // ECO+SPORT both on doesn't pass "ECO on"
+  b.in.sport = false;
+  b.step(20);
+  CHECK(b.t.result(T_SW_ECO) == TR_PASS);
+  CHECK(b.t.prompt() == PR_SPORT);
+  b.in.eco = false;
+  b.in.sport = b.in.manual = true;  // SPORT and MANUAL on the same core
+  b.step(100);
+  CHECK(b.t.result(T_SW_SPORT) == TR_NONE);
+  b.in.manual = false;
+  b.step(20);
+  CHECK(b.t.prompt() == PR_MANUAL);
+  b.in.sport = false;
+  b.in.manual = true;
+  b.step(20);
+  CHECK(b.t.result(T_SW_MANUAL) == TR_PASS);
+  CHECK(b.t.prompt() == PR_BRAKE);
 }
 
 static void test_abort() {

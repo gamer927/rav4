@@ -21,7 +21,7 @@ ruler and solder a wire, you can do this.
 | [5](#part-5--logic-board) | Logic board | 1 evening |
 | [6](#part-6--hub-on-the-mega) | Hub on the Mega | 1 evening |
 | [7](#part-7--screen) | Screen | 1 h |
-| [8](#part-8--console-pod-and-shifter) | Console pod and shifter | 1 evening |
+| [8](#part-8--dash-pod-and-shifter-base) | Dash pod and shifter base | 1 evening |
 | [9](#part-9--dummy-loads) | Dummy loads on the heatsink | 30 min |
 | [10](#part-10--test-everything-on-the-bench) | Test everything on the bench | 1 evening |
 | [11](#part-11--close-the-box) | Close the box, make the cable ends | 1 evening |
@@ -73,8 +73,14 @@ measure, a pen, your phone.
 - [ ] **Room for the box.** Take out the glovebox. You need a flat metal spot for a box
   **216 × 178 × 51 mm** (244 mm wide with its ears), and somewhere nearby for the heatsink
   (100 × 100 × 25 mm) where air moves.
-- [ ] **Room for the pod.** On the centre console you need **176 × 130 mm**, 70 mm tall, plus the
-  shifter on top. Check it won't hit the gear lever, handbrake or your knee.
+- [ ] **A spot for the dash pod** (210 × 64 × 64 mm, on a small tilting mount). Either the **dash
+  top on the driver's side**, or the **ceiling** above the windscreen. Sit in the driver's seat:
+  you must see it without it blocking the road or the gauges. **Never over the passenger airbag**
+  (the right-hand half of the dash top). For the ceiling, find a sun-visor screw point or the
+  metal roof bow to screw into: the headliner alone won't hold it.
+- [ ] **Room for the shifter base** (150 × 100 mm, plus the lever on top) on the centre console
+  next to the gear lever. Move a hand through the full lever travel: it mustn't hit the gear
+  lever, handbrake, cup holder or your knee.
 - [ ] **The ECM wires.** Find the engine computer (RM: "location of components"). For each wire
   below, do the meter test in [wiring guide §5](03-wiring-guide.md) and fill in the table.
   **Don't cut anything.** Take photos.
@@ -116,15 +122,18 @@ Prints take a long time, so start them first. They print while you solder parts 
 **PETG or ASA, never PLA** (PLA goes soft in a hot car). Settings: 0.2 mm layers, 4 walls,
 30–40 % infill, no supports. More detail: [hardware/README.md](../hardware/README.md).
 
-- [ ] **First, the panel test** (`hardware/stl/console_pod_panel_test.stl`, about 1 hour): a flat
-  copy of the pod's front panel. When your switches and screen arrive, push each one into its
-  hole to check it fits. If a hole is too tight, change its size in `hardware/console_pod.scad`
+- [ ] **First, the panel test** (`hardware/stl/dash_pod_panel_test.stl`, about 1 hour): a flat
+  copy of the dash pod's front. When your switches and screen arrive, push each one into its
+  hole to check it fits. If a hole is too tight, change its size in `hardware/dash_pod.scad`
   before printing the real pod.
 - [ ] TCU box: `tcu_enclosure_box.stl` (about 12 h). On a 220 mm printer:
   `tcu_enclosure_box_no_ears.stl`.
 - [ ] TCU lid: `tcu_enclosure_lid.stl` (about 4 h).
-- [ ] Pod: `console_pod_shell.stl` (about 10 h, prints upside down).
-- [ ] Pod bottom plate: `console_pod_bottom.stl` (about 2 h).
+- [ ] Dash pod: `dash_pod_shell.stl` (about 7 h, prints front face down).
+- [ ] Dash pod back cover: `dash_pod_back.stl` (about 2 h) and mount: `dash_pod_mount.stl`
+  (about 1 h).
+- [ ] Shifter base: `shifter_base_box.stl` (about 5 h, prints upside down) and its bottom plate:
+  `shifter_base_bottom.stl` (about 2 h).
 - [ ] Shifter parts from Thingiverse [4557771](https://www.thingiverse.com/thing:4557771), in PETG
   (about 15–20 h).
 
@@ -275,8 +284,12 @@ For its checks, feed it 5 V from the power board: two jumper wires, **JA pin 1 �
 
 {{STEP L2}}
 
-✅ **CHECK** (5 V on): each terminal **X4a to X4f** reads **5 V**. Touch it to X4g (ground):
-JB pin 3, 4, 5, 6, 7 or 8 drops to **0 V**.
+✅ **CHECK** (5 V on): terminals **X7a, X7b and X4a to X4e** each read **5 V**. Touch each one to
+a ground terminal (X7c or X4g) and check its JB pin drops to **0 V**:
+
+| Terminal | X7a UP | X7b DOWN | X4a ECO | X4b SPORT | X4c MANUAL | X4d TEST | X4e ON/OFF |
+|---|---|---|---|---|---|---|---|
+| JB pin | 3 | 4 | 5 | 6 | 15 | 8 | 7 |
 
 ### Step L3 — Status light and ATF probe
 
@@ -330,52 +343,85 @@ Don't stick it into the pod yet: it's tested in part 10 first.
 
 ---
 
-## Part 8 — Console pod and shifter
+## Part 8 — Dash pod and shifter base
 
-**8.1 Inserts.** Heat-set the 4 brass inserts into the corner posts (iron at 230–250 °C, push in
-straight, stop when flush).
+Two separate pieces, each with its own cable to the TCU box: the **dash pod** (screen and every
+switch) and the **shifter base** (the lever). Neither needs the box yet.
 
-![Pod step 1](build/pod-1.png)
+**About the toggles.** A 3-pin toggle has a middle pin and two outer pins. With the meter on
+beep and the lever **up**, find the outer pin that beeps to the middle one. Use those two pins:
+**lever up = on**. For the ON/OFF switch, closing its red cover pushes the lever down (off).
 
-**8.2 Switches.** Fit ON/OFF (flip cover hinge at the top), ECO, SPORT, TEST and the LED bezel.
-Tighten the nuts from inside.
+### The dash pod
 
-![Pod step 2](build/pod-2.png)
+**8.1 Inserts.** Heat-set the 4 brass inserts into the ends of the corner posts, at the open back
+(iron at 230–250 °C, push in straight, stop when flush).
 
-**8.3 Screen.** Drop the screen into the pocket behind the window, face first. Stick it with
-double-sided foam tape on the black glass border. It only goes in one way.
+![Dash pod step 1](build/pod-1.png)
 
-![Pod step 3](build/pod-3.png)
+**8.2 Screen, switches, LED.** Left to right on the front: the **screen** drops into the pocket
+behind its window, face first, stuck with double-sided foam tape on its black glass border (it
+only goes in one way). Then the **LED** bezel (**TCU**), **ECO**, **SPORT**, **MANUAL** (the three
+small toggles), **TEST** (push button) and **ON/OFF** (big toggle, red cover hinge at the top).
+Tighten the nuts from inside. The names are engraved under each hole.
 
-**8.4 Cables.** Fit the 2 glands in the back. Push the **8-core console cable** through one and
-the **screen cable** through the other. Join the console cable's cores with lever connectors:
+![Dash pod step 2](build/pod-2.png)
 
-![Pod step 4](build/pod-4.png)
+**8.3 Cables.** Fit the 2 glands in the back cover: **SWITCHES** and **SCREEN**. Push the **8-core
+cable** through SWITCHES and the screen's **4-core cable** (from part 7) through SCREEN. Cut the
+8-core's eighth core short and tape it. Join each core with a lever connector:
+
+![Dash pod step 3](build/pod-3.png)
 
 | Core | Goes to |
 |---|---|
-| C1 | upshift switch NO (or the [+] button) |
-| C2 | downshift switch NO (or the [−] button) |
-| C3 | ECO switch |
-| C4 | SPORT switch |
+| C1 | ECO switch |
+| C2 | SPORT switch |
+| C3 | MANUAL switch |
+| C4 | TEST button |
 | C5 | ON/OFF switch |
-| C6 | TEST button |
-| C7 (ground) | the other side of **every** switch and button, both shifter switches' COM, and the LED's short leg |
-| C8 | the LED's long leg |
+| C6 | the LED's long leg |
+| C7 (ground) | the other pin of **every** switch and the button, and the LED's short leg. Easiest: one black wire soldered from switch to switch, ECO → SPORT → MANUAL → TEST → ON/OFF → LED, with C7 joined to its end |
 
-**8.5 Shifter.** Build the Beavis lever from its guide, in PETG. Use only its two **V-155-1C25**
-switches (no Arduino). Run their wires down the slot in the deck to the lever connectors. Drop
-4 M6 nuts into the slots under the deck. Cut the M6 bolts to **shifter base thickness + 6 mm**
-and bolt it down.
+**8.4 Back cover.** Screw the back cover on (4 × M3 × 10 countersunk). The two hinge lugs stick
+out of the back.
 
-![Pod step 5](build/pod-5.png)
+![Dash pod step 4](build/pod-4.png)
 
-**8.6 Bottom plate:** later, in the car (part 12.4).
+**8.5 Mount:** later, in the car (part 12.4).
 
-![Pod step 6](build/pod-6.png)
+![Dash pod step 5](build/pod-5.png)
 
-✅ **CHECK** (meter on beep, at the cable's far end): C3 ↔ C7 beeps only with ECO on; C4 with
-SPORT; C5 with ON/OFF; C6 with TEST pressed; C1 and C2 with the lever pulled and pushed.
+✅ **CHECK** (meter on beep, at the 8-core's far end): C1 ↔ C7 beeps only with ECO on; C2 with
+SPORT; C3 with MANUAL; C4 with TEST pressed; C5 with ON/OFF on. With the meter on **diode**
+(red probe on C6, black on C7), the LED glows faintly.
+
+### The shifter base
+
+**8.6 Inserts.** Heat-set 4 brass inserts into the base's corner posts, from underneath.
+
+**8.7 Lever.** Build the Beavis lever from its guide, in PETG. Use only its two **V-155-1C25**
+switches (no Arduino). Drop 4 M6 nuts into the hex slots under the deck. Cut the M6 bolts to
+**shifter base thickness + 6 mm** and bolt the lever down. Feed its switch wires down the
+rectangular hole.
+
+**8.8 Cable.** Fit a PG7 gland in the back wall (**TO TCU**) and push the **3-core cable** through.
+Join with 3 lever connectors:
+
+| Core | Goes to |
+|---|---|
+| UP | the upshift switch's **NO** pin |
+| DOWN | the downshift switch's **NO** pin |
+| GND | **both** switches' **COM** pins |
+
+Leave each switch's NC pin empty. Write down which colour is UP, DOWN and GND.
+
+![The shifter base with the lever](build/shifter.png)
+
+**8.9 Bottom plate:** later, in the car (part 12.4).
+
+✅ **CHECK** (meter on beep, at the 3-core's far end): UP ↔ GND beeps only with the lever pulled
+for an upshift, DOWN ↔ GND only with it pushed for a downshift.
 
 ---
 
@@ -395,8 +441,8 @@ Everything is connected on the table, outside the box.
 
 - [ ] Plug the hub onto the Mega. Plug **ribbon A** (power board ↔ socket A) and **ribbon B**
   (logic board ↔ socket B). The red stripe is pin 1.
-- [ ] Console cable C1–C8 → **X4a–X4h**. Screen cable → **X5** (5V, GND, SDA, SCL). ATF probe →
-  **X6** (red 5V, black GND, yellow DQ).
+- [ ] Shifter cable → **X7a/X7b/X7c** (UP, DOWN, GND). Dash cable C1–C7 → **X4a–X4g**. Screen
+  cable → **X5** (5V, GND, SDA, SCL). ATF probe → **X6** (red 5V, black GND, yellow DQ).
 - [ ] Dummy loads: LOAD 1/2/3/GND → **J4a/J4b/J4c/J4d**. For this test only, add three jumpers
   **J2d → J4a, J2e → J4b, J2f → J4c** (the resistors stand in for the solenoids).
 - [ ] **Load the software:** install the Arduino IDE, open `firmware/tcu/tcu.ino`, choose
@@ -410,8 +456,9 @@ Everything is connected on the table, outside the box.
 - [ ] With ON/OFF **off**, hold TEST for 2 seconds: the self-test runs. When it tests the
   solenoids, each should read about **0.8 A** (12 V ÷ 15 Ω). If they're more than 10 % out,
   change `IS_AMPS_PER_VOLT` in `firmware/tcu/config.h`, upload again, retest.
-- [ ] Follow the prompts on the screen: flip ECO, flip SPORT, pull and push the lever, press
-  the brake (touch 12 V to J3b).
+- [ ] Follow the prompts on the screen: **SHIFTER UP** (pull the lever), **SHIFTER DOWN** (push
+  it), **ONLY ECO ON**, **ONLY SPORT ON**, **ONLY MANUAL ON** (each time with the other two off),
+  then press the brake (touch 12 V to J3b).
 - [ ] The result says **PASS** (CHK on the lamps is normal: it's asking you to confirm the lights
   flashed).
 
@@ -425,8 +472,9 @@ Everything is connected on the table, outside the box.
 
 ![Box step 2](build/box-2.png)
 
-- [ ] **11.2** Fit the 7 glands: the small ones (PG7) in **CON, OLED, ATF**, the big ones (PG9)
-  in **SIG, PWR, SOL, LOAD**.
+- [ ] **11.2** Fit the 8 glands (the round holes in the front wall, each with its name above it):
+  the small ones (PG7) in **SHIFT, DASH, SCREEN, ATF**, the big ones (PG9) in **SIG, PWR, SOL,
+  LOAD**. The box has no switches: they're all on the dash pod.
 
 ![Box step 3](build/box-3.png)
 
@@ -437,8 +485,9 @@ Everything is connected on the table, outside the box.
 
 | Gland | Cable | Inside, to | Plug outside |
 |---|---|---|---|
-| CON | 8-core from the pod | X4a–X4h | (straight to the pod) |
-| OLED | 4-core from the pod | X5a–X5d | (straight to the pod) |
+| SHIFT | 3-core from the shifter base | X7a–X7c | (straight to the shifter base) |
+| DASH | 8-core from the dash pod | X4a–X4g | (straight to the dash pod) |
+| SCREEN | 4-core from the dash pod | X5a–X5d | (straight to the dash pod) |
 | ATF | 3-core | X6a–X6c | X6, 3-way |
 | SIG | 7 thin wires: D, STP, E1, SPD, TAC, VTA, E2 | J3a–J3g | X3, 8-way |
 | PWR | red, red, black (16 AWG) | J1a, J1b, J1c | X1, 3-way |
@@ -482,11 +531,21 @@ over until the very last job, and only when its ON/OFF switch is on.
 ✅ **CHECK** (SENSORS page): throttle goes 0 % → about 100 % as you press the pedal; rpm about
 700–800 at idle; brake shows when pressed; D shows only in D.
 
-### 12.4 Console pod
-- [ ] Bolt the pod's bottom plate to the console (4 bolts, big washers), then screw the pod onto
-  it from underneath. Hide its two cables under the trim, to the box.
+### 12.4 Dash pod and shifter base
+- [ ] **Dash pod mount.** On the dash top: 2 screws into the dash pad's frame, or VHB tape on a
+  cleaned spot, arm pointing up. On the ceiling: turn the mount upside down (arm pointing down)
+  and screw it through the headliner into a sun-visor screw point or the roof bow
+  ([wiring guide §9](03-wiring-guide.md#the-dash-pod)).
+- [ ] **Hang the pod.** Slide the mount's knuckle between the pod's two lugs. M5 × 25 bolt through
+  all three, nyloc nut into the hex pocket. Tilt the screen to face you, then tighten until it
+  holds that angle over bumps.
+- [ ] **Shifter base.** Bolt its bottom plate to the console next to the gear lever (4 bolts, big
+  washers), then screw the base onto it from underneath (4 × M3).
+- [ ] Hide all three cables under the trim, to the box. The dash pod's two cables go down behind
+  the dash trim (dash top) or along the headliner edge and down the passenger A-pillar trim
+  (ceiling).
 
-✅ **CHECK:** hold TEST 2 s: every switch prompt passes.
+✅ **CHECK:** hold TEST 2 s: every shifter and switch prompt passes.
 
 ### 12.5 ATF probe (cold engine)
 - [ ] Follow [wiring guide §9](03-wiring-guide.md#the-atf-temperature-probe): cut the **hot** hose,
@@ -516,7 +575,8 @@ drive again: also the same. Plug in the OBD-II scanner: **no trouble codes**.
    - [ ] In the driveway: hold TEST for the self-test.
    - [ ] **All four wheels on jack stands** (full-time 4WD: never only the front), ON/OFF on:
      go through the gears and watch the screen.
-   - [ ] An empty car park: ECO, NORM, SPORT, then MANUAL with the lever.
+   - [ ] An empty car park: ECO, NORM, SPORT, then flip **MANUAL** on and shift with the lever.
+     With MANUAL off, the lever does nothing (the screen says FLIP MANUAL ON).
    - [ ] The road.
 
 ✅ **CHECK:** flip ON/OFF off at any time: the car goes straight back to the factory computer.

@@ -29,14 +29,14 @@ namespace pin {
 constexpr uint8_t VSS = 2;           // INT4, conditioned VSS square wave
 constexpr uint8_t TACH = 3;          // INT5, conditioned tach square wave
 constexpr uint8_t RELAY = 6;         // relay-bank driver, HIGH = TCU in control
-constexpr uint8_t CONSOLE_LED = 7;   // overhead "CUSTOM" indicator (via transistor)
+constexpr uint8_t CONSOLE_LED = 7;   // dash pod "TCU" LED (330 R to the LED)
 constexpr uint8_t S1 = 8;            // high-side driver on (via ULN2803 + P-MOSFET), solenoid S1
 constexpr uint8_t S2 = 9;            // high-side driver on, shift solenoid 2
 constexpr uint8_t SL = 10;           // high-side driver on, lockup solenoid
 constexpr uint8_t STATUS_LED = 13;
-// Active-LOW inputs: console switches close to ground, optos pull low.
-constexpr uint8_t UP = 22;           // [+] shift button
-constexpr uint8_t DOWN = 23;         // [-] shift button
+// Active-LOW inputs: dash and shifter switches close to ground, optos pull low.
+constexpr uint8_t UP = 22;           // shifter lever upshift microswitch (X7)
+constexpr uint8_t DOWN = 23;         // shifter lever downshift microswitch (X7)
 constexpr uint8_t ECO = 24;          // ECO switch
 constexpr uint8_t SPORT = 25;        // SPORT switch (both off = NORMAL)
 constexpr uint8_t MASTER = 26;       // ON/OFF switch: closed = ON (CUSTOM); open/broken wire = STOCK
@@ -45,8 +45,9 @@ constexpr uint8_t LEVER_D = 28;      // opto from park/neutral switch "D" output
 constexpr uint8_t ECU_S1 = 29;       // opto from ECU S1 output (ECU side of relay)
 constexpr uint8_t ECU_S2 = 30;
 constexpr uint8_t ECU_SL = 31;
-constexpr uint8_t TEST = 32;         // console TEST button
+constexpr uint8_t TEST = 32;         // dash pod TEST button
 constexpr uint8_t ATF_PROBE = 33;    // DS18B20 1-Wire data (4.7k pull-up to 5 V)
+constexpr uint8_t MANUAL = 34;       // MANUAL switch: closed = the shifter lever shifts
 constexpr uint8_t TPS = A0;          // ECM VTA (10k series tap)
 constexpr uint8_t TPS_E2 = A1;       // ECM E2 sensor ground (10k series tap)
 constexpr uint8_t ATF = A2;
@@ -54,7 +55,7 @@ constexpr uint8_t VBAT = A3;
 constexpr uint8_t IS_S1 = A4;        // solenoid current sensors (ACS712 outputs)
 constexpr uint8_t IS_S2 = A5;
 constexpr uint8_t IS_SL = A6;
-// I2C (SDA = 20, SCL = 21): console OLED (0x3C) and MPU-6050 gyro (0x68).
+// I2C (SDA = 20, SCL = 21): dash pod OLED (0x3C) and MPU-6050 gyro (0x68).
 }  // namespace pin
 
 // USB serial carries a CSV log for calibration (docs/02-revised-spec.md §8).
@@ -221,7 +222,7 @@ void serviceGyro(uint32_t now) {
 }
 
 // --------------------------------------------------------------- switches
-tcu::Debouncer dbUp, dbDown, dbEco, dbSport, dbMaster, dbBrake, dbLeverD, dbEcuS1, dbEcuS2, dbEcuSL, dbTest;
+tcu::Debouncer dbUp, dbDown, dbEco, dbSport, dbManual, dbMaster, dbBrake, dbLeverD, dbEcuS1, dbEcuS2, dbEcuSL, dbTest;
 
 inline bool activeLow(uint8_t p) { return digitalRead(p) == LOW; }
 
@@ -230,6 +231,7 @@ void sampleSwitches(uint32_t now) {
   dbDown.update(activeLow(pin::DOWN), now, cfg::DEBOUNCE_SWITCH_MS);
   dbEco.update(activeLow(pin::ECO), now, cfg::DEBOUNCE_SWITCH_MS);
   dbSport.update(activeLow(pin::SPORT), now, cfg::DEBOUNCE_SWITCH_MS);
+  dbManual.update(activeLow(pin::MANUAL), now, cfg::DEBOUNCE_SWITCH_MS);
   dbMaster.update(activeLow(pin::MASTER), now, cfg::DEBOUNCE_SWITCH_MS);
   dbBrake.update(activeLow(pin::BRAKE), now, cfg::DEBOUNCE_OPTO_MS);
   dbLeverD.update(activeLow(pin::LEVER_D), now, cfg::DEBOUNCE_OPTO_MS);
@@ -246,6 +248,7 @@ tcu::Inputs readInputs(uint32_t now) {
   in.down = cfg::SWAP_SHIFT_INPUTS ? dbUp.state() : dbDown.state();
   in.eco = dbEco.state();
   in.sport = dbSport.state();
+  in.manual = dbManual.state();
   // Until the car is calibrated the ON/OFF switch is ignored (STOCK only).
   in.customRequested = cfg::CALIBRATED && dbMaster.state();
   in.brake = dbBrake.state();
@@ -378,6 +381,8 @@ const char* eventText(tcu::Event e) {
     case tcu::EV_AUTO_DOWNSHIFT: return "AUTO DOWNSHIFT";
     case tcu::EV_REV_LIMIT_UPSHIFT: return "REV LIMIT UPSHIFT";
     case tcu::EV_AUTO_RESUMED: return "AUTO";
+    case tcu::EV_MANUAL: return "MANUAL";
+    case tcu::EV_DENY_NOT_MANUAL: return "FLIP MANUAL ON";
     default: return "";
   }
 }
@@ -438,10 +443,11 @@ const char* resultText(tcu::TestResult r) {
 
 const char* promptText(tcu::TestPrompt p) {
   switch (p) {
-    case tcu::PR_UP: return "PRESS [+]";
-    case tcu::PR_DOWN: return "PRESS [-]";
-    case tcu::PR_ECO: return "ECO ON, SPORT OFF";
-    case tcu::PR_SPORT: return "SPORT ON, ECO OFF";
+    case tcu::PR_UP: return "SHIFTER UP";
+    case tcu::PR_DOWN: return "SHIFTER DOWN";
+    case tcu::PR_ECO: return "ONLY ECO ON";
+    case tcu::PR_SPORT: return "ONLY SPORT ON";
+    case tcu::PR_MANUAL: return "ONLY MANUAL ON";
     case tcu::PR_BRAKE: return "PRESS BRAKE";
     default: return "";
   }
@@ -495,7 +501,7 @@ void appendFlags(Text& t, uint16_t bits, const char* const* names, uint8_t count
   }
 }
 const char* const kFaultNames[] = {"SUPPLY", "VSS", "TPS", "RATIO", "SOLND"};
-const char* const kWarnNames[] = {"ATFSNS", "HOT", "CRIT", "ECO+SPT", "BTN", "WDT"};
+const char* const kWarnNames[] = {"ATFSNS", "HOT", "CRIT", "ECO+SPT", "SHIFTR", "WDT"};
 
 uint32_t inhibitShownUntil = 0;  // show an IBIT refusal for a few seconds
 
@@ -580,7 +586,7 @@ void serviceUsbLog(uint32_t now) {
   Serial.println(o.warnings);
 }
 
-// --------------------------------------------------------------- console OLED
+// -------------------------------------------------------------- dash pod OLED
 enum Page : uint8_t { PG_MAIN, PG_SENSORS, PG_TEST, PG_COUNT };
 uint8_t page = PG_MAIN;
 
@@ -815,7 +821,7 @@ void setup() {
 
   // External 2.2k pull-ups do the real work; internal ones are a backstop.
   const uint8_t inputs[] = {pin::UP,     pin::DOWN,    pin::ECO,    pin::SPORT,  pin::MASTER, pin::BRAKE,
-                            pin::LEVER_D, pin::ECU_S1, pin::ECU_S2, pin::ECU_SL, pin::TEST};
+                            pin::LEVER_D, pin::ECU_S1, pin::ECU_S2, pin::ECU_SL, pin::TEST,     pin::MANUAL};
   for (uint8_t p : inputs) pinMode(p, INPUT_PULLUP);
   pinMode(pin::VSS, INPUT);
   pinMode(pin::TACH, INPUT);

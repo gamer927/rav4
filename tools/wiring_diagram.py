@@ -87,7 +87,7 @@ ax.text(12, 15.3, "W-numbers match the wire list in docs/03-wiring-guide.md.  Ca
 
 zone(0.2, 0.3, 7.0, 14.6, "1999 RAV4 (factory)", "#f6f1e7")
 zone(7.4, 0.3, 10.2, 14.6, "TCU box (behind the glovebox)", "#eaf2fb")
-zone(17.9, 0.3, 5.9, 14.6, "Console & dash", "#ecf7ea")
+zone(17.9, 0.3, 5.9, 14.6, "Dash pod & shifter", "#ecf7ea")
 
 # ------------------------------------------------------------------ TCU connectors
 CX = 7.7
@@ -161,7 +161,7 @@ for name, w in zip(["+5V", "GND", "DQ"], ["W17", "W18", "W19"]):
 BX = 8.7
 box(BX, 12.3, 3.9, 2.2, "Power",
     ["X1-1 -> TVS -> driver +12 V", "X1-2 -> rev. diode -> TVS", "  -> 5 V/3 A buck -> Mega 5V,",
-     "     OLED, gyro, probe", "X1-3 -> GND star point"], line_size=8.5)
+     "     screen, gyro, probe", "X1-3 -> GND star point"], line_size=8.5)
 box(BX, 8.15, 3.9, 3.85, "Input conditioning",
     ["D   -> PC817  -> D28", "STP -> PC817  -> D27", "E1  -> signal GND", "SPD -> LM393  -> D2",
      "TAC -> PC817  -> D3", "VTA -> 10k/100nF -> A0", "E2  -> 10k/100nF -> A1", "+12 -> 47k/10k -> A3",
@@ -174,10 +174,10 @@ box(BX, 0.6, 3.9, 2.25, "ATF probe input",
     ["DQ -> 100 ohm -> D33", "4.7k pull-up DQ -> 5V", "5.1 V TVS to GND"], line_size=8.5)
 box(13.1, 0.6, 2.7, 2.3, "MPU-6050 gyro", ["GY-521 board,", "mounted FLAT", "I2C addr 0x68"], line_size=8.5)
 
-mega_pins = ["D2  VSS (int)", "D3  tach (int)", "D6  relay drv", "D7  console LED", "D8  S1 drv",
-             "D9  S2 drv", "D10 SL drv", "D20 SDA", "D21 SCL", "D22 [+]", "D23 [-]", "D24 ECO",
+mega_pins = ["D2  VSS (int)", "D3  tach (int)", "D6  relay drv", "D7  status LED", "D8  S1 drv",
+             "D9  S2 drv", "D10 SL drv", "D20 SDA", "D21 SCL", "D22 shift up", "D23 shift dn", "D24 ECO",
              "D25 SPORT", "D26 ON/OFF", "D27 brake", "D28 lever D", "D29 ECU S1", "D30 ECU S2",
-             "D31 ECU SL", "D32 TEST", "D33 ATF DQ", "A0  TPS (VTA)", "A1  TPS ref (E2)", "A3  battery", "A4  S1 amps",
+             "D31 ECU SL", "D32 TEST", "D33 ATF DQ", "D34 MANUAL", "A0  TPS (VTA)", "A1  TPS ref (E2)", "A3  battery", "A4  S1 amps",
              "A5  S2 amps", "A6  SL amps", "5V / GND", "USB -> laptop"]
 box(13.1, 3.3, 4.2, 11.2, "Arduino Mega 2560", mega_pins, fc="#fdfde8", line_size=9.5)
 
@@ -199,34 +199,47 @@ wire([(BX + 3.9, 1.7), (12.85, 1.7), (12.85, 3.6), (13.1, 3.6)], C["probe"], lw=
 label(12.85, 2.6, "D33", C["probe"])
 wire([(14.4, 2.9), (14.4, 3.3)], C["i2c"], lw=2)
 
-# ------------------------------------------------------------------ console & dash
-X4 = connector(18.0, 12.1, "X4 console", ["[+]", "[-]", "ECO", "SPORT", "ON/OFF", "TEST", "GND", "LED+"])
-X5 = connector(18.0, 5.0, "X5 OLED", ["5V", "GND", "SDA", "SCL"])
-wire([(17.3, 10.6), (18.0, 10.6)], C["console"], lw=2)
-label(17.65, 10.62, "D7 D22-26 D32", C["console"])
-wire([(17.3, 4.5), (18.0, 4.5)], C["i2c"], lw=2)
-label(17.65, 4.52, "D20 D21", C["i2c"])
+# ------------------------------------------------------------------ dash pod & shifter
+X4 = connector(18.0, 13.9, "X4 dash", ["ECO", "SPORT", "MANUAL", "TEST", "ON/OFF", "LED+", "GND"])
+X7 = connector(18.0, 8.3, "X7 shifter", ["UP", "DOWN", "GND"])
+X5 = connector(18.0, 5.5, "X5 screen", ["5V", "GND", "SDA", "SCL"])
+wire([(17.3, 11.9), (18.0, 11.9)], C["console"], lw=2)
+label(17.62, 11.92, "D7,24-26,32,34", C["console"])
+wire([(17.3, 7.9), (18.0, 7.9)], C["console"], lw=2)
+label(17.65, 7.92, "D22 D23", C["console"])
+wire([(17.3, 5.0), (18.0, 5.0)], C["i2c"], lw=2)
+label(17.65, 5.02, "D20 D21", C["i2c"])
 
-box(19.7, 7.6, 3.9, 6.0, "Console panel",
-    ["ON/OFF  toggle (SPST)", "ECO     toggle (SPST)", "SPORT   toggle (SPST)", "[+] [-] push buttons,",
-     "  or a sequential", "  shifter lever with", "  two microswitches", "TEST    push button",
-     "LED     status", "", "every control switches", "to the common GND wire"], line_size=9)
-for i, n in enumerate(["[+]", "[-]", "ECO", "SPORT", "ON/OFF", "TEST", "GND", "LED+"]):
+box(19.7, 9.85, 3.9, 4.4, "Dash pod: switches",
+    ["ECO     toggle (SPST)", "SPORT   toggle (SPST)", "MANUAL  toggle (SPST)", "TEST    push button",
+     "ON/OFF  toggle + cover", "LED     status", "every control switches", "to the common GND wire"],
+    line_size=9)
+for i, n in enumerate(["ECO", "SPORT", "MANUAL", "TEST", "ON/OFF", "LED+", "GND"]):
     _, y, rx = X4[n]
     color = C["ground"] if n == "GND" else C["console"]
     wire([(rx, y), (19.7, y)], color, lw=1.8)
     label(19.15, y, "C%d %s" % (i + 1, n), color)
-ax.text(18.85, 8.75, "W20: 8-core shielded;\nshield to GND at the TCU only", fontsize=8.5,
+ax.text(18.85, 11.15, "W20: 8-core shielded\n(1 spare core)", fontsize=8.5,
         color=C["console"], ha="center", va="top", fontweight="bold")
 
-box(19.7, 3.4, 3.9, 2.4, "Dash OLED", ["0.96\" SSD1306 or", "1.3\" SH1106, 128x64", "I2C addr 0x3C"],
+box(19.7, 6.85, 3.9, 1.75, "Shifter base", ["sequential lever,", "two microswitches (NO)", "COM -> GND"],
+    line_size=9)
+for n in ["UP", "DOWN", "GND"]:
+    _, y, rx = X7[n]
+    color = C["ground"] if n == "GND" else C["console"]
+    wire([(rx, y), (19.7, y)], color, lw=1.8)
+    label(19.15, y, n, color)
+ax.text(18.85, 7.15, "W22: 3-core\nshielded", fontsize=8.5, color=C["console"], ha="center",
+        va="top", fontweight="bold")
+
+box(19.7, 3.65, 3.9, 2.2, "Dash pod: screen", ["2.42\" SSD1309 OLED,", "128x64, I2C 0x3C"],
     line_size=9)
 for n in ["5V", "GND", "SDA", "SCL"]:
     _, y, rx = X5[n]
     color = C["power"] if n == "5V" else (C["ground"] if n == "GND" else C["i2c"])
     wire([(rx, y), (19.7, y)], color, lw=1.8)
     label(19.15, y, n, color)
-ax.text(18.85, 3.35, "W21: 4-core shielded,\n1 m max", fontsize=8.5, color=C["i2c"], ha="center",
+ax.text(18.85, 3.75, "W21: 4-core shielded,\n2.5 m max", fontsize=8.5, color=C["i2c"], ha="center",
         va="top", fontweight="bold")
 
 # ------------------------------------------------------------------ legend
@@ -234,7 +247,7 @@ lx, ly = 18.2, 2.55
 ax.text(lx, ly, "Wire colours (suggested)", fontsize=10, fontweight="bold", va="top")
 legend = [("power", "+12 V / +5 V (red)"), ("ground", "ground (black)"),
           ("ecu", "ECU side of S1/S2/SL (yellow)"), ("sol", "solenoid side of S1/S2/SL (orange)"),
-          ("sig", "signal taps (blue)"), ("console", "console (green)"), ("i2c", "I2C (purple)"),
+          ("sig", "signal taps (blue)"), ("console", "dash & shifter (green)"), ("i2c", "I2C (purple)"),
           ("probe", "ATF probe (brown)")]
 for i, (k, t) in enumerate(legend):
     col, row = i % 2, i // 2

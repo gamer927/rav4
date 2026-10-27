@@ -15,13 +15,13 @@ Everything for the 1999 RAV4 transmission controller, including the 3D-printed h
 | 3. Signal inputs | $42 |
 | 4. Boards and inside wiring | $66 |
 | 5. Car harness and connectors | $147 |
-| 6. Console pod controls and screen | $68 |
+| 6. Dash pod controls and screen | $68 |
 | 7. ATF temperature probe | $59 |
-| 8. 3D printing | $64 |
+| 8. 3D printing | $65 |
 | 9. Sequential shifter (Beavis Motorsport DIY) | $54 |
-| **All parts, including the shifter** | **$648** |
-| Without the shifter (buttons instead) | $594 |
-| Without filament (if your printer comes with it) | $612 |
+| **All parts, including the shifter** | **$649** |
+| Without the shifter (no manual shifting) | $595 |
+| Without filament (if your printer comes with it) | $613 |
 | Tools, if you own none of them | $197 |
 
 Expect roughly **±25 %** depending on where you shop. Many packs leave spares, which is useful: you'll want a spare relay, MOSFET and buck module if something goes wrong.
@@ -33,7 +33,8 @@ Build book **step 0** (one evening, nothing cut) settles these, so you order the
 1. **Fuse blade size** in the cabin fuse box (standard ATO/ATC or mini): for the fuse tap and inline fuse holders.
 2. **ATF cooler hose inside diameter** (usually 5/16" or 3/8"): for the barbed tee.
 3. **Space behind the glovebox**: the TCU box is 216 × 178 × 51 mm (244 mm wide with its mounting ears).
-4. **Space on the centre console**: the pod is 176 × 130 × 70 mm, plus the shifter on top.
+4. **A spot for the dash pod**: 210 × 64 × 64 mm, plus its hinge mount, on the dash top (driver's side, never over the passenger airbag) or on the ceiling above the windscreen.
+5. **Space on the centre console** beside the gear lever for the shifter base: 150 × 100 × 29 mm, plus the shifter on top.
 
 ## Where to order
 
@@ -72,18 +73,18 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 |---|---|---|---|---|---|---|
 | ☐ | PC817 optocoupler, DIP-4 | 6 | pack of 20 | Amazon (or AliExpress, cheaper but slower) | $6 |  |
 | ☐ | LM393 comparator, DIP-8 | 1 | pack of 10 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
-| ☐ | BAT85 Schottky diode (DO-35) | 16 | pack of 25 | DigiKey / Mouser | $5 | Input clamps |
+| ☐ | BAT85 Schottky diode (DO-35) | 18 | pack of 25 | DigiKey / Mouser | $5 | Input clamps |
 | ☐ | 1N4148 diode | 6 | pack of 100 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
 | ☐ | Resistor kit, 1/4 W 1 % metal film (600+ pcs) | ≈ 70 | kit | Amazon (or AliExpress, cheaper but slower) | $12 | Needs 100, 330, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M |
 | ☐ | Extra 10 kΩ resistors | 19 total | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $4 | Most kits only have 10–20 of each value |
-| ☐ | 100 nF ceramic capacitors, 50 V | 9 | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
+| ☐ | 100 nF ceramic capacitors, 50 V | 10 | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
 
 ## 4. Boards and inside wiring — $66
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
 | ☐ | Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm | 1 + 1 | assorted pack | Amazon (or AliExpress, cheaper but slower) | $10 | Power board 9 × 15, logic board 7 × 9 |
-| ☐ | Screw terminals, 5.08 mm, 2- and 3-way, interlocking | 35 positions | pack of ~40 pieces | Amazon (or AliExpress, cheaper but slower) | $9 | KF301 / DG301 type |
+| ☐ | Screw terminals, 5.08 mm, 2- and 3-way, interlocking | 37 positions | pack of ~40 pieces | Amazon (or AliExpress, cheaper but slower) | $9 | KF301 / DG301 type |
 | ☐ | Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~20 cm) | 1 + 1 | headers + 2 cables | Amazon (or AliExpress, cheaper but slower) | $12 | Or crimp your own from ribbon and IDC sockets |
 | ☐ | Silicone hook-up wire 22 AWG, 6 colours | ~5 m | kit | Amazon (or AliExpress, cheaper but slower) | $15 |  |
 | ☐ | Silicone wire 18 AWG, red/black/yellow | ~3 m | kit | Amazon (or AliExpress, cheaper but slower) | $14 | Board power paths and the dummy-load cable (heat-proof) |
@@ -96,19 +97,19 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 | ☐ | Deutsch DT connector kit, 2–12 way, with crimper | X1–X6 + bypass plug | kit (~200 pcs) | Amazon (or AliExpress, cheaper but slower) | $40 | Needs 3-, 4-, 6- and 8-way pairs |
 | ☐ | 16 AWG automotive wire, red and black | ~4 m | 25 ft each | Auto-parts store | $15 | W1–W3 |
 | ☐ | 18 AWG automotive wire, multi-colour kit | ~15 m | kit | Amazon (or AliExpress, cheaper but slower) | $20 | Solenoid wires W4–W9 and taps |
-| ☐ | Shielded cable: 8-core 24 AWG, 4-core, 3-core | 3 m + 1.5 m + 3 m | 5 m of each | Amazon (or AliExpress, cheaper but slower) | $26 | Console, OLED and ATF probe cables |
+| ☐ | Shielded cable: 8-core 24 AWG, 4-core, 3-core | 3 m + 2.5 m + 4.5 m | 5 m of each | Amazon (or AliExpress, cheaper but slower) | $26 | Dash pod switches (8-core), screen (4-core, ≤ 2.5 m), ATF probe and shifter (3-core) |
 | ☐ | Heat-shrink assortment incl. adhesive-lined | 1 | kit | Amazon (or AliExpress, cheaper but slower) | $12 |  |
 | ☐ | Split loom + zip ties | 1 | pack | Auto-parts store | $12 |  |
-| ☐ | Wago 221 lever-nut connectors, assorted | ~6 | pack | Hardware store | $12 | Joins the console cable to the switches inside the pod |
-| ☐ | Cable glands PG7 + PG9, nylon, with locknuts | 5 + 4 | assortment | Amazon (or AliExpress, cheaper but slower) | $10 | TCU box 3 × PG7 + 4 × PG9; pod 2 × PG7 |
+| ☐ | Wago 221 lever-nut connectors, assorted | ~9 | pack | Hardware store | $12 | Joins the cables to the switch wires inside the dash pod and the shifter base |
+| ☐ | Cable glands PG7 + PG9, nylon, with locknuts | 7 + 4 | assortment | Amazon (or AliExpress, cheaper but slower) | $10 | TCU box 4 × PG7 + 4 × PG9; dash pod 2 × PG7; shifter base 1 × PG7 |
 
-## 6. Console pod controls and screen — $68
+## 6. Dash pod controls and screen — $68
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
 | ☐ | 12 mm ON/OFF toggle with flip-up safety cover | 1 | 1 | Amazon (or AliExpress, cheaper but slower) | $10 |  |
-| ☐ | 6 mm mini toggle switch, MTS-101/102 | 2 | pack of 5 | Amazon (or AliExpress, cheaper but slower) | $8 | ECO and SPORT |
-| ☐ | 12 mm momentary push button, normally open | 1 (3 with [+]/[−]) | pack of 5 | Amazon (or AliExpress, cheaper but slower) | $10 | TEST |
+| ☐ | 6 mm mini toggle switch, MTS-101/102 | 3 | pack of 5 | Amazon (or AliExpress, cheaper but slower) | $8 | ECO, SPORT and MANUAL |
+| ☐ | 12 mm momentary push button, normally open | 1 | pack of 5 | Amazon (or AliExpress, cheaper but slower) | $10 | TEST |
 | ☐ | 5 mm LED + 8 mm chrome panel bezel | 1 | pack | Amazon (or AliExpress, cheaper but slower) | $7 | Status light |
 | ☐ | 2.42" OLED module, 128 × 64, SSD1309, I²C-capable | 1 | 1 | Amazon (or AliExpress, cheaper but slower) | $20 | e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat |
 | ☐ | 1 µF capacitor (ceramic or electrolytic, 16 V+) | 1 | pack | Amazon (or AliExpress, cheaper but slower) | $4 | Power-on reset for the screen, with a 10k from the resistor kit |
@@ -126,14 +127,14 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 | ☐ | Firewall grommet assortment | 1 | kit | Auto-parts store | $7 |  |
 | ☐ | ATF to top up (Toyota Type T-IV, or as your owner's manual says) | ~1 qt | 1 qt | Auto-parts store | $10 |  |
 
-## 8. 3D printing — $64
+## 8. 3D printing — $65
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
 | ☐ | PETG filament, 1 kg | ~1 kg | 2 rolls (don't run out mid-print) | Amazon (or AliExpress, cheaper but slower) | $36 | Skip if filament comes with the printer. Not PLA |
-| ☐ | M3 heat-set inserts (~4 mm OD) | 8 | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $8 |  |
+| ☐ | M3 heat-set inserts (~4 mm OD) | 12 | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $8 |  |
 | ☐ | M3 screw kit with countersunk screws and nuts | ~20 | kit | Amazon (or AliExpress, cheaper but slower) | $12 | 8 and 10 mm countersunk, 6 mm pan head |
-| ☐ | M6 bolts + nuts (shifter); M5 bolts + large washers (mounting) | 4 + 8 | loose | Hardware store | $8 |  |
+| ☐ | M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge) | 4 + 8 + 1 | loose | Hardware store | $9 |  |
 
 ## 9. Sequential shifter (Beavis Motorsport DIY) — $54
 
@@ -167,7 +168,7 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 ## Optional extras
 
 - Genuine Arduino Mega instead of a clone: +$26
-- Two extra 12 mm push buttons for [+]/[−] on the pod (already in the button pack above)
+- 3M VHB tape, to stick the dash-pod mount down instead of screwing it: +$8
 - Cheap logic analyser (checks speed and tach signals): +$12
 
 ## By store (for ordering)
@@ -176,6 +177,6 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 
 **Amazon (or AliExpress, cheaper but slower)** — 39 items, about $468: Arduino Mega 2560 R3; Prototype shield for the Mega ("Mega ProtoShield"); LM2596HV buck converter module, 4.5–60 V in; ACS712-05B current sensor module (5 A); 1 W zener diode kit (1N4728A–1N4764A); Finned aluminium heatsink, ≥ 100 × 100 × 25 mm; Thermal paste; PC817 optocoupler, DIP-4; LM393 comparator, DIP-8; 1N4148 diode; Resistor kit, 1/4 W 1 % metal film (600+ pcs); Extra 10 kΩ resistors; 100 nF ceramic capacitors, 50 V; Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm; Screw terminals, 5.08 mm, 2- and 3-way, interlocking; Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~20 cm); Silicone hook-up wire 22 AWG, 6 colours; Silicone wire 18 AWG, red/black/yellow; Double-sided foam mounting tape; Deutsch DT connector kit, 2–12 way, with crimper; 18 AWG automotive wire, multi-colour kit; Shielded cable: 8-core 24 AWG, 4-core, 3-core; Heat-shrink assortment incl. adhesive-lined; Cable glands PG7 + PG9, nylon, with locknuts; 12 mm ON/OFF toggle with flip-up safety cover; 6 mm mini toggle switch, MTS-101/102; 12 mm momentary push button, normally open; 5 mm LED + 8 mm chrome panel bezel; 2.42" OLED module, 128 × 64, SSD1309, I²C-capable; 1 µF capacitor (ceramic or electrolytic, 16 V+); GY-521 (MPU-6050) gyro module; DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C); PETG filament, 1 kg; M3 heat-set inserts (~4 mm OD); M3 screw kit with countersunk screws and nuts; V-155-1C25 roller-lever microswitch; M12 ball plungers; Compression spring assortment; Shift knob, M10 × 1.5 thread.
 
-**Hardware store** — 7 items, about $55: Wago 221 lever-nut connectors, assorted; Brass barbed tee with a 1/8" NPT female side port; 1/8" NPT male × 6 mm compression fitting, brass; ATF-safe thread sealant (PTFE paste); M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); 12 mm OD steel pivot tube, or an M12 bolt + nyloc nut; M3 × 70 bolts + nuts.
+**Hardware store** — 7 items, about $56: Wago 221 lever-nut connectors, assorted; Brass barbed tee with a 1/8" NPT female side port; 1/8" NPT male × 6 mm compression fitting, brass; ATF-safe thread sealant (PTFE paste); M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge); 12 mm OD steel pivot tube, or an M12 bolt + nyloc nut; M3 × 70 bolts + nuts.
 
 **Auto-parts store** — 7 items, about $70: Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses; Add-a-circuit fuse tap; 16 AWG automotive wire, red and black; Split loom + zip ties; Fuel-injection hose clamps; Firewall grommet assortment; ATF to top up (Toyota Type T-IV, or as your owner's manual says).

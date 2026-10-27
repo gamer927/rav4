@@ -9,7 +9,7 @@ stay 100 % stock.
 anything go wrong, and relays hand the transmission straight back to the factory computer. The
 car then drives exactly as it did from the factory.
 
-![Console screen](docs/oled-screens.png)
+![Dash pod screen](docs/oled-screens.png)
 
 ## What it does
 
@@ -21,7 +21,7 @@ All speeds (screen, logs, settings, docs) are in **mph**.
 | **Highway (all modes)** | Locked and steady | In 4th above ~51 mph the torque converter stays locked up to 95 % throttle, so a long 90 mph run (~3,550 rpm) or a highway grade doesn't let it slip: lower rpm, less fuel, much less transmission heat. Only flooring it releases lockup (in SPORT, a quick stab does too). |
 | **NORMAL** | Like stock, plus the extras | Shift points close to a factory-style schedule (tune them to your car's logged factory shifts), light throttle smoothing, plus everything stock doesn't have: corner hold, the over-rev guards and the fault hand-back. |
 | **SPORT** | Sharp | Holds each gear to just under the redline at full throttle (the fastest way through these gears), kicks down from 60 % throttle, holds the gear when you snap off the throttle between corners, downshifts while braking so you're in the right gear for the exit, and releases lockup on a closed throttle or a fast pedal stab. |
-| **MANUAL** | SPORT, you shift | Tap [+] or [−] from any mode. Same lockup and pedal response as SPORT, but the box never shifts for you, except to protect the engine (upshift at 6,200 rpm, downshift when slowing to a stop). Hold [+] for 1 s to go back to automatic in the switch's mode. |
+| **MANUAL** | SPORT, you shift | Flip the **MANUAL** switch on, then pull or push the sequential shifter lever: one click, one gear. Same lockup and pedal response as SPORT, but the box never shifts for you, except to protect the engine (upshift at 6,200 rpm, downshift when slowing to a stop). Flip MANUAL off to go back to automatic in the ECO/SPORT switches' mode. With MANUAL off the lever does nothing. |
 | **All automatic modes** | | No automatic shifts mid-corner (gyro), lockup off when braking. |
 
 **Protection, always on:**
@@ -33,7 +33,7 @@ All speeds (screen, logs, settings, docs) are in **mph**.
 - **Faults hand back to the factory computer:** a lost speed signal, a failed throttle sensor,
   bad voltage, the wrong gear engaged, or a broken solenoid wire.
 - **Built-in self-test:** hold TEST for 2 s with the car parked and the engine off. It checks
-  the lamps, each solenoid's current, the relays, every console switch, and the watchdog. It
+  the lamps, each solenoid's current, the relays, the shifter and every dash switch, and the watchdog. It
   refuses to run unless the car is parked with the engine off.
 - **Locked until calibrated:** the box can't take control until you've calibrated it on your car
   (see [First steps](#first-steps)).
@@ -71,20 +71,24 @@ the solenoid changeover, which is built three times.
 Only three factory wires are cut (S1, S2, SL); everything else is a tap. A **bypass plug**
 restores stock driving with the box removed.
 
-**Where everything goes in the car** (TCU box, gyro, heatsink, console pod, ATF probe, plus the
+**Where everything goes in the car** (TCU box, gyro, heatsink, dash pod, shifter base, ATF probe, plus the
 4WD-specific notes) is [guide §9](docs/03-wiring-guide.md#9-where-everything-goes-1999-rav4-4wd).
 
 ## 3D-printed housings
 
-![Console pod and TCU enclosure](hardware/preview.png)
+![Dash pod, shifter base and TCU box](hardware/preview.png)
 
-Two printable housings, as parametric OpenSCAD models with ready-to-print STLs in
-[`hardware/`](hardware/README.md):
+Three separate pieces, each with its own cables to the TCU box. They're parametric OpenSCAD
+models with ready-to-print STLs in [`hardware/`](hardware/README.md):
 
-- **Console pod:** the ON/OFF (with safety cover), ECO, SPORT and TEST controls, status LED and
-  OLED on a sloped panel facing the driver. The Beavis sequential shifter bolts to its top deck.
-- **TCU enclosure:** holds the Mega with its hub shield, the power board and the logic board
-  (which carries the gyro). It has seven labelled cable glands and USB access.
+1. **Dash pod**, on top of the dash or on the ceiling: the 2.42" screen on the left, then one row
+   of controls, **TCU light, ECO, SPORT, MANUAL, TEST, ON/OFF** (with a flip-up safety cover). It
+   hangs on a hinge from a small mount, so it stays upright and tilts to face you either way up.
+2. **Shifter base**, on the centre console next to the gear lever: the Beavis sequential shifter
+   bolts on top, with its own cable to the box.
+3. **TCU box**, behind the glovebox: the Mega with its hub shield, the power board and the logic
+   board (which carries the gyro). It has no switches: the round things on its front are eight
+   labelled cable glands, one per cable. USB access for the laptop.
 
 A **fit check** in each model confirms that every part fits: switch bodies, terminals, wire
 bends, board parts at their real heights, glands and bolts. It runs every time the STLs are
@@ -99,8 +103,8 @@ outside on a finned heatsink. Print settings, hardware and assembly:
 ## Status
 
 - **Done:** full design, firmware and documentation.
-  - 1,400 automated test checks pass.
-  - The firmware compiles for the Arduino Mega 2560 without warnings (12 % flash, 39 % RAM).
+  - 1,423 automated test checks pass.
+  - The firmware compiles for the Arduino Mega 2560 without warnings (13 % flash, 41 % RAM).
   - The screens above come from the real firmware running in a simulator.
 - **Not done yet:** nothing has been built or run on real hardware or in the car. The gear
   ratios, speed-sensor scaling and throttle-sensor voltages are best estimates until you
@@ -122,11 +126,11 @@ measure on the car first so you order the right sizes once.
 | Signal inputs (optos, comparator, resistors, diodes) | $42 |
 | Boards and inside wiring | $66 |
 | Car harness and connectors (Deutsch kit with crimper, wire, shielded cable, glands) | $147 |
-| Console pod controls, OLED, gyro | $54 |
+| Dash pod controls, OLED, gyro | $68 |
 | ATF temperature probe and fittings | $59 |
-| 3D printing (filament, inserts, screws) | $71 |
+| 3D printing (filament, inserts, screws) | $65 |
 | Sequential shifter (Beavis Motorsport DIY) | $54 |
-| **Total parts** | **≈ $640** (±25 %) |
+| **Total parts** | **≈ $650** (±25 %) |
 | Tools, if you own none (your 3D printer and jack stands aren't counted) | ≈ $200 |
 
 Many items are packs and kits, so you'll have spares. The big-ticket items are the connector kit
@@ -142,9 +146,9 @@ The key parts:
 - **3 × 15 Ω 50 W resistors on a finned heatsink**: dummy loads, so the factory computer sees a
   "solenoid" while the box is in control. Outside the box: they make ~14 W each.
 - **LM2596HV buck converter** (60 V input), PC817 optos, LM393, ULN2803A.
-- **Console:** ON/OFF toggle with a flip-up cover, ECO and SPORT mini toggles, TEST button,
-  status LED, a **2.42" OLED** (the gear shows 18 mm tall), and the **Beavis sequential shifter**
-  (two V-155-1C25 switches).
+- **Dash pod:** ON/OFF toggle with a flip-up cover, ECO, SPORT and MANUAL mini toggles, TEST
+  button, status LED, and a **2.42" OLED** (the gear shows 18 mm tall).
+- **Shifter base:** the **Beavis sequential shifter** (two V-155-1C25 switches).
 - **MPU-6050 gyro (GY-521)** on the logic board, and a **DS18B20 ATF probe** in a brass tee.
 
 ## Tools and equipment
@@ -190,7 +194,7 @@ to the first drive, with a picture for each board step. In outline:
 | [`docs/oled-screens.png`](docs/oled-screens.png) | What each screen looks like |
 | [`docs/05-build-book.md`](docs/05-build-book.md) | **Build book:** every step in order, Lego-instruction style, with a picture for each board step |
 | [`docs/04-shopping-list.md`](docs/04-shopping-list.md) | **Shopping list** with cost estimates, by store |
-| [`hardware/README.md`](hardware/README.md) | 3D-printed console pod and TCU enclosure: print settings, hardware, assembly, mounting |
+| [`hardware/README.md`](hardware/README.md) | 3D-printed dash pod, shifter base and TCU enclosure: print settings, hardware, assembly, mounting |
 | [`docs/01-audit.md`](docs/01-audit.md) | Review of the original spec this project started from (rev 0, which still had an oil sender and a Nextion dashboard) and what was fixed |
 
 ## Repository layout
@@ -210,7 +214,7 @@ tools/build_stl.sh          fit-checks the housings, exports the STLs and previe
 tools/boards.py             board layouts: checks them, draws the build-book pictures and templates
 tools/shopping_list.py      writes the shopping list and its cost totals
 docs/build/                 build-book pictures and 1:1 board templates (generated)
-hardware/*.scad             3D-printable console pod and TCU enclosure (OpenSCAD)
+hardware/*.scad             3D-printable dash pod, shifter base and TCU enclosure (OpenSCAD)
 hardware/stl/               ready-to-print STL files
 ```
 

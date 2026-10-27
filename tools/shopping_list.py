@@ -52,17 +52,17 @@ ITEMS = [
     # ---------------------------------------------------------------- 3
     ("3. Signal inputs", "PC817 optocoupler, DIP-4", "6", "pack of 20", AMZ, 6, ""),
     ("3. Signal inputs", "LM393 comparator, DIP-8", "1", "pack of 10", AMZ, 5, ""),
-    ("3. Signal inputs", "BAT85 Schottky diode (DO-35)", "16", "pack of 25", DK, 5, "Input clamps"),
+    ("3. Signal inputs", "BAT85 Schottky diode (DO-35)", "18", "pack of 25", DK, 5, "Input clamps"),
     ("3. Signal inputs", "1N4148 diode", "6", "pack of 100", AMZ, 5, ""),
     ("3. Signal inputs", "Resistor kit, 1/4 W 1 % metal film (600+ pcs)", "≈ 70", "kit", AMZ, 12,
      "Needs 100, 330, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"),
     ("3. Signal inputs", "Extra 10 kΩ resistors", "19 total", "pack of 50", AMZ, 4,
      "Most kits only have 10–20 of each value"),
-    ("3. Signal inputs", "100 nF ceramic capacitors, 50 V", "9", "pack of 50", AMZ, 5, ""),
+    ("3. Signal inputs", "100 nF ceramic capacitors, 50 V", "10", "pack of 50", AMZ, 5, ""),
     # ---------------------------------------------------------------- 4
     ("4. Boards and inside wiring", "Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm", "1 + 1",
      "assorted pack", AMZ, 10, "Power board 9 × 15, logic board 7 × 9"),
-    ("4. Boards and inside wiring", "Screw terminals, 5.08 mm, 2- and 3-way, interlocking", "35 positions",
+    ("4. Boards and inside wiring", "Screw terminals, 5.08 mm, 2- and 3-way, interlocking", "37 positions",
      "pack of ~40 pieces", AMZ, 9, "KF301 / DG301 type"),
     ("4. Boards and inside wiring", "Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~20 cm)",
      "1 + 1", "headers + 2 cables", AMZ, 12, "Or crimp your own from ribbon and IDC sockets"),
@@ -77,26 +77,26 @@ ITEMS = [
     ("5. Car harness and connectors", "16 AWG automotive wire, red and black", "~4 m", "25 ft each", AUTO, 15, "W1–W3"),
     ("5. Car harness and connectors", "18 AWG automotive wire, multi-colour kit", "~15 m", "kit", AMZ, 20,
      "Solenoid wires W4–W9 and taps"),
-    ("5. Car harness and connectors", "Shielded cable: 8-core 24 AWG, 4-core, 3-core", "3 m + 1.5 m + 3 m",
-     "5 m of each", AMZ, 26, "Console, OLED and ATF probe cables"),
+    ("5. Car harness and connectors", "Shielded cable: 8-core 24 AWG, 4-core, 3-core", "3 m + 2.5 m + 4.5 m",
+     "5 m of each", AMZ, 26, "Dash pod switches (8-core), screen (4-core, ≤ 2.5 m), ATF probe and shifter (3-core)"),
     ("5. Car harness and connectors", "Heat-shrink assortment incl. adhesive-lined", "1", "kit", AMZ, 12, ""),
     ("5. Car harness and connectors", "Split loom + zip ties", "1", "pack", AUTO, 12, ""),
-    ("5. Car harness and connectors", "Wago 221 lever-nut connectors, assorted", "~6", "pack", HW, 12,
-     "Joins the console cable to the switches inside the pod"),
-    ("5. Car harness and connectors", "Cable glands PG7 + PG9, nylon, with locknuts", "5 + 4", "assortment", AMZ, 10,
-     "TCU box 3 × PG7 + 4 × PG9; pod 2 × PG7"),
+    ("5. Car harness and connectors", "Wago 221 lever-nut connectors, assorted", "~9", "pack", HW, 12,
+     "Joins the cables to the switch wires inside the dash pod and the shifter base"),
+    ("5. Car harness and connectors", "Cable glands PG7 + PG9, nylon, with locknuts", "7 + 4", "assortment", AMZ, 10,
+     "TCU box 4 × PG7 + 4 × PG9; dash pod 2 × PG7; shifter base 1 × PG7"),
     # ---------------------------------------------------------------- 6
-    ("6. Console pod controls and screen", "12 mm ON/OFF toggle with flip-up safety cover", "1", "1", AMZ, 10, ""),
-    ("6. Console pod controls and screen", "6 mm mini toggle switch, MTS-101/102", "2", "pack of 5", AMZ, 8,
-     "ECO and SPORT"),
-    ("6. Console pod controls and screen", "12 mm momentary push button, normally open", "1 (3 with [+]/[−])",
+    ("6. Dash pod controls and screen", "12 mm ON/OFF toggle with flip-up safety cover", "1", "1", AMZ, 10, ""),
+    ("6. Dash pod controls and screen", "6 mm mini toggle switch, MTS-101/102", "3", "pack of 5", AMZ, 8,
+     "ECO, SPORT and MANUAL"),
+    ("6. Dash pod controls and screen", "12 mm momentary push button, normally open", "1",
      "pack of 5", AMZ, 10, "TEST"),
-    ("6. Console pod controls and screen", "5 mm LED + 8 mm chrome panel bezel", "1", "pack", AMZ, 7, "Status light"),
-    ("6. Console pod controls and screen", "2.42\" OLED module, 128 × 64, SSD1309, I²C-capable", "1", "1", AMZ, 20,
+    ("6. Dash pod controls and screen", "5 mm LED + 8 mm chrome panel bezel", "1", "pack", AMZ, 7, "Status light"),
+    ("6. Dash pod controls and screen", "2.42\" OLED module, 128 × 64, SSD1309, I²C-capable", "1", "1", AMZ, 20,
      "e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat"),
-    ("6. Console pod controls and screen", "1 µF capacitor (ceramic or electrolytic, 16 V+)", "1", "pack", AMZ, 4,
+    ("6. Dash pod controls and screen", "1 µF capacitor (ceramic or electrolytic, 16 V+)", "1", "pack", AMZ, 4,
      "Power-on reset for the screen, with a 10k from the resistor kit"),
-    ("6. Console pod controls and screen", "GY-521 (MPU-6050) gyro module", "1", "pack of 3", AMZ, 9, ""),
+    ("6. Dash pod controls and screen", "GY-521 (MPU-6050) gyro module", "1", "pack of 3", AMZ, 9, ""),
     # ---------------------------------------------------------------- 7
     ("7. ATF temperature probe", "DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C)", "1", "1", AMZ, 10,
      "Not the PVC-cable kind"),
@@ -112,10 +112,11 @@ ITEMS = [
     # ---------------------------------------------------------------- 8
     ("8. 3D printing", "PETG filament, 1 kg", "~1 kg", "2 rolls (don't run out mid-print)", AMZ, 36,
      "Skip if filament comes with the printer. Not PLA"),
-    ("8. 3D printing", "M3 heat-set inserts (~4 mm OD)", "8", "pack of 50", AMZ, 8, ""),
+    ("8. 3D printing", "M3 heat-set inserts (~4 mm OD)", "12", "pack of 50", AMZ, 8, ""),
     ("8. 3D printing", "M3 screw kit with countersunk screws and nuts", "~20", "kit", AMZ, 12,
      "8 and 10 mm countersunk, 6 mm pan head"),
-    ("8. 3D printing", "M6 bolts + nuts (shifter); M5 bolts + large washers (mounting)", "4 + 8", "loose", HW, 8, ""),
+    ("8. 3D printing", "M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge)",
+     "4 + 8 + 1", "loose", HW, 9, ""),
     # ---------------------------------------------------------------- 9
     ("9. Sequential shifter (Beavis Motorsport DIY)", "V-155-1C25 roller-lever microswitch", "2", "pack of 5", AMZ, 9,
      "Genuine Omron is $4–6 each"),
@@ -147,7 +148,7 @@ TOOLS = [
 
 OPTIONAL = [
     ("Genuine Arduino Mega instead of a clone", 26),
-    ("Two extra 12 mm push buttons for [+]/[−] on the pod", 0),
+    ("3M VHB tape, to stick the dash-pod mount down instead of screwing it", 8),
     ("Cheap logic analyser (checks speed and tach signals)", 12),
 ]
 
@@ -188,7 +189,7 @@ def main():
     for s in sections:
         md.append(f"| {s} | {money(tot[s])} |")
     md.append(f"| **All parts, including the shifter** | **{money(parts_total)}** |")
-    md.append(f"| Without the shifter (buttons instead) | {money(parts_total - shifter)} |")
+    md.append(f"| Without the shifter (no manual shifting) | {money(parts_total - shifter)} |")
     md.append(f"| Without filament (if your printer comes with it) | {money(parts_total - filament)} |")
     md.append(f"| Tools, if you own none of them | {money(tools_total)} |")
     md.append("")
@@ -205,7 +206,10 @@ def main():
     md.append("2. **ATF cooler hose inside diameter** (usually 5/16\" or 3/8\"): for the barbed tee.")
     md.append("3. **Space behind the glovebox**: the TCU box is 216 × 178 × 51 mm (244 mm wide with "
               "its mounting ears).")
-    md.append("4. **Space on the centre console**: the pod is 176 × 130 × 70 mm, plus the shifter on top.")
+    md.append("4. **A spot for the dash pod**: 210 × 64 × 64 mm, plus its hinge mount, on the dash top "
+              "(driver's side, never over the passenger airbag) or on the ceiling above the windscreen.")
+    md.append("5. **Space on the centre console** beside the gear lever for the shifter base: "
+              "150 × 100 × 29 mm, plus the shifter on top.")
     md.append("")
     md.append("## Where to order")
     md.append("")

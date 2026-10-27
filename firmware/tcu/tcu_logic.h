@@ -41,13 +41,16 @@ enum Event : uint8_t {
   EV_DENY_LIMIT,         // already in 1st / 4th
   EV_AUTO_DOWNSHIFT,     // MANUAL: forced downshift while slowing
   EV_REV_LIMIT_UPSHIFT,  // forced upshift at rev limit
-  EV_AUTO_RESUMED,       // MANUAL -> AUTO (long press [+])
+  EV_AUTO_RESUMED,       // MANUAL switch flipped off: back to the AUTO map
+  EV_MANUAL,             // MANUAL switch flipped on: the shifter shifts
+  EV_DENY_NOT_MANUAL,    // shifter clicked with the MANUAL switch off
 };
 
 struct Inputs {
   uint32_t nowMs = 0;
   // Debounced switch states, true = active.
   bool up = false, down = false, eco = false, sport = false;
+  bool manual = false;           // MANUAL switch ON: the shifter lever shifts
   bool customRequested = false;  // ON/OFF switch ON
   bool brake = false;
   bool leverInD = false;
@@ -192,7 +195,7 @@ class Controller {
   uint32_t lastHighTpsMs_ = 0;
 
   bool prevUp_ = false, prevDown_ = false;
-  bool upEdge_ = false, downEdge_ = false, upLong_ = false, upLongFired_ = false;
+  bool upEdge_ = false, downEdge_ = false;
   uint32_t upSince_ = 0, downSince_ = 0;
 
   Persist supplyBad_, tpsBad_, vssStall_, ratioBad_, overRev_, solBad_[3];

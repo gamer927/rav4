@@ -10,7 +10,7 @@ inline bool elapsed(uint32_t now, uint32_t since, uint32_t ms) { return (uint32_
 
 const char* const kNames[T_COUNT] = {
     "SUPPLY", "TPS",     "ATF SENS", "GYRO",     "SWITCHES", "CALIBRATN", "LAST RST", "LAMPS",    "SOL S1",
-    "SOL S2", "SOL SL",  "RELAY REL", "BTN [+]", "BTN [-]",   "ECO SW",   "SPORT SW", "BRAKE SW",
+    "SOL S2", "SOL SL",  "RELAY REL", "SHIFT UP", "SHIFT DN",   "ECO SW",   "SPORT SW", "MANUAL SW", "BRAKE SW",
     "WATCHDOG",
 };
 
@@ -174,8 +174,10 @@ void SelfTest::step(const Inputs& in, bool testEdge) {
       switch (PR_UP + promptIndex_) {
         case PR_UP: ok = in.up; break;
         case PR_DOWN: ok = in.down; break;
-        case PR_ECO: ok = in.eco && !in.sport; break;
-        case PR_SPORT: ok = in.sport && !in.eco; break;
+        // "Only this one on" also catches two switches wired to the same core.
+        case PR_ECO: ok = in.eco && !in.sport && !in.manual; break;
+        case PR_SPORT: ok = in.sport && !in.eco && !in.manual; break;
+        case PR_MANUAL: ok = in.manual && !in.eco && !in.sport; break;
         case PR_BRAKE: ok = in.brake; break;
       }
       TestResult r = TR_NONE;

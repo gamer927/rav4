@@ -11,17 +11,23 @@ an ON/OFF switch, an ECO switch, a SPORT switch, [+]/[−] shift buttons and a T
 small OLED screen. Rev 3 makes it buildable by hand: through-hole MOSFET drivers with
 current-sensor modules instead of surface-mount PROFETs (§3.3), a corrected speed-signal
 comparator (wiring guide §6), the TCU split into a power board, a logic board and a hub on the
-Mega, and 3D-printed housings.
+Mega, and 3D-printed housings. Rev 3.1 splits the hardware into three pieces (a dash pod with the
+screen and switches, a shifter base on the centre console, and the TCU box), each with its own
+cables, and makes MANUAL a switch of its own instead of tapping a shift button.
 
-**Console controls**
+**Dash pod controls** (left to right, after the screen)
 
 | Control | Type | What it does |
 |---|---|---|
-| ON/OFF | Toggle switch | OFF = factory transmission control (STOCK). ON = this controller drives the shifts (CUSTOM) |
+| TCU | LED | Lit = the TCU is shifting (§6.7 for the blink codes) |
 | ECO | Toggle switch | Early upshifts, early lockup |
 | SPORT | Toggle switch | Holds gears longer, quick kickdown. ECO and SPORT both off = NORMAL; both on = NORMAL plus an `ECO+SPT` warning |
-| [+] / [−] | Push buttons | Manual shifts (tiptronic-style). Hold [+] 1 s to go back to automatic |
+| MANUAL | Toggle switch | ON = you shift with the shifter lever (SPORT's lockup and pedal response). OFF = the TCU shifts by itself in the ECO/NORMAL/SPORT map |
 | TEST | Push button | Tap: next screen. Hold 2 s: run the self-test (§7) |
+| ON/OFF | Toggle switch with a flip-up cover | OFF = factory transmission control (STOCK). ON = this controller drives the shifts (CUSTOM) |
+
+**Shifter lever** (on the centre console): a sequential lever with two microswitches. One click is
+one shift, and only with MANUAL on.
 
 > **Safety.** This system takes control of the drivetrain. Everything marked **VERIFY** must
 > be confirmed against the factory repair manual (RM) and electrical wiring diagram (EWD) for
@@ -64,8 +70,8 @@ What this means:
 | State | Who drives the solenoids | How you get there |
 |---|---|---|
 | **STOCK** | Factory ECU (relays de-energised) | Power-up, ON/OFF switch OFF, lever not in D, any fault, MCU reset |
-| **CUSTOM-AUTO** | TCU, using the ECO/NORMAL/SPORT shift and lockup maps | ON/OFF switch flipped OFF→ON with the lever in D; or hold [+] for 1 s while in MANUAL |
-| **CUSTOM-MANUAL** | TCU, holding the gear you selected | Tap [+] or [-] while in CUSTOM |
+| **CUSTOM-AUTO** | TCU, using the ECO/NORMAL/SPORT shift and lockup maps | ON/OFF switch flipped OFF→ON with the lever in D and MANUAL off; or MANUAL flipped off while in CUSTOM |
+| **CUSTOM-MANUAL** | TCU, holding the gear you selected with the shifter lever | As CUSTOM-AUTO but with MANUAL on; or MANUAL flipped on while in CUSTOM |
 
 Rules that never change:
 1. **De-energised = factory.** Power loss, reset, watchdog, firmware hang or a broken ON/OFF
@@ -83,8 +89,10 @@ Rules that never change:
 ## 2. Architecture
 
 ```
- OVERHEAD CONSOLE                        8-core shielded (shield grounded at TCU end only)
- [ON/OFF] [ECO] [SPORT] [+] [-] [TEST]  LED ────────────────────────────────┐
+ DASH POD (dash top or ceiling)          8-core shielded (shield grounded at TCU end only)
+ [OLED] LED [ECO] [SPORT] [MANUAL] [TEST] [ON/OFF] ─────────────────────────┐
+ SHIFTER BASE (centre console)           3-core shielded                    │
+ sequential lever: UP / DOWN microswitches ─────────────────────────────────┤
                                                                             v
  ┌──────────────────────────── UNDER-DASH TCU ENCLOSURE ───────────────────────────────┐
  │  Fused IG feed → reverse-polarity + TVS → 5 V/3 A automotive buck → Mega 5 V, OLED    │
@@ -92,7 +100,7 @@ Rules that never change:
  │  Arduino Mega 2560 ── input conditioning (RC + clamps, optos for 12 V signals)        │
  │        │  D8/D9/D10 → 3 × P-MOSFET high-side + ACS712 ──────┐                         │
  │        │  D6 → MOSFET/ULN → 3 × DPDT relay coils             │                         │
- │        │  I²C → console OLED (2.42", in the pod)             v                         │
+ │        │  I²C → dash pod OLED (2.42")                        v                         │
  │        │                           ┌── DPDT ×3 (S1, S2, SL) ─────────────┐             │
  │        │   ECU S1/S2/SL outputs ───┤ NC: ECU → solenoid    (de-energised) │             │
  │        │   (sensed via optos) ─────┤ NO: ECU → 15 Ω/50 W dummy            │             │
@@ -182,7 +190,7 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 
 | Signal | Source (VERIFY in the EWD) | Conditioning |
 |---|---|---|
-| Console controls (UP, DOWN, ECO, SPORT, ON/OFF, TEST) | Switch to ground | 2.2 kΩ pull-up to 5 V, 1 kΩ series, 100 nF to ground at the MCU, BAT54S clamp |
+| Switches (shifter UP, DOWN; dash ECO, SPORT, MANUAL, ON/OFF, TEST) | Switch to ground | 2.2 kΩ pull-up to 5 V, 1 kΩ series, 100 nF to ground at the MCU, BAT54S clamp |
 | Brake | Stop-lamp switch STP (+12 V when pressed) | PC817 opto (LED + 2.2 kΩ), output pulls the MCU pin low |
 | Lever in D | PNP switch "D" output (feeds the D indicator) | PC817 opto as above |
 | ECU S1/S2/SL sense | ECU side of each relay (COM-A) | PC817 opto with 3.3 kΩ (about 4 mA load) |
@@ -192,25 +200,29 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 | ATF temperature | DS18B20 probe in the cooler line (§3.8) | 4.7 kΩ pull-up DQ→5 V at the TCU, 100 Ω series, 5.1 V TVS to ground. (Alternative: analog NTC sender on A2 with a 1 kΩ pull-up; set `ATF_SENSOR = ATF_NTC`) |
 | Battery | IG feed | 47 kΩ / 10 kΩ divider, 100 nF, 5.1 V zener |
 
-### 3.6 Console cable (8-core shielded)
+### 3.6 Dash pod and shifter cables
 Step-by-step wiring, connector pin-outs and the full wire list are in
 [`03-wiring-guide.md`](03-wiring-guide.md), with diagrams
 [`wiring-diagram.svg`](wiring-diagram.svg) and [`wiring-detail-a.svg`](wiring-detail-a.svg).
 
-1. [+] button
-2. [−] button
-3. ECO switch
-4. SPORT switch
+Dash pod switch cable (X4, 8-core shielded, one core spare):
+1. ECO switch
+2. SPORT switch
+3. MANUAL switch
+4. TEST button
 5. ON/OFF switch
-6. TEST button
+6. LED anode (D7 → 330 Ω; the cathode goes to the common ground)
 7. Switch common (ground)
-8. LED anode (D7 → 330 Ω; the cathode goes to the common ground)
 
-Ground the shield drain at the TCU end only. Every control switches to ground, so a broken wire
-reads as "off": ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
+Shifter cable (X7, 3-core shielded): 1 = upshift microswitch, 2 = downshift microswitch,
+3 = common (ground).
 
-### 3.7 Console display (OLED)
-- A **2.42" 128×64 I²C OLED** (SSD1309), in the console pod within about 1–1.5 m of the TCU
+Ground each shield drain at the TCU end only. Every control switches to ground, so a broken wire
+reads as "off": ON/OFF falls back to STOCK, ECO/SPORT fall back to NORMAL, MANUAL falls back to
+AUTO, and a broken shifter wire just stops that shift direction.
+
+### 3.7 Dash pod display (OLED)
+- A **2.42" 128×64 I²C OLED** (SSD1309), in the dash pod, within 2.5 m of cable from the TCU
   box. At the driver's eye distance (60–75 cm), text needs to be about 4 mm tall to read at a
   glance. A 0.96" screen's small text is 1.2 mm tall and its big line 2.4 mm; on the 2.42" they
   are 3.0 mm and 6.0 mm, and the MAIN page's gear digit is **18 mm**.
@@ -227,8 +239,10 @@ reads as "off": ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
 - Use a 4-wire shielded cable (5 V, GND, SDA, SCL). The firmware runs I²C at 100 kHz for the
   long run and uses a 3 ms bus timeout, so a damaged cable can't hang the controller. If the
   module lacks pull-ups, add 4.7 kΩ on SDA and SCL at the TCU end.
-- Don't run I²C up the A-pillar: it isn't built for long cables. That's why the TEST button goes
-  in the console cable but the screen sits in the dash.
+- Keep the I²C cable under 2.5 m. At 100 kHz the bus allows 400 pF; a shielded cable is about
+  100 pF/m, so 2.5 m plus the two modules stays well inside it, and the modules' pull-ups (about
+  2.4 kΩ together) keep the rise time under the 1 µs limit. A ceiling-mounted pod's run (behind
+  the glovebox, up the A-pillar, along the headliner) is about 2 m.
 
 ### 3.8 ATF temperature probe (DS18B20 in the cooler line)
 Yes, this works, with these corrections to the usual "Option B" write-up:
@@ -283,13 +297,13 @@ How the firmware reads it:
 | D2 (INT4) | in | VSS pulses | falling edge | Comparator or opto output |
 | D3 (INT5) | in | Tach pulses | falling edge | 2 pulses/rev (4-cyl) |
 | D6 | out | Relay bank driver | HIGH = TCU in control | 10 k pull-down; MOSFET/ULN, never the coil directly |
-| D7 | out | Console LED | HIGH | 330 Ω series |
+| D7 | out | Dash pod TCU LED | HIGH | 330 Ω series |
 | D8 | out | S1 high-side IN | HIGH = on | 10 k pull-down |
 | D9 | out | S2 high-side IN | HIGH = on | 10 k pull-down |
 | D10 | out | SL high-side IN | HIGH = on | 10 k pull-down |
 | D13 | out | Status LED (on-board) | HIGH | Mirrors D7 |
-| D22 | in | Upshift [+] (button or lever microswitch) | LOW | Edge-triggered; `SWAP_SHIFT_INPUTS` swaps D22/D23 |
-| D23 | in | Downshift [-] (button or lever microswitch) | LOW | Edge-triggered |
+| D22 | in | Shifter upshift microswitch | LOW | Edge-triggered; `SWAP_SHIFT_INPUTS` swaps D22/D23 |
+| D23 | in | Shifter downshift microswitch | LOW | Edge-triggered |
 | D24 | in | Mode ECO | LOW | |
 | D25 | in | Mode SPORT | LOW | |
 | D26 | in | ON/OFF switch | LOW = ON (CUSTOM) | Open = STOCK (fail-safe) |
@@ -298,8 +312,9 @@ How the firmware reads it:
 | D29 | in | ECU S1 sense | LOW = ECU S1 on | Opto |
 | D30 | in | ECU S2 sense | LOW = ECU S2 on | Opto |
 | D31 | in | ECU SL sense | LOW = ECU SL on | Opto |
-| D32 | in | TEST button | LOW = pressed | Console core 8 |
+| D32 | in | TEST button | LOW = pressed | Dash cable core 4 |
 | D33 | 1-Wire | ATF probe (DS18B20) DQ | – | 4.7 k pull-up to 5 V |
+| D34 | in | MANUAL switch | LOW = on (shifter shifts) | Open = AUTO (fail-safe) |
 | D20 / D21 | I²C | OLED (0x3C) and gyro (0x68) SDA / SCL | – | 100 kHz |
 | A0 | an | TPS (VTA) | – | 10 k series tap |
 | A1 | an | TPS ground reference (E2) | – | 10 k series tap; subtracted from A0 |
@@ -330,7 +345,7 @@ debounced.
 ## 6. Control logic (`firmware/tcu/tcu_logic.cpp`)
 
 ### 6.1 Loop
-- Switches are sampled on every pass and debounced: 25 ms for console switches, 40 ms for optos.
+- Switches are sampled on every pass and debounced: 25 ms for the dash and shifter switches, 40 ms for optos.
 - The controller runs every **10 ms**: it reads the inputs, steps the logic and applies the
   outputs.
 - The OLED is redrawn every 100 ms, sent in small chunks so it never blocks the loop.
@@ -393,9 +408,10 @@ shift earlier on purpose, for quietness and economy, not speed.
   tip-in release whatever the ECO/SPORT switches are set to. Going back to AUTO restores the
   switch mode. Brake downshifts and corner hold are automatic-shift features, so they don't apply:
   in MANUAL the gear is yours.
-- A tap on [+] or [-] gives one shift. Holding a button never repeats. Any tap while in AUTO
-  switches to MANUAL.
-- Hold [+] for **1 s** to return to AUTO.
+- The **MANUAL switch** picks it: on = CUSTOM-MANUAL, off = CUSTOM-AUTO. Flipping it never shifts
+  by itself; the gear you're in carries over.
+- One click of the shifter lever gives one shift. Holding it never repeats. With MANUAL off, a
+  click does nothing except show `FLIP MANUAL ON`.
 - **Forced downshift** when slowing below 22 mph (4th), 11 mph (3rd) or 5 mph (2nd), so the
   car never stops in a high gear. To allow 2nd-gear snow starts, set `MANUAL_MIN_MPH[2] = 0`.
 - **Forced upshift** at 6,200 rpm held for 150 ms (configurable).
@@ -462,10 +478,10 @@ Coast release (SPORT, §6.8) also counts as a release condition.
 | `WARN_ATF_SENSOR` | ATF thermistor open or short |
 | `WARN_ATF_HOT` / `WARN_ATF_CRITICAL` | 110 °C / 125 °C |
 | `WARN_MODE_SWITCH` | ECO and SPORT both on; running NORMAL |
-| `WARN_BUTTON_STUCK` | [+] or [-] held for 10 s |
+| `WARN_BUTTON_STUCK` | A shifter microswitch held closed for 10 s (`SHIFTR` on the screen) |
 | `WARN_WDT_RESET` | The last reset was caused by the watchdog |
 
-The console LED shows the state:
+The dash pod's TCU LED shows the state:
 - **Solid:** TCU in control.
 - **Slow blink:** armed and waiting to stop before engaging.
 - **Fast blink:** fault (turn the ON/OFF switch OFF to acknowledge).
@@ -475,7 +491,7 @@ The console LED shows the state:
 | Feature | ECO | NORMAL | SPORT | What it does |
 |---|---|---|---|---|
 | Hold gears longer, shift near the top at full throttle | – | – | ✓ | The SPORT shift map (§6.3): full-throttle upshifts at about 6,000–6,200 real engine rpm, just under the redline, which is the fastest way through these gears |
-| **Corner hold** | ✓ | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own [+]/[−] and the over-rev upshift always work |
+| **Corner hold** | ✓ | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own shifter clicks (in MANUAL) and the over-rev upshift always work |
 | **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 2 mph/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
 | **Early lockup** | ✓ | – | – | ECO locks the converter as soon as the engine can take it (1,250 rpm locked: ~23 mph in 3rd, ~32 in 4th) and keeps it through light throttle. A slipping converter is the biggest fuel waste in an automatic, so this is ECO's main economy gain |
 | **Highway lockup** | ✓ | ✓ | ✓ | In 4th above ~51 mph, lockup holds up to 95 % throttle, so a long fast run or a highway grade doesn't slip and heat the fluid (§6.5) |
@@ -524,7 +540,7 @@ handles those).
   opening. Changing the linkage geometry changes line pressure and shift firmness, and can
   cause slipping.
 
-## 7. Built-in test and console screen
+## 7. Built-in test and screen
 
 The system tests itself in three ways, modelled on aircraft built-in test (BIT):
 
@@ -550,11 +566,11 @@ On an abort, every output switches off at once.
 
 | # | Step | Pass condition |
 |---|---|---|
-| 1 | Lamp test: console LED, status LED and the OLED (screen inverts) for 1.5 s | You look. Recorded as CHK |
+| 1 | Lamp test: dash pod LED, on-board status LED and the OLED (screen inverts) for 1.5 s | You look. Recorded as CHK |
 | 2 | Re-run the PBIT checks | As PBIT |
 | 3 | Relays on; pulse S1, then S2, then SL for 0.4 s each, one at a time | 0.6–1.6 A on the pulsed solenoid. Engine off means no line pressure, so the valves only click |
 | 4 | Relays off; all drivers on for 0.4 s | ≤ 0.2 A. Current here means a welded or stuck relay |
-| 5 | Prompts: PRESS [+], PRESS [−], ECO ON SPORT OFF, SPORT ON ECO OFF, PRESS BRAKE | Detected within 8 s. TEST skips a prompt (SKIP); a timeout is a FAIL. Covers the whole A-pillar cable |
+| 5 | Prompts: SHIFTER UP, SHIFTER DOWN, ONLY ECO ON, ONLY SPORT ON, ONLY MANUAL ON, PRESS BRAKE | Detected within 8 s. "Only" means the other two mode switches off, which also catches two switches wired to one core. TEST skips a prompt (SKIP); a timeout is a FAIL. Covers the whole shifter and dash cables |
 | 6 | Watchdog: the board deliberately stops servicing the watchdog | It must reboot within 0.25 s; the results survive the reset and the test records PASS. If the screen freezes on `WATCHDOG TEST`, it failed |
 
 Results are PASS, FAIL, CHK (needs a human: lamps, or solenoids without current sense) or SKIP.
@@ -616,7 +632,7 @@ Log columns: `ms, ctrl, mode, gear, lockup, mph, rpm, rpm_per_mph, tps, atf, vol
    - Check the truth table, the handover and every fault in §6.7.
 3. **In the car, static:**
    - Ignition on, engine off, lever in P: run IBIT. It checks the real solenoids, relays and the
-     whole console cable.
+     shifter and dash pod cables.
    - Engine off: verify that every relay drops on power loss.
    - Measure ECU outputs into the dummies.
    - Confirm that no DTCs are set after a drive in STOCK with the TCU connected (OBD-II scan

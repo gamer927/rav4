@@ -120,14 +120,6 @@ void Controller::updateButtons(const Inputs& in) {
   // Edge-triggered: holding a button never auto-repeats shifts.
   upEdge_ = in.up && !prevUp_ && !both;
   downEdge_ = in.down && !prevDown_ && !both;
-
-  upLong_ = false;
-  if (!in.up) {
-    upLongFired_ = false;
-  } else if (!both && !upLongFired_ && elapsed(now_, upSince_, cfg::LONG_PRESS_MS)) {
-    upLong_ = true;
-    upLongFired_ = true;
-  }
   prevUp_ = in.up;
   prevDown_ = in.down;
 }
@@ -242,7 +234,7 @@ void Controller::tryEnterCustom(const Inputs& in) {
   brakeHold_ = liftHold_ = highTpsSeen_ = false;
   lastLockupChangeMs_ = now_;
   overRev_ = Persist();
-  out_.control = cfg::ENTER_IN_MANUAL ? CTRL_MANUAL : CTRL_AUTO;
+  out_.control = in.manual ? CTRL_MANUAL : CTRL_AUTO;
   raise(EV_CUSTOM, true);
 }
 
@@ -260,16 +252,21 @@ void Controller::runCustom(const Inputs& in) {
     pendingGear_ = 0;
   }
 
-  if (upLong_ && out_.control == CTRL_MANUAL) {
-    out_.control = CTRL_AUTO;
-    raise(EV_AUTO_RESUMED, true);
-  } else if (upEdge_ || downEdge_) {
-    // Tiptronic-style: any tap in AUTO drops into MANUAL and shifts.
-    out_.control = CTRL_MANUAL;
-    if (requestShift(gear_ + (upEdge_ ? 1 : -1), in.speedMph, true)) raise(EV_SHIFT, true);
+  // The MANUAL switch picks who shifts: on, the shifter lever; off, the map.
+  const Control want = in.manual ? CTRL_MANUAL : CTRL_AUTO;
+  if (out_.control != want) {
+    out_.control = want;
+    raise(want == CTRL_MANUAL ? EV_MANUAL : EV_AUTO_RESUMED, true);
+  }
+  if (upEdge_ || downEdge_) {
+    if (out_.control != CTRL_MANUAL) {
+      raise(EV_DENY_NOT_MANUAL, true);
+    } else if (requestShift(gear_ + (upEdge_ ? 1 : -1), in.speedMph, true)) {
+      raise(EV_SHIFT, true);
+    }
   }
 
-  updateMode(in);  // a tap may have switched AUTO <-> MANUAL this step
+  updateMode(in);  // the MANUAL switch may have changed AUTO <-> MANUAL this step
   revLimitGuard(in);
   if (out_.control == CTRL_AUTO) {
     autoSchedule(in);

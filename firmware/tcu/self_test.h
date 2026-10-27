@@ -2,7 +2,7 @@
 //   PBIT  power-up BIT: passive checks, run once after every boot.
 //   CBIT  continuous BIT: the Controller's faults and warnings (tcu_logic.cpp).
 //   IBIT  initiated BIT: hold the TEST button. Exercises lamps, relays,
-//         solenoid circuits, console switches and the watchdog. Interlocked
+//         solenoid circuits, shifter and dash switches and the watchdog. Interlocked
 //         like "weight on wheels": only parked, engine off, master at STOCK.
 // Pure logic, no Arduino dependencies; unit-tested in test/test_self_test.cpp.
 #pragma once
@@ -31,6 +31,7 @@ enum TestId : uint8_t {
   T_BTN_DOWN,
   T_SW_ECO,
   T_SW_SPORT,
+  T_SW_MANUAL,
   T_BRAKE,
   T_WATCHDOG,
   T_COUNT
@@ -67,7 +68,7 @@ enum TestPhase : uint8_t {
   PH_DONE,
 };
 
-enum TestPrompt : uint8_t { PR_NONE = 0, PR_UP, PR_DOWN, PR_ECO, PR_SPORT, PR_BRAKE };
+enum TestPrompt : uint8_t { PR_NONE = 0, PR_UP, PR_DOWN, PR_ECO, PR_SPORT, PR_MANUAL, PR_BRAKE };
 
 struct TestOutputs {
   bool relay = false;

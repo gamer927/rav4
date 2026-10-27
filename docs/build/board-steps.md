@@ -466,12 +466,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L1.1](build/logic-L1-1.png)
 
-- [ ] **X4a**: C1 screw terminal → col 2, row 1. X4-1: C1 [+]
-- [ ] **X4b**: C2 screw terminal → col 4, row 1. X4-2: C2 [−]
-- [ ] **X4c**: C3 screw terminal → col 6, row 1. X4-3: C3 ECO
-- [ ] **X4d**: C4 screw terminal → col 8, row 1. X4-4: C4 SPORT
-- [ ] **X4e**: C5 screw terminal → col 10, row 1. X4-5: C5 ON/OFF
-- [ ] **X4f**: C6 screw terminal → col 12, row 1. X4-6: C6 TEST
+- [ ] **X7a**: UP screw terminal → col 1, row 1. X7-1 shifter UP
+- [ ] **X7b**: DOWN screw terminal → col 3, row 1. X7-2 shifter DOWN
+- [ ] **X7c**: GND screw terminal → col 5, row 1. X7-3 shifter GND
+- [ ] **X4a**: C1 ECO screw terminal → col 7, row 1. X4-1: C1 ECO
+- [ ] **X4b**: C2 SPORT screw terminal → col 9, row 1. X4-2: C2 SPORT
+- [ ] **X4c**: C3 MANUAL screw terminal → col 11, row 1. X4-3: C3 MANUAL
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -479,22 +479,24 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L1.2](build/logic-L1-2.png)
 
-- [ ] **X4g**: C7 screw terminal → col 14, row 1. X4-7: C7 GND
-- [ ] **X4h**: C8 screw terminal → col 16, row 1. X4-8: C8 LED
-- [ ] **X5a**: 5V screw terminal → col 19, row 1. X5-1 OLED
-- [ ] **X5b**: GND screw terminal → col 21, row 1. X5-2 OLED
-- [ ] **X5c**: SDA screw terminal → col 23, row 1. X5-3 OLED
-- [ ] **X5d**: SCL screw terminal → col 25, row 1. X5-4 OLED
+- [ ] **X4d**: C4 TEST screw terminal → col 13, row 1. X4-4: C4 TEST
+- [ ] **X4e**: C5 ON/OFF screw terminal → col 15, row 1. X4-5: C5 ON/OFF
+- [ ] **X4f**: C6 LED screw terminal → col 17, row 1. X4-6: C6 LED
+- [ ] **X4g**: C7 GND screw terminal → col 19, row 1. X4-7: C7 GND
+- [ ] **X5a**: 5V screw terminal → col 21, row 1. X5-1 screen
+- [ ] **X5b**: GND screw terminal → col 23, row 1. X5-2 screen
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### L1.3 — Place 4 parts
+#### L1.3 — Place 6 parts
 
 ![L1.3](build/logic-L1-3.png)
 
-- [ ] **X6a**: 5V screw terminal → col 28, row 1. X6-1 ATF probe
-- [ ] **X6b**: GND screw terminal → col 30, row 1. X6-2 ATF probe
-- [ ] **X6c**: DQ screw terminal → col 32, row 1. X6-3 ATF probe
+- [ ] **X5c**: SDA screw terminal → col 25, row 1. X5-3 screen
+- [ ] **X5d**: SCL screw terminal → col 27, row 1. X5-4 screen
+- [ ] **X6a**: 5V screw terminal → col 29, row 1. X6-1 ATF probe
+- [ ] **X6b**: GND screw terminal → col 31, row 1. X6-2 ATF probe
+- [ ] **X6c**: DQ screw terminal → col 33, row 1. X6-3 ATF probe
 - [ ] **JB**: 16-pin box header box header → pin 1 in col 9, row 24. Notch facing the back edge; pin 1 (square pad) at the right-hand end, back row
 
 Push the legs through, bend them out a little underneath, solder, snip.
@@ -504,7 +506,7 @@ Push the legs through, bend them out a little underneath, solder, snip.
 ![L1.4](build/logic-L1-4.png)
 
 - [ ] **1** red 22 AWG: **JB** pin 1 → **X5a** (5V) → **X6a** (5V)
-- [ ] **2** black 22 AWG: **JB** pin 2 → **X4g** (C7) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
+- [ ] **2** black 22 AWG: **JB** pin 2 → **X7c** (GND) → **X4g** (C7 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
 - [ ] **3** blue 22 AWG: **JB** pin 11 → **X5c** (SDA)
 - [ ] **4** blue 22 AWG: **JB** pin 12 → **X5d** (SCL)
 
@@ -513,12 +515,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.1](build/logic-L2-1.png)
 
-- [ ] **RU1**: 2.2k resistor (bands: red-red-black-brown-brown) → col 2, row 4 and col 2, row 8. Pull-up
-- [ ] **RS1**: 1k resistor (bands: brown-black-black-brown-brown) → col 3, row 9 and col 3, row 13. Series
-- [ ] **CF1**: 100 nF capacitor → col 2, row 14 and col 2, row 16
-- [ ] **DH1**: BAT85 diode → col 3, row 15 and col 3, row 18. Band (K) towards the back
-- [ ] **DL1**: BAT85 diode → col 2, row 18 and col 2, row 21. Band (K) towards the back
-- [ ] **RU2**: 2.2k resistor (bands: red-red-black-brown-brown) → col 4, row 4 and col 4, row 8. Pull-up
+- [ ] **RU1**: 2.2k resistor (bands: red-red-black-brown-brown) → col 1, row 4 and col 1, row 8. Pull-up
+- [ ] **RS1**: 1k resistor (bands: brown-black-black-brown-brown) → col 2, row 9 and col 2, row 13. Series
+- [ ] **CF1**: 100 nF capacitor → col 1, row 14 and col 1, row 16
+- [ ] **DH1**: BAT85 diode → col 2, row 15 and col 2, row 18. Band (K) towards the back
+- [ ] **DL1**: BAT85 diode → col 1, row 18 and col 1, row 21. Band (K) towards the back
+- [ ] **RU2**: 2.2k resistor (bands: red-red-black-brown-brown) → col 3, row 4 and col 3, row 8. Pull-up
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -526,12 +528,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.2](build/logic-L2-2.png)
 
-- [ ] **RS2**: 1k resistor (bands: brown-black-black-brown-brown) → col 5, row 9 and col 5, row 13. Series
-- [ ] **CF2**: 100 nF capacitor → col 4, row 14 and col 4, row 16
-- [ ] **DH2**: BAT85 diode → col 5, row 15 and col 5, row 18. Band (K) towards the back
-- [ ] **DL2**: BAT85 diode → col 4, row 18 and col 4, row 21. Band (K) towards the back
-- [ ] **RU3**: 2.2k resistor (bands: red-red-black-brown-brown) → col 6, row 4 and col 6, row 8. Pull-up
-- [ ] **RS3**: 1k resistor (bands: brown-black-black-brown-brown) → col 7, row 9 and col 7, row 13. Series
+- [ ] **RS2**: 1k resistor (bands: brown-black-black-brown-brown) → col 4, row 9 and col 4, row 13. Series
+- [ ] **CF2**: 100 nF capacitor → col 3, row 14 and col 3, row 16
+- [ ] **DH2**: BAT85 diode → col 4, row 15 and col 4, row 18. Band (K) towards the back
+- [ ] **DL2**: BAT85 diode → col 3, row 18 and col 3, row 21. Band (K) towards the back
+- [ ] **RU3**: 2.2k resistor (bands: red-red-black-brown-brown) → col 7, row 4 and col 7, row 8. Pull-up
+- [ ] **RS3**: 1k resistor (bands: brown-black-black-brown-brown) → col 8, row 9 and col 8, row 13. Series
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -539,12 +541,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.3](build/logic-L2-3.png)
 
-- [ ] **CF3**: 100 nF capacitor → col 6, row 14 and col 6, row 16
-- [ ] **DH3**: BAT85 diode → col 7, row 15 and col 7, row 18. Band (K) towards the back
-- [ ] **DL3**: BAT85 diode → col 6, row 18 and col 6, row 21. Band (K) towards the back
-- [ ] **RU4**: 2.2k resistor (bands: red-red-black-brown-brown) → col 8, row 4 and col 8, row 8. Pull-up
-- [ ] **RS4**: 1k resistor (bands: brown-black-black-brown-brown) → col 9, row 9 and col 9, row 13. Series
-- [ ] **CF4**: 100 nF capacitor → col 8, row 14 and col 8, row 16
+- [ ] **CF3**: 100 nF capacitor → col 7, row 14 and col 7, row 16
+- [ ] **DH3**: BAT85 diode → col 8, row 15 and col 8, row 18. Band (K) towards the back
+- [ ] **DL3**: BAT85 diode → col 7, row 18 and col 7, row 21. Band (K) towards the back
+- [ ] **RU4**: 2.2k resistor (bands: red-red-black-brown-brown) → col 9, row 4 and col 9, row 8. Pull-up
+- [ ] **RS4**: 1k resistor (bands: brown-black-black-brown-brown) → col 10, row 9 and col 10, row 13. Series
+- [ ] **CF4**: 100 nF capacitor → col 9, row 14 and col 9, row 16
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -552,12 +554,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.4](build/logic-L2-4.png)
 
-- [ ] **DH4**: BAT85 diode → col 9, row 15 and col 9, row 18. Band (K) towards the back
-- [ ] **DL4**: BAT85 diode → col 8, row 18 and col 8, row 21. Band (K) towards the back
-- [ ] **RU5**: 2.2k resistor (bands: red-red-black-brown-brown) → col 10, row 4 and col 10, row 8. Pull-up
-- [ ] **RS5**: 1k resistor (bands: brown-black-black-brown-brown) → col 11, row 9 and col 11, row 13. Series
-- [ ] **CF5**: 100 nF capacitor → col 10, row 14 and col 10, row 16
-- [ ] **DH5**: BAT85 diode → col 11, row 15 and col 11, row 18. Band (K) towards the back
+- [ ] **DH4**: BAT85 diode → col 10, row 15 and col 10, row 18. Band (K) towards the back
+- [ ] **DL4**: BAT85 diode → col 9, row 18 and col 9, row 21. Band (K) towards the back
+- [ ] **RU5**: 2.2k resistor (bands: red-red-black-brown-brown) → col 11, row 4 and col 11, row 8. Pull-up
+- [ ] **RS5**: 1k resistor (bands: brown-black-black-brown-brown) → col 12, row 9 and col 12, row 13. Series
+- [ ] **CF5**: 100 nF capacitor → col 11, row 14 and col 11, row 16
+- [ ] **DH5**: BAT85 diode → col 12, row 15 and col 12, row 18. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -565,53 +567,67 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.5](build/logic-L2-5.png)
 
-- [ ] **DL5**: BAT85 diode → col 10, row 18 and col 10, row 21. Band (K) towards the back
-- [ ] **RU6**: 2.2k resistor (bands: red-red-black-brown-brown) → col 12, row 4 and col 12, row 8. Pull-up
-- [ ] **RS6**: 1k resistor (bands: brown-black-black-brown-brown) → col 13, row 9 and col 13, row 13. Series
-- [ ] **CF6**: 100 nF capacitor → col 12, row 14 and col 12, row 16
-- [ ] **DH6**: BAT85 diode → col 13, row 15 and col 13, row 18. Band (K) towards the back
-- [ ] **DL6**: BAT85 diode → col 12, row 18 and col 12, row 21. Band (K) towards the back
+- [ ] **DL5**: BAT85 diode → col 11, row 18 and col 11, row 21. Band (K) towards the back
+- [ ] **RU6**: 2.2k resistor (bands: red-red-black-brown-brown) → col 13, row 4 and col 13, row 8. Pull-up
+- [ ] **RS6**: 1k resistor (bands: brown-black-black-brown-brown) → col 14, row 9 and col 14, row 13. Series
+- [ ] **CF6**: 100 nF capacitor → col 13, row 14 and col 13, row 16
+- [ ] **DH6**: BAT85 diode → col 14, row 15 and col 14, row 18. Band (K) towards the back
+- [ ] **DL6**: BAT85 diode → col 13, row 18 and col 13, row 21. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### L2.6 — Solder 6 wires (bottom side)
+#### L2.6 — Place 5 parts
 
 ![L2.6](build/logic-L2-6.png)
 
-- [ ] **1** blue 22 AWG: **X4a** (C1) → **RU1** at col 2, row 4 → **RS1** at col 3, row 9
-- [ ] **2** blue 22 AWG: **RS1** at col 3, row 13 → **DH1** plain end → **CF1** at col 2, row 14 → **DL1** band end → **JB** pin 3
-- [ ] **3** blue 22 AWG: **X4b** (C2) → **RU2** at col 4, row 4 → **RS2** at col 5, row 9
-- [ ] **4** blue 22 AWG: **RS2** at col 5, row 13 → **DH2** plain end → **CF2** at col 4, row 14 → **DL2** band end → **JB** pin 4
-- [ ] **5** blue 22 AWG: **X4c** (C3) → **RU3** at col 6, row 4 → **RS3** at col 7, row 9
-- [ ] **6** blue 22 AWG: **RS3** at col 7, row 13 → **DH3** plain end → **CF3** at col 6, row 14 → **DL3** band end → **JB** pin 5
+- [ ] **RU7**: 2.2k resistor (bands: red-red-black-brown-brown) → col 15, row 4 and col 15, row 8. Pull-up
+- [ ] **RS7**: 1k resistor (bands: brown-black-black-brown-brown) → col 16, row 9 and col 16, row 13. Series
+- [ ] **CF7**: 100 nF capacitor → col 15, row 14 and col 15, row 16
+- [ ] **DH7**: BAT85 diode → col 16, row 15 and col 16, row 18. Band (K) towards the back
+- [ ] **DL7**: BAT85 diode → col 15, row 18 and col 15, row 21. Band (K) towards the back
+
+Push the legs through, bend them out a little underneath, solder, snip.
 
 #### L2.7 — Solder 6 wires (bottom side)
 
 ![L2.7](build/logic-L2-7.png)
 
-- [ ] **1** blue 22 AWG: **X4d** (C4) → **RU4** at col 8, row 4 → **RS4** at col 9, row 9
-- [ ] **2** blue 22 AWG: **RS4** at col 9, row 13 → **DH4** plain end → **CF4** at col 8, row 14 → **DL4** band end → **JB** pin 6
-- [ ] **3** blue 22 AWG: **X4e** (C5) → **RU5** at col 10, row 4 → **RS5** at col 11, row 9
-- [ ] **4** blue 22 AWG: **RS5** at col 11, row 13 → **DH5** plain end → **CF5** at col 10, row 14 → **DL5** band end → **JB** pin 7
-- [ ] **5** blue 22 AWG: **X4f** (C6) → **RU6** at col 12, row 4 → **RS6** at col 13, row 9
-- [ ] **6** blue 22 AWG: **RS6** at col 13, row 13 → **DH6** plain end → **CF6** at col 12, row 14 → **DL6** band end → **JB** pin 8
+- [ ] **1** blue 22 AWG: **X7a** (UP) → **RU1** at col 1, row 4 → **RS1** at col 2, row 9
+- [ ] **2** blue 22 AWG: **RS1** at col 2, row 13 → **DH1** plain end → **CF1** at col 1, row 14 → **DL1** band end → **JB** pin 3
+- [ ] **3** blue 22 AWG: **X7b** (DOWN) → **RU2** at col 3, row 4 → **RS2** at col 4, row 9
+- [ ] **4** blue 22 AWG: **RS2** at col 4, row 13 → **DH2** plain end → **CF2** at col 3, row 14 → **DL2** band end → **JB** pin 4
+- [ ] **5** blue 22 AWG: **X4a** (C1 ECO) → **RU3** at col 7, row 4 → **RS3** at col 8, row 9
+- [ ] **6** blue 22 AWG: **RS3** at col 8, row 13 → **DH3** plain end → **CF3** at col 7, row 14 → **DL3** band end → **JB** pin 5
 
-#### L2.8 — Solder 2 wires (bottom side)
+#### L2.8 — Solder 6 wires (bottom side)
 
 ![L2.8](build/logic-L2-8.png)
 
-- [ ] **1** red 22 AWG: **JB** pin 1 → **RU1** at col 2, row 8 → **RU2** at col 4, row 8 → **RU3** at col 6, row 8 → **RU4** at col 8, row 8 → **RU5** at col 10, row 8 → **RU6** at col 12, row 8 → **DH6** band end → **DH5** band end → **DH4** band end → **DH3** band end → **DH2** band end → **DH1** band end
-- [ ] **2** black 22 AWG: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **CF6** at col 12, row 16 → **CF5** at col 10, row 16 → **CF4** at col 8, row 16 → **CF3** at col 6, row 16 → **CF2** at col 4, row 16 → **CF1** at col 2, row 16
+- [ ] **1** blue 22 AWG: **X4b** (C2 SPORT) → **RU4** at col 9, row 4 → **RS4** at col 10, row 9
+- [ ] **2** blue 22 AWG: **RS4** at col 10, row 13 → **DH4** plain end → **CF4** at col 9, row 14 → **DL4** band end → **JB** pin 6
+- [ ] **3** blue 22 AWG: **X4c** (C3 MANUAL) → **RU5** at col 11, row 4 → **RS5** at col 12, row 9
+- [ ] **4** blue 22 AWG: **RS5** at col 12, row 13 → **DH5** plain end → **CF5** at col 11, row 14 → **DL5** band end → **JB** pin 15
+- [ ] **5** blue 22 AWG: **X4d** (C4 TEST) → **RU6** at col 13, row 4 → **RS6** at col 14, row 9
+- [ ] **6** blue 22 AWG: **RS6** at col 14, row 13 → **DH6** plain end → **CF6** at col 13, row 14 → **DL6** band end → **JB** pin 8
+
+#### L2.9 — Solder 4 wires (bottom side)
+
+![L2.9](build/logic-L2-9.png)
+
+- [ ] **1** blue 22 AWG: **X4e** (C5 ON/OFF) → **RU7** at col 15, row 4 → **RS7** at col 16, row 9
+- [ ] **2** blue 22 AWG: **RS7** at col 16, row 13 → **DH7** plain end → **CF7** at col 15, row 14 → **DL7** band end → **JB** pin 7
+- [ ] **3** red 22 AWG: **JB** pin 1 → **RU1** at col 1, row 8 → **RU2** at col 3, row 8 → **RU3** at col 7, row 8 → **RU4** at col 9, row 8 → **RU5** at col 11, row 8 → **RU6** at col 13, row 8 → **RU7** at col 15, row 8 → **DH7** band end → **DH6** band end → **DH5** band end → **DH4** band end → **DH3** band end → **DH2** band end → **DH1** band end
+- [ ] **4** black 22 AWG: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **DL7** plain end → **CF7** at col 15, row 16 → **CF6** at col 13, row 16 → **CF5** at col 11, row 16 → **CF4** at col 9, row 16 → **CF3** at col 7, row 16 → **CF2** at col 3, row 16 → **CF1** at col 1, row 16
 
 <!-- STEP L3 -->
 #### L3.1 — Place 4 parts
 
 ![L3.1](build/logic-L3-1.png)
 
-- [ ] **RL**: 330 resistor (bands: orange-orange-black-black-brown) → col 14, row 4 and col 14, row 8. Status LED
-- [ ] **RA1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 26, row 5 and col 26, row 9. ATF pull-up
-- [ ] **RA2**: 100 resistor (bands: brown-black-black-black-brown) → col 28, row 5 and col 28, row 9. ATF series
-- [ ] **ZA**: 1N4733A 5.1 V diode → col 30, row 5 and col 30, row 9. Band (K) towards the back
+- [ ] **RL**: 330 resistor (bands: orange-orange-black-black-brown) → col 17, row 4 and col 17, row 8. Status LED
+- [ ] **RA1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 29, row 5 and col 29, row 9. ATF pull-up
+- [ ] **RA2**: 100 resistor (bands: brown-black-black-black-brown) → col 31, row 5 and col 31, row 9. ATF series
+- [ ] **ZA**: 1N4733A 5.1 V diode → col 33, row 5 and col 33, row 9. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -619,11 +635,11 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L3.2](build/logic-L3-2.png)
 
-- [ ] **1** green 22 AWG: **JB** pin 9 → **RL** at col 14, row 8
-- [ ] **2** green 22 AWG: **RL** at col 14, row 4 → **X4h** (C8)
-- [ ] **3** green 22 AWG: **X6c** (DQ) → **RA1** at col 26, row 5 → **RA2** at col 28, row 5 → **ZA** band end
-- [ ] **4** blue 22 AWG: **RA2** at col 28, row 9 → **JB** pin 10
-- [ ] **5** red 22 AWG: **X6a** (5V) → **RA1** at col 26, row 9
+- [ ] **1** green 22 AWG: **JB** pin 9 → **RL** at col 17, row 8
+- [ ] **2** blue 22 AWG: **RL** at col 17, row 4 → **X4f** (C6 LED)
+- [ ] **3** green 22 AWG: **X6c** (DQ) → **RA1** at col 29, row 5 → **RA2** at col 31, row 5 → **ZA** band end
+- [ ] **4** blue 22 AWG: **RA2** at col 31, row 9 → **JB** pin 10
+- [ ] **5** red 22 AWG: **X6a** (5V) → **RA1** at col 29, row 9
 - [ ] **6** black 22 AWG: **X6b** (GND) → **ZA** plain end
 
 <!-- STEP L4 -->
@@ -631,7 +647,7 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L4.1](build/logic-L4-1.png)
 
-- [ ] **GYRO**: GY-521 module → VCC in col 19, row 12. Chip side up, flat on its header + a dab of hot glue
+- [ ] **GYRO**: GY-521 module → VCC in col 21, row 12. Chip side up, flat on its header + a dab of hot glue
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -676,17 +692,18 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 - [ ] B1 → **5V** (5V)
 - [ ] B2 → **GND** (GND)
-- [ ] B3 → **D22** (C1 [+])
-- [ ] B4 → **D23** (C2 [−])
-- [ ] B5 → **D24** (C3 ECO)
-- [ ] B6 → **D25** (C4 SPORT)
-- [ ] B7 → **D26** (C5 ON/OFF)
-- [ ] B8 → **D32** (C6 TEST)
+- [ ] B3 → **D22** (shifter UP)
+- [ ] B4 → **D23** (shifter DOWN)
+- [ ] B5 → **D24** (ECO)
+- [ ] B6 → **D25** (SPORT)
+- [ ] B7 → **D26** (ON/OFF)
+- [ ] B8 → **D32** (TEST)
 - [ ] B9 → **D7** (LED)
 - [ ] B10 → **D33** (ATF probe)
 - [ ] B11 → **D20 (SDA)** (SDA)
 - [ ] B12 → **D21 (SCL)** (SCL)
 - [ ] B13 → **GND** (GND)
 - [ ] B14 → **GND** (GND)
+- [ ] B15 → **D34** (MANUAL)
 
-Pins A25, A26, B15 and B16 stay empty.
+Pins A25, A26 and B16 stay empty.

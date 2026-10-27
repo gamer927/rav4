@@ -21,7 +21,7 @@ ruler and solder a wire, you can do this.
 | [5](#part-5--logic-board) | Logic board | 1 evening |
 | [6](#part-6--hub-on-the-mega) | Hub on the Mega | 1 evening |
 | [7](#part-7--screen) | Screen | 1 h |
-| [8](#part-8--console-pod-and-shifter) | Console pod and shifter | 1 evening |
+| [8](#part-8--dash-pod-and-shifter-base) | Dash pod and shifter base | 1 evening |
 | [9](#part-9--dummy-loads) | Dummy loads on the heatsink | 30 min |
 | [10](#part-10--test-everything-on-the-bench) | Test everything on the bench | 1 evening |
 | [11](#part-11--close-the-box) | Close the box, make the cable ends | 1 evening |
@@ -73,8 +73,14 @@ measure, a pen, your phone.
 - [ ] **Room for the box.** Take out the glovebox. You need a flat metal spot for a box
   **216 × 178 × 51 mm** (244 mm wide with its ears), and somewhere nearby for the heatsink
   (100 × 100 × 25 mm) where air moves.
-- [ ] **Room for the pod.** On the centre console you need **176 × 130 mm**, 70 mm tall, plus the
-  shifter on top. Check it won't hit the gear lever, handbrake or your knee.
+- [ ] **A spot for the dash pod** (210 × 64 × 64 mm, on a small tilting mount). Either the **dash
+  top on the driver's side**, or the **ceiling** above the windscreen. Sit in the driver's seat:
+  you must see it without it blocking the road or the gauges. **Never over the passenger airbag**
+  (the right-hand half of the dash top). For the ceiling, find a sun-visor screw point or the
+  metal roof bow to screw into: the headliner alone won't hold it.
+- [ ] **Room for the shifter base** (150 × 100 mm, plus the lever on top) on the centre console
+  next to the gear lever. Move a hand through the full lever travel: it mustn't hit the gear
+  lever, handbrake, cup holder or your knee.
 - [ ] **The ECM wires.** Find the engine computer (RM: "location of components"). For each wire
   below, do the meter test in [wiring guide §5](03-wiring-guide.md) and fill in the table.
   **Don't cut anything.** Take photos.
@@ -116,15 +122,18 @@ Prints take a long time, so start them first. They print while you solder parts 
 **PETG or ASA, never PLA** (PLA goes soft in a hot car). Settings: 0.2 mm layers, 4 walls,
 30–40 % infill, no supports. More detail: [hardware/README.md](../hardware/README.md).
 
-- [ ] **First, the panel test** (`hardware/stl/console_pod_panel_test.stl`, about 1 hour): a flat
-  copy of the pod's front panel. When your switches and screen arrive, push each one into its
-  hole to check it fits. If a hole is too tight, change its size in `hardware/console_pod.scad`
+- [ ] **First, the panel test** (`hardware/stl/dash_pod_panel_test.stl`, about 1 hour): a flat
+  copy of the dash pod's front. When your switches and screen arrive, push each one into its
+  hole to check it fits. If a hole is too tight, change its size in `hardware/dash_pod.scad`
   before printing the real pod.
 - [ ] TCU box: `tcu_enclosure_box.stl` (about 12 h). On a 220 mm printer:
   `tcu_enclosure_box_no_ears.stl`.
 - [ ] TCU lid: `tcu_enclosure_lid.stl` (about 4 h).
-- [ ] Pod: `console_pod_shell.stl` (about 10 h, prints upside down).
-- [ ] Pod bottom plate: `console_pod_bottom.stl` (about 2 h).
+- [ ] Dash pod: `dash_pod_shell.stl` (about 7 h, prints front face down).
+- [ ] Dash pod back cover: `dash_pod_back.stl` (about 2 h) and mount: `dash_pod_mount.stl`
+  (about 1 h).
+- [ ] Shifter base: `shifter_base_box.stl` (about 5 h, prints upside down) and its bottom plate:
+  `shifter_base_bottom.stl` (about 2 h).
 - [ ] Shifter parts from Thingiverse [4557771](https://www.thingiverse.com/thing:4557771), in PETG
   (about 15–20 h).
 
@@ -154,8 +163,8 @@ Prints take a long time, so start them first. They print while you solder parts 
 - [ ] **Bag P6**: 7× 5.08 mm screw-terminal positions; 6× PC817 chip; 3× 2.2k resistor (red-red-black-brown-brown); 6× 1N4148 diode; 6× 10k resistor (brown-black-black-red-brown); 3× 3.3k resistor (orange-orange-black-brown-brown)
 - [ ] **Bag P7**: 1× LM393 chip; 1× 22k resistor (red-red-black-red-brown); 3× 10k resistor (brown-black-black-red-brown); 1× 1N4733A 5.1 V diode; 1× 1M resistor (brown-black-black-yellow-brown); 1× 1.8k resistor (brown-grey-black-brown-brown)
 - [ ] **Bag P8**: 2× 10k resistor (brown-black-black-red-brown); 2× 100 nF capacitor; 4× BAT85 diode
-- [ ] **Bag L1**: 15× 5.08 mm screw-terminal positions; 1× 16-pin box header
-- [ ] **Bag L2**: 6× 2.2k resistor (red-red-black-brown-brown); 6× 1k resistor (brown-black-black-brown-brown); 6× 100 nF capacitor; 12× BAT85 diode
+- [ ] **Bag L1**: 17× 5.08 mm screw-terminal positions; 1× 16-pin box header
+- [ ] **Bag L2**: 7× 2.2k resistor (red-red-black-brown-brown); 7× 1k resistor (brown-black-black-brown-brown); 7× 100 nF capacitor; 14× BAT85 diode
 - [ ] **Bag L3**: 1× 330 resistor (orange-orange-black-black-brown); 1× 4.7k resistor (yellow-violet-black-brown-brown); 1× 100 resistor (brown-black-black-black-brown); 1× 1N4733A 5.1 V diode
 - [ ] **Bag L4**: 1× GY-521 module
 
@@ -719,12 +728,12 @@ For its checks, feed it 5 V from the power board: two jumper wires, **JA pin 1 �
 
 ![L1.1](build/logic-L1-1.png)
 
-- [ ] **X4a**: C1 screw terminal → col 2, row 1. X4-1: C1 [+]
-- [ ] **X4b**: C2 screw terminal → col 4, row 1. X4-2: C2 [−]
-- [ ] **X4c**: C3 screw terminal → col 6, row 1. X4-3: C3 ECO
-- [ ] **X4d**: C4 screw terminal → col 8, row 1. X4-4: C4 SPORT
-- [ ] **X4e**: C5 screw terminal → col 10, row 1. X4-5: C5 ON/OFF
-- [ ] **X4f**: C6 screw terminal → col 12, row 1. X4-6: C6 TEST
+- [ ] **X7a**: UP screw terminal → col 1, row 1. X7-1 shifter UP
+- [ ] **X7b**: DOWN screw terminal → col 3, row 1. X7-2 shifter DOWN
+- [ ] **X7c**: GND screw terminal → col 5, row 1. X7-3 shifter GND
+- [ ] **X4a**: C1 ECO screw terminal → col 7, row 1. X4-1: C1 ECO
+- [ ] **X4b**: C2 SPORT screw terminal → col 9, row 1. X4-2: C2 SPORT
+- [ ] **X4c**: C3 MANUAL screw terminal → col 11, row 1. X4-3: C3 MANUAL
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -732,22 +741,24 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L1.2](build/logic-L1-2.png)
 
-- [ ] **X4g**: C7 screw terminal → col 14, row 1. X4-7: C7 GND
-- [ ] **X4h**: C8 screw terminal → col 16, row 1. X4-8: C8 LED
-- [ ] **X5a**: 5V screw terminal → col 19, row 1. X5-1 OLED
-- [ ] **X5b**: GND screw terminal → col 21, row 1. X5-2 OLED
-- [ ] **X5c**: SDA screw terminal → col 23, row 1. X5-3 OLED
-- [ ] **X5d**: SCL screw terminal → col 25, row 1. X5-4 OLED
+- [ ] **X4d**: C4 TEST screw terminal → col 13, row 1. X4-4: C4 TEST
+- [ ] **X4e**: C5 ON/OFF screw terminal → col 15, row 1. X4-5: C5 ON/OFF
+- [ ] **X4f**: C6 LED screw terminal → col 17, row 1. X4-6: C6 LED
+- [ ] **X4g**: C7 GND screw terminal → col 19, row 1. X4-7: C7 GND
+- [ ] **X5a**: 5V screw terminal → col 21, row 1. X5-1 screen
+- [ ] **X5b**: GND screw terminal → col 23, row 1. X5-2 screen
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### L1.3 — Place 4 parts
+#### L1.3 — Place 6 parts
 
 ![L1.3](build/logic-L1-3.png)
 
-- [ ] **X6a**: 5V screw terminal → col 28, row 1. X6-1 ATF probe
-- [ ] **X6b**: GND screw terminal → col 30, row 1. X6-2 ATF probe
-- [ ] **X6c**: DQ screw terminal → col 32, row 1. X6-3 ATF probe
+- [ ] **X5c**: SDA screw terminal → col 25, row 1. X5-3 screen
+- [ ] **X5d**: SCL screw terminal → col 27, row 1. X5-4 screen
+- [ ] **X6a**: 5V screw terminal → col 29, row 1. X6-1 ATF probe
+- [ ] **X6b**: GND screw terminal → col 31, row 1. X6-2 ATF probe
+- [ ] **X6c**: DQ screw terminal → col 33, row 1. X6-3 ATF probe
 - [ ] **JB**: 16-pin box header box header → pin 1 in col 9, row 24. Notch facing the back edge; pin 1 (square pad) at the right-hand end, back row
 
 Push the legs through, bend them out a little underneath, solder, snip.
@@ -757,7 +768,7 @@ Push the legs through, bend them out a little underneath, solder, snip.
 ![L1.4](build/logic-L1-4.png)
 
 - [ ] **1** red 22 AWG: **JB** pin 1 → **X5a** (5V) → **X6a** (5V)
-- [ ] **2** black 22 AWG: **JB** pin 2 → **X4g** (C7) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
+- [ ] **2** black 22 AWG: **JB** pin 2 → **X7c** (GND) → **X4g** (C7 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
 - [ ] **3** blue 22 AWG: **JB** pin 11 → **X5c** (SDA)
 - [ ] **4** blue 22 AWG: **JB** pin 12 → **X5d** (SCL)
 
@@ -769,12 +780,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.1](build/logic-L2-1.png)
 
-- [ ] **RU1**: 2.2k resistor (bands: red-red-black-brown-brown) → col 2, row 4 and col 2, row 8. Pull-up
-- [ ] **RS1**: 1k resistor (bands: brown-black-black-brown-brown) → col 3, row 9 and col 3, row 13. Series
-- [ ] **CF1**: 100 nF capacitor → col 2, row 14 and col 2, row 16
-- [ ] **DH1**: BAT85 diode → col 3, row 15 and col 3, row 18. Band (K) towards the back
-- [ ] **DL1**: BAT85 diode → col 2, row 18 and col 2, row 21. Band (K) towards the back
-- [ ] **RU2**: 2.2k resistor (bands: red-red-black-brown-brown) → col 4, row 4 and col 4, row 8. Pull-up
+- [ ] **RU1**: 2.2k resistor (bands: red-red-black-brown-brown) → col 1, row 4 and col 1, row 8. Pull-up
+- [ ] **RS1**: 1k resistor (bands: brown-black-black-brown-brown) → col 2, row 9 and col 2, row 13. Series
+- [ ] **CF1**: 100 nF capacitor → col 1, row 14 and col 1, row 16
+- [ ] **DH1**: BAT85 diode → col 2, row 15 and col 2, row 18. Band (K) towards the back
+- [ ] **DL1**: BAT85 diode → col 1, row 18 and col 1, row 21. Band (K) towards the back
+- [ ] **RU2**: 2.2k resistor (bands: red-red-black-brown-brown) → col 3, row 4 and col 3, row 8. Pull-up
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -782,12 +793,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.2](build/logic-L2-2.png)
 
-- [ ] **RS2**: 1k resistor (bands: brown-black-black-brown-brown) → col 5, row 9 and col 5, row 13. Series
-- [ ] **CF2**: 100 nF capacitor → col 4, row 14 and col 4, row 16
-- [ ] **DH2**: BAT85 diode → col 5, row 15 and col 5, row 18. Band (K) towards the back
-- [ ] **DL2**: BAT85 diode → col 4, row 18 and col 4, row 21. Band (K) towards the back
-- [ ] **RU3**: 2.2k resistor (bands: red-red-black-brown-brown) → col 6, row 4 and col 6, row 8. Pull-up
-- [ ] **RS3**: 1k resistor (bands: brown-black-black-brown-brown) → col 7, row 9 and col 7, row 13. Series
+- [ ] **RS2**: 1k resistor (bands: brown-black-black-brown-brown) → col 4, row 9 and col 4, row 13. Series
+- [ ] **CF2**: 100 nF capacitor → col 3, row 14 and col 3, row 16
+- [ ] **DH2**: BAT85 diode → col 4, row 15 and col 4, row 18. Band (K) towards the back
+- [ ] **DL2**: BAT85 diode → col 3, row 18 and col 3, row 21. Band (K) towards the back
+- [ ] **RU3**: 2.2k resistor (bands: red-red-black-brown-brown) → col 7, row 4 and col 7, row 8. Pull-up
+- [ ] **RS3**: 1k resistor (bands: brown-black-black-brown-brown) → col 8, row 9 and col 8, row 13. Series
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -795,12 +806,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.3](build/logic-L2-3.png)
 
-- [ ] **CF3**: 100 nF capacitor → col 6, row 14 and col 6, row 16
-- [ ] **DH3**: BAT85 diode → col 7, row 15 and col 7, row 18. Band (K) towards the back
-- [ ] **DL3**: BAT85 diode → col 6, row 18 and col 6, row 21. Band (K) towards the back
-- [ ] **RU4**: 2.2k resistor (bands: red-red-black-brown-brown) → col 8, row 4 and col 8, row 8. Pull-up
-- [ ] **RS4**: 1k resistor (bands: brown-black-black-brown-brown) → col 9, row 9 and col 9, row 13. Series
-- [ ] **CF4**: 100 nF capacitor → col 8, row 14 and col 8, row 16
+- [ ] **CF3**: 100 nF capacitor → col 7, row 14 and col 7, row 16
+- [ ] **DH3**: BAT85 diode → col 8, row 15 and col 8, row 18. Band (K) towards the back
+- [ ] **DL3**: BAT85 diode → col 7, row 18 and col 7, row 21. Band (K) towards the back
+- [ ] **RU4**: 2.2k resistor (bands: red-red-black-brown-brown) → col 9, row 4 and col 9, row 8. Pull-up
+- [ ] **RS4**: 1k resistor (bands: brown-black-black-brown-brown) → col 10, row 9 and col 10, row 13. Series
+- [ ] **CF4**: 100 nF capacitor → col 9, row 14 and col 9, row 16
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -808,12 +819,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.4](build/logic-L2-4.png)
 
-- [ ] **DH4**: BAT85 diode → col 9, row 15 and col 9, row 18. Band (K) towards the back
-- [ ] **DL4**: BAT85 diode → col 8, row 18 and col 8, row 21. Band (K) towards the back
-- [ ] **RU5**: 2.2k resistor (bands: red-red-black-brown-brown) → col 10, row 4 and col 10, row 8. Pull-up
-- [ ] **RS5**: 1k resistor (bands: brown-black-black-brown-brown) → col 11, row 9 and col 11, row 13. Series
-- [ ] **CF5**: 100 nF capacitor → col 10, row 14 and col 10, row 16
-- [ ] **DH5**: BAT85 diode → col 11, row 15 and col 11, row 18. Band (K) towards the back
+- [ ] **DH4**: BAT85 diode → col 10, row 15 and col 10, row 18. Band (K) towards the back
+- [ ] **DL4**: BAT85 diode → col 9, row 18 and col 9, row 21. Band (K) towards the back
+- [ ] **RU5**: 2.2k resistor (bands: red-red-black-brown-brown) → col 11, row 4 and col 11, row 8. Pull-up
+- [ ] **RS5**: 1k resistor (bands: brown-black-black-brown-brown) → col 12, row 9 and col 12, row 13. Series
+- [ ] **CF5**: 100 nF capacitor → col 11, row 14 and col 11, row 16
+- [ ] **DH5**: BAT85 diode → col 12, row 15 and col 12, row 18. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -821,46 +832,64 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.5](build/logic-L2-5.png)
 
-- [ ] **DL5**: BAT85 diode → col 10, row 18 and col 10, row 21. Band (K) towards the back
-- [ ] **RU6**: 2.2k resistor (bands: red-red-black-brown-brown) → col 12, row 4 and col 12, row 8. Pull-up
-- [ ] **RS6**: 1k resistor (bands: brown-black-black-brown-brown) → col 13, row 9 and col 13, row 13. Series
-- [ ] **CF6**: 100 nF capacitor → col 12, row 14 and col 12, row 16
-- [ ] **DH6**: BAT85 diode → col 13, row 15 and col 13, row 18. Band (K) towards the back
-- [ ] **DL6**: BAT85 diode → col 12, row 18 and col 12, row 21. Band (K) towards the back
+- [ ] **DL5**: BAT85 diode → col 11, row 18 and col 11, row 21. Band (K) towards the back
+- [ ] **RU6**: 2.2k resistor (bands: red-red-black-brown-brown) → col 13, row 4 and col 13, row 8. Pull-up
+- [ ] **RS6**: 1k resistor (bands: brown-black-black-brown-brown) → col 14, row 9 and col 14, row 13. Series
+- [ ] **CF6**: 100 nF capacitor → col 13, row 14 and col 13, row 16
+- [ ] **DH6**: BAT85 diode → col 14, row 15 and col 14, row 18. Band (K) towards the back
+- [ ] **DL6**: BAT85 diode → col 13, row 18 and col 13, row 21. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### L2.6 — Solder 6 wires (bottom side)
+#### L2.6 — Place 5 parts
 
 ![L2.6](build/logic-L2-6.png)
 
-- [ ] **1** blue 22 AWG: **X4a** (C1) → **RU1** at col 2, row 4 → **RS1** at col 3, row 9
-- [ ] **2** blue 22 AWG: **RS1** at col 3, row 13 → **DH1** plain end → **CF1** at col 2, row 14 → **DL1** band end → **JB** pin 3
-- [ ] **3** blue 22 AWG: **X4b** (C2) → **RU2** at col 4, row 4 → **RS2** at col 5, row 9
-- [ ] **4** blue 22 AWG: **RS2** at col 5, row 13 → **DH2** plain end → **CF2** at col 4, row 14 → **DL2** band end → **JB** pin 4
-- [ ] **5** blue 22 AWG: **X4c** (C3) → **RU3** at col 6, row 4 → **RS3** at col 7, row 9
-- [ ] **6** blue 22 AWG: **RS3** at col 7, row 13 → **DH3** plain end → **CF3** at col 6, row 14 → **DL3** band end → **JB** pin 5
+- [ ] **RU7**: 2.2k resistor (bands: red-red-black-brown-brown) → col 15, row 4 and col 15, row 8. Pull-up
+- [ ] **RS7**: 1k resistor (bands: brown-black-black-brown-brown) → col 16, row 9 and col 16, row 13. Series
+- [ ] **CF7**: 100 nF capacitor → col 15, row 14 and col 15, row 16
+- [ ] **DH7**: BAT85 diode → col 16, row 15 and col 16, row 18. Band (K) towards the back
+- [ ] **DL7**: BAT85 diode → col 15, row 18 and col 15, row 21. Band (K) towards the back
+
+Push the legs through, bend them out a little underneath, solder, snip.
 
 #### L2.7 — Solder 6 wires (bottom side)
 
 ![L2.7](build/logic-L2-7.png)
 
-- [ ] **1** blue 22 AWG: **X4d** (C4) → **RU4** at col 8, row 4 → **RS4** at col 9, row 9
-- [ ] **2** blue 22 AWG: **RS4** at col 9, row 13 → **DH4** plain end → **CF4** at col 8, row 14 → **DL4** band end → **JB** pin 6
-- [ ] **3** blue 22 AWG: **X4e** (C5) → **RU5** at col 10, row 4 → **RS5** at col 11, row 9
-- [ ] **4** blue 22 AWG: **RS5** at col 11, row 13 → **DH5** plain end → **CF5** at col 10, row 14 → **DL5** band end → **JB** pin 7
-- [ ] **5** blue 22 AWG: **X4f** (C6) → **RU6** at col 12, row 4 → **RS6** at col 13, row 9
-- [ ] **6** blue 22 AWG: **RS6** at col 13, row 13 → **DH6** plain end → **CF6** at col 12, row 14 → **DL6** band end → **JB** pin 8
+- [ ] **1** blue 22 AWG: **X7a** (UP) → **RU1** at col 1, row 4 → **RS1** at col 2, row 9
+- [ ] **2** blue 22 AWG: **RS1** at col 2, row 13 → **DH1** plain end → **CF1** at col 1, row 14 → **DL1** band end → **JB** pin 3
+- [ ] **3** blue 22 AWG: **X7b** (DOWN) → **RU2** at col 3, row 4 → **RS2** at col 4, row 9
+- [ ] **4** blue 22 AWG: **RS2** at col 4, row 13 → **DH2** plain end → **CF2** at col 3, row 14 → **DL2** band end → **JB** pin 4
+- [ ] **5** blue 22 AWG: **X4a** (C1 ECO) → **RU3** at col 7, row 4 → **RS3** at col 8, row 9
+- [ ] **6** blue 22 AWG: **RS3** at col 8, row 13 → **DH3** plain end → **CF3** at col 7, row 14 → **DL3** band end → **JB** pin 5
 
-#### L2.8 — Solder 2 wires (bottom side)
+#### L2.8 — Solder 6 wires (bottom side)
 
 ![L2.8](build/logic-L2-8.png)
 
-- [ ] **1** red 22 AWG: **JB** pin 1 → **RU1** at col 2, row 8 → **RU2** at col 4, row 8 → **RU3** at col 6, row 8 → **RU4** at col 8, row 8 → **RU5** at col 10, row 8 → **RU6** at col 12, row 8 → **DH6** band end → **DH5** band end → **DH4** band end → **DH3** band end → **DH2** band end → **DH1** band end
-- [ ] **2** black 22 AWG: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **CF6** at col 12, row 16 → **CF5** at col 10, row 16 → **CF4** at col 8, row 16 → **CF3** at col 6, row 16 → **CF2** at col 4, row 16 → **CF1** at col 2, row 16
+- [ ] **1** blue 22 AWG: **X4b** (C2 SPORT) → **RU4** at col 9, row 4 → **RS4** at col 10, row 9
+- [ ] **2** blue 22 AWG: **RS4** at col 10, row 13 → **DH4** plain end → **CF4** at col 9, row 14 → **DL4** band end → **JB** pin 6
+- [ ] **3** blue 22 AWG: **X4c** (C3 MANUAL) → **RU5** at col 11, row 4 → **RS5** at col 12, row 9
+- [ ] **4** blue 22 AWG: **RS5** at col 12, row 13 → **DH5** plain end → **CF5** at col 11, row 14 → **DL5** band end → **JB** pin 15
+- [ ] **5** blue 22 AWG: **X4d** (C4 TEST) → **RU6** at col 13, row 4 → **RS6** at col 14, row 9
+- [ ] **6** blue 22 AWG: **RS6** at col 14, row 13 → **DH6** plain end → **CF6** at col 13, row 14 → **DL6** band end → **JB** pin 8
 
-✅ **CHECK** (5 V on): each terminal **X4a to X4f** reads **5 V**. Touch it to X4g (ground):
-JB pin 3, 4, 5, 6, 7 or 8 drops to **0 V**.
+#### L2.9 — Solder 4 wires (bottom side)
+
+![L2.9](build/logic-L2-9.png)
+
+- [ ] **1** blue 22 AWG: **X4e** (C5 ON/OFF) → **RU7** at col 15, row 4 → **RS7** at col 16, row 9
+- [ ] **2** blue 22 AWG: **RS7** at col 16, row 13 → **DH7** plain end → **CF7** at col 15, row 14 → **DL7** band end → **JB** pin 7
+- [ ] **3** red 22 AWG: **JB** pin 1 → **RU1** at col 1, row 8 → **RU2** at col 3, row 8 → **RU3** at col 7, row 8 → **RU4** at col 9, row 8 → **RU5** at col 11, row 8 → **RU6** at col 13, row 8 → **RU7** at col 15, row 8 → **DH7** band end → **DH6** band end → **DH5** band end → **DH4** band end → **DH3** band end → **DH2** band end → **DH1** band end
+- [ ] **4** black 22 AWG: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **DL7** plain end → **CF7** at col 15, row 16 → **CF6** at col 13, row 16 → **CF5** at col 11, row 16 → **CF4** at col 9, row 16 → **CF3** at col 7, row 16 → **CF2** at col 3, row 16 → **CF1** at col 1, row 16
+
+✅ **CHECK** (5 V on): terminals **X7a, X7b and X4a to X4e** each read **5 V**. Touch each one to
+a ground terminal (X7c or X4g) and check its JB pin drops to **0 V**:
+
+| Terminal | X7a UP | X7b DOWN | X4a ECO | X4b SPORT | X4c MANUAL | X4d TEST | X4e ON/OFF |
+|---|---|---|---|---|---|---|---|
+| JB pin | 3 | 4 | 5 | 6 | 15 | 8 | 7 |
 
 ### Step L3 — Status light and ATF probe
 
@@ -868,10 +897,10 @@ JB pin 3, 4, 5, 6, 7 or 8 drops to **0 V**.
 
 ![L3.1](build/logic-L3-1.png)
 
-- [ ] **RL**: 330 resistor (bands: orange-orange-black-black-brown) → col 14, row 4 and col 14, row 8. Status LED
-- [ ] **RA1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 26, row 5 and col 26, row 9. ATF pull-up
-- [ ] **RA2**: 100 resistor (bands: brown-black-black-black-brown) → col 28, row 5 and col 28, row 9. ATF series
-- [ ] **ZA**: 1N4733A 5.1 V diode → col 30, row 5 and col 30, row 9. Band (K) towards the back
+- [ ] **RL**: 330 resistor (bands: orange-orange-black-black-brown) → col 17, row 4 and col 17, row 8. Status LED
+- [ ] **RA1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 29, row 5 and col 29, row 9. ATF pull-up
+- [ ] **RA2**: 100 resistor (bands: brown-black-black-black-brown) → col 31, row 5 and col 31, row 9. ATF series
+- [ ] **ZA**: 1N4733A 5.1 V diode → col 33, row 5 and col 33, row 9. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -879,11 +908,11 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L3.2](build/logic-L3-2.png)
 
-- [ ] **1** green 22 AWG: **JB** pin 9 → **RL** at col 14, row 8
-- [ ] **2** green 22 AWG: **RL** at col 14, row 4 → **X4h** (C8)
-- [ ] **3** green 22 AWG: **X6c** (DQ) → **RA1** at col 26, row 5 → **RA2** at col 28, row 5 → **ZA** band end
-- [ ] **4** blue 22 AWG: **RA2** at col 28, row 9 → **JB** pin 10
-- [ ] **5** red 22 AWG: **X6a** (5V) → **RA1** at col 26, row 9
+- [ ] **1** green 22 AWG: **JB** pin 9 → **RL** at col 17, row 8
+- [ ] **2** blue 22 AWG: **RL** at col 17, row 4 → **X4f** (C6 LED)
+- [ ] **3** green 22 AWG: **X6c** (DQ) → **RA1** at col 29, row 5 → **RA2** at col 31, row 5 → **ZA** band end
+- [ ] **4** blue 22 AWG: **RA2** at col 31, row 9 → **JB** pin 10
+- [ ] **5** red 22 AWG: **X6a** (5V) → **RA1** at col 29, row 9
 - [ ] **6** black 22 AWG: **X6b** (GND) → **ZA** plain end
 
 ✅ **CHECK** (5 V on): X6c reads **5 V**.
@@ -894,7 +923,7 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L4.1](build/logic-L4-1.png)
 
-- [ ] **GYRO**: GY-521 module → VCC in col 19, row 12. Chip side up, flat on its header + a dab of hot glue
+- [ ] **GYRO**: GY-521 module → VCC in col 21, row 12. Chip side up, flat on its header + a dab of hot glue
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -954,20 +983,21 @@ The hub is the prototype shield that plugs onto the Mega. The two ribbon cables 
 
 - [ ] B1 → **5V** (5V)
 - [ ] B2 → **GND** (GND)
-- [ ] B3 → **D22** (C1 [+])
-- [ ] B4 → **D23** (C2 [−])
-- [ ] B5 → **D24** (C3 ECO)
-- [ ] B6 → **D25** (C4 SPORT)
-- [ ] B7 → **D26** (C5 ON/OFF)
-- [ ] B8 → **D32** (C6 TEST)
+- [ ] B3 → **D22** (shifter UP)
+- [ ] B4 → **D23** (shifter DOWN)
+- [ ] B5 → **D24** (ECO)
+- [ ] B6 → **D25** (SPORT)
+- [ ] B7 → **D26** (ON/OFF)
+- [ ] B8 → **D32** (TEST)
 - [ ] B9 → **D7** (LED)
 - [ ] B10 → **D33** (ATF probe)
 - [ ] B11 → **D20 (SDA)** (SDA)
 - [ ] B12 → **D21 (SCL)** (SCL)
 - [ ] B13 → **GND** (GND)
 - [ ] B14 → **GND** (GND)
+- [ ] B15 → **D34** (MANUAL)
 
-Pins A25, A26, B15 and B16 stay empty.
+Pins A25, A26 and B16 stay empty.
 
 ✅ **CHECK** (meter on beep, shield plugged onto the Mega): each socket pin beeps to its Mega pin,
 and no two neighbouring socket pins beep to each other (except 5 V to 5 V and GND to GND).
@@ -993,52 +1023,85 @@ Don't stick it into the pod yet: it's tested in part 10 first.
 
 ---
 
-## Part 8 — Console pod and shifter
+## Part 8 — Dash pod and shifter base
 
-**8.1 Inserts.** Heat-set the 4 brass inserts into the corner posts (iron at 230–250 °C, push in
-straight, stop when flush).
+Two separate pieces, each with its own cable to the TCU box: the **dash pod** (screen and every
+switch) and the **shifter base** (the lever). Neither needs the box yet.
 
-![Pod step 1](build/pod-1.png)
+**About the toggles.** A 3-pin toggle has a middle pin and two outer pins. With the meter on
+beep and the lever **up**, find the outer pin that beeps to the middle one. Use those two pins:
+**lever up = on**. For the ON/OFF switch, closing its red cover pushes the lever down (off).
 
-**8.2 Switches.** Fit ON/OFF (flip cover hinge at the top), ECO, SPORT, TEST and the LED bezel.
-Tighten the nuts from inside.
+### The dash pod
 
-![Pod step 2](build/pod-2.png)
+**8.1 Inserts.** Heat-set the 4 brass inserts into the ends of the corner posts, at the open back
+(iron at 230–250 °C, push in straight, stop when flush).
 
-**8.3 Screen.** Drop the screen into the pocket behind the window, face first. Stick it with
-double-sided foam tape on the black glass border. It only goes in one way.
+![Dash pod step 1](build/pod-1.png)
 
-![Pod step 3](build/pod-3.png)
+**8.2 Screen, switches, LED.** Left to right on the front: the **screen** drops into the pocket
+behind its window, face first, stuck with double-sided foam tape on its black glass border (it
+only goes in one way). Then the **LED** bezel (**TCU**), **ECO**, **SPORT**, **MANUAL** (the three
+small toggles), **TEST** (push button) and **ON/OFF** (big toggle, red cover hinge at the top).
+Tighten the nuts from inside. The names are engraved under each hole.
 
-**8.4 Cables.** Fit the 2 glands in the back. Push the **8-core console cable** through one and
-the **screen cable** through the other. Join the console cable's cores with lever connectors:
+![Dash pod step 2](build/pod-2.png)
 
-![Pod step 4](build/pod-4.png)
+**8.3 Cables.** Fit the 2 glands in the back cover: **SWITCHES** and **SCREEN**. Push the **8-core
+cable** through SWITCHES and the screen's **4-core cable** (from part 7) through SCREEN. Cut the
+8-core's eighth core short and tape it. Join each core with a lever connector:
+
+![Dash pod step 3](build/pod-3.png)
 
 | Core | Goes to |
 |---|---|
-| C1 | upshift switch NO (or the [+] button) |
-| C2 | downshift switch NO (or the [−] button) |
-| C3 | ECO switch |
-| C4 | SPORT switch |
+| C1 | ECO switch |
+| C2 | SPORT switch |
+| C3 | MANUAL switch |
+| C4 | TEST button |
 | C5 | ON/OFF switch |
-| C6 | TEST button |
-| C7 (ground) | the other side of **every** switch and button, both shifter switches' COM, and the LED's short leg |
-| C8 | the LED's long leg |
+| C6 | the LED's long leg |
+| C7 (ground) | the other pin of **every** switch and the button, and the LED's short leg. Easiest: one black wire soldered from switch to switch, ECO → SPORT → MANUAL → TEST → ON/OFF → LED, with C7 joined to its end |
 
-**8.5 Shifter.** Build the Beavis lever from its guide, in PETG. Use only its two **V-155-1C25**
-switches (no Arduino). Run their wires down the slot in the deck to the lever connectors. Drop
-4 M6 nuts into the slots under the deck. Cut the M6 bolts to **shifter base thickness + 6 mm**
-and bolt it down.
+**8.4 Back cover.** Screw the back cover on (4 × M3 × 10 countersunk). The two hinge lugs stick
+out of the back.
 
-![Pod step 5](build/pod-5.png)
+![Dash pod step 4](build/pod-4.png)
 
-**8.6 Bottom plate:** later, in the car (part 12.4).
+**8.5 Mount:** later, in the car (part 12.4).
 
-![Pod step 6](build/pod-6.png)
+![Dash pod step 5](build/pod-5.png)
 
-✅ **CHECK** (meter on beep, at the cable's far end): C3 ↔ C7 beeps only with ECO on; C4 with
-SPORT; C5 with ON/OFF; C6 with TEST pressed; C1 and C2 with the lever pulled and pushed.
+✅ **CHECK** (meter on beep, at the 8-core's far end): C1 ↔ C7 beeps only with ECO on; C2 with
+SPORT; C3 with MANUAL; C4 with TEST pressed; C5 with ON/OFF on. With the meter on **diode**
+(red probe on C6, black on C7), the LED glows faintly.
+
+### The shifter base
+
+**8.6 Inserts.** Heat-set 4 brass inserts into the base's corner posts, from underneath.
+
+**8.7 Lever.** Build the Beavis lever from its guide, in PETG. Use only its two **V-155-1C25**
+switches (no Arduino). Drop 4 M6 nuts into the hex slots under the deck. Cut the M6 bolts to
+**shifter base thickness + 6 mm** and bolt the lever down. Feed its switch wires down the
+rectangular hole.
+
+**8.8 Cable.** Fit a PG7 gland in the back wall (**TO TCU**) and push the **3-core cable** through.
+Join with 3 lever connectors:
+
+| Core | Goes to |
+|---|---|
+| UP | the upshift switch's **NO** pin |
+| DOWN | the downshift switch's **NO** pin |
+| GND | **both** switches' **COM** pins |
+
+Leave each switch's NC pin empty. Write down which colour is UP, DOWN and GND.
+
+![The shifter base with the lever](build/shifter.png)
+
+**8.9 Bottom plate:** later, in the car (part 12.4).
+
+✅ **CHECK** (meter on beep, at the 3-core's far end): UP ↔ GND beeps only with the lever pulled
+for an upshift, DOWN ↔ GND only with it pushed for a downshift.
 
 ---
 
@@ -1058,8 +1121,8 @@ Everything is connected on the table, outside the box.
 
 - [ ] Plug the hub onto the Mega. Plug **ribbon A** (power board ↔ socket A) and **ribbon B**
   (logic board ↔ socket B). The red stripe is pin 1.
-- [ ] Console cable C1–C8 → **X4a–X4h**. Screen cable → **X5** (5V, GND, SDA, SCL). ATF probe →
-  **X6** (red 5V, black GND, yellow DQ).
+- [ ] Shifter cable → **X7a/X7b/X7c** (UP, DOWN, GND). Dash cable C1–C7 → **X4a–X4g**. Screen
+  cable → **X5** (5V, GND, SDA, SCL). ATF probe → **X6** (red 5V, black GND, yellow DQ).
 - [ ] Dummy loads: LOAD 1/2/3/GND → **J4a/J4b/J4c/J4d**. For this test only, add three jumpers
   **J2d → J4a, J2e → J4b, J2f → J4c** (the resistors stand in for the solenoids).
 - [ ] **Load the software:** install the Arduino IDE, open `firmware/tcu/tcu.ino`, choose
@@ -1073,8 +1136,9 @@ Everything is connected on the table, outside the box.
 - [ ] With ON/OFF **off**, hold TEST for 2 seconds: the self-test runs. When it tests the
   solenoids, each should read about **0.8 A** (12 V ÷ 15 Ω). If they're more than 10 % out,
   change `IS_AMPS_PER_VOLT` in `firmware/tcu/config.h`, upload again, retest.
-- [ ] Follow the prompts on the screen: flip ECO, flip SPORT, pull and push the lever, press
-  the brake (touch 12 V to J3b).
+- [ ] Follow the prompts on the screen: **SHIFTER UP** (pull the lever), **SHIFTER DOWN** (push
+  it), **ONLY ECO ON**, **ONLY SPORT ON**, **ONLY MANUAL ON** (each time with the other two off),
+  then press the brake (touch 12 V to J3b).
 - [ ] The result says **PASS** (CHK on the lamps is normal: it's asking you to confirm the lights
   flashed).
 
@@ -1088,8 +1152,9 @@ Everything is connected on the table, outside the box.
 
 ![Box step 2](build/box-2.png)
 
-- [ ] **11.2** Fit the 7 glands: the small ones (PG7) in **CON, OLED, ATF**, the big ones (PG9)
-  in **SIG, PWR, SOL, LOAD**.
+- [ ] **11.2** Fit the 8 glands (the round holes in the front wall, each with its name above it):
+  the small ones (PG7) in **SHIFT, DASH, SCREEN, ATF**, the big ones (PG9) in **SIG, PWR, SOL,
+  LOAD**. The box has no switches: they're all on the dash pod.
 
 ![Box step 3](build/box-3.png)
 
@@ -1100,8 +1165,9 @@ Everything is connected on the table, outside the box.
 
 | Gland | Cable | Inside, to | Plug outside |
 |---|---|---|---|
-| CON | 8-core from the pod | X4a–X4h | (straight to the pod) |
-| OLED | 4-core from the pod | X5a–X5d | (straight to the pod) |
+| SHIFT | 3-core from the shifter base | X7a–X7c | (straight to the shifter base) |
+| DASH | 8-core from the dash pod | X4a–X4g | (straight to the dash pod) |
+| SCREEN | 4-core from the dash pod | X5a–X5d | (straight to the dash pod) |
 | ATF | 3-core | X6a–X6c | X6, 3-way |
 | SIG | 7 thin wires: D, STP, E1, SPD, TAC, VTA, E2 | J3a–J3g | X3, 8-way |
 | PWR | red, red, black (16 AWG) | J1a, J1b, J1c | X1, 3-way |
@@ -1145,11 +1211,21 @@ over until the very last job, and only when its ON/OFF switch is on.
 ✅ **CHECK** (SENSORS page): throttle goes 0 % → about 100 % as you press the pedal; rpm about
 700–800 at idle; brake shows when pressed; D shows only in D.
 
-### 12.4 Console pod
-- [ ] Bolt the pod's bottom plate to the console (4 bolts, big washers), then screw the pod onto
-  it from underneath. Hide its two cables under the trim, to the box.
+### 12.4 Dash pod and shifter base
+- [ ] **Dash pod mount.** On the dash top: 2 screws into the dash pad's frame, or VHB tape on a
+  cleaned spot, arm pointing up. On the ceiling: turn the mount upside down (arm pointing down)
+  and screw it through the headliner into a sun-visor screw point or the roof bow
+  ([wiring guide §9](03-wiring-guide.md#the-dash-pod)).
+- [ ] **Hang the pod.** Slide the mount's knuckle between the pod's two lugs. M5 × 25 bolt through
+  all three, nyloc nut into the hex pocket. Tilt the screen to face you, then tighten until it
+  holds that angle over bumps.
+- [ ] **Shifter base.** Bolt its bottom plate to the console next to the gear lever (4 bolts, big
+  washers), then screw the base onto it from underneath (4 × M3).
+- [ ] Hide all three cables under the trim, to the box. The dash pod's two cables go down behind
+  the dash trim (dash top) or along the headliner edge and down the passenger A-pillar trim
+  (ceiling).
 
-✅ **CHECK:** hold TEST 2 s: every switch prompt passes.
+✅ **CHECK:** hold TEST 2 s: every shifter and switch prompt passes.
 
 ### 12.5 ATF probe (cold engine)
 - [ ] Follow [wiring guide §9](03-wiring-guide.md#the-atf-temperature-probe): cut the **hot** hose,
@@ -1179,7 +1255,8 @@ drive again: also the same. Plug in the OBD-II scanner: **no trouble codes**.
    - [ ] In the driveway: hold TEST for the self-test.
    - [ ] **All four wheels on jack stands** (full-time 4WD: never only the front), ON/OFF on:
      go through the gears and watch the screen.
-   - [ ] An empty car park: ECO, NORM, SPORT, then MANUAL with the lever.
+   - [ ] An empty car park: ECO, NORM, SPORT, then flip **MANUAL** on and shift with the lever.
+     With MANUAL off, the lever does nothing (the screen says FLIP MANUAL ON).
    - [ ] The road.
 
 ✅ **CHECK:** flip ON/OFF off at any time: the car goes straight back to the factory computer.

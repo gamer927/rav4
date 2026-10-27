@@ -82,10 +82,11 @@ struct Sim {
     solenoidsForGear(g, in.ecuS1, in.ecuS2);
   }
   void cruise(float mph) { rampTo(mph); }
-  // Arm, then drop into MANUAL at a standstill (a refused [-] in 1st).
+  // Arm, then flip the MANUAL switch on.
   const Outputs& armManual() {
     arm();
-    return tap(in.down);
+    in.manual = true;
+    return step(50);
   }
 };
 
@@ -247,7 +248,7 @@ static void test_downshift_overrev_guard() {
 static void test_upshift_too_slow() {
   std::printf("upshift into forced-downshift zone is refused\n");
   Sim s;
-  s.arm();
+  s.armManual();
   s.cruise(3.1);
   s.tap(s.in.up);
   CHECK(s.c.outputs().gear == 1);
@@ -275,19 +276,41 @@ static void test_manual_auto_downshift_to_stop() {
   CHECK(s.c.outputs().control == CTRL_MANUAL);
 }
 
-static void test_long_press_resumes_auto() {
-  std::printf("long-press [+] returns MANUAL -> AUTO\n");
+static void test_manual_switch() {
+  std::printf("MANUAL switch: on = shifter shifts, off = AUTO; shifter ignored in AUTO\n");
   Sim s;
   s.arm();
   s.cruise(24.9);
-  s.tap(s.in.up);
+  s.step(3000);  // let AUTO settle
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  const uint8_t g = s.c.outputs().gear;
+  s.tap(s.in.down);  // MANUAL off: a click doesn't shift, and says why
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(s.c.outputs().event == EV_DENY_NOT_MANUAL);
+  CHECK(s.c.outputs().gear == g);
+  s.in.manual = true;
+  s.step(20);
   CHECK(s.c.outputs().control == CTRL_MANUAL);
+  CHECK(s.c.outputs().event == EV_MANUAL);
+  CHECK(s.c.outputs().gear == g);  // flipping the switch never shifts by itself
   s.step(800);
-  s.in.up = true;
-  s.step(cfg::LONG_PRESS_MS + 100);
-  s.in.up = false;
+  s.tap(s.in.up);
+  s.step(300);
+  CHECK(s.c.outputs().gear == g + 1);
+  s.in.manual = false;
   s.step(20);
   CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(s.c.outputs().event == EV_AUTO_RESUMED);
+
+  // Switch already on when the TCU takes over: starts in MANUAL.
+  Sim m;
+  m.in.manual = true;
+  m.arm();
+  CHECK(m.c.outputs().control == CTRL_MANUAL);
+  // And the switch does nothing in STOCK.
+  m.in.customRequested = false;
+  m.step(50);
+  CHECK(m.c.outputs().control == CTRL_STOCK);
 }
 
 static void test_auto_schedule() {
@@ -397,6 +420,7 @@ static void test_corner_hold() {
   u.cruise(24.9);
   u.in.latValid = true;
   u.in.latG = 0.4f;
+  u.in.manual = true;
   u.step(20);
   u.tap(u.in.up);
   CHECK(u.c.outputs().gear == 3);
@@ -575,7 +599,8 @@ static void test_manual_is_sport() {
   s.in.tpsPct = 20;
   s.step(1500);
 
-  s.tap(s.in.down);  // into MANUAL
+  s.in.manual = true;  // MANUAL switch on
+  s.tap(s.in.down);
   CHECK(s.c.outputs().control == CTRL_MANUAL);
   CHECK(s.c.outputs().mode == MODE_SPORT);
   s.step(cfg::LOCKUP_RELEASE_BEFORE_SHIFT_MS);
@@ -589,9 +614,7 @@ static void test_manual_is_sport() {
   s.step(2000);
   CHECK(s.c.outputs().gear == 3);  // and it holds the gear you chose
 
-  s.in.up = true;  // hold [+]: back to AUTO, back to ECO
-  s.step(cfg::LONG_PRESS_MS + 100);
-  s.in.up = false;
+  s.in.manual = false;  // MANUAL switch off: back to AUTO, back to ECO
   s.step(50);
   CHECK(s.c.outputs().control == CTRL_AUTO);
   CHECK(s.c.outputs().mode == MODE_ECO);
@@ -876,8 +899,7 @@ static void test_supply_and_tps_faults() {
 static void test_rev_limit_upshift() {
   std::printf("MANUAL: forced upshift at the rev limit\n");
   Sim s;
-  s.arm();
-  s.tap(s.in.down);  // enter MANUAL (refused shift, already 1st)
+  s.armManual();
   CHECK(s.c.outputs().control == CTRL_MANUAL);
   s.in.speedMph = 32.3;
   s.autoRpm = false;
@@ -984,7 +1006,7 @@ int main() {
   test_downshift_overrev_guard();
   test_upshift_too_slow();
   test_manual_auto_downshift_to_stop();
-  test_long_press_resumes_auto();
+  test_manual_switch();
   test_auto_schedule();
   test_kickdown_is_immediate();
   test_corner_hold();

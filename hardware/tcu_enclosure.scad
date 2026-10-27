@@ -5,10 +5,12 @@
 //     USB-B reachable through the left wall for flashing and logging
 //   * the power board (90 x 150 perfboard: everything that touches the car's
 //     12 V wiring: relays, drivers, current sensors, optos, 5 V supply)
-//   * the logic board (90 x 70 perfboard: console inputs, ATF probe, and the
+//   * the logic board (90 x 70 perfboard: shifter and dash inputs, ATF probe, and the
 //     MPU-6050 gyro, which lies FLAT when the box is bolted in level)
-//   * seven cable glands in the front wall, one per connector X1-X6 plus the
-//     dummy-load heatsink cable, with engraved labels
+//   * eight cable glands in the front wall (round holes, not switches), one
+//     per connector X1-X7 plus the dummy-load heatsink cable, each with its
+//     name engraved above it. The box itself has no switches: they are all
+//     on the dash pod (hardware/dash_pod.scad)
 //   * mounting ears for M6 bolts, and a screw-on lid (M3 heat-set inserts)
 //
 // part = "fit_check" renders every board part, the Mega stack and the glands
@@ -65,7 +67,8 @@ lid_screw_clear = 3.4;
 /* [Cable glands (front wall)] */
 // [label, hole diameter]: PG9 = 15.2 mm, PG7 = 12.5 mm
 // [label, hole diameter, x from the box's outer left edge]
-glands = [["CON", 12.5, 26], ["OLED", 12.5, 49], ["ATF", 12.5, 72],
+// Left to right they match the terminal groups on the boards behind them.
+glands = [["SHIFT", 12.5, 21], ["DASH", 12.5, 44.5], ["SCREEN", 12.5, 68], ["ATF", 12.5, 91.5],
           ["SIG", 15.2, 120], ["PWR", 15.2, 144], ["SOL", 15.2, 168], ["LOAD", 15.2, 192]];
 gland_z = 20;                      // centre height above the floor top
 gland_nut = [[12.5, 17.5], [15.2, 22.5]];   // [hole, locknut across corners]

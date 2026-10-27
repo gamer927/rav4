@@ -24,14 +24,23 @@ Follow this guide alongside the two diagrams:
 
 ## 1. What connects to what
 
+The system is three separate pieces, each in its own 3D-printed housing
+([hardware/README.md](../hardware/README.md)):
+
+1. **Dash pod**: screen and all the switches, on top of the dash or on the ceiling.
+2. **Shifter base**: the sequential shifter lever, on the centre console next to the gear lever.
+3. **TCU box**: the electronics, behind the glovebox. It has no switches. The round things on
+   its front wall are cable glands, one per cable, each with its name above it.
+
 | Connector (at the TCU) | Goes to | Wires |
 |---|---|---|
 | **X1 power** (3-pin) | Fuse box (ignition-switched 12 V), body ground | W1–W3 |
 | **X2 solenoids** (6-pin) | The S1, S2, SL wires, cut between the ECM and the transaxle | W4–W9 |
 | **X3 signals** (8-pin, 7 used) | Taps: lever "D", brake, ECM ground, speed, tach, throttle, throttle ground | W10–W16 |
-| **X4 console** (8-pin) | Overhead console switches, buttons or shifter lever, LED | W20 (C1–C8) |
-| **X5 OLED** (4-pin) | 2.42" screen in the console pod | W21 |
+| **X4 dash** (7-pin) | Dash pod: ECO, SPORT, MANUAL, TEST and ON/OFF switches, status LED | W20 (C1–C7) |
+| **X5 screen** (4-pin) | 2.42" OLED screen in the dash pod | W21 |
 | **X6 ATF** (3-pin) | Temperature probe in the cooler line | W17–W19 |
+| **X7 shifter** (3-pin) | The sequential shifter lever's two microswitches, in the shifter base | W22 |
 | USB | Laptop, for flashing and the calibration log | – |
 
 Use sealed automotive connectors (Deutsch DT or Superseal) so the box unplugs cleanly.
@@ -47,15 +56,16 @@ are in the EWD. Label both ends of every wire with its W-number (heat-shrink mar
 
 | Colour | Use | Size |
 |---|---|---|
-| Red | +12 V (W1, W2) and +5 V (W17, OLED 5V) | W1 16 AWG, others 18–22 AWG |
-| Black | Ground (W3, W18, OLED GND, C7) | W3 16 AWG, others 18–22 AWG |
+| Red | +12 V (W1, W2) and +5 V (W17, screen 5V) | W1 16 AWG, others 18–22 AWG |
+| Black | Ground (W3, W18, screen GND, C7, shifter GND) | W3 16 AWG, others 18–22 AWG |
 | Black/white | ECM ground reference E1 (W12) | 18 AWG |
 | Yellow | S1/S2/SL, **ECM side** (W4–W6) | 18 AWG |
 | Orange | S1/S2/SL, **solenoid side** (W7–W9) | 18 AWG |
 | Blue | Signal taps (W10, W11, W13–W16) | 22 AWG; SPD+TAC and VTA+E2 as shielded pairs |
 | Brown | ATF probe (W17–W19) | 3-core shielded cable |
-| Green | Console (W20) | 8-core shielded cable, 24 AWG |
-| Purple | OLED I²C (W21) | 4-core shielded cable, ≤ 1.5 m |
+| Green | Dash pod switches (W20) | 8-core shielded cable, 24 AWG (one core spare) |
+| Purple | Screen I²C (W21) | 4-core shielded cable, ≤ 2.5 m |
+| Grey | Shifter (W22) | 3-core shielded cable (the same cable as the ATF probe's) |
 
 Ground every cable shield **at the TCU end only**.
 
@@ -93,23 +103,25 @@ Ground every cable shield **at the TCU end only**.
 | 7 | W16 | Throttle ground **E2** | 10k series, 100 nF, clamp → A1 (measured, *not* tied to TCU ground) |
 | 8 | – | spare | |
 
-**X4 console** (W20, 8-core)
+**X4 dash** (W20, 8-core; cut the eighth core back and tape it)
 
 | Pin | Core | Signal | Mega pin |
 |---|---|---|---|
-| 1 | C1 | [+] button / lever upshift microswitch | D22 |
-| 2 | C2 | [−] button / lever downshift microswitch | D23 |
-| 3 | C3 | ECO switch | D24 |
-| 4 | C4 | SPORT switch | D25 |
+| 1 | C1 | ECO switch | D24 |
+| 2 | C2 | SPORT switch | D25 |
+| 3 | C3 | MANUAL switch | D34 |
+| 4 | C4 | TEST button | D32 |
 | 5 | C5 | ON/OFF switch | D26 |
-| 6 | C6 | TEST button | D32 |
+| 6 | C6 | Status LED anode (D7 → 330 Ω → C6) | D7 |
 | 7 | C7 | Common ground: the other side of every switch, and the LED cathode | GND |
-| 8 | C8 | Status LED anode (D7 → 330 Ω → C8) | D7 |
 
 Each control switches its core to C7 (ground). Closed means active. A broken wire reads as off:
-ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
+ON/OFF falls back to STOCK, ECO/SPORT fall back to NORMAL, and MANUAL falls back to AUTO.
 
-**X5 OLED** (W21): 1 = 5 V, 2 = GND, 3 = SDA (D20), 4 = SCL (D21). At the 2.42" screen: VCC = 5 V,
+**X7 shifter** (W22, 3-core): 1 = UP (upshift microswitch NO, D22), 2 = DOWN (downshift
+microswitch NO, D23), 3 = GND (both microswitches' COM).
+
+**X5 screen** (W21): 1 = 5 V, 2 = GND, 3 = SDA (D20), 4 = SCL (D21). At the 2.42" screen: VCC = 5 V,
 GND, DIN = SDA, CLK = SCL, DC and CS to GND, RES to a 10k pull-up + 1 µF to GND (build book part 7).
 **X6 ATF**: 1 = +5 V (W17), 2 = GND (W18), 3 = DQ (W19 → 100 Ω → D33, 4.7k pull-up to 5 V).
 The **MPU-6050 gyro** sits inside the box on the same I²C bus (5 V, GND, D20, D21). Mount it flat (§9).
@@ -135,8 +147,9 @@ The **MPU-6050 gyro** sits inside the box on the same I²C bus (5 V, GND, D20, D
 | W15 | ECM **VTA** | X3-6 | Shielded pair with W16 | Tap |
 | W16 | ECM **E2** | X3-7 | Shielded pair with W15 | Tap |
 | W17–W19 | DS18B20 probe red / black / yellow | X6-1/2/3 | Brown 3-core shielded | Through a firewall grommet |
-| W20 | Console panel | X4 | Green 8-core shielded | Up the A-pillar, away from the airbag |
-| W21 | Console-pod OLED | X5 | Purple 4-core shielded | 1.5 m maximum |
+| W20 | Dash pod switches and LED | X4 | Green 8-core shielded | Behind the dash trim (dash top) or up the A-pillar trim (ceiling), away from the airbag |
+| W21 | Dash pod screen | X5 | Purple 4-core shielded | Same route as W20; 2.5 m maximum |
+| W22 | Shifter base | X7 | Grey 3-core shielded | Under the console trim, away from the handbrake and seat rails |
 
 ## 5. Finding each signal on the 1999 RAV4
 
@@ -169,7 +182,7 @@ order to build them in are in the [build book](05-build-book.md).
 | Board | What's on it |
 |---|---|
 | **Power board** (90 × 150 mm perfboard) | Everything that touches the car's 12 V wiring: X1/X2/X3 and LOAD terminals, protection, the 5 V buck converter, relays, drivers, current sensors, optocouplers, speed comparator, throttle taps. Ribbon A (26-way) to the hub |
-| **Logic board** (90 × 70 mm perfboard) | X4 console, X5 OLED and X6 ATF terminals, console input filters, ATF probe parts, the **gyro**. Ribbon B (16-way) to the hub |
+| **Logic board** (90 × 70 mm perfboard) | X7 shifter, X4 dash, X5 screen and X6 ATF terminals (left to right, under their glands), seven switch input filters, ATF probe parts, the **gyro**. Ribbon B (16-way) to the hub |
 | **Hub** (Mega prototype shield) | Two ribbon sockets, each pin wired to its Mega pin |
 
 Detail A (the solenoid channel) is in [`wiring-detail-a.svg`](wiring-detail-a.svg). The other
@@ -187,12 +200,12 @@ CS1 OUT ── A4 (185 mV/A around ~2.5 V)
 D8 high → the ULN2803 pulls the gate down → the MOSFET switches +12 V to the solenoid. The
 zener clamp lets the solenoid release quickly, like the ECM's own driver.
 
-**Console switch input** (×6: D22–D26, D32), on the logic board
+**Switch input** (×7: shifter D22, D23; dash D24, D25, D26, D32, D34), on the logic board
 ```
 +5V ── 2.2k ──┬── 1k ──┬── Mega pin
               │        ├── 100 nF ── GND
               │        └── BAT85 to 5V, BAT85 from GND (clamps)
-            X4 core ── switch ── C7 (GND)
+       X4 / X7 core ── switch ── GND (X4-7 / X7-3)
 ```
 
 **12 V opto input** (brake D27, lever D28, ECU sense D29–D31, tach D3)
@@ -228,7 +241,7 @@ VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
 
 **Relay coils** (D6): `D6 ── ULN2803 IN1-3 (10k pull-down); OUT1-3 ── K1/K2/K3 coil (−); coil (+) ── +12 V DRV; ULN COM ── +12 V DRV`
 
-**Status LED** (D7): `D7 ── 330 Ω ── X4-8 (C8) ── LED ── X4-7 (C7)`
+**Status LED** (D7): `D7 ── 330 Ω ── X4-6 (C6) ── LED ── X4-7 (C7)`
 
 ## 7. Build order
 
@@ -242,7 +255,8 @@ in order, with pictures.
    and the power-up test runs.
 3. **Signal taps:** W10–W16. Check the SENSORS page: speed 0, throttle 0 % → 100 % as you press
    the pedal, rpm at idle.
-4. **Console and screen:** W20, W21. Hold TEST: the switch prompts check every console wire.
+4. **Dash pod, screen and shifter:** W20–W22. Hold TEST: the prompts check the shifter's two
+   switches and every dash switch.
 5. **ATF probe:** W17–W19, and the probe in the cooler line (spec §3.8). Top up the ATF.
 6. **Solenoid intercept:** cut S1/S2/SL and fit X2 (W4–W9). With the switch OFF, the relays rest
    in factory position, so the car must drive **exactly** as before. Then try the bypass plug: it
@@ -250,28 +264,34 @@ in order, with pictures.
 7. **Calibrate** with the switch OFF (spec §8), set `CALIBRATED = true`, and follow spec §9: lift,
    then a closed lot, then the road.
 
-## 8. Sequential shifter lever (instead of [+] and [−] buttons)
+## 8. Sequential shifter lever
 
 Any sim-racing style sequential lever with **two microswitches** works. This project is set up
 for the DIY build in
 [Beavis Motorsport's DIY sequential shifter guide](https://www.beavismotorsport.com/sim-racing/diy-sequential-shifter/)
-(printed parts: Thingiverse [4557771](https://www.thingiverse.com/thing:4557771)). The
-[console pod](../hardware/README.md#console-pod) has its 4 × M6, 116 × 74 mm bolt pattern on its
-top deck.
+(printed parts: Thingiverse [4557771](https://www.thingiverse.com/thing:4557771)). It bolts onto
+the [shifter base](../hardware/README.md#shifter-base) (4 × M6, 116 × 74 mm), which sits on the
+centre console next to the factory gear lever and has its own cable (W22) to the TCU box.
 
 - Build the lever as the guide describes, but **print it in PETG or ASA, not PLA**: PLA goes
   soft in a hot car.
 - Use its two **V-155-1C25 roller limit switches**, and leave out the Arduino Pro Micro. That
   board turns the switches into a USB game controller for a PC; the TCU reads the switches
   directly.
-- Upshift switch: COM → C7 (ground), NO → C1 ([+]).
-- Downshift switch: COM → C7 (ground), NO → C2 ([−]).
-- Leave each switch's NC terminal unconnected.
+- Inside the shifter base, three lever-nut connectors join the switch wires to W22:
+  - Upshift switch NO → X7-1 (UP).
+  - Downshift switch NO → X7-2 (DOWN).
+  - Both switches' COM → X7-3 (GND).
+  - Leave each switch's NC terminal unconnected.
+- **The lever only shifts with the MANUAL switch on.** With it off, the TCU shifts by itself and
+  a click on the lever just shows FLIP MANUAL ON. Flipping MANUAL on or off never shifts by
+  itself: the TCU keeps the gear you're in, and you (or the AUTO map) shift from there.
 - To change between "pull = upshift" (rally style) and "push = upshift", set
   `SWAP_SHIFT_INPUTS` in `config.h`. You don't need to rewire.
-- **In a car:** mount it rigidly where it can't foul the factory gear lever, your knee or the
-  handbrake, and give it hard end-stops. The V-155 switches are open-frame. That's fine inside
-  the cabin, but keep drinks away, or use sealed (IP67) V-type switches with the same footprint.
+- **In the car:** bolt the base where the lever can't foul the factory gear lever, your knee,
+  the handbrake or the cup holder, and give the lever hard end-stops. The V-155 switches are
+  open-frame. That's fine inside the cabin, but keep drinks away, or use sealed (IP67) V-type
+  switches with the same footprint.
 - The firmware's 25 ms debounce and edge detection mean one click is always exactly one shift,
   even with a bouncy switch.
 
@@ -279,17 +299,37 @@ top deck.
 
 | Part | Where | Why / how |
 |---|---|---|
-| **TCU box** ([3D-printed](../hardware/README.md#tcu-enclosure)) | Behind the glovebox, bolted **flat** to the dash's metal structure or a steel bracket | Close to the ECM and the console. Flat and rigid because the gyro is inside it. Mounting needs four bolts, not Velcro |
+| **TCU box** ([3D-printed](../hardware/README.md#tcu-enclosure)) | Behind the glovebox, bolted **flat** to the dash's metal structure or a steel bracket | Close to the ECM. Flat and rigid because the gyro is inside it. Mounting needs four bolts, not Velcro |
 | **Gyro (MPU-6050)** | **Inside the TCU box**, on its two standoffs, chip up | See below |
 | **Dummy-load heatsink** | Under the dash on metal, in moving air, ≥ 50 mm from plastic, wiring and the TCU box | ~14 W per resistor. Never inside the box |
-| **Console pod** (switches, LED, OLED, shifter) | Centre console, bolted down through its bottom plate | Within ~1–1.5 m of the box, for the OLED's I²C cable |
+| **Dash pod** (screen, switches, LED) | On top of the dash on the driver's side, or on the ceiling above the windscreen | See below. Within 2.5 m of cable from the box, for the screen's I²C cable |
+| **Shifter base** (sequential lever) | Centre console, next to the factory gear lever | §8. Bolted down through its bottom plate |
 | **ATF probe** | Engine bay, in the hot ATF cooler hose | See below |
 | **Fuse tap** | Cabin fuse box, an IG (ignition-switched) fuse | §5 |
+
+### The dash pod
+
+The pod hangs on a hinge from a small mount, so it stays upright and tilts to face you whichever
+way the mount is fixed. Tighten the hinge bolt's nyloc nut until the pod holds its angle over
+bumps.
+
+- **Dash top:** on the driver's side, where it doesn't block your view of the road or the
+  gauges. **Never on or near the passenger airbag door** in the right-hand half of the dash top:
+  an airbag would throw it at someone. Fix the mount with two screws into the dash pad's frame,
+  or with 3M VHB tape on a clean, flat spot.
+- **Ceiling:** turn the mount upside down so its arm hangs down. The headliner alone won't hold
+  it. Screw the base through the headliner into something solid: one of the sun-visor bracket
+  screw points (with longer screws) or the metal roof bow above the windscreen. Keep it out of
+  the windscreen's view zone and clear of your head on bumps.
+- **Cables:** both cables (W20 switches, W21 screen) leave from the pod's back. For the dash top,
+  tuck them down behind the dash trim. For the ceiling, run them under the headliner edge and
+  down the passenger A-pillar trim. Keep the screen cable under 2.5 m: the firmware runs the
+  screen at the standard 100 kHz I²C speed, which a shielded cable that long handles.
 
 ### The gyro
 
 - It sits **inside the TCU box**. The box's floor has two standoffs for a GY-521 board and the
-  words "GYRO: CHIP UP, FLAT". It shares the I²C bus with the OLED, so it needs no extra cable.
+  words "GYRO: CHIP UP, FLAT". It shares the I²C bus with the screen, so it needs no extra cable.
 - **Flat matters; where doesn't.** The firmware only uses the yaw rate (how fast the car is
   turning), and every point of a rigid car turns at the same rate. Behind the glovebox reads the
   same as the middle of the car. A tilt only scales the reading by cos(tilt): 5° costs

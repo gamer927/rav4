@@ -112,7 +112,7 @@ constexpr float TEST_ENGINE_RUNNING_RPM = 100.0f;
 constexpr float TEST_CHARGING_V = 13.4f;
 constexpr float TEST_SUPPLY_MIN_V = 11.0f;
 
-// Console OLED (128x64, I2C). Default: the 2.42" SSD1309 module (55 x 27.5 mm
+// Dash pod OLED (128x64, I2C). Default: the 2.42" SSD1309 module (55 x 27.5 mm
 // display, readable from the driver's seat). Its controller chip:
 //   0 = SSD1306 (most 0.96" modules)   1 = SH1106 (many 1.3" modules)
 //   2 = SSD1309 (2.42" modules)
@@ -122,7 +122,7 @@ constexpr uint8_t OLED_I2C_ADDR = 0x3C;
 
 // ------------------------------------------------------------------- timing
 constexpr uint32_t CONTROL_PERIOD_MS = 10;
-constexpr uint16_t DEBOUNCE_SWITCH_MS = 25;       // console switches (A-pillar run)
+constexpr uint16_t DEBOUNCE_SWITCH_MS = 25;       // dash pod and shifter switches
 constexpr uint16_t DEBOUNCE_OPTO_MS = 40;         // brake / lever / ECU sense
 constexpr uint32_t MIN_SHIFT_INTERVAL_MS = 700;   // one shift must finish first
 constexpr uint32_t AUTO_MIN_TIME_IN_GEAR_MS = 1200;  // anti-hunting dwell
@@ -132,8 +132,7 @@ constexpr float KICKDOWN_TPS[3] = {80.0f, 80.0f, 60.0f};  // per mode: ECO, NORM
 constexpr uint32_t LOCKUP_RELEASE_BEFORE_SHIFT_MS = 200;
 constexpr uint32_t LOCKUP_SETTLE_AFTER_SHIFT_MS = 1500;
 constexpr uint32_t LOCKUP_MIN_OFF_MS = 1000;      // anti-chatter before re-apply
-constexpr uint32_t LONG_PRESS_MS = 1000;          // hold [+] = back to AUTO
-// Sequential shifter lever: set true to swap the [+] and [-] inputs, e.g. to
+// Sequential shifter lever: set true to swap the up and down inputs, e.g. to
 // change between "pull = upshift" (rally style) and "push = upshift"
 // without rewiring the lever's two microswitches.
 constexpr bool SWAP_SHIFT_INPUTS = false;
@@ -150,7 +149,6 @@ constexpr bool MANUAL_REV_LIMIT_UPSHIFT = true;
 // car never stops in 3rd/4th. Set [2] to 0 to allow 2nd-gear (snow) starts.
 constexpr float MANUAL_MIN_MPH[5] = {0.0f, 0.0f, 5.0f, 11.0f, 22.0f};
 constexpr float UPSHIFT_MARGIN_MPH = 2.5f;        // no upshift into a forced-downshift zone
-constexpr bool ENTER_IN_MANUAL = false;           // CUSTOM starts in AUTO map
 
 constexpr float SUPPLY_MIN_V = 10.5f;
 constexpr float SUPPLY_MAX_V = 16.0f;
@@ -243,7 +241,7 @@ constexpr float MIN_DOWNSHIFT_MPH = 2.0f;
 // Index: 0 = ECO, 1 = NORMAL, 2 = SPORT.
 
 // Corner hold: no automatic shifts (up or down, kickdown included) while the
-// car is cornering, so a shift can't unsettle it mid-turn. Manual [+]/[-] and
+// car is cornering, so a shift can't unsettle it mid-turn. Manual shifts and
 // the over-rev upshift still work. Lateral g comes from the gyro's yaw rate x
 // road speed (MPU-6050 on I2C). No gyro, or no bias learned yet = no hold.
 constexpr bool IMU_INSTALLED = true;
