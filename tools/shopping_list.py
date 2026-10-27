@@ -64,7 +64,7 @@ ITEMS = [
      "assorted pack", AMZ, 10, "Power board 9 × 15, logic board 7 × 9"),
     ("4. Boards and inside wiring", "Screw terminals, 5.08 mm, 2- and 3-way, interlocking", "37 positions",
      "pack of ~40 pieces", AMZ, 9, "KF301 / DG301 type"),
-    ("4. Boards and inside wiring", "Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~20 cm)",
+    ("4. Boards and inside wiring", "Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~10 cm plug to plug)",
      "1 + 1", "headers + 2 cables", AMZ, 12, "Or crimp your own from ribbon and IDC sockets"),
     ("4. Boards and inside wiring", "Silicone hook-up wire 22 AWG, 6 colours", "~5 m", "kit", AMZ, 15, ""),
     ("4. Boards and inside wiring", "Silicone wire 18 AWG, red/black/yellow", "~3 m", "kit", AMZ, 14,
@@ -211,7 +211,7 @@ def main():
               "tap and inline fuse holders.")
     md.append("2. **ATF cooler hose inside diameter** (usually 5/16\" or 3/8\"): for the barbed tee.")
     md.append("3. **A spot for the TCU box**, ideally under the passenger side of the dash where you "
-              "can reach it: 216 × 178 × 51 mm (244 mm wide with its mounting ears), bolted to metal.")
+              "can reach it: 216 × 192 × 51 mm (244 mm wide with its mounting ears), bolted to metal.")
     md.append("4. **A spot for the dash pod**: 200 × 64 × 64 mm, plus its hinge mount, on the dash top "
               "(driver's side, never over the passenger airbag).")
     md.append("5. **Space on the centre console** beside the gear lever for the shifter base: "

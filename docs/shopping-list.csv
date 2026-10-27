@@ -25,7 +25,7 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 3. Signal inputs,"100 nF ceramic capacitors, 50 V",10,pack of 50,"Amazon (or AliExpress, cheaper but slower)",5,
 4. Boards and inside wiring,"Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm",1 + 1,assorted pack,"Amazon (or AliExpress, cheaper but slower)",10,"Power board 9 × 15, logic board 7 × 9"
 4. Boards and inside wiring,"Screw terminals, 5.08 mm, 2- and 3-way, interlocking",37 positions,pack of ~40 pieces,"Amazon (or AliExpress, cheaper but slower)",9,KF301 / DG301 type
-4. Boards and inside wiring,"Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~20 cm)",1 + 1,headers + 2 cables,"Amazon (or AliExpress, cheaper but slower)",12,Or crimp your own from ribbon and IDC sockets
+4. Boards and inside wiring,"Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~10 cm plug to plug)",1 + 1,headers + 2 cables,"Amazon (or AliExpress, cheaper but slower)",12,Or crimp your own from ribbon and IDC sockets
 4. Boards and inside wiring,"Silicone hook-up wire 22 AWG, 6 colours",~5 m,kit,"Amazon (or AliExpress, cheaper but slower)",15,
 4. Boards and inside wiring,"Silicone wire 18 AWG, red/black/yellow",~3 m,kit,"Amazon (or AliExpress, cheaper but slower)",14,Board power paths and the dummy-load cable (heat-proof)
 4. Boards and inside wiring,Double-sided foam mounting tape,1,roll,"Amazon (or AliExpress, cheaper but slower)",6,Holds the current sensors and buck module

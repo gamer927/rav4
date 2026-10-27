@@ -72,7 +72,7 @@ measure, a pen, your phone.
   one that warms first is the **hot hose**. Put a piece of tape on it.
 - [ ] **A spot for the box.** Kneel at the passenger footwell and look up under the dash, below
   the glovebox. You need a metal spot (the dash support, or somewhere to hang a steel bracket)
-  for a box **216 × 178 × 51 mm** (244 mm wide with its ears), with ~10 cm in front for the
+  for a box **216 × 192 × 51 mm** (244 mm wide with its ears), with ~10 cm in front for the
   cables, clear of the passenger's knees and the heater ducts. That's the best place: you can
   reach it later without taking anything apart. No room? Take out the glovebox and look behind
   it instead. Also find somewhere nearby for the heatsink (100 × 100 × 25 mm) where air moves.

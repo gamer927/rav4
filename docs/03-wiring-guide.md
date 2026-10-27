@@ -1,6 +1,24 @@
 # Wiring guide: 1999 Toyota RAV4 transmission controller
 
-Follow this guide alongside the two diagrams:
+**Start here: the whole system is 8 cables.** Each one has its own name, its own labelled hole in
+the TCU box and its own plug, so connecting the car is 8 separate jobs, done one at a time:
+
+![Cable map: 8 cables, one per labelled hole](cable-map.png)
+
+How much wiring that really is:
+
+| Where | What you wire | How many |
+|---|---|---|
+| In the car | New wires from the 8 cables to the car, the dash pod, the shifter and the heatsink | 36 wire ends, in 8 cables. Only **3** car wires get cut (S1, S2, SL); 8 more are tapped without cutting (7 at the engine computer, 1 fuse tap) |
+| Inside the box | Screwing each cable's wires into its own row of labelled terminals, right behind its hole | 36 screw terminals |
+| On the bench (build book parts 4–6) | Soldering the two boards and the hub, one small page at a time | ~135 short wires on the boards, ~40 on the hub |
+
+The bench part is the long one, but it's done sitting down, a page at a time, with a check after
+each step. Once the boards are built, the box has two ribbon cables inside and nothing else, and
+the [fit check](../hardware/README.md#does-everything-fit-the-fit-check) models every wire bundle
+in it and the room your hands need to reach the terminals.
+
+Then follow the rest of this guide alongside the two detailed diagrams:
 
 - [`wiring-diagram.svg`](wiring-diagram.svg) is the whole system. Every wire has a **W-number**
   that matches the wire list in §4.
@@ -330,7 +348,7 @@ It doesn't have to hide behind the glovebox. What it needs:
    "location of components" page (§5).
 3. **Bolted rigidly to metal**, because the gyro is inside: four bolts, not Velcro or tape.
 4. **Within 2.5 m of cable of the dash pod**, for the screen.
-5. **Room around it:** 244 × 178 × 51 mm with its mounting ears, plus about 10 cm in front for the
+5. **Room around it:** 244 × 192 × 51 mm with its mounting ears, plus about 10 cm in front for the
    cables to bend out of the glands.
 
 **Best spot: under the passenger side of the dash, below the glovebox**, bolted to the metal dash

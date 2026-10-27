@@ -933,6 +933,22 @@ def write_envelopes(boards):
             for ref, x0, y0, x1, y1, h in b.envelopes():
                 f.write(f"    [{x0:.2f}, {y0:.2f}, {x1:.2f}, {y1:.2f}, {h}],  // {ref}\n")
             f.write("];\n")
+            # Screw-terminal groups (X7, X4, J1, ...) and the ribbon header, so
+            # the box's fit check can route each cable's wires to them.
+            groups = {}
+            for p in b.parts:
+                if p.fp["kind"] in ("TB", "J"):
+                    key = p.ref[:2]
+                    c0, r0, c1, r1 = p.body()
+                    x0, y0 = b.mm(c0, r0)
+                    x1, y1 = b.mm(c1, r1)
+                    g = groups.setdefault(key, [x0, y0, x1, y1, p.fp["h"]])
+                    g[0], g[1] = min(g[0], x0), min(g[1], y0)
+                    g[2], g[3] = max(g[2], x1), max(g[3], y1)
+            f.write(f"{b.name}_terminals = [  // [name, x0, y0, x1, y1, height]\n")
+            for k, (x0, y0, x1, y1, h) in sorted(groups.items()):
+                f.write(f'    ["{k}", {x0:.2f}, {y0:.2f}, {x1:.2f}, {y1:.2f}, {h}],\n')
+            f.write("];\n")
 
 
 def main():

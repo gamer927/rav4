@@ -13,9 +13,10 @@ fit_check() {  # file [extra-openscad-args...]
     f=$1; shift
     out=$(openscad -o /tmp/fit_check_$$.stl -D 'part="fit_check"' "$@" "hardware/$f.scad" 2>&1 || true)
     rm -f /tmp/fit_check_$$.stl
-    if echo "$out" | grep -q "top level object is empty"; then
+    if echo "$out" | grep -q "top level object is empty" && ! echo "$out" | grep -q "ERROR"; then
         echo "fit check OK: $f $*"
     else
+        echo "$out" | grep "ERROR" >&2
         echo "FIT CHECK FAILED: $f $* (something collides; render part=\"fit_check\" to see it)" >&2
         exit 1
     fi

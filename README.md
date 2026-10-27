@@ -73,6 +73,10 @@ signal is on the 1999 RAV4 with a multimeter test to confirm it, the circuit for
 and the build order. [`docs/wiring-detail-a.svg`](docs/wiring-detail-a.svg) is a close-up of
 the solenoid changeover, which is built three times.
 
+**The whole system is 8 cables**, each into its own labelled hole in the box:
+
+![Cable map: 8 cables, one per labelled hole](docs/cable-map.png)
+
 Only three factory wires are cut (S1, S2, SL); everything else is a tap. A **bypass plug**
 restores stock driving with the box removed.
 

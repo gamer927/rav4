@@ -40,8 +40,8 @@ and a PLA box will let its standoffs creep.
 | Dash pod mount | Base on the bed, arm up | 70 × 44 × 59 mm |
 | Shifter base | Upside down, top deck on the bed | 150 × 100 × 26 mm |
 | Shifter base bottom plate | Flat | 150 × 100 × 3 mm |
-| TCU box | Floor on the bed | 244 × 178 × 48 mm with ears; **216** × 178 without |
-| TCU lid | Upside down, lettering on the bed, locating lip up | 216 × 178 × 5 mm |
+| TCU box | Floor on the bed | 244 × 192 × 48 mm with ears; **216** × 192 without |
+| TCU lid | Upside down, lettering on the bed, locating lip up | 216 × 192 × 5 mm |
 
 **Bed size:** everything except the TCU box with ears fits a 220 × 220 mm bed (Ender 3 class).
 That box needs a 250 mm bed (Prusa MK3/MK4, Bambu, Voron and similar). On a 220 mm bed, print
@@ -56,7 +56,7 @@ collides. `tools/build_stl.sh` runs it every time.
 
 | Housing | What the check includes |
 |---|---|
-| TCU box | Every part on both boards at its real height (relays 15.7 mm, MOSFETs 19 mm standing, current sensors and buck module on foam tape, plugged ribbon headers), 3 mm under each board for solder joints and wires, the Mega + hub shield stack with its plugged ribbons (34 mm), the USB jack and its plug's moulding, every gland's locknut and cable, the lid-screw bosses and the lid's locating lip |
+| TCU box | Every part on both boards at its real height (relays 15.7 mm, MOSFETs 19 mm standing, current sensors and buck module on foam tape), 3 mm under each board for solder joints and wires, the Mega + hub shield stack (34 mm), the USB jack and its plug's moulding, every gland's locknut, the lid-screw bosses and the lid's locating lip. **And the wires:** each cable's cores as an 8 mm bundle from its gland to its own terminals (ending in 6 mm of straight wire into them; the SIG wires run back along the channel between the boards), both ribbon cables with their plugs, up and over to the hub, and at least 15 mm of clear working room between the gland nuts and the terminals |
 | Dash pod | Each switch and button body with its terminals and a wire bend (ON/OFF 50 mm deep, mini toggles 32 mm, button 38 mm), the 2.42" OLED module with its wires (14 mm), the glands' locknuts and cables, a row of lever-nut connectors, the ON/OFF switch's flip cover outside, and **the pod tilting on its hinge** in 5° steps from 35° towards you to 5° away without touching the mount |
 | Shifter base | The shifter's M6 bolt tips, the mounting-bolt heads, the gland's locknut and cable, and the lever-nut connectors. Also, using the **real shifter's STL**: its body stands on the deck without overlapping it, its whole footprint is on the deck, and the deck's wire hole opens into the pocket under the body, not into solid plastic |
 
@@ -67,6 +67,10 @@ What the check found and fixed:
 - The original single 80 × 120 mm main board couldn't hold everything (its parts alone covered
   about 80 % of it, with no room for wiring). It's now a 90 × 150 mm **power board** and a
   90 × 70 mm **logic board**, and the box grew to 216 × 178 mm.
+- Every part fitted, but the wires didn't have room: only 7 mm between the gland nuts and the
+  terminals, too little to get a wire in by hand. The boards moved 14 mm further back (box
+  216 × 192 mm), leaving 21 mm, and the fit check now models the wires (below) and fails if
+  that gap drops under 15 mm.
 - The USB cut-out was too small for a USB-B plug's moulding to reach the jack: now 18 × 15 mm.
 - One lid-screw boss clipped the power board's corner: the box is 2 mm deeper.
 - The gyro's header pins would have hit the floor on its old 5 mm standoffs. It now sits on
@@ -220,7 +224,7 @@ templates in [`docs/build/`](../docs/build/).
 | SCREEN | X5: dash pod screen, 4-core shielded | PG7 |
 | ATF | X6: ATF probe, 3-core shielded | PG7 |
 
-The box is 216 × 178 × 48 mm (51 mm with the lid; 244 mm wide with its mounting ears).
+The box is 216 × 192 × 48 mm (51 mm with the lid; 244 mm wide with its mounting ears).
 
 ### The dummy resistors do NOT go in this box
 
