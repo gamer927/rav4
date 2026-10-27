@@ -44,6 +44,10 @@ constexpr uint32_t TACH_TIMEOUT_US = 200000;      // no pulse for 200 ms -> 0 rp
 constexpr bool ECU_SENSE_INSTALLED = true;
 
 // Throttle position (linear VTA). CALIBRATE closed/WOT volts on the car.
+// VTA is measured against the ECM's sensor ground E2, which is sensed on its
+// own pin (A1) and subtracted, so the TCU never ties its ground to E2 (no
+// ground loop that could shift the ECM's own throttle reading).
+constexpr bool TPS_E2_SENSE = true;
 constexpr float TPS_CLOSED_V = 0.60f;
 constexpr float TPS_WOT_V = 4.00f;
 constexpr float TPS_VALID_MIN_V = 0.15f;          // below = shorted / open ground
@@ -117,6 +121,10 @@ constexpr uint32_t LOCKUP_RELEASE_BEFORE_SHIFT_MS = 200;
 constexpr uint32_t LOCKUP_SETTLE_AFTER_SHIFT_MS = 1500;
 constexpr uint32_t LOCKUP_MIN_OFF_MS = 1000;      // anti-chatter before re-apply
 constexpr uint32_t LONG_PRESS_MS = 1000;          // hold [+] = back to AUTO
+// Sequential shifter lever: set true to swap the [+] and [-] inputs, e.g. to
+// change between "pull = upshift" (rally style) and "push = upshift"
+// without rewiring the lever's two microswitches.
+constexpr bool SWAP_SHIFT_INPUTS = false;
 constexpr uint32_t STUCK_BUTTON_MS = 10000;
 
 // ------------------------------------------------------------------- safety

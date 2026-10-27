@@ -176,11 +176,15 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 | ECU S1/S2/SL sense | ECU side of each relay (COM-A) | PC817 opto with 3.3 kΩ (about 4 mA load) |
 | VSS | SPD signal to the ECU (meter output, about 4 pulses/rev) | Comparator with hysteresis (LM393) or a 6N137 opto. High-impedance tap; never load the line |
 | Tach | ECU/DLC TAC signal | 10 kΩ series resistor + 5.1 V zener, or an opto. **Never the coil primary** (hundreds of volts) |
-| TPS | ECU VTA (tapped) | 10 kΩ series resistor (keeps the ECU's reading intact), 100 nF at the pin, BAT54S clamp |
+| TPS | ECU VTA and its sensor ground E2 (both tapped) | VTA → 10 kΩ series → A0, and E2 → 10 kΩ series → A1, each with 100 nF and a BAT54S clamp. The firmware reads A0 − A1, so the TCU never ties its ground to E2 (no ground loop that could shift the ECM's throttle reading) |
 | ATF temperature | DS18B20 probe in the cooler line (§3.8) | 4.7 kΩ pull-up DQ→5 V at the TCU, 100 Ω series, 5.1 V TVS to ground. (Alternative: analog NTC sender on A2 with a 1 kΩ pull-up; set `ATF_SENSOR = ATF_NTC`) |
 | Battery | IG feed | 47 kΩ / 10 kΩ divider, 100 nF, 5.1 V zener |
 
 ### 3.6 Console cable (8-core shielded)
+Step-by-step wiring, connector pin-outs and the full wire list are in
+[`03-wiring-guide.md`](03-wiring-guide.md), with diagrams
+[`wiring-diagram.svg`](wiring-diagram.svg) and [`wiring-detail-a.svg`](wiring-detail-a.svg).
+
 1. [+] button
 2. [−] button
 3. ECO switch
@@ -188,7 +192,7 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 5. ON/OFF switch
 6. TEST button
 7. Switch common (ground)
-8. LED (+, via a transistor in the TCU)
+8. LED anode (D7 → 330 Ω; the cathode goes to the common ground)
 
 Ground the shield drain at the TCU end only. Every control switches to ground, so a broken wire
 reads as "off": ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
@@ -254,13 +258,13 @@ How the firmware reads it:
 | D2 (INT4) | in | VSS pulses | falling edge | Comparator or opto output |
 | D3 (INT5) | in | Tach pulses | falling edge | 2 pulses/rev (4-cyl) |
 | D6 | out | Relay bank driver | HIGH = TCU in control | 10 k pull-down; MOSFET/ULN, never the coil directly |
-| D7 | out | Console LED | HIGH | Via transistor |
+| D7 | out | Console LED | HIGH | 330 Ω series |
 | D8 | out | S1 high-side IN | HIGH = on | 10 k pull-down |
 | D9 | out | S2 high-side IN | HIGH = on | 10 k pull-down |
 | D10 | out | SL high-side IN | HIGH = on | 10 k pull-down |
 | D13 | out | Status LED (on-board) | HIGH | Mirrors D7 |
-| D22 | in | Upshift [+] | LOW | Edge-triggered |
-| D23 | in | Downshift [-] | LOW | Edge-triggered |
+| D22 | in | Upshift [+] (button or lever microswitch) | LOW | Edge-triggered; `SWAP_SHIFT_INPUTS` swaps D22/D23 |
+| D23 | in | Downshift [-] (button or lever microswitch) | LOW | Edge-triggered |
 | D24 | in | Mode ECO | LOW | |
 | D25 | in | Mode SPORT | LOW | |
 | D26 | in | ON/OFF switch | LOW = ON (CUSTOM) | Open = STOCK (fail-safe) |
@@ -272,7 +276,8 @@ How the firmware reads it:
 | D32 | in | TEST button | LOW = pressed | Console core 8 |
 | D33 | 1-Wire | ATF probe (DS18B20) DQ | – | 4.7 k pull-up to 5 V |
 | D20 / D21 | I²C | OLED (0x3C) and gyro (0x68) SDA / SCL | – | 100 kHz |
-| A0 | an | TPS | – | 10 k series tap |
+| A0 | an | TPS (VTA) | – | 10 k series tap |
+| A1 | an | TPS ground reference (E2) | – | 10 k series tap; subtracted from A0 |
 | A2 | an | ATF thermistor (only if `ATF_SENSOR = ATF_NTC`) | – | 1 k pull-up |
 | A3 | an | Battery | – | ×5.7 divider |
 | A4 / A5 / A6 | an | S1 / S2 / SL current sense | – | Driver IS pins |

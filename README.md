@@ -40,6 +40,37 @@ All speeds (screen, logs, settings, docs) are in **mph**.
 
 **Not touched:** the engine computer, the throttle, and the transmission's throttle cable.
 
+### What about rev matching on downshifts?
+
+True rev matching (a throttle "blip" before each downshift) needs something that can open the
+throttle. The 1999 RAV4 has a cable throttle, so the box can't do it without adding a throttle
+actuator. That would be a separate, safety-critical system that can accelerate the car on its
+own, so this project deliberately doesn't do it.
+
+An automatic gets the same result a different way, and the box already does it:
+- **The torque converter is the rev matcher.** Before every downshift the box unlocks the
+  converter clutch (200 ms ahead of the shift). The fluid coupling then absorbs the speed
+  difference, which is the job a blip does in a manual gearbox.
+- **Lockup stays off for 1.5 s after each shift**, so the engine settles to its new speed
+  smoothly before the connection goes solid again.
+- **Over-rev guard:** downshifts that would land above 5,800 rpm are refused.
+- **On this transaxle, 1st and 2nd freewheel when you lift off** (one-way clutches in D). Only
+  the 4→3 downshift can pull the car back with engine braking, so a downshift into 2nd or 1st
+  can't jolt the car.
+
+## Wiring
+
+![System wiring diagram](docs/wiring-diagram.png)
+
+The full step-by-step guide is in **[`docs/03-wiring-guide.md`](docs/03-wiring-guide.md)**. It
+covers every connector pin-out, a numbered wire list (W1–W21) matching the diagram, where each
+signal is on the 1999 RAV4 with a multimeter test to confirm it, the circuit for every input,
+and the build order. [`docs/wiring-detail-a.svg`](docs/wiring-detail-a.svg) is a close-up of
+the solenoid changeover, which is built three times.
+
+Only three factory wires are cut (S1, S2, SL); everything else is a tap. A **bypass plug**
+restores stock driving with the box removed.
+
 ## Status
 
 - **Done:** full design, firmware and documentation.
@@ -85,9 +116,10 @@ Quantities are for one car. Part numbers are examples; equivalents are fine if t
 |---|---|---|
 | 6 | PC817 optocoupler | Brake switch, lever-in-D signal, the factory computer's S1/S2/SL outputs, tach |
 | 1 | LM393 comparator | Vehicle speed signal (high-impedance tap; doesn't load the car's line) |
-| 7 | BAT54S dual clamp diode | Input protection: the 6 console controls + throttle sensor |
+| 8 | BAT54S dual clamp diode | Input protection: the 6 console controls + throttle signal (VTA) + throttle ground (E2) |
 | 2 | 5.1 V zener (or TVS) diode | Battery-sense and ATF-probe line protection |
-| — | Resistor kit, 1/4 W, 1 % | Including 1 kΩ, 2.2 kΩ, 3.3 kΩ, 4.7 kΩ, 10 kΩ, 47 kΩ, 100 Ω |
+| — | Resistor kit, 1/4 W, 1 % | Including 100 Ω, 330 Ω, 1 kΩ, 2.2 kΩ, 3.3 kΩ, 4.7 kΩ, 10 kΩ, 47 kΩ, 1 MΩ |
+| 6 | 1N4148 diode | Reverse protection across each optocoupler LED |
 | — | 100 nF ceramic capacitors (~20) | Filtering on every input |
 
 ### 4. Console (overhead or centre console)
@@ -97,9 +129,10 @@ Quantities are for one car. Part numbers are examples; equivalents are fine if t
 | 1 | **ON/OFF toggle switch** (SPST) | Factory ↔ box. A flip-up safety cover is a nice touch |
 | 1 | **ECO toggle switch** (SPST) | |
 | 1 | **SPORT toggle switch** (SPST) | Both ECO and SPORT off = NORMAL |
-| 2 | **Momentary push buttons**: [+] and [−] | Manual shifting |
+| 2 | **Momentary push buttons**: [+] and [−] | Manual shifting. **Or** a sequential shifter lever with two microswitches (next row) |
+| (1) | *Option:* **sequential shifter lever** with two sealed microswitches | A sim-racing style lever, e.g. the DIY build in [Beavis Motorsport's DIY sequential shifter guide](https://www.beavismotorsport.com/sim-racing/diy-sequential-shifter/). Use the lever and its two microswitches only, not the USB board. Wiring: guide §8. `SWAP_SHIFT_INPUTS` picks push or pull for upshift |
 | 1 | **Momentary push button**: TEST | Tap = next screen, hold 2 s = self-test |
-| 1 | Panel LED + resistor | Status: solid = box in control, fast blink = fault |
+| 1 | Panel LED (plain 5 V LED) + 330 Ω resistor | Status: solid = box in control, fast blink = fault |
 | 1 | Small panel or enclosure for the switches | |
 | ~3 m | **8-core shielded cable** (24 AWG / 0.22 mm²) | Console to box: 6 controls + ground + LED |
 
@@ -129,7 +162,8 @@ Quantities are for one car. Part numbers are examples; equivalents are fine if t
 |---|---|---|
 | 1 | Project enclosure, ~200 × 150 × 75 mm | Behind the glovebox; leave room and airflow for the dummy resistors |
 | 1 | Perfboard or a custom PCB + screw terminals | |
-| — | Automotive connectors (Deutsch DT or Superseal) | So the box unplugs cleanly from the car |
+| 6 | Automotive connector pairs (Deutsch DT or Superseal): 3-pin (X1, X6), 4-pin (X5), 6-pin (X2), 8-pin (X3, X4) | So the box unplugs cleanly from the car (pin-outs: wiring guide §3) |
+| 1 | Extra 6-pin plug for X2 + 3 short jumpers | **Bypass plug**: jumpers 1–4, 2–5, 3–6; makes the car stock with the box removed |
 | — | Automotive wire (TXL/GXL): 18 AWG for the solenoid circuits, 22 AWG for signals | |
 | — | Heat-shrink, loom, zip ties | Solder and heat-shrink every tap into the car's harness (no Scotch-lock taps) |
 
@@ -168,6 +202,8 @@ Quantities are for one car. Part numbers are examples; equivalents are fine if t
 
 | Document | Contents |
 |---|---|
+| [`docs/03-wiring-guide.md`](docs/03-wiring-guide.md) | **Wiring guide:** connectors, wire list, where each signal is on the RAV4 and how to confirm it, circuits, build order, shifter lever |
+| [`docs/wiring-diagram.svg`](docs/wiring-diagram.svg) / [`wiring-detail-a.svg`](docs/wiring-detail-a.svg) | System wiring diagram; solenoid channel close-up (regenerate with `python3 tools/wiring_diagram.py`) |
 | [`docs/02-revised-spec.md`](docs/02-revised-spec.md) | The full design: wiring, pin map, solenoid logic, every control rule, self-test, calibration, test plan |
 | [`docs/oled-screens.png`](docs/oled-screens.png) | What each screen looks like |
 | [`docs/01-audit.md`](docs/01-audit.md) | Review of the original spec this project started from (rev 0, which still had an oil sender and a Nextion dashboard) and what was fixed |
@@ -184,6 +220,7 @@ firmware/tcu/ds18b20.*      ATF probe driver + tested decoding
 firmware/tcu/imu.*          gyro (MPU-6050) yaw-rate reader
 test/                       unit tests
 tools/avr_build.sh          compile for the Mega without the Arduino IDE
+tools/wiring_diagram.py     regenerates the wiring diagrams in docs/
 ```
 
 ## Build and flash

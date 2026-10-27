@@ -47,7 +47,8 @@ constexpr uint8_t ECU_S2 = 30;
 constexpr uint8_t ECU_SL = 31;
 constexpr uint8_t TEST = 32;         // console TEST button
 constexpr uint8_t ATF_PROBE = 33;    // DS18B20 1-Wire data (4.7k pull-up to 5 V)
-constexpr uint8_t TPS = A0;
+constexpr uint8_t TPS = A0;          // ECM VTA (10k series tap)
+constexpr uint8_t TPS_E2 = A1;       // ECM E2 sensor ground (10k series tap)
 constexpr uint8_t ATF = A2;
 constexpr uint8_t VBAT = A3;
 constexpr uint8_t IS_S1 = A4;        // high-side driver current-sense outputs
@@ -241,8 +242,8 @@ void sampleSwitches(uint32_t now) {
 tcu::Inputs readInputs(uint32_t now) {
   tcu::Inputs in;
   in.nowMs = now;
-  in.up = dbUp.state();
-  in.down = dbDown.state();
+  in.up = cfg::SWAP_SHIFT_INPUTS ? dbDown.state() : dbUp.state();
+  in.down = cfg::SWAP_SHIFT_INPUTS ? dbUp.state() : dbDown.state();
   in.eco = dbEco.state();
   in.sport = dbSport.state();
   // Until the car is calibrated the ON/OFF switch is ignored (STOCK only).
@@ -262,7 +263,9 @@ tcu::Inputs readInputs(uint32_t now) {
   // falls back to speed x ratio instead of trusting it.
   in.rpmValid = cfg::TACH_INSTALLED && !(in.engineRpm < 300.0f && in.speedMph > 6.0f);
 
-  const float tpsV = tpsF.update(rawToVolts(readRaw(pin::TPS)), 0.4f);
+  // VTA relative to the ECM's sensor ground E2 (differential, no ground loop).
+  const float e2V = cfg::TPS_E2_SENSE ? rawToVolts(readRaw(pin::TPS_E2)) : 0.0f;
+  const float tpsV = tpsF.update(rawToVolts(readRaw(pin::TPS)) - e2V, 0.4f);
   in.tpsValid = tpsV >= cfg::TPS_VALID_MIN_V && tpsV <= cfg::TPS_VALID_MAX_V;
   float tps = (tpsV - cfg::TPS_CLOSED_V) / (cfg::TPS_WOT_V - cfg::TPS_CLOSED_V) * 100.0f;
   in.tpsPct = tps < 0.0f ? 0.0f : (tps > 100.0f ? 100.0f : tps);

@@ -1,0 +1,240 @@
+# Wiring guide: 1999 Toyota RAV4 transmission controller
+
+Follow this guide alongside the two diagrams:
+
+- [`wiring-diagram.svg`](wiring-diagram.svg) is the whole system. Every wire has a **W-number**
+  that matches the wire list in §4.
+- [`wiring-detail-a.svg`](wiring-detail-a.svg) is **Detail A**: one solenoid channel (relay,
+  driver, dummy load, sense), built three times.
+
+![System wiring diagram](wiring-diagram.png)
+
+> **Read this first**
+> - **Confirm every car wire with a meter before you cut or tap it.** §5 gives a test for each.
+>   The Toyota terminal *names* (S1, SPD, VTA, …) are confirmed for this car, but ECM pin
+>   numbers and wire colours vary by year, 2WD/4WD and market, and published pinouts disagree.
+>   Use the factory repair manual (RM) and electrical wiring diagram (EWD) for your VIN.
+> - **Disconnect the battery** before working on the ECM or solenoid wiring.
+> - **Only S1, S2 and SL are cut.** Every other car connection is a *tap*: the factory wire
+>   stays intact and the TCU listens to it.
+> - **The ECM is static-sensitive.** Ground yourself, back-probe connectors, and never push
+>   meter probes into the front of ECM pins.
+
+---
+
+## 1. What connects to what
+
+| Connector (at the TCU) | Goes to | Wires |
+|---|---|---|
+| **X1 power** (3-pin) | Fuse box (ignition-switched 12 V), body ground | W1–W3 |
+| **X2 solenoids** (6-pin) | The S1, S2, SL wires, cut between the ECM and the transaxle | W4–W9 |
+| **X3 signals** (8-pin, 7 used) | Taps: lever "D", brake, ECM ground, speed, tach, throttle, throttle ground | W10–W16 |
+| **X4 console** (8-pin) | Overhead console switches, buttons or shifter lever, LED | W20 (C1–C8) |
+| **X5 OLED** (4-pin) | Dash screen | W21 |
+| **X6 ATF** (3-pin) | Temperature probe in the cooler line | W17–W19 |
+| USB | Laptop, for flashing and the calibration log | – |
+
+Use sealed automotive connectors (Deutsch DT or Superseal) so the box unplugs cleanly.
+
+**Make a bypass plug for X2:** a mating 6-pin plug with three jumpers, 1–4, 2–5 and 3–6. Unplug
+the TCU, plug this into the car side of X2, and the ECM drives the solenoids directly. The car is
+100 % stock, even with the TCU removed.
+
+## 2. Harness colour code and wire sizes
+
+These colours are for **your** harness, the new wires from the TCU. Toyota's own wire colours
+are in the EWD. Label both ends of every wire with its W-number (heat-shrink markers).
+
+| Colour | Use | Size |
+|---|---|---|
+| Red | +12 V (W1, W2) and +5 V (W17, OLED 5V) | W1 16 AWG, others 18–22 AWG |
+| Black | Ground (W3, W18, OLED GND, C7) | W3 16 AWG, others 18–22 AWG |
+| Black/white | ECM ground reference E1 (W12) | 18 AWG |
+| Yellow | S1/S2/SL, **ECM side** (W4–W6) | 18 AWG |
+| Orange | S1/S2/SL, **solenoid side** (W7–W9) | 18 AWG |
+| Blue | Signal taps (W10, W11, W13–W16) | 22 AWG; SPD+TAC and VTA+E2 as shielded pairs |
+| Brown | ATF probe (W17–W19) | 3-core shielded cable |
+| Green | Console (W20) | 8-core shielded cable, 24 AWG |
+| Purple | OLED I²C (W21) | 4-core shielded cable, ≤ 1 m |
+
+Ground every cable shield **at the TCU end only**.
+
+## 3. Connector pin-outs
+
+**X1 power**
+
+| Pin | Wire | Signal | Inside the TCU |
+|---|---|---|---|
+| 1 | W1 | +12 V drivers, **5 A fuse** | TVS → high-side switches U1–U3, relay coils |
+| 2 | W2 | +12 V logic, **2 A fuse** | Reverse-polarity diode → TVS → 5 V buck; battery sense (47k/10k → A3) |
+| 3 | W3 | Body ground | Star ground point |
+
+**X2 solenoids** (Detail A)
+
+| Pin | Wire | Signal | Inside the TCU |
+|---|---|---|---|
+| 1 | W4 | S1, ECM side | K1 COM-A; ECU-sense opto → D29 |
+| 2 | W5 | S2, ECM side | K2 COM-A; ECU-sense opto → D30 |
+| 3 | W6 | SL, ECM side | K3 COM-A; ECU-sense opto → D31 |
+| 4 | W7 | S1, solenoid side | K1 NC-A + K1 NO-B |
+| 5 | W8 | S2, solenoid side | K2 NC-A + K2 NO-B |
+| 6 | W9 | SL, solenoid side | K3 NC-A + K3 NO-B |
+
+**X3 signals**
+
+| Pin | Wire | Signal | Inside the TCU |
+|---|---|---|---|
+| 1 | W10 | Lever in **D** (+12 V in D) | PC817 opto → D28 |
+| 2 | W11 | Brake **STP** (+12 V when pressed) | PC817 opto → D27 |
+| 3 | W12 | ECM ground **E1** | TCU signal ground reference |
+| 4 | W13 | Speed **SPD** | LM393 comparator → D2 |
+| 5 | W14 | Tach **TAC** | PC817 opto → D3 |
+| 6 | W15 | Throttle **VTA** | 10k series, 100 nF, clamp → A0 |
+| 7 | W16 | Throttle ground **E2** | 10k series, 100 nF, clamp → A1 (measured, *not* tied to TCU ground) |
+| 8 | – | spare | |
+
+**X4 console** (W20, 8-core)
+
+| Pin | Core | Signal | Mega pin |
+|---|---|---|---|
+| 1 | C1 | [+] button / lever upshift microswitch | D22 |
+| 2 | C2 | [−] button / lever downshift microswitch | D23 |
+| 3 | C3 | ECO switch | D24 |
+| 4 | C4 | SPORT switch | D25 |
+| 5 | C5 | ON/OFF switch | D26 |
+| 6 | C6 | TEST button | D32 |
+| 7 | C7 | Common ground: the other side of every switch, and the LED cathode | GND |
+| 8 | C8 | Status LED anode (D7 → 330 Ω → C8) | D7 |
+
+Each control switches its core to C7 (ground). Closed means active. A broken wire reads as off:
+ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
+
+**X5 OLED** (W21): 1 = 5 V, 2 = GND, 3 = SDA (D20), 4 = SCL (D21).
+**X6 ATF**: 1 = +5 V (W17), 2 = GND (W18), 3 = DQ (W19 → 100 Ω → D33, 4.7k pull-up to 5 V).
+The **MPU-6050 gyro** sits inside the box on the same I²C bus (5 V, GND, D20, D21). Mount it flat.
+
+## 4. Wire list
+
+| W | From (car) | To | Colour / size | Notes |
+|---|---|---|---|---|
+| W1 | Add-a-fuse output → 5 A inline fuse | X1-1 | Red 16 AWG | Fuse within 20 cm of the tap |
+| W2 | Add-a-fuse output → 2 A inline fuse | X1-2 | Red 18 AWG | Same tap as W1, separate fuse |
+| W3 | Body ground bolt | X1-3 | Black 16 AWG | Short; bare metal; star washer |
+| W4 | ECM terminal **S1** (cut, ECM end) | X2-1 | Yellow 18 AWG | Solder + heat-shrink |
+| W5 | ECM terminal **S2** (cut, ECM end) | X2-2 | Yellow 18 AWG | |
+| W6 | ECM terminal **SL** (cut, ECM end) | X2-3 | Yellow 18 AWG | |
+| W7 | S1 wire (cut, solenoid end) | X2-4 | Orange 18 AWG | |
+| W8 | S2 wire (cut, solenoid end) | X2-5 | Orange 18 AWG | |
+| W9 | SL wire (cut, solenoid end) | X2-6 | Orange 18 AWG | |
+| W10 | Park/neutral switch **D** output | X3-1 | Blue 22 AWG | Tap |
+| W11 | Stop-lamp switch **STP** output | X3-2 | Blue 22 AWG | Tap |
+| W12 | ECM ground **E1** / engine ground | X3-3 | Black/white 18 AWG | |
+| W13 | ECM **SPD** | X3-4 | Shielded pair with W14 | Tap (high impedance) |
+| W14 | ECM **TAC** | X3-5 | Shielded pair with W13 | Tap. **Never the ignition coil (−) terminal** |
+| W15 | ECM **VTA** | X3-6 | Shielded pair with W16 | Tap |
+| W16 | ECM **E2** | X3-7 | Shielded pair with W15 | Tap |
+| W17–W19 | DS18B20 probe red / black / yellow | X6-1/2/3 | Brown 3-core shielded | Through a firewall grommet |
+| W20 | Console panel | X4 | Green 8-core shielded | Up the A-pillar, away from the airbag |
+| W21 | Dash OLED | X5 | Purple 4-core shielded | 1 m maximum |
+
+## 5. Finding each signal on the 1999 RAV4
+
+Do these tests with a multimeter **before** you cut or tap. Write down the wire colour you find on
+your car next to each W-number.
+
+| Signal | Where (VERIFY in your EWD) | How to confirm it's the right wire |
+|---|---|---|
+| **IG 12 V** (W1, W2) | Interior fuse box: an ignition-only fuse, with an add-a-fuse | 12 V with the key ON and engine running, **0 V with the key OFF** |
+| **Body ground** (W3) | A factory ground bolt near the ECM | < 0.5 Ω to the battery negative |
+| **ECM location** | See the RM's "location of components" page. Many Toyotas of this era have it behind the glovebox or passenger kick panel, but check | – |
+| **S1, S2, SL** (W4–W9) | ECM terminals named S1, S2, SL; the same three wires run to the solenoid connector on the transaxle | Battery disconnected. Unplug the transaxle solenoid connector and check continuity from each ECM wire to it. Expected: S1 → A3 (2WD) / B3 (4WD), S2 → A1 / B6, SL → A2 / B5 (Toyota service text; VERIFY). With the connector plugged back in, each reads **11–15 Ω to body ground** (through the solenoid). |
+| **SPD** (W13) | ECM terminal SPD (speed signal from the meter) | Key ON, lever in N, roll the car slowly: the voltage pulses between ~0 V and ~5 V (or 12 V). About **1.1 pulses per second per mph** |
+| **TAC** (W14) | ECM terminal TAC (or TAC at the engine-bay diagnostic connector, if fitted) | Engine idling (~750 rpm): about **25 Hz** in frequency mode (2 pulses per crank turn) |
+| **VTA / E2** (W15, W16) | ECM terminals VTA and E2 (throttle sensor signal and its ground) | Key ON, engine off, measured VTA-to-E2: **~0.3–0.8 V closed**, rising smoothly to **~3.2–4.9 V** at full throttle. E2 is within a few mV of ground |
+| **E1** (W12) | ECM ground terminal E1, or the engine ground strap | < 0.5 Ω to the engine block |
+| **STP** (W11) | Stop-lamp switch on the brake pedal (output side), or ECM terminal STP | 0 V pedal up, **12 V pedal down** |
+| **Lever D** (W10) | Park/neutral position switch "D" output (it also feeds the "D" light in the cluster) | Key ON: **12 V only with the lever in D**, 0 V in P, R, N, 2, L |
+
+**How to tap a wire:** strip a 10 mm window without cutting the strands, wrap the new wire around
+it, solder, and seal with adhesive heat-shrink. Don't use Scotch-lock taps.
+**How to cut S1/S2/SL:** cut close to the ECM (inside the car, dry), leaving room to work. Solder
+each end into its X2 harness wire and seal it.
+
+## 6. Inside the TCU (Detail B: input and output circuits)
+
+Detail A (the solenoid channel) is in [`wiring-detail-a.svg`](wiring-detail-a.svg). The other
+circuits are below. Fit a 10 kΩ pull-down on **every** output that drives something (D6, D8, D9,
+D10), so everything is off while the Mega resets.
+
+**Console switch input** (×6: D22–D26, D32)
+```
++5V ── 2.2k ──┬── 1k ──┬── Mega pin
+              │        ├── 100 nF ── GND
+              │        └── BAT54S clamp to 5V / GND
+            X4 core ── switch ── C7 (GND)
+```
+
+**12 V opto input** (brake D27, lever D28, ECU sense D29–D31, tach D3)
+```
+car signal ── 2.2k (3.3k for ECU sense) ──┬── PC817 LED (+) ── LED (−) ── GND
+                                          └── 1N4148 reverse across the LED
+PC817 transistor: collector ── Mega pin (internal pull-up + 10k to 5V), emitter ── GND
+Mega reads LOW when the car signal is at +12 V.
+```
+
+**Speed (SPD) comparator**, high impedance so it never loads the car's line (D2)
+```
+SPD ── 47k ──┬── LM393 (+)        LM393 (−) ── 2.5 V (10k/10k from 5V)
+             ├── 10k ── GND       1M feedback (+) ← output (hysteresis)
+             └── 5.1V zener       output ── 10k pull-up to 5V ── D2
+```
+
+**Throttle tap** (A0, A1)
+```
+VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
+           100 nF                  100 nF
+           BAT54S                  BAT54S
+(Firmware reads A0 − A1. E2 is never tied to the TCU ground.)
+```
+
+**Battery sense** (A3): `X1-2 (+12 V) ── 47k ──┬── A3; 10k to GND, 100 nF, 5.1 V zener`
+
+**ATF probe** (D33): `X6-3 DQ ── 100 Ω ── D33; 4.7k from DQ to 5 V; 5.1 V TVS to GND`
+(use 2.2k if readings drop out on the long run)
+
+**Relay coils** (D6): `D6 ── ULN2803 IN1-3 (10k pull-down); OUT1-3 ── K1/K2/K3 coil (−); coil (+) ── +12 V DRV; ULN COM ── +12 V DRV`
+
+**Status LED** (D7): `D7 ── 330 Ω ── X4-8 (C8) ── LED ── X4-7 (C7)`
+
+## 7. Build order
+
+1. **Bench:** build the TCU on the bench with 15 Ω power resistors (plus LEDs) in place of the
+   three solenoids. Flash the firmware, calibrate `IS_AMPS_PER_VOLT`, hold TEST, and check every
+   self-test line passes.
+2. **Power (car):** W1–W3 only, with the ON/OFF switch OFF. Key ON: the screen shows the MAIN page
+   and the power-up test runs.
+3. **Signal taps:** W10–W16. Check the SENSORS page: speed 0, throttle 0 % → 100 % as you press
+   the pedal, rpm at idle.
+4. **Console and screen:** W20, W21. Hold TEST: the switch prompts check every console wire.
+5. **ATF probe:** W17–W19, and the probe in the cooler line (spec §3.8). Top up the ATF.
+6. **Solenoid intercept:** cut S1/S2/SL and fit X2 (W4–W9). With the switch OFF, the relays rest
+   in factory position, so the car must drive **exactly** as before. Then try the bypass plug: it
+   must drive the same. Check the OBD-II scanner for trouble codes.
+7. **Calibrate** with the switch OFF (spec §8), set `CALIBRATED = true`, and follow spec §9: lift,
+   then a closed lot, then the road.
+
+## 8. Sequential shifter lever (instead of [+] and [−] buttons)
+
+Any sim-racing style sequential lever with **two microswitches** works, such as the DIY build in
+[Beavis Motorsport's DIY sequential shifter guide](https://www.beavismotorsport.com/sim-racing/diy-sequential-shifter/).
+Use only the mechanical lever and its two microswitches; you don't need the USB board those
+builds use for PC games.
+
+- Upshift microswitch: COM → C7 (ground), NO → C1 ([+]).
+- Downshift microswitch: COM → C7 (ground), NO → C2 ([−]).
+- To change between "pull = upshift" (rally style) and "push = upshift", set
+  `SWAP_SHIFT_INPUTS` in `config.h`. No rewiring needed.
+- **In a car:** mount it rigidly where it can't foul the factory gear lever, your knee or the
+  handbrake, and give it hard end-stops. Use sealed microswitches (for example V-type, IP67).
+  The firmware's 25 ms debounce and edge detection mean one click is always exactly one shift,
+  even with a bouncy switch.
