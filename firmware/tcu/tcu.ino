@@ -498,6 +498,39 @@ void messageText(Text& t, const tcu::Outputs& o, uint32_t now) {
   }
 }
 
+// In STOCK, log every shift and lockup change the factory ECU makes, with
+// the speed and throttle it happened at. Driving normally with the switch
+// OFF then gives the factory shift map to compare NORMAL against (spec §8).
+void logEcuShifts(const tcu::Outputs& o) {
+  static uint8_t prevGear = 0;
+  static bool prevLockup = false;
+  if (o.control != tcu::CTRL_STOCK) {
+    prevGear = 0;
+    return;
+  }
+  const bool shifted = prevGear && o.gear && o.gear != prevGear;
+  const bool lockupChanged = o.gear && o.lockup != prevLockup;
+  if (USB_LOG_ENABLED && (shifted || lockupChanged) && Serial.availableForWrite() >= 56) {
+    if (shifted) {
+      Serial.print(F("# ECU shift "));
+      Serial.print(prevGear);
+      Serial.print('>');
+      Serial.print(o.gear);
+    } else {
+      Serial.print(o.lockup ? F("# ECU lockup ON") : F("# ECU lockup OFF"));
+    }
+    Serial.print(F(" at "));
+    Serial.print((int16_t)(lastIn.speedKmh + 0.5f));
+    Serial.print(F(" km/h, TPS "));
+    Serial.print((int16_t)(lastIn.tpsPct + 0.5f));
+    Serial.print(F(" %, "));
+    Serial.print((int32_t)lastIn.engineRpm);
+    Serial.println(F(" rpm"));
+  }
+  prevGear = o.gear;
+  prevLockup = o.lockup;
+}
+
 void serviceUsbLog(uint32_t now) {
   static uint32_t last = 0;
   if (!USB_LOG_ENABLED || (uint32_t)(now - last) < USB_LOG_PERIOD_MS) return;
@@ -548,6 +581,7 @@ void renderMain(const tcu::Outputs& o, uint32_t now) {
   } else {
     if (o.lockup) r2.s("LOCKUP ");
     if (o.cornerHold) r2.s("CORNER");
+    else if (o.gearHold) r2.s("HOLD");
   }
   r3.s("BIT  ");
   bitStatus(r3);
@@ -832,6 +866,7 @@ void loop() {
       applyOutputs(out);
       updateLeds(out, now);
     }
+    logEcuShifts(out);
   }
 
   serviceAtfProbe(now);

@@ -79,6 +79,7 @@ struct Outputs {
   uint8_t gear = 0;          // TCU gear in CUSTOM, ECU's gear in STOCK, 0 = unknown
   bool lockup = false;       // converter lockup commanded (by TCU or ECU)
   bool cornerHold = false;   // automatic shifts paused: cornering
+  bool gearHold = false;     // upshifts paused: brake or lift-off hold
   Control control = CTRL_STOCK;
   DriveMode mode = MODE_NORMAL;
   bool armed = false;        // master switch cycled into CUSTOM since boot
@@ -185,6 +186,10 @@ class Controller {
   float tpsRef_ = 0.0f;
   uint32_t tpsRefMs_ = 0;
   bool tipIn_ = false;
+  bool liftHold_ = false;
+  uint32_t liftHoldSinceMs_ = 0;
+  bool highTpsSeen_ = false;
+  uint32_t lastHighTpsMs_ = 0;
 
   bool prevUp_ = false, prevDown_ = false;
   bool upEdge_ = false, downEdge_ = false, upLong_ = false, upLongFired_ = false;

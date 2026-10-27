@@ -16,8 +16,8 @@ car then drives exactly as it did from the factory.
 | Mode | Feel | What changes |
 |---|---|---|
 | **ECO** | Calm | Early upshifts, early torque-converter lockup that stays on when you lift, pedal stabs ignored (0.8 s throttle smoothing). Flooring it still kicks down instantly. |
-| **NORMAL** | In between | Middle shift points, light throttle smoothing. |
-| **SPORT** | Sharp | Holds each gear to just under the redline at full throttle (the fastest way through these gears), downshifts while braking so you're in the right gear for the corner exit, releases lockup on a closed throttle or a fast pedal stab. |
+| **NORMAL** | Like stock, plus the extras | Shift points close to a factory-style schedule (tune them to your car's logged factory shifts), light throttle smoothing, plus everything stock doesn't have: corner hold, the over-rev guards and the fault hand-back. |
+| **SPORT** | Sharp | Holds each gear to just under the redline at full throttle (the fastest way through these gears), kicks down from 60 % throttle, holds the gear when you snap off the throttle between corners, downshifts while braking so you're in the right gear for the exit, and releases lockup on a closed throttle or a fast pedal stab. |
 | **MANUAL** | SPORT, you shift | Tap [+] or [−] from any mode. Same lockup and pedal response as SPORT, but the box never shifts for you, except to protect the engine (upshift at 6,200 rpm, downshift when slowing to a stop). Hold [+] for 1 s to go back to automatic in the switch's mode. |
 | **All automatic modes** | | No automatic shifts mid-corner (gyro), lockup off when braking. |
 
@@ -40,7 +40,7 @@ car then drives exactly as it did from the factory.
 ## Status
 
 - **Done:** full design, firmware and documentation.
-  - 1,369 automated test checks pass.
+  - 1,377 automated test checks pass.
   - The firmware compiles for the Arduino Mega 2560 without warnings (12 % flash, 39 % RAM).
   - The screens above come from the real firmware running in a simulator.
 - **Not done yet:** nothing has been built or run on real hardware or in the car. The gear

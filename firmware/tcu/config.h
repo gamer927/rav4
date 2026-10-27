@@ -109,7 +109,7 @@ constexpr uint32_t MIN_SHIFT_INTERVAL_MS = 700;   // one shift must finish first
 constexpr uint32_t AUTO_MIN_TIME_IN_GEAR_MS = 1200;  // anti-hunting dwell
 // Throttle at or above this is a kickdown: AUTO downshifts skip the dwell
 // above and only wait for the previous shift to finish (MIN_SHIFT_INTERVAL).
-constexpr float KICKDOWN_TPS = 80.0f;
+constexpr float KICKDOWN_TPS[3] = {80.0f, 80.0f, 60.0f};  // per mode: ECO, NORMAL, SPORT
 constexpr uint32_t LOCKUP_RELEASE_BEFORE_SHIFT_MS = 200;
 constexpr uint32_t LOCKUP_SETTLE_AFTER_SHIFT_MS = 1500;
 constexpr uint32_t LOCKUP_MIN_OFF_MS = 1000;      // anti-chatter before re-apply
@@ -232,9 +232,20 @@ constexpr float COAST_TPS_ON = 5.0f;              // allow re-lock above this
 
 // Throttle smoothing for shift decisions: the shift map sees a low-passed
 // throttle with this time constant, so a quick stab of the pedal doesn't
-// cause a downshift; only a sustained push does. Flooring it (>= KICKDOWN_TPS)
-// always uses the raw throttle, so kickdown is never delayed.
+// cause a downshift; only a sustained push does. A kickdown (>= KICKDOWN_TPS)
+// always uses the raw throttle, so it is never delayed.
 constexpr uint32_t SHIFT_TPS_SMOOTH_MS[3] = {800, 250, 0};
+
+// Lift-off hold: after a hard push (>= LIFT_FROM_TPS), lifting quickly
+// (to <= LIFT_TO_TPS within LIFT_WINDOW_MS) holds the gear instead of
+// upshifting, for up to LIFT_HOLD_MS or until the throttle comes back. Keeps
+// SPORT in gear between corners instead of short-shifting on every lift.
+constexpr bool LIFT_HOLD[3] = {false, false, true};
+constexpr float LIFT_FROM_TPS = 40.0f;
+constexpr float LIFT_TO_TPS = 10.0f;
+constexpr uint32_t LIFT_WINDOW_MS = 500;
+constexpr uint32_t LIFT_HOLD_MS = 4000;
+constexpr float LIFT_RELEASE_TPS = 20.0f;
 
 // Tip-in release: a fast stab of the pedal releases lockup at once, even
 // below the mode's TPS limit, so the converter multiplies torque right away.

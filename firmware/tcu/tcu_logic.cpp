@@ -237,7 +237,7 @@ void Controller::tryEnterCustom(const Inputs& in) {
   gearSinceMs_ = now_;
   lastShiftMs_ = now_ - cfg::MIN_SHIFT_INTERVAL_MS;
   slCmd_ = in.ecuSenseValid && in.ecuSL && g >= cfg::LU_MIN_GEAR && !in.brake;
-  brakeHold_ = false;
+  brakeHold_ = liftHold_ = highTpsSeen_ = false;
   lastLockupChangeMs_ = now_;
   overRev_ = Persist();
   out_.control = cfg::ENTER_IN_MANUAL ? CTRL_MANUAL : CTRL_AUTO;
@@ -392,17 +392,32 @@ void Controller::autoSchedule(const Inputs& in) {
       (in.tpsPct >= cfg::BRAKE_HOLD_TPS || elapsed(now_, brakeReleasedMs_, cfg::BRAKE_HOLD_MS))) {
     brakeHold_ = false;
   }
+  // Lift-off hold: a quick lift after a hard push keeps the gear.
+  const uint8_t m = out_.mode;
+  if (in.tpsPct >= cfg::LIFT_FROM_TPS) {
+    highTpsSeen_ = true;
+    lastHighTpsMs_ = now_;
+  }
+  if (cfg::LIFT_HOLD[m] && !liftHold_ && highTpsSeen_ && in.tpsPct <= cfg::LIFT_TO_TPS &&
+      !elapsed(now_, lastHighTpsMs_, cfg::LIFT_WINDOW_MS)) {
+    liftHold_ = true;
+    liftHoldSinceMs_ = now_;
+  }
+  if (liftHold_ && (!cfg::LIFT_HOLD[m] || in.tpsPct >= cfg::LIFT_RELEASE_TPS ||
+                    elapsed(now_, liftHoldSinceMs_, cfg::LIFT_HOLD_MS))) {
+    liftHold_ = false;
+  }
   // No automatic shifts mid-corner (manual and over-rev shifts still work).
   if (cornerHoldActive()) return;
   if (brakeDownshift(in)) return;
   // A kickdown must not wait out the anti-hunting dwell, so 4->3->2 takes
   // about one shift interval per step instead of over a second. It also
   // bypasses the throttle smoothing.
-  const bool kickdown = in.tpsPct >= cfg::KICKDOWN_TPS;
+  const bool kickdown = in.tpsPct >= cfg::KICKDOWN_TPS[m];
   const float tps = kickdown ? in.tpsPct : tpsShift_;
   if (!kickdown && !elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS)) return;
   if (gear_ < 4 && in.speedKmh >= upshiftKmh(out_.mode, gear_, tps)) {
-    if (!brakeHold_ && (!kickdown || elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS))) {
+    if (!brakeHold_ && !liftHold_ && (!kickdown || elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS))) {
       requestShift(gear_ + 1, in.speedKmh, false);
     }
   } else if (gear_ > 1 && in.speedKmh < downshiftKmh(out_.mode, gear_, tps)) {
@@ -451,6 +466,7 @@ void Controller::compose(const Inputs& in) {
   out_.armed = armed_;
   out_.faults = latched_ | active_;
   out_.cornerHold = custom && out_.control == CTRL_AUTO && cornerHoldActive();
+  out_.gearHold = custom && out_.control == CTRL_AUTO && (brakeHold_ || liftHold_);
   if (custom) {
     solenoidsForGear(gear_, out_.s1, out_.s2);
     out_.sl = slCmd_;

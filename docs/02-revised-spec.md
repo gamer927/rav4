@@ -433,6 +433,8 @@ The console LED shows the state:
 | **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 3 km/h/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
 | **Coast unlock** | – | – | ✓ | Lockup released on a closed throttle (< 2 %, re-allowed at 5 %), so the converter is already slipping when you get back on the throttle |
 | **Throttle smoothing** | 0.8 s | 0.25 s | off | The shift map sees a smoothed throttle, so a quick stab of the pedal doesn't cause a downshift; only a sustained push does. That's what makes ECO feel calm. Flooring it (≥ 80 %) bypasses the smoothing, so kickdown is never delayed |
+| **Kickdown threshold** | 80 % | 80 % | 60 % | Throttle at or above this is a kickdown: downshifts skip the 1.2 s anti-hunting wait and the throttle smoothing |
+| **Lift-off hold** | – | – | ✓ | Snap off the throttle after a hard push (≥ 40 % → ≤ 10 % within 0.5 s) and it holds the gear instead of upshifting, for up to 4 s or until you're back on the throttle (≥ 20 %). Keeps SPORT in gear between corners. A gentle ease-off still upshifts normally. The screen shows `HOLD` |
 | **Tip-in release** | – | – | ✓ | A fast stab (≥ 150 %/s) releases lockup at once, even below SPORT's lockup throttle limit, so the converter's torque multiplication is there immediately. Not when the ATF is hot |
 | Lockup released on the brake | ✓ | ✓ | ✓ | Always (stall protection) |
 
@@ -440,7 +442,7 @@ MANUAL behaves as SPORT for every row except the two automatic-shift features (c
 brake downshift): there, you choose the gear.
 
 Each one is a per-mode setting in `config.h` (`CORNER_HOLD`, `BRAKE_DOWNSHIFT`,
-`LU_COAST_RELEASE`, `SHIFT_TPS_SMOOTH_MS`, `LU_TIPIN_RELEASE`), so you can turn them on or off
+`LU_COAST_RELEASE`, `SHIFT_TPS_SMOOTH_MS`, `LU_TIPIN_RELEASE`, `KICKDOWN_TPS`, `LIFT_HOLD`), so you can turn them on or off
 for any mode.
 
 How each mode feels, overall:
@@ -545,6 +547,12 @@ Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, vol
 4. **ATF thermistor:** check the reading at ambient and at hot operating temperature against an
    IR thermometer on the cooler line, then adjust `ATF_R25_OHMS` and `ATF_BETA`.
 5. **Battery:** compare with a multimeter, then trim `VBAT_DIVIDER`.
+6. **Factory shift map (for tuning NORMAL):** with the switch OFF, the log also prints every
+   shift and lockup change the factory ECU makes, for example
+   `# ECU shift 2>3 at 45 km/h, TPS 30 %, 2400 rpm`. Drive a mix of gentle, normal and firm
+   acceleration and collect these lines. The NORMAL map is an estimate of a stock-like schedule;
+   adjust its `UPSHIFT_KMH` row so NORMAL lands near the factory points, so NORMAL feels like
+   stock plus the extras.
 
 ## 9. Bring-up and test plan
 1. **Host tests:** `make test`. Every logic rule in §6, and the self-test sequence and interlocks

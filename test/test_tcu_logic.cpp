@@ -1,6 +1,7 @@
 // Host unit tests for firmware/tcu/tcu_logic.cpp. Run: make test
 #include <cmath>
 #include <cstdio>
+#include <utility>
 
 #include "../firmware/tcu/config.h"
 #include "../firmware/tcu/ds18b20.h"
@@ -347,7 +348,7 @@ static void test_kickdown_is_immediate() {
   t.setEcuGear(4);
   t.arm();
   t.step(300);
-  t.in.tpsPct = 70;
+  t.in.tpsPct = 50;  // below SPORT's 60 % kickdown threshold
   t.step(20);
   CHECK(t.c.outputs().gear == 4);
   t.step(cfg::AUTO_MIN_TIME_IN_GEAR_MS);
@@ -594,6 +595,49 @@ static void test_manual_is_sport() {
   s.step(50);
   CHECK(s.c.outputs().control == CTRL_AUTO);
   CHECK(s.c.outputs().mode == MODE_ECO);
+}
+
+static void test_sport_lift_hold() {
+  std::printf("SPORT lift-off hold: a quick lift after a hard push keeps the gear\n");
+  auto run = [](bool sport, bool quickLift) {
+    Sim s;
+    s.in.sport = sport;
+    s.arm();
+    s.in.tpsPct = 70;  // hard acceleration out of a corner, in 2nd
+    s.rampTo(75, 8.0f);
+    const uint8_t g = s.c.outputs().gear;
+    if (quickLift) {
+      s.in.tpsPct = 0;  // snap off the throttle for the next corner
+    } else {
+      for (int i = 0; i < 300; i++) {  // ease off over 3 s
+        s.in.tpsPct -= 70.0f / 300.0f;
+        s.step(10);
+      }
+    }
+    s.step(2000);
+    return std::make_pair(g, s.c.outputs().gear);
+  };
+  const auto sportQuick = run(true, true);
+  CHECK(sportQuick.first == 2);
+  CHECK(sportQuick.second == 2);  // held, ready for the next corner
+  const auto sportSlow = run(true, false);
+  CHECK(sportSlow.second > 2);    // a gentle lift is a cruise: upshift as usual
+  const auto normalQuick = run(false, true);
+  CHECK(normalQuick.first == 2);
+  CHECK(normalQuick.second > 2);  // NORMAL upshifts on the lift as before
+
+  // The hold ends on its own after LIFT_HOLD_MS, and when the throttle returns.
+  Sim t;
+  t.in.sport = true;
+  t.arm();
+  t.in.tpsPct = 70;
+  t.rampTo(75, 8.0f);
+  t.in.tpsPct = 0;
+  t.step(100);
+  CHECK(t.c.outputs().gearHold);
+  t.step(cfg::LIFT_HOLD_MS + 1500);
+  CHECK(!t.c.outputs().gearHold);
+  CHECK(t.c.outputs().gear > 2);
 }
 
 static void test_lockup_rules() {
@@ -863,6 +907,7 @@ int main() {
   test_eco_throttle_smoothing();
   test_sport_tipin_release();
   test_manual_is_sport();
+  test_sport_lift_hold();
   test_lockup_rules();
   test_hot_atf_widens_lockup();
   test_vss_faults();
