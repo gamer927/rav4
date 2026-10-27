@@ -92,7 +92,10 @@ ITEMS = [
     ("6. Console pod controls and screen", "12 mm momentary push button, normally open", "1 (3 with [+]/[−])",
      "pack of 5", AMZ, 10, "TEST"),
     ("6. Console pod controls and screen", "5 mm LED + 8 mm chrome panel bezel", "1", "pack", AMZ, 7, "Status light"),
-    ("6. Console pod controls and screen", "0.96\" I²C OLED, SSD1306, 128 × 64, 4-pin", "1", "pack of 2", AMZ, 10, ""),
+    ("6. Console pod controls and screen", "2.42\" OLED module, 128 × 64, SSD1309, I²C-capable", "1", "1", AMZ, 20,
+     "e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat"),
+    ("6. Console pod controls and screen", "1 µF capacitor (ceramic or electrolytic, 16 V+)", "1", "pack", AMZ, 4,
+     "Power-on reset for the screen, with a 10k from the resistor kit"),
     ("6. Console pod controls and screen", "GY-521 (MPU-6050) gyro module", "1", "pack of 3", AMZ, 9, ""),
     # ---------------------------------------------------------------- 7
     ("7. ATF temperature probe", "DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C)", "1", "1", AMZ, 10,
@@ -112,7 +115,6 @@ ITEMS = [
     ("8. 3D printing", "M3 heat-set inserts (~4 mm OD)", "8", "pack of 50", AMZ, 8, ""),
     ("8. 3D printing", "M3 screw kit with countersunk screws and nuts", "~20", "kit", AMZ, 12,
      "8 and 10 mm countersunk, 6 mm pan head"),
-    ("8. 3D printing", "M2 × 8 screws + nuts", "4", "small kit", AMZ, 7, "OLED"),
     ("8. 3D printing", "M6 bolts + nuts (shifter); M5 bolts + large washers (mounting)", "4 + 8", "loose", HW, 8, ""),
     # ---------------------------------------------------------------- 9
     ("9. Sequential shifter (Beavis Motorsport DIY)", "V-155-1C25 roller-lever microswitch", "2", "pack of 5", AMZ, 9,
@@ -203,7 +205,7 @@ def main():
     md.append("2. **ATF cooler hose inside diameter** (usually 5/16\" or 3/8\"): for the barbed tee.")
     md.append("3. **Space behind the glovebox**: the TCU box is 216 × 178 × 51 mm (244 mm wide with "
               "its mounting ears).")
-    md.append("4. **Space on the centre console**: the pod is 150 × 130 × 70 mm, plus the shifter on top.")
+    md.append("4. **Space on the centre console**: the pod is 176 × 130 × 70 mm, plus the shifter on top.")
     md.append("")
     md.append("## Where to order")
     md.append("")

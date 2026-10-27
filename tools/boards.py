@@ -25,7 +25,8 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, FancyBboxPatch, Rectangle
+import matplotlib.patheffects as pe
+from matplotlib.patches import Circle, FancyBboxPatch, Polygon, Rectangle
 from PIL import Image
 
 P = 2.54  # grid pitch, mm
@@ -306,28 +307,151 @@ class Board:
             for x, y in pts:
                 ax.add_patch(Circle((x, y), 0.55, fc=color if new else "#9e9e9e", ec="none"))
 
+    # ----------------------------------------------------------- pages
+    # Each build step is split into small "Lego pages": first the parts (at
+    # most PAGE_PARTS per page, top view), then the wires (at most PAGE_WIRES
+    # per page, bottom view, numbered).
+    def pages(self, step):
+        parts = [p for p in self.parts if p.step == step]
+        wires = [w for w in self.wires if w["step"] == step]
+        out = []
+        for i in range(0, len(parts), PAGE_PARTS):
+            out.append(("parts", parts[i:i + PAGE_PARTS]))
+        for i in range(0, len(wires), PAGE_WIRES):
+            out.append(("wires", wires[i:i + PAGE_WIRES]))
+        return [(f"{step}.{n}", kind, items) for n, (kind, items) in enumerate(out, 1)]
+
+    def draw_page(self, ax, step, kind, items, done_parts, done_wires):
+        W, H = self.size
+        bottom = kind == "wires"
+        ax.set_xlim(-4, W + 4)
+        ax.set_ylim(-4, H + 4)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        if bottom:
+            ax.invert_xaxis()
+        ax.add_patch(FancyBboxPatch((0, 0), W, H, boxstyle="round,pad=0,rounding_size=2",
+                                    fc="#e9f2df" if not bottom else "#dfe8d4", ec="#55703a", lw=1.2))
+        for c in range(self.holes[0]):
+            for r in range(self.holes[1]):
+                ax.add_patch(Circle(self.mm(c, r), 0.42, fc="#c9b77d", ec="none"))
+        for c in range(0, self.holes[0], 5):
+            ax.text(self.mm(c, 0)[0], -2.2, str(c), ha="center", va="center", fontsize=6, color="#555")
+        for r in range(0, self.holes[1], 5):
+            ax.text(-2.4 if not bottom else W + 2.4, self.mm(0, r)[1], str(r), ha="center", va="center",
+                    fontsize=6, color="#555")
+        ax.text(W / 2, H + 2.6, "FRONT EDGE (terminals) at the bottom" if not bottom else
+                "BOARD FLIPPED OVER: left and right are swapped", ha="center", fontsize=6.5,
+                color="#b71c1c" if bottom else "#333", fontweight="bold")
+        new_parts = set(p.ref for p in items) if kind == "parts" else set()
+        for p in self.parts:
+            if p.ref not in done_parts and p.ref not in new_parts:
+                continue
+            new = p.ref in new_parts
+            c0, r0, c1, r1 = p.body()
+            x0, y0 = self.mm(c0, r0)
+            x1, y1 = self.mm(c1, r1)
+            if new:
+                fc, ec, alpha, lw = COLORS.get(p.fp["kind"], "#ffd54f"), "#000", 1.0, 1.0
+            elif bottom:
+                fc, ec, alpha, lw = "none", "#9e9e9e", 1.0, 0.4
+            else:
+                fc, ec, alpha, lw = "#d6d6d6", "#8a8a8a", 0.9, 0.5
+            ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, fc=fc, ec=ec, lw=lw, alpha=alpha,
+                                   ls="--" if p.fp.get("module") else "-"))
+            vertical = (y1 - y0) > (x1 - x0) * 1.6 and (x1 - x0) < 8
+            if new or bottom or p.fp["kind"] in ("K", "MOD", "J", "IC"):
+                dark = new and p.fp["kind"] == "IC"
+                ax.text((x0 + x1) / 2, (y0 + y1) / 2, p.ref, ha="center", va="center",
+                        fontsize=7 if new else 5, rotation=90 if vertical else 0,
+                        color="white" if dark else "#000" if new else "#666",
+                        fontweight="bold" if new else "normal")
+            if new and p.fp["kind"] in ("IC", "J"):  # pin 1 marker
+                x, y = self.mm(*p.pins()["1"])
+                ax.add_patch(Circle((x, y), 1.3, fc="none", ec="#d50000", lw=1.2, zorder=4))
+                ax.text(x - 2.2, y, "1", ha="center", va="center", fontsize=6.5, fontweight="bold",
+                        color="#d50000", zorder=4)
+            for name, (c, r) in p.pins().items():
+                x, y = self.mm(c, r)
+                col = "#c62828" if new else "#555"
+                ax.add_patch(Circle((x, y), 0.7 if p.fp.get("module") else 0.6,
+                                    fc="none" if p.fp.get("module") else col, ec=col, lw=0.6))
+                if (new or bottom) and p.fp["kind"] in ("K", "Q", "MOD", "IC", "J"):
+                    if p.fp["kind"] in ("J", "IC") and name not in ("1", "2"):
+                        continue
+                    ax.text(x + 0.8, y + 0.8, name.replace("_", "-"), fontsize=4.2, color="#1a237e")
+            if p.fp["kind"] == "D" and (new or bottom):
+                kx, ky = self.mm(*p.pins()["K"])
+                ax.add_patch(Circle((kx, ky), 1.2, fc="none", ec="#6a1b9a", lw=0.8))
+        if kind == "wires":
+            for w in self.wires:
+                if id(w) in done_wires:
+                    pts = [self.mm(*self.pin(n)) for n in w["nodes"]]
+                    ax.plot([q[0] for q in pts], [q[1] for q in pts], color="#b0b0b0", lw=0.6)
+            for i, w in enumerate(items, 1):
+                pts = [self.mm(*self.pin(n)) for n in w["nodes"]]
+                name, rgb = wire_colour(w["net"])
+                ax.plot([q[0] for q in pts], [q[1] for q in pts], color=rgb, lw=2.0, solid_capstyle="round",
+                        path_effects=[pe.Stroke(linewidth=3.2, foreground="#222"), pe.Normal()])
+                for x, y in pts:
+                    ax.add_patch(Circle((x, y), 0.8, fc=rgb, ec="#222", lw=0.6))
+                x, y = along(pts, 0.22 + 0.11 * ((i - 1) % 6))  # staggered so numbers don't pile up
+                ax.text(x, y, str(i), ha="center", va="center", fontsize=8, fontweight="bold", zorder=6,
+                        bbox=dict(boxstyle="circle,pad=0.25", fc="white", ec="#222", lw=1.0))
+
+    def draw_callout(self, ax, kind, items):
+        ax.set_xlim(0, 100)
+        ax.set_ylim(0, 100)
+        ax.axis("off")
+        ax.add_patch(FancyBboxPatch((1, 1), 98, 98, boxstyle="round,pad=0,rounding_size=3", fc="#fffde7",
+                                    ec="#f9a825", lw=1.5))
+        ax.text(50, 95, "YOU NEED" if kind == "parts" else "WIRES (solder on the bottom)", ha="center",
+                va="top", fontsize=11, fontweight="bold")
+        n = len(items)
+        row_h = min(14.0, 84.0 / max(n, 1))
+        for i, it in enumerate(items):
+            y = 86 - row_h * (i + 0.5)
+            if kind == "parts":
+                draw_icon(ax, it, 14, y, row_h)
+                ax.text(30, y + row_h * 0.12, f"{it.ref}", fontsize=10, fontweight="bold", va="center")
+                ax.text(30, y - row_h * 0.22, it.value + (f"   {bands_text(it.value)}" if it.fp["kind"] == "R" else ""),
+                        fontsize=7.5, va="center", color="#333")
+            else:
+                name, rgb = wire_colour(it["net"])
+                ax.text(8, y, str(i + 1), ha="center", va="center", fontsize=9, fontweight="bold",
+                        bbox=dict(boxstyle="circle,pad=0.3", fc="white", ec="#222", lw=1.0))
+                ax.add_patch(Rectangle((14, y - 1.2), 12, 2.4, fc=rgb, ec="#222", lw=0.6))
+                ax.text(30, y + row_h * 0.15, f"{name} wire, {it['gauge']} AWG", fontsize=8.5, fontweight="bold",
+                        va="center")
+                ax.text(30, y - row_h * 0.2, f"{len(it['nodes'])} stops: {it['net']}", fontsize=7, va="center",
+                        color="#333")
+
     def render(self):
         os.makedirs(OUT, exist_ok=True)
         W, H = self.size
-        files = []
-        for i, s in enumerate(self.steps):
-            fig, axs = plt.subplots(1, 2, figsize=(2 * (W + 8) / 25.4 * 1.55, (H + 14) / 25.4 * 1.55))
-            self.draw(axs[0], i, bottom=False)
-            self.draw(axs[1], i, bottom=True)
-            axs[0].set_title("TOP: where the parts go", fontsize=8)
-            axs[1].set_title("BOTTOM (board flipped): where the wires go", fontsize=8)
-            fig.suptitle(f"{self.title} - step {s}", fontsize=10, fontweight="bold")
-            fig.tight_layout()
-            f = os.path.join(OUT, f"{self.name}-{s}.png")
-            fig.savefig(f, dpi=140)
-            plt.close(fig)
-            shrink(f)
-            files.append(f)
+        done_parts, done_wires = set(), set()
+        for s in self.steps:
+            for pid, kind, items in self.pages(s):
+                fig = plt.figure(figsize=((W + 8) / 25.4 * 1.4 + 3.6, (H + 10) / 25.4 * 1.4 + 0.5))
+                bw = ((W + 8) / 25.4 * 1.4) / fig.get_figwidth()
+                ax = fig.add_axes([0, 0, bw, 1 - 0.5 / fig.get_figheight()])
+                self.draw_page(ax, s, kind, items, done_parts, done_wires)
+                cx = fig.add_axes([bw + 0.01, 0.03, 0.98 - bw - 0.01, 0.97 - 0.6 / fig.get_figheight()])
+                self.draw_callout(cx, kind, items)
+                verb = "Place the parts" if kind == "parts" else "Solder the wires"
+                fig.suptitle(f"{self.title}   {pid}   {verb}", fontsize=13, fontweight="bold",
+                             y=1 - 0.12 / fig.get_figheight(), va="top")
+                f = os.path.join(OUT, f"{self.name}-{pid.replace('.', '-')}.png")
+                fig.savefig(f, dpi=95)
+                plt.close(fig)
+                shrink(f)
+                if kind == "parts":
+                    done_parts |= set(p.ref for p in items)
+                else:
+                    done_wires |= set(id(w) for w in items)
         # full layout
         fig, ax = plt.subplots(figsize=((W + 8) / 25.4 * 1.8, (H + 10) / 25.4 * 1.8))
         self.draw(ax, len(self.steps) - 1)
-        for p in self.parts:  # recolour everything as "placed"
-            pass
         ax.set_title(f"{self.title} - finished layout (top view)", fontsize=9)
         fig.tight_layout()
         fig.savefig(os.path.join(OUT, f"{self.name}-layout.png"), dpi=150)
@@ -343,37 +467,61 @@ class Board:
                 ha="center", fontsize=4.5)
         fig.savefig(os.path.join(OUT, f"{self.name}-template.svg"))
         plt.close(fig)
-        return files
 
     # ----------------------------------------------------------- text
     def hole(self, cr):
         return f"col {cr[0]}, row {cr[1]}"
 
+    def node_text(self, node):
+        ref, pin = node.split(".", 1)
+        p = self.part(ref)
+        k = p.fp["kind"]
+        if k == "TB":
+            return f"**{ref}** ({p.value})"
+        if k in ("R", "C"):
+            return f"**{ref}** at {self.hole(p.pins()[pin])}"
+        if k == "D":
+            return f"**{ref}** {'band end' if pin == 'K' else 'plain end'}"
+        if k == "CE":
+            return f"**{ref}** {'+ leg' if pin == '+' else '− leg'}"
+        if k in ("IC", "J"):
+            return f"**{ref}** pin {pin}"
+        return f"**{ref}** {pin.replace('_', '-')}"
+
     def markdown(self, step):
         lines = []
-        parts = [p for p in self.parts if p.step == step]
-        if parts:
-            lines.append("| Part | Value | Goes in | Notes |")
-            lines.append("|---|---|---|---|")
-            for p in parts:
-                pins = p.pins()
-                if p.fp.get("module"):
-                    where = "on foam tape, " + ", ".join(f"{k} at {self.hole(v)}" for k, v in
-                                                          list(pins.items())[:1])
-                elif len(pins) <= 2:
-                    where = " → ".join(f"{k} {self.hole(v)}" for k, v in pins.items())
-                else:
-                    first = list(pins.items())[0]
-                    where = f"{first[0]} at {self.hole(first[1])}"
-                lines.append(f"| **{p.ref}** | {p.value} | {where} | {p.note} |")
-            lines.append("")
-        wires = [w for w in self.wires if w["step"] == step]
-        if wires:
-            lines.append("| Wire | Net | Connect, in this order | Wire |")
-            lines.append("|---|---|---|---|")
-            for i, w in enumerate(wires, 1):
-                chain = " → ".join(n.replace("_", "-") for n in w["nodes"])
-                lines.append(f"| {step}.{i} | {w['net']} | {chain} | {w['gauge']} AWG |")
+        for pid, kind, items in self.pages(step):
+            img = f"build/{self.name}-{pid.replace('.', '-')}.png"
+            if kind == "parts":
+                lines.append(f"#### {pid} — Place {len(items)} part{'s' if len(items) > 1 else ''}")
+                lines.append("")
+                lines.append(f"![{pid}]({img})")
+                lines.append("")
+                for p in items:
+                    pins = p.pins()
+                    if p.fp.get("module"):
+                        where = "stick it down with foam tape where shown"
+                    elif len(pins) <= 2:
+                        where = " and ".join(self.hole(v) for v in pins.values())
+                    else:
+                        first = list(pins.items())[0]
+                        name = f"pin {first[0]}" if p.fp["kind"] in ("IC", "J") else first[0].replace("_", "-")
+                        where = f"{name} in {self.hole(first[1])}"
+                    what = PART_WORDS.get(p.fp["kind"], "part")
+                    band = f" (bands: {bands_text(p.value)})" if p.fp["kind"] == "R" else ""
+                    note = f". {p.note[0].upper() + p.note[1:]}" if p.note else ""
+                    lines.append(f"- [ ] **{p.ref}**: {p.value} {what}{band} → {where}{note}")
+                lines.append("")
+                lines.append("Push the legs through, bend them out a little underneath, solder, snip.")
+            else:
+                lines.append(f"#### {pid} — Solder {len(items)} wire{'s' if len(items) > 1 else ''} (bottom side)")
+                lines.append("")
+                lines.append(f"![{pid}]({img})")
+                lines.append("")
+                for i, w in enumerate(items, 1):
+                    name, _ = wire_colour(w["net"])
+                    chain = " → ".join(self.node_text(n) for n in w["nodes"])
+                    lines.append(f"- [ ] **{i}** {name} {w['gauge']} AWG: {chain}")
             lines.append("")
         return "\n".join(lines)
 
@@ -386,6 +534,115 @@ class Board:
             x1, y1 = self.mm(c1, r1)
             out.append((p.ref, x0, y0, x1, y1, p.fp["h"]))
         return out
+
+
+PAGE_PARTS = 6
+PAGE_WIRES = 6
+
+PART_WORDS = {"R": "resistor", "D": "diode", "C": "capacitor", "CE": "capacitor", "IC": "chip",
+              "TB": "screw terminal", "K": "relay", "Q": "MOSFET", "MOD": "module", "J": "box header"}
+
+# Suggested insulation colours (a 6-colour silicone wire kit), by net.
+def wire_colour(net):
+    n = net.split()[0]
+    if net.startswith("GND"):
+        return "black", "#212121"
+    if net.startswith("5V"):
+        return "red", "#e53935"
+    if n in ("+12", "LOG") or n.startswith(("SRC", "DOUT")):
+        return "yellow", "#fdd835"
+    if n in ("ECU", "SOL", "LOAD"):
+        return "white", "#fafafa"
+    if n.startswith(("GATE", "GDRV", "CLAMP", "COIL", "LED", "REF", "SPDIN", "VBAT", "DQ", "C8")):
+        return "green", "#43a047"
+    return "blue", "#1e88e5"
+
+
+BAND = ["black", "brown", "red", "orange", "yellow", "green", "blue", "violet", "grey", "white"]
+BAND_RGB = {"black": "#111", "brown": "#7b4a12", "red": "#d32f2f", "orange": "#f57c00", "yellow": "#fbc02d",
+            "green": "#388e3c", "blue": "#1976d2", "violet": "#7b1fa2", "grey": "#9e9e9e", "white": "#f5f5f5"}
+
+
+def ohms(value):
+    v = value.replace("Ω", "").strip()
+    mult = {"k": 1e3, "M": 1e6}.get(v[-1], 1)
+    return float(v[:-1] if v[-1] in "kM" else v) * mult
+
+
+def bands(value):
+    """5-band code for a 1 % metal-film resistor: 3 digits, multiplier, brown (1 %)."""
+    r = ohms(value)
+    exp = 0
+    while r >= 1000:
+        r /= 10
+        exp += 1
+    while r < 100:
+        r *= 10
+        exp -= 1
+    d = str(int(round(r)))
+    return [BAND[int(d[0])], BAND[int(d[1])], BAND[int(d[2])], BAND[exp], "brown"]
+
+
+def bands_text(value):
+    return "-".join(bands(value))
+
+
+def draw_icon(ax, part, x, y, h):
+    k = part.fp["kind"]
+    s = min(h * 0.38, 5.0)
+    if k == "R":
+        ax.plot([x - 2.4 * s, x + 2.4 * s], [y, y], color="#777", lw=1.2)
+        ax.add_patch(FancyBboxPatch((x - 1.4 * s, y - 0.45 * s), 2.8 * s, 0.9 * s,
+                                    boxstyle="round,pad=0,rounding_size=0.3", fc="#8ab4d8", ec="#333", lw=0.6))
+        for i, b in enumerate(bands(part.value)):
+            bx = x - 1.05 * s + i * 0.45 * s + (0.25 * s if i == 4 else 0)
+            ax.add_patch(Rectangle((bx, y - 0.45 * s), 0.22 * s, 0.9 * s, fc=BAND_RGB[b], ec="none"))
+    elif k == "D":
+        ax.plot([x - 2.4 * s, x + 2.4 * s], [y, y], color="#777", lw=1.2)
+        body = "#d84315" if "BAT85" in part.value or "1N4148" in part.value else "#222"
+        ax.add_patch(Rectangle((x - 1.2 * s, y - 0.4 * s), 2.4 * s, 0.8 * s, fc=body, ec="#333", lw=0.6))
+        ax.add_patch(Rectangle((x + 0.75 * s, y - 0.4 * s), 0.3 * s, 0.8 * s, fc="#e0e0e0", ec="none"))
+    elif k == "C":
+        ax.plot([x - 0.4 * s, x - 0.4 * s], [y - 1.6 * s, y], color="#777", lw=1)
+        ax.plot([x + 0.4 * s, x + 0.4 * s], [y - 1.6 * s, y], color="#777", lw=1)
+        ax.add_patch(Circle((x, y + 0.2 * s), 0.8 * s, fc="#ffb300", ec="#333", lw=0.6))
+    elif k == "CE":
+        ax.add_patch(Rectangle((x - 0.8 * s, y - 1.0 * s), 1.6 * s, 2.0 * s, fc="#1565c0", ec="#333", lw=0.6))
+        ax.add_patch(Rectangle((x + 0.4 * s, y - 1.0 * s), 0.4 * s, 2.0 * s, fc="#bbdefb", ec="none"))
+    elif k == "IC":
+        n = len(part.fp["pins"]) // 2
+        w = min(max(1.0, n * 0.25), 1.9) * s
+        ax.add_patch(Rectangle((x - w, y - 0.6 * s), 2 * w, 1.2 * s, fc="#222", ec="#000"))
+        ax.add_patch(Circle((x - w + 0.35 * s, y), 0.15 * s, fc="#888"))
+    elif k == "TB":
+        ax.add_patch(Rectangle((x - 0.9 * s, y - 0.8 * s), 1.8 * s, 1.6 * s, fc="#2e7d32", ec="#000", lw=0.6))
+        ax.add_patch(Circle((x, y + 0.2 * s), 0.35 * s, fc="#bdbdbd", ec="#333", lw=0.5))
+    elif k == "K":
+        ax.add_patch(Rectangle((x - 1.6 * s, y - 0.8 * s), 3.2 * s, 1.6 * s, fc="#222", ec="#000"))
+        ax.text(x, y, "G2RL", color="white", fontsize=5.5, ha="center", va="center")
+    elif k == "Q":
+        ax.add_patch(Rectangle((x - 0.8 * s, y - 0.4 * s), 1.6 * s, 1.6 * s, fc="#222", ec="#000"))
+        ax.add_patch(Rectangle((x - 0.8 * s, y + 1.2 * s), 1.6 * s, 0.4 * s, fc="#bdbdbd", ec="#555"))
+        for dx in (-0.5, 0, 0.5):
+            ax.plot([x + dx * s, x + dx * s], [y - 0.4 * s, y - 1.6 * s], color="#777", lw=1)
+    elif k == "J":
+        ax.add_patch(Rectangle((x - 1.8 * s, y - 0.6 * s), 3.6 * s, 1.2 * s, fc="#424242", ec="#000"))
+        ax.add_patch(Rectangle((x - 0.4 * s, y - 0.6 * s), 0.8 * s, 0.25 * s, fc="#fffde7", ec="none"))
+    else:
+        ax.add_patch(Rectangle((x - 1.6 * s, y - 0.9 * s), 3.2 * s, 1.8 * s, fc="#80cbc4", ec="#004d40",
+                               ls="--"))
+
+
+def along(pts, f):
+    """The point a fraction f of the way along a polyline."""
+    segs = [((pts[i][0] - pts[i - 1][0]) ** 2 + (pts[i][1] - pts[i - 1][1]) ** 2) ** 0.5 for i in range(1, len(pts))]
+    target = sum(segs) * f
+    for i, L in enumerate(segs):
+        if target <= L and L > 0:
+            t = target / L
+            return (pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t)
+        target -= L
+    return pts[-1]
 
 
 def shrink(path):
@@ -632,10 +889,37 @@ HUB_B = [  # ribbon B (logic board) pin -> Mega pin
 
 
 def hub_markdown():
-    lines = ["| Header A pin | Signal | Mega pin |", "|---|---|---|"]
-    lines += [f"| A{p} | {s} | **{m}** |" for p, s, m in HUB_A]
-    lines += ["", "| Header B pin | Signal | Mega pin |", "|---|---|---|"]
-    lines += [f"| B{p} | {s} | **{m}** |" for p, s, m in HUB_B]
+    lines = ["**Header A** (26-way, to the power board):", ""]
+    lines += [f"- [ ] A{p} → **{m}** ({s})" for p, s, m in HUB_A if m != "not connected"]
+    lines += ["", "**Header B** (16-way, to the logic board):", ""]
+    lines += [f"- [ ] B{p} → **{m}** ({s})" for p, s, m in HUB_B if m != "not connected"]
+    lines += ["", "Pins A25, A26, B15 and B16 stay empty."]
+    return "\n".join(lines)
+
+
+def bags_markdown(boards):
+    """One labelled bag (or cup) of parts per board step, Lego-style."""
+    lines = []
+    for b in boards:
+        for s in b.steps:
+            count = {}
+            for p in b.parts:
+                if p.step != s:
+                    continue
+                word = PART_WORDS.get(p.fp["kind"], "part")
+                value = p.value
+                if p.fp["kind"] == "TB":
+                    value, word = "5.08 mm", "screw-terminal position"
+                if value.lower().endswith(word):
+                    word = ""
+                key = (value, word)
+                count[key] = count.get(key, 0) + 1
+            items = []
+            for (value, word), n in count.items():
+                extra = f" ({bands_text(value)})" if word == "resistor" else ""
+                plural = "s" if n > 1 and word.endswith("position") else ""
+                items.append(f"{n}× {value} {word}{plural}{extra}".replace("  ", " ").strip())
+            lines.append(f"- [ ] **Bag {s}**: " + "; ".join(items))
     return "\n".join(lines)
 
 
@@ -679,6 +963,7 @@ def main():
         for s in b.steps:
             book = book.replace("{{STEP %s}}" % s, b.markdown(s).rstrip())
     book = book.replace("{{HUB}}", hub_markdown())
+    book = book.replace("{{BAGS}}", bags_markdown(boards))
     if "{{" in book:
         sys.exit("build book: unfilled placeholder " + book[book.index("{{"):book.index("{{") + 20])
     with open(os.path.join(ROOT, "docs", "05-build-book.md"), "w") as f:

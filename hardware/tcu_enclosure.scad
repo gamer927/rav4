@@ -257,9 +257,42 @@ module populated() {
     }
 }
 
+// ------------------------------------------------------------ build-book views
+// part = "build", bstep = 1..4: the assembly so far, with this step's pieces
+// highlighted (orange) and earlier ones grey.
+bstep = 4;
+module hi(n) { if (bstep == n) color("orangered") children(); else if (bstep > n) color("silver") children(); }
+module build_view() {
+    color("gold") box();
+    // 1: heat-set inserts in the corner bosses
+    hi(1) inside() for (c = corner_boss)
+        // drawn half out of their holes, as if being pressed in (step 1 only)
+        translate([c[0] + (c[0] == 0 ? boss_off : -boss_off), c[1] + (c[1] == 0 ? boss_off : -boss_off),
+                   IH - (bstep == 1 ? 1 : 6)])
+            cylinder(h = 6.2, d = insert_d + 1.5);
+    // 2: glands (dome outside, locknut inside)
+    hi(2) for (g = glands) {
+        nut = g[1] < 14 ? gland_nut[0][1] : gland_nut[1][1];
+        translate([g[2], 0, floor_t + gland_z]) rotate([90, 0, 0]) {
+            cylinder(h = 10, d = nut - 3, $fn = 6);
+            translate([0, 0, 10]) cylinder(h = 8, d1 = nut - 3, d2 = g[1] - 4);
+        }
+        translate([g[2], wall, floor_t + gland_z]) rotate([-90, 0, 0]) cylinder(h = 5, d = nut, $fn = 6);
+    }
+    // 3: Mega + hub, power board, logic board
+    hi(3) inside() {
+        board_contents(power_pos, power_board_size, power_parts);
+        board_contents(logic_pos, logic_board_size, logic_parts);
+        mega_contents();
+    }
+    // 4: the lid, lifted
+    hi(4) translate([0, 0, OH + 25]) lid();
+}
+
 if (part == "box") box();
 // The lid is exported upside down (top face on the bed, lip up) so it prints without supports.
 else if (part == "lid") translate([0, OD, lid_t]) rotate([180, 0, 0]) lid();
 else if (part == "fit_check") fit_check();
 else if (part == "fit") populated();
+else if (part == "build") build_view();
 else if (part == "assembly") { box(); color("grey", 0.6) translate([0, 0, OH + 10]) lid(); }

@@ -3,7 +3,8 @@
 // A wedge-shaped pod for the centre console:
 //   * sloped, driver-facing front panel: ON/OFF (12 mm toggle with flip-up
 //     safety cover), ECO and SPORT (6 mm mini toggles), TEST (12 mm push
-//     button), status LED (8 mm bezel), 0.96" OLED window, optional [+]/[-]
+//     button), status LED (8 mm bezel), a 2.42" OLED screen in a locating
+//     pocket, optional [+]/[-]
 //   * flat top deck with the Beavis Motorsport DIY sequential shifter's
 //     bolt pattern (4 x M6, 116 x 74 mm) and a slot for its switch wires
 //   * rear cable glands (PG7) for the console cable and the OLED cable
@@ -17,10 +18,13 @@
 // is then a 30-degree overhang and needs no supports.
 //
 // Render one part at a time:  part = "shell";  or  part = "bottom";
-part = "shell";  // [shell, bottom, assembly, fit, fit_check]
+// part = "panel_test" is a flat 3 mm copy of the front panel (about 1 hour to
+// print): check that every switch, the LED and the screen fit BEFORE printing
+// the 10-hour shell.
+part = "shell";  // [shell, bottom, panel_test, assembly, fit, fit_check]
 
 /* [Overall size] */
-W = 150;            // width (x)
+W = 176;            // width (x)
 D = 130;            // depth (y), front to back
 H = 70;             // height (z)
 R = 40;             // horizontal run of the sloped front panel
@@ -44,12 +48,16 @@ with_shift_buttons = false;   // true = [+]/[-] buttons as well as / instead of 
 labels = true;
 label_depth = 0.6;
 
-/* [OLED (0.96" SSD1306 I2C)] */
+/* [OLED (2.42" SSD1309, I2C)] */
+// Module 61.5 x 39.5 mm, display area 55.0 x 27.5 mm. It drops into a pocket
+// of ribs behind the panel and is held by double-sided foam tape on the
+// glass border. Check the window position with part = "panel_test".
 with_oled = true;
-oled_window = [25, 14];        // visible window
-oled_window_offset = [0, 2.5]; // window centre relative to the PCB centre
-oled_holes = [23.5, 23.8];     // M2 mounting hole spacing
-oled_hole_d = 2.4;
+oled_module = [61.5, 39.5];      // PCB size
+oled_window = [58, 30.5];        // display area + 1.5 mm each side
+oled_window_offset = [0, 0];     // window centre relative to the PCB centre (VERIFY)
+oled_depth = 14;                 // glass + PCB + connector + wires, behind the panel
+oled_rib = [1.6, 3];             // pocket rib width and height
 
 /* [Rear cable glands] */
 gland_d = 12.5;   // PG7
@@ -94,29 +102,24 @@ boss_pos = [[bo, R * 0.6], [W - bo, R * 0.6], [bo, D - bo], [W - bo, D - bo]];
 // The lowest controls sit high enough up the slope that their bodies clear
 // the bottom plate (checked by part = "fit_check").
 controls = concat(
-    [[60, 50, toggle_big_d,   "ON/OFF", -31, 14, 20, 50],     // label below: the flip cover hides above
-     [86, 63, toggle_small_d, "ECO",     6.5, 9, 14, 32],
-     [108, 63, toggle_small_d, "SPORT",  6.5, 9, 14, 32],
-     [86, 38, button_d,       "TEST",    9.5, 16, 16, 38]],
-    with_shift_buttons ? [[108, 38, button_d, "-", 9.5, 16, 16, 38],
-                          [130, 38, button_d, "+", 9.5, 16, 16, 38]] : []);
-led_uv = [28, 30];
-oled_uv = [28, 56];          // centre of the OLED module's PCB
-oled_module = [27.5, 28, 16];  // PCB size + depth behind the panel (glass, PCB, soldered wires)
+    [[160, 50, toggle_big_d,   "ON/OFF", -31, 14, 20, 50],    // label below: the flip cover hides above
+     [90, 63, toggle_small_d,  "ECO",     6.5, 9, 14, 32],
+     [113, 63, toggle_small_d, "SPORT",   6.5, 9, 14, 32],
+     [90, 38, button_d,        "TEST",    9.5, 16, 16, 38]],
+    with_shift_buttons ? [[113, 38, button_d, "-", 9.5, 16, 16, 38],
+                          [136, 38, button_d, "+", 9.5, 16, 16, 38]] : []);
+led_uv = [136, 63];
+oled_uv = [40, 52];          // centre of the OLED module's PCB
 led_depth = 30;              // bezel + LED legs + wires
 
 module controls_cut() {
     on_panel() {
         for (c = controls) translate([c[0], c[1], -10]) cylinder(h = 20, d = c[2]);
         translate([led_uv[0], led_uv[1], -10]) cylinder(h = 20, d = led_d);
-        if (with_oled) {
+        if (with_oled)
             translate([oled_uv[0] + oled_window_offset[0] - oled_window[0] / 2,
                        oled_uv[1] + oled_window_offset[1] - oled_window[1] / 2, -10])
                 cube([oled_window[0], oled_window[1], 20]);
-            for (sx = [-1, 1], sy = [-1, 1])
-                translate([oled_uv[0] + sx * oled_holes[0] / 2, oled_uv[1] + sy * oled_holes[1] / 2, -10])
-                    cylinder(h = 20, d = oled_hole_d);
-        }
         if (labels) {
             for (c = controls)
                 translate([c[0], c[1] + c[4], -label_depth])
@@ -126,6 +129,21 @@ module controls_cut() {
                 linear_extrude(label_depth + 1) text("STATUS", size = 3.5, halign = "center",
                                                      font = "DejaVu Sans:style=Bold");
         }
+    }
+}
+
+// Four L-shaped corner ribs behind the panel: the OLED module drops in
+// between them (0.5 mm clearance), so it lines up with the window by itself.
+module oled_pocket() {
+    if (with_oled) on_panel() {
+        cw = oled_module[0] / 2 + 0.5;
+        ch = oled_module[1] / 2 + 0.5;
+        t = oled_rib[0];
+        for (sx = [-1, 1], sy = [-1, 1])
+            translate([oled_uv[0] + sx * cw, oled_uv[1] + sy * ch, -wall - oled_rib[1]]) {
+                translate([sx > 0 ? 0 : -t, sy > 0 ? -10 : -t, 0]) cube([t, 10 + t, oled_rib[1] + 0.5]);
+                translate([sx > 0 ? -10 : -t, sy > 0 ? 0 : -t, 0]) cube([10 + t, t, oled_rib[1] + 0.5]);
+            }
     }
 }
 
@@ -150,6 +168,7 @@ module shell() {
                 wedge(0, 0, 0, 0, H);
                 wedge(wall, wall, wall / sin(ang), -1, H - deck_t);
             }
+            oled_pocket();
             // corner bosses for the bottom plate, each with a 45-degree gusset
             // into the side wall so the shell prints upside down without supports
             for (p = boss_pos) {
@@ -197,8 +216,8 @@ module control_bodies() {
         for (c = controls) translate([c[0] - c[5] / 2, c[1] - c[6] / 2, -wall - 0.05 - c[7]]) cube([c[5], c[6], c[7]]);
         translate([led_uv[0] - 5, led_uv[1] - 5, -wall - 0.05 - led_depth]) cube([10, 10, led_depth]);
         if (with_oled)
-            translate([oled_uv[0] - oled_module[0] / 2, oled_uv[1] - oled_module[1] / 2, -wall - 0.05 - oled_module[2]])
-                cube(oled_module);
+            translate([oled_uv[0] - oled_module[0] / 2, oled_uv[1] - oled_module[1] / 2, -wall - 0.05 - oled_depth])
+                cube([oled_module[0], oled_module[1], oled_depth]);
     }
 }
 module other_contents() {
@@ -232,9 +251,74 @@ module fit_check() {
         }
 }
 
+// The front panel, flat: every hole, the screen window and its pocket, on a
+// 3 mm plate the size of the panel (print it outer face down).
+module panel_test() {
+    difference() {
+        union() {
+            translate([0, 0, -wall]) cube([W, L, wall]);
+            // pocket ribs, as on the shell
+            if (with_oled) {
+                cw = oled_module[0] / 2 + 0.5;
+                ch = oled_module[1] / 2 + 0.5;
+                t = oled_rib[0];
+                for (sx = [-1, 1], sy = [-1, 1])
+                    translate([oled_uv[0] + sx * cw, oled_uv[1] + sy * ch, -wall - oled_rib[1]]) {
+                        translate([sx > 0 ? 0 : -t, sy > 0 ? -10 : -t, 0]) cube([t, 10 + t, oled_rib[1] + 0.5]);
+                        translate([sx > 0 ? -10 : -t, sy > 0 ? 0 : -t, 0]) cube([10 + t, t, oled_rib[1] + 0.5]);
+                    }
+            }
+        }
+        rotate([-ang, 0, 0]) controls_cut();
+    }
+}
+
+// ------------------------------------------------------------ build-book views
+// part = "build", bstep = 1..6: the assembly so far, with this step's pieces
+// highlighted (orange) and earlier ones grey.
+bstep = 6;
+module hi(n) { if (bstep == n) color("orangered") children(); else if (bstep > n) color("silver") children(); }
+module build_view() {
+    color("gold", bstep >= 3 && bstep <= 4 ? 0.45 : 1) shell();
+    // 1: heat-set inserts
+    // drawn half out of their holes, as if being pressed in (step 1 only)
+    hi(1) for (p = boss_pos) translate([p[0], p[1], bstep == 1 ? -5 : 0]) cylinder(h = 6, d = insert_d + 1.5);
+    // 2: switches, button, LED (bodies inside, levers and caps outside)
+    hi(2) {
+        control_bodies_only();
+        on_panel() {
+            for (c = controls) translate([c[0], c[1], 0]) cylinder(h = c[2] > 10 ? 9 : 12, d = c[2] > 10 ? c[2] : 3);
+            translate([led_uv[0], led_uv[1], 0]) cylinder(h = 4, d = led_d + 2);
+        }
+    }
+    // 3: the screen, dropped into its pocket behind the window
+    hi(3) if (with_oled) on_panel()
+        translate([oled_uv[0] - oled_module[0] / 2, oled_uv[1] - oled_module[1] / 2, -wall - 0.05 - 4])
+            cube([oled_module[0], oled_module[1], 4]);
+    // 4: glands, cables, lever-nut connectors
+    hi(4) other_contents();
+    // 5: the shifter on the deck
+    hi(5) if (with_shifter_deck) translate([W / 2, R + (D - R) / 2, H]) {
+        translate([-67, -45, 0]) cube([134, 90, 10]);
+        translate([0, 0, 10]) cylinder(h = 140, d = 12);
+        translate([0, 0, 155]) sphere(d = 40);
+    }
+    // 6: bottom plate (bolted to the console first), then the shell onto it
+    hi(6) translate([0, 0, -plate_t - 20]) bottom();
+}
+module control_bodies_only() {
+    on_panel() {
+        for (c = controls) translate([c[0] - c[5] / 2, c[1] - c[6] / 2, -wall - 0.05 - c[7] * 0.6])
+            cube([c[5], c[6], c[7] * 0.6]);
+        translate([led_uv[0] - 5, led_uv[1] - 5, -wall - 0.05 - 15]) cube([10, 10, 15]);
+    }
+}
+
 // "shell" is exported upside down, ready to print; "assembly" shows it upright.
 if (part == "shell") translate([0, D, H]) rotate([180, 0, 0]) shell();
 else if (part == "bottom") bottom();
+else if (part == "build") build_view();
+else if (part == "panel_test") translate([0, L, 0]) rotate([180, 0, 0]) panel_test();   // outer face on the bed
 else if (part == "fit_check") fit_check();
 else if (part == "fit") { color("gold", 0.35) shell(); color("seagreen") control_bodies(); color("dimgray") other_contents(); }
 else if (part == "assembly") { shell(); color("grey") translate([0, 0, -plate_t - 5]) bottom(); }

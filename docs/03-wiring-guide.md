@@ -30,7 +30,7 @@ Follow this guide alongside the two diagrams:
 | **X2 solenoids** (6-pin) | The S1, S2, SL wires, cut between the ECM and the transaxle | W4–W9 |
 | **X3 signals** (8-pin, 7 used) | Taps: lever "D", brake, ECM ground, speed, tach, throttle, throttle ground | W10–W16 |
 | **X4 console** (8-pin) | Overhead console switches, buttons or shifter lever, LED | W20 (C1–C8) |
-| **X5 OLED** (4-pin) | Dash screen | W21 |
+| **X5 OLED** (4-pin) | 2.42" screen in the console pod | W21 |
 | **X6 ATF** (3-pin) | Temperature probe in the cooler line | W17–W19 |
 | USB | Laptop, for flashing and the calibration log | – |
 
@@ -55,7 +55,7 @@ are in the EWD. Label both ends of every wire with its W-number (heat-shrink mar
 | Blue | Signal taps (W10, W11, W13–W16) | 22 AWG; SPD+TAC and VTA+E2 as shielded pairs |
 | Brown | ATF probe (W17–W19) | 3-core shielded cable |
 | Green | Console (W20) | 8-core shielded cable, 24 AWG |
-| Purple | OLED I²C (W21) | 4-core shielded cable, ≤ 1 m |
+| Purple | OLED I²C (W21) | 4-core shielded cable, ≤ 1.5 m |
 
 Ground every cable shield **at the TCU end only**.
 
@@ -109,7 +109,8 @@ Ground every cable shield **at the TCU end only**.
 Each control switches its core to C7 (ground). Closed means active. A broken wire reads as off:
 ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
 
-**X5 OLED** (W21): 1 = 5 V, 2 = GND, 3 = SDA (D20), 4 = SCL (D21).
+**X5 OLED** (W21): 1 = 5 V, 2 = GND, 3 = SDA (D20), 4 = SCL (D21). At the 2.42" screen: VCC = 5 V,
+GND, DIN = SDA, CLK = SCL, DC and CS to GND, RES to a 10k pull-up + 1 µF to GND (build book part 7).
 **X6 ATF**: 1 = +5 V (W17), 2 = GND (W18), 3 = DQ (W19 → 100 Ω → D33, 4.7k pull-up to 5 V).
 The **MPU-6050 gyro** sits inside the box on the same I²C bus (5 V, GND, D20, D21). Mount it flat (§9).
 
@@ -135,7 +136,7 @@ The **MPU-6050 gyro** sits inside the box on the same I²C bus (5 V, GND, D20, D
 | W16 | ECM **E2** | X3-7 | Shielded pair with W15 | Tap |
 | W17–W19 | DS18B20 probe red / black / yellow | X6-1/2/3 | Brown 3-core shielded | Through a firewall grommet |
 | W20 | Console panel | X4 | Green 8-core shielded | Up the A-pillar, away from the airbag |
-| W21 | Dash OLED | X5 | Purple 4-core shielded | 1 m maximum |
+| W21 | Console-pod OLED | X5 | Purple 4-core shielded | 1.5 m maximum |
 
 ## 5. Finding each signal on the 1999 RAV4
 

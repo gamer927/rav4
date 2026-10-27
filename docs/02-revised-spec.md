@@ -92,7 +92,7 @@ Rules that never change:
  │  Arduino Mega 2560 ── input conditioning (RC + clamps, optos for 12 V signals)        │
  │        │  D8/D9/D10 → 3 × P-MOSFET high-side + ACS712 ──────┐                         │
  │        │  D6 → MOSFET/ULN → 3 × DPDT relay coils             │                         │
- │        │  I²C → console OLED (dash)                          v                         │
+ │        │  I²C → console OLED (2.42", in the pod)             v                         │
  │        │                           ┌── DPDT ×3 (S1, S2, SL) ─────────────┐             │
  │        │   ECU S1/S2/SL outputs ───┤ NC: ECU → solenoid    (de-energised) │             │
  │        │   (sensed via optos) ─────┤ NO: ECU → 15 Ω/50 W dummy            │             │
@@ -210,9 +210,20 @@ Ground the shield drain at the TCU end only. Every control switches to ground, s
 reads as "off": ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
 
 ### 3.7 Console display (OLED)
-- A 0.96" or 1.3" 128×64 I²C OLED, mounted in the dash or centre console within about 1 m of
-  the TCU box. 0.96" modules are usually SSD1306; many 1.3" modules are SH1106. Set
-  `OLED_SH1106` to match.
+- A **2.42" 128×64 I²C OLED** (SSD1309), in the console pod within about 1–1.5 m of the TCU
+  box. At the driver's eye distance (60–75 cm), text needs to be about 4 mm tall to read at a
+  glance. A 0.96" screen's small text is 1.2 mm tall and its big line 2.4 mm; on the 2.42" they
+  are 3.0 mm and 6.0 mm, and the MAIN page's gear digit is **18 mm**.
+- The MAIN page puts the gear as one giant digit on the left and the mode (ECO / NORM / SPORT /
+  MANUAL / STOCK) in double-size text beside it: everything you need while driving. The small
+  status lines (self-test, faults, warnings, speed, ATF) are for when you're parked.
+- `OLED_CHIP` in `config.h` selects the controller: 0 = SSD1306 (0.96"), 1 = SH1106 (1.3"),
+  2 = SSD1309 (2.42", default). The SSD1309 is the SSD1306 command set without the internal
+  charge pump.
+- Wiring at the screen: DIN → SDA, CLK → SCL, DC → GND (address 0x3C), CS → GND, and RES
+  through a 10 kΩ pull-up to VCC with 1 µF to GND (a clean reset at power-up). The module
+  ships in SPI mode: move its two mode-select resistors to the I²C position, as printed on its
+  back.
 - Use a 4-wire shielded cable (5 V, GND, SDA, SCL). The firmware runs I²C at 100 kHz for the
   long run and uses a 3 ms bus timeout, so a damaged cable can't hang the controller. If the
   module lacks pull-ups, add 4.7 kΩ on SDA and SCL at the TCU end.

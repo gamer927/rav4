@@ -143,7 +143,8 @@ The key parts:
   "solenoid" while the box is in control. Outside the box: they make ~14 W each.
 - **LM2596HV buck converter** (60 V input), PC817 optos, LM393, ULN2803A.
 - **Console:** ON/OFF toggle with a flip-up cover, ECO and SPORT mini toggles, TEST button,
-  status LED, 0.96" OLED, and the **Beavis sequential shifter** (two V-155-1C25 switches).
+  status LED, a **2.42" OLED** (the gear shows 18 mm tall), and the **Beavis sequential shifter**
+  (two V-155-1C25 switches).
 - **MPU-6050 gyro (GY-521)** on the logic board, and a **DS18B20 ATF probe** in a brass tee.
 
 ## Tools and equipment
@@ -199,7 +200,7 @@ firmware/tcu/tcu.ino        hardware layer: pins, inputs, relays, watchdog, scre
 firmware/tcu/tcu_logic.*    every driving decision (no Arduino code; unit-tested on a PC)
 firmware/tcu/self_test.*    built-in test: power-up, continuous and press-to-test (unit-tested)
 firmware/tcu/config.h       every tunable number: shift maps, mode features, calibration
-firmware/tcu/oled.*         screen driver (SSD1306 / SH1106), never stalls the control loop
+firmware/tcu/oled.*         screen driver (SSD1309 / SSD1306 / SH1106), never stalls the control loop
 firmware/tcu/ds18b20.*      ATF probe driver + tested decoding
 firmware/tcu/imu.*          gyro (MPU-6050) yaw-rate reader
 test/                       unit tests

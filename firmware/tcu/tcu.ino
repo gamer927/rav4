@@ -477,10 +477,11 @@ void bitStatus(Text& t) {
   } else if (!selfTest.hasRun()) {
     t.s("NOT RUN");
   } else {
+    // Compact, to fit beside the gear digit: "FAIL 2", "PASS CHK 3" or "PASS".
     const tcu::TestSummary m = selfTest.summary();
     if (m.fail) t.s("FAIL ").n(m.fail);
-    else t.s("PASS ").n(m.pass);
-    if (m.check) t.s(" CHK ").n(m.check);
+    else if (m.check) t.s("PASS CHK ").n(m.check);
+    else t.s("PASS");
   }
 }
 
@@ -583,13 +584,15 @@ void serviceUsbLog(uint32_t now) {
 enum Page : uint8_t { PG_MAIN, PG_SENSORS, PG_TEST, PG_COUNT };
 uint8_t page = PG_MAIN;
 
+// MAIN page, hero layout: the gear as one giant digit on the left (18 mm tall
+// on a 2.42" screen) and the mode beside it, both readable at a glance from
+// the driver's seat. The small lines are for when you're parked.
 void renderMain(const tcu::Outputs& o, uint32_t now) {
-  const char gear[2] = {o.gear ? (char)('0' + o.gear) : '-', '\0'};
-  Text big;
-  big.s(gear).s("  ").s(o.control == tcu::CTRL_MANUAL ? "MANUAL" : modeText(o.mode));
-  oled.setBig(big.buf);
+  oled.setHero(o.gear ? (char)('0' + o.gear) : '-');
+  oled.setBig(o.control == tcu::CTRL_MANUAL ? "MANUAL"
+              : o.control == tcu::CTRL_STOCK ? "STOCK"
+                                             : modeText(o.mode));
   Text r2, r3, r4, r5, r6, r7;
-  r2.s(controlText(o.control)).pad(7);
   if (!cfg::CALIBRATED) {
     r2.s("NOT CALIBRATED");
   } else {
@@ -597,11 +600,11 @@ void renderMain(const tcu::Outputs& o, uint32_t now) {
     if (o.cornerHold) r2.s("CORNER");
     else if (o.gearHold) r2.s("HOLD");
   }
-  r3.s("BIT  ");
+  r3.s("BIT ");
   bitStatus(r3);
-  r4.s("FLT  ");
+  r4.s("FLT ");
   appendFlags(r4, o.faults, kFaultNames, 5);
-  r5.s("WRN  ");
+  r5.s("WRN ");
   appendFlags(r5, o.warnings, kWarnNames, 6);
   messageText(r6, o, now);
   r7.n((int32_t)(lastIn.speedMph + 0.5f)).s(" mph  ATF ");
@@ -616,6 +619,7 @@ void renderMain(const tcu::Outputs& o, uint32_t now) {
 }
 
 void renderSensors() {
+  oled.setHero('\0');
   oled.setBig("SENSORS");
   Text r2, r3, r4, r5, r6, r7;
   r2.s("SPEED").pad(9).n((int32_t)(lastIn.speedMph + 0.5f)).s(" mph");
@@ -646,6 +650,7 @@ void renderSensors() {
 }
 
 void renderTest(uint32_t now) {
+  oled.setHero('\0');
   Text big;
   if (selfTest.active()) big.s("TESTING");
   else if (selfTest.aborted()) big.s("ABORTED");
@@ -779,6 +784,7 @@ void runWatchdogTest() {
     Serial.flush();
   }
   if (cfg::OLED_INSTALLED) {
+    oled.setHero('\0');
     oled.setBig("WATCHDOG");
     oled.setLine(2, "TEST: BOARD SHOULD");
     oled.setLine(3, "RESTART NOW");
@@ -831,7 +837,7 @@ void setup() {
   savedBit.magic = 0;
   unexpectedWdtReset = wdtReset && !bitSaved;
 
-  if (cfg::OLED_INSTALLED) oled.begin(cfg::OLED_I2C_ADDR, cfg::OLED_SH1106);
+  if (cfg::OLED_INSTALLED) oled.begin(cfg::OLED_I2C_ADDR, (OledType)cfg::OLED_CHIP);
   if (cfg::IMU_INSTALLED) imu.begin();
   if (cfg::ATF_SENSOR == cfg::ATF_DS18B20) {
     atfBus.begin(pin::ATF_PROBE);

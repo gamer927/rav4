@@ -32,8 +32,9 @@ PLA box will let its standoffs creep.
 
 | Part | Orientation on the bed (the STLs are already oriented) | Approx. size |
 |---|---|---|
-| Pod shell | Upside down, top deck on the bed. The sloped panel is then a 30° overhang | 150 × 130 × 70 mm |
-| Pod bottom plate | Flat | 150 × 130 × 3 mm |
+| Pod shell | Upside down, top deck on the bed. The sloped panel is then a 30° overhang | 176 × 130 × 70 mm |
+| Pod bottom plate | Flat | 176 × 130 × 3 mm |
+| **Panel test** (print first!) | Flat, outer face on the bed. A copy of the front panel: check every switch and the screen fit before the 10-hour shell | 176 × 81 × 6 mm, ~1 h |
 | TCU box | Floor on the bed | 244 × 178 × 48 mm with ears; **216** × 178 without |
 | TCU lid | Upside down, lettering on the bed, locating lip up | 216 × 178 × 5 mm |
 
@@ -51,7 +52,7 @@ collides. `tools/build_stl.sh` runs it every time.
 | Housing | What the check includes |
 |---|---|
 | TCU box | Every part on both boards at its real height (relays 15.7 mm, MOSFETs 19 mm standing, current sensors and buck module on foam tape, plugged ribbon headers), 3 mm under each board for solder joints and wires, the Mega + hub shield stack with its plugged ribbons (34 mm), the USB jack and its plug's moulding, every gland's locknut and cable, the lid-screw bosses and the lid's locating lip |
-| Console pod | Each switch and button body with its terminals and a wire bend (ON/OFF 50 mm deep, mini toggles 32 mm, buttons 38 mm), the LED and bezel (30 mm), the OLED module with soldered wires (16 mm), the shifter's M6 bolt tips, the mounting-bolt heads, the rear glands, and a cluster of lever-nut connectors. Checked with and without the optional [+]/[−] buttons |
+| Console pod | Each switch and button body with its terminals and a wire bend (ON/OFF 50 mm deep, mini toggles 32 mm, buttons 38 mm), the LED and bezel (30 mm), the 2.42" OLED module with its wires (14 mm), the shifter's M6 bolt tips, the mounting-bolt heads, the rear glands, and a cluster of lever-nut connectors. Checked with and without the optional [+]/[−] buttons |
 
 ![Fit check: TCU box](fit-tcu.png)
 
@@ -75,7 +76,6 @@ What the check found and fixed in this revision:
 | 4 | M3 × 8 countersunk screws | Pod bottom plate |
 | 4 | M3 × 10 countersunk screws | TCU lid |
 | 14 | M3 × 6 screws (self-tapping into the 2.6 mm standoff holes) | Mega (6), power board (4), logic board (4) |
-| 4 | M2 × 8 screws + nuts | OLED module behind its window |
 | 4 | M6 bolts + **M6 hex nuts** (length = shifter base thickness + 6 mm) | Shifter to the pod deck. The nuts drop into the hex traps under the deck |
 | 4 | M5 or M6 bolts, large washers | Pod bottom plate to the console (slots), TCU ears or floor holes to a bracket |
 | 4 | **PG9 cable glands** (cable 4–8 mm) | TCU: PWR (X1), SOL (X2), SIG (X3), LOAD (heatsink) |
@@ -101,7 +101,7 @@ Panel holes, as set in `console_pod.scad`. **Check your switches before printing
 | TEST | 12 mm momentary push button | 12.2 mm | `button_d` |
 | [+] / [−] (optional) | 12 mm momentary push buttons. Set `with_shift_buttons = true` | 12.2 mm | `button_d` |
 | Status LED | 5 mm LED in an 8 mm panel bezel. The 330 Ω resistor is already at the TCU end | 8.0 mm | `led_d` |
-| OLED | 0.96" SSD1306 I²C module behind a 25 × 14 mm window, 4 × M2 | — | `oled_*` |
+| Screen | 2.42" SSD1309 module (61.5 × 39.5 mm) in a pocket of ribs behind a 58 × 30.5 mm window, held by double-sided foam tape | — | `oled_*` |
 
 The panel is 3 mm thick, which suits most panel-mount switches (they usually take 1–6 mm).
 Labels are engraved 0.6 mm deep. Fill them with paint or a paint pen for contrast.
@@ -141,7 +141,8 @@ handbrake, your knee or the dash at either end of its travel.
 ### Assembly order
 
 1. Fit the four heat-set inserts in the corner bosses.
-2. Fit the switches, the TEST button, the LED bezel and the OLED (M2 screws) to the front panel.
+2. Fit the switches, the TEST button and the LED bezel. Drop the screen into its pocket behind the
+   window and fix it with double-sided foam tape on its glass border.
 3. Drop the M6 nuts into the deck traps.
 4. Fit the two PG7 glands in the rear wall: the console cable (X4) and the OLED cable (X5).
 5. Wire each control to its core: [wiring guide §3](../docs/03-wiring-guide.md), X4 C1–C8.

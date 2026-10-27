@@ -112,10 +112,12 @@ constexpr float TEST_ENGINE_RUNNING_RPM = 100.0f;
 constexpr float TEST_CHARGING_V = 13.4f;
 constexpr float TEST_SUPPLY_MIN_V = 11.0f;
 
-// Console OLED (128x64, I2C). 0.96" modules are usually SSD1306; many 1.3"
-// modules are SH1106.
+// Console OLED (128x64, I2C). Default: the 2.42" SSD1309 module (55 x 27.5 mm
+// display, readable from the driver's seat). Its controller chip:
+//   0 = SSD1306 (most 0.96" modules)   1 = SH1106 (many 1.3" modules)
+//   2 = SSD1309 (2.42" modules)
 constexpr bool OLED_INSTALLED = true;
-constexpr bool OLED_SH1106 = false;
+constexpr uint8_t OLED_CHIP = 2;
 constexpr uint8_t OLED_I2C_ADDR = 0x3C;
 
 // ------------------------------------------------------------------- timing

@@ -35,9 +35,9 @@ void copyPadded(char* dst, const char* src, uint8_t width) {
 
 }  // namespace
 
-void Oled::begin(uint8_t addr, bool sh1106) {
+void Oled::begin(uint8_t addr, OledType type) {
   addr_ = addr;
-  sh1106_ = sh1106;
+  type_ = type;
   Wire.begin();
   Wire.setClock(100000);           // runs of up to ~1 m to the dash
   Wire.setWireTimeout(3000, true);  // a bad cable must never hang the TCU
@@ -64,9 +64,13 @@ bool Oled::init() {
                                     0xDA, 0x12, 0x81, 0xCF, 0xD9, 0xF1, 0xDB, 0x40, 0xA4};
   static const uint8_t kPumpSsd1306[] = {0x8D, 0x14};  // internal charge pump on
   static const uint8_t kPumpSh1106[] = {0xAD, 0x8B};   // DC-DC on
+  // SSD1309: no internal charge pump (the module supplies the panel voltage),
+  // otherwise the same command set as the SSD1306.
   const uint8_t tail[] = {(uint8_t)(invert_ ? 0xA7 : 0xA6), 0xAF};
-  const bool ok = command(kCommon, sizeof(kCommon)) &&
-                  (sh1106_ ? command(kPumpSh1106, 2) : command(kPumpSsd1306, 2)) && command(tail, 2);
+  bool ok = command(kCommon, sizeof(kCommon));
+  if (ok && type_ == OLED_SSD1306) ok = command(kPumpSsd1306, 2);
+  if (ok && type_ == OLED_SH1106) ok = command(kPumpSh1106, 2);
+  ok = ok && command(tail, 2);
   dirty_ = 0xFF;
   busy_ = false;
   invertDirty_ = false;
@@ -79,6 +83,12 @@ void Oled::setBig(const char* text) {
   if (strcmp(tmp, big_) == 0) return;
   memcpy(big_, tmp, sizeof(tmp));
   dirty_ |= 0x03;
+}
+
+void Oled::setHero(char c) {
+  if (c == hero_) return;
+  hero_ = c;
+  dirty_ |= 0x3F;  // pages 0-5 change layout
 }
 
 void Oled::setLine(uint8_t row, const char* text) {
@@ -97,6 +107,29 @@ void Oled::setInvert(bool on) {
 }
 
 uint8_t Oled::columnByte(uint8_t page, uint8_t x) const {
+  if (hero_ && page < 6) {
+    if (x < HERO_X) {
+      // 5x7 glyph scaled 6x: columns 2..31, rows 3..44.
+      if (x < 2 || x >= 32) return 0;
+      const uint8_t g = glyphColumn(hero_, (x - 2) / 6);
+      uint8_t out = 0;
+      for (uint8_t bit = 0; bit < 8; bit++) {
+        const int8_t gy = (int8_t)(page * 8 + bit) - 3;
+        if (gy >= 0 && gy < 42 && (g >> (gy / 6)) & 1) out |= 1 << bit;
+      }
+      return out;
+    }
+    x -= HERO_X;
+    if (page < FIRST_LINE) {
+      const uint8_t idx = x / 12;
+      if (idx >= HERO_BIG_CHARS) return 0;
+      const uint8_t b = glyphColumn(big_[idx], (x % 12) / 2);
+      return stretch(page == 0 ? (b & 0x0F) : (b >> 4));
+    }
+    const uint8_t idx = x / 6;
+    if (idx >= HERO_LINE_CHARS) return 0;
+    return glyphColumn(line_[page][idx], x % 6);
+  }
   if (page < FIRST_LINE) {
     const uint8_t idx = x / 12;
     if (idx >= BIG_CHARS) return 0;
@@ -130,7 +163,7 @@ void Oled::service(uint32_t nowMs) {
     col_ = 0;
     busy_ = true;
   }
-  const uint8_t hwCol = col_ + (sh1106_ ? 2 : 0);  // SH1106 RAM is 132 wide, centred
+  const uint8_t hwCol = col_ + (type_ == OLED_SH1106 ? 2 : 0);  // SH1106 RAM is 132 wide, centred
   const uint8_t addrCmd[] = {(uint8_t)(0xB0 | page_), (uint8_t)(hwCol & 0x0F), (uint8_t)(0x10 | (hwCol >> 4))};
   bool ok = command(addrCmd, sizeof(addrCmd));
   if (ok) {
