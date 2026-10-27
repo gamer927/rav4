@@ -105,8 +105,8 @@ box(0.5, 5.2, 4.4, 5.9, "Factory ECM",
     ["engine + transmission", "computer", "", "Signals - TAP only:", "  E1 SPD TAC VTA E2", "",
      "Solenoid outputs -", "CUT & intercept:", "  S1  S2  SL", "", "(location & pins:", " repair manual)"])
 box(0.5, 2.5, 6.2, 1.8, "Transaxle solenoids  S1  S2  SL",
-    ["single wire each, grounded through the case", "(trans. connector: 2WD A3/A1/A2,",
-     " 4WD B3/B6/B5 - VERIFY)"])
+    ["single wire each, grounded through the case", "(trans. connector: 4WD B3/B6/B5,",
+     " 2WD A3/A1/A2 - VERIFY)"])
 box(0.5, 0.6, 6.2, 1.5, "ATF cooler line (engine bay)",
     ["barbed tee + DS18B20 probe on the hose", "from the transaxle to the radiator"])
 

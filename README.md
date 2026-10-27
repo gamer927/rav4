@@ -71,6 +71,25 @@ the solenoid changeover, which is built three times.
 Only three factory wires are cut (S1, S2, SL); everything else is a tap. A **bypass plug**
 restores stock driving with the box removed.
 
+**Where everything goes in the car** (TCU box, gyro, heatsink, console pod, ATF probe, plus the
+4WD-specific notes) is [guide §9](docs/03-wiring-guide.md#9-where-everything-goes-1999-rav4-4wd).
+
+## 3D-printed housings
+
+![Console pod and TCU enclosure](hardware/preview.png)
+
+Two printable housings, as parametric OpenSCAD models with ready-to-print STLs in
+[`hardware/`](hardware/README.md):
+
+- **Console pod:** the ON/OFF (with safety cover), ECO, SPORT and TEST controls, status LED and
+  OLED on a sloped panel facing the driver. The Beavis sequential shifter bolts to its top deck.
+- **TCU enclosure:** holds the Mega, the main board, the buck converter and the gyro. It has seven
+  labelled cable glands and USB access.
+
+Print them in **PETG or ASA, not PLA** (PLA softens in a hot car). The dummy-load resistors stay
+outside on a finned heatsink. Print settings, hardware and assembly:
+[`hardware/README.md`](hardware/README.md).
+
 ## Status
 
 - **Done:** full design, firmware and documentation.
@@ -108,7 +127,7 @@ Quantities are for one car. Part numbers are examples; equivalents are fine if t
 | 3 | **DPDT relay, 12 V coil, ≥ 5 A contacts** (e.g. Omron G2RL-2-DC12) | The factory/box changeover, one per solenoid. Coil off = factory control |
 | 1 | ULN2803A (or a logic-level MOSFET) + flyback diode | Drives the three relay coils from pin D6. Never drive a coil straight from an Arduino pin |
 | 3 | **15 Ω, 50 W aluminium-clad resistor** | Dummy loads, so the factory computer sees a "solenoid" while the box is in control. Each makes **~14 W of heat** continuously |
-| 1 | Aluminium plate or heatsink + thermal paste | For the three dummy resistors. Mount away from wiring |
+| 1 | **Finned aluminium heatsink**, ≥ 100 × 100 × 25 mm (~1–1.5 °C/W), + thermal paste | For the three dummy resistors. **Outside** the TCU box, in moving air, ≥ 50 mm from plastic and wiring ([hardware](hardware/README.md#the-dummy-resistors-do-not-go-in-this-box)) |
 
 ### 3. Signal inputs (tapped from the car's existing wiring)
 
@@ -130,21 +149,24 @@ Quantities are for one car. Part numbers are examples; equivalents are fine if t
 | 1 | **ECO toggle switch** (SPST) | |
 | 1 | **SPORT toggle switch** (SPST) | Both ECO and SPORT off = NORMAL |
 | 2 | **Momentary push buttons**: [+] and [−] | Manual shifting. **Or** a sequential shifter lever with two microswitches (next row) |
-| (1) | *Option:* **sequential shifter lever** with two sealed microswitches | A sim-racing style lever, e.g. the DIY build in [Beavis Motorsport's DIY sequential shifter guide](https://www.beavismotorsport.com/sim-racing/diy-sequential-shifter/). Use the lever and its two microswitches only, not the USB board. Wiring: guide §8. `SWAP_SHIFT_INPUTS` picks push or pull for upshift |
+| (1) | *Option:* **sequential shifter lever** with two sealed microswitches | The DIY build in [Beavis Motorsport's DIY sequential shifter guide](https://www.beavismotorsport.com/sim-racing/diy-sequential-shifter/) (parts: [Thingiverse 4557771](https://www.thingiverse.com/thing:4557771), **printed in PETG/ASA**, two V-155-1C25 roller switches, 12 mm pivot tube, M12 ball plungers, springs, M10 knob). Skip its Arduino Pro Micro. It bolts to the console pod's top deck. Wiring: guide §8. `SWAP_SHIFT_INPUTS` picks push or pull for upshift |
 | 1 | **Momentary push button**: TEST | Tap = next screen, hold 2 s = self-test |
 | 1 | Panel LED (plain 5 V LED) + 330 Ω resistor | Status: solid = box in control, fast blink = fault |
-| 1 | Small panel or enclosure for the switches | |
+| 1 | **3D-printed console pod** ([`hardware/`](hardware/README.md#console-pod)) | Or any small panel. Pod switch sizes: 12 mm ON/OFF toggle + flip-up safety cover, 6 mm mini toggles for ECO/SPORT, 12 mm TEST button, 8 mm LED bezel |
 | ~3 m | **8-core shielded cable** (24 AWG / 0.22 mm²) | Console to box: 6 controls + ground + LED |
 
 ### 5. Screen and gyro
 
 | Qty | Part | Notes |
 |---|---|---|
-| 1 | **0.96" or 1.3" I²C OLED, 128×64** | SSD1306 (0.96") or SH1106 (1.3"); set `OLED_SH1106` to match. Mount in the dash |
-| 1 | **MPU-6050 gyro module (GY-521)** | Corner detection. Mount flat, firmly, in or beside the box |
+| 1 | **0.96" or 1.3" I²C OLED, 128×64** | SSD1306 (0.96") or SH1106 (1.3"); set `OLED_SH1106` to match. The console pod has a window for the 0.96"; or mount it in the dash |
+| 1 | **MPU-6050 gyro module (GY-521)** | Corner detection. Goes **inside the TCU box** on its standoffs, chip up, with the box bolted flat ([guide §9](docs/03-wiring-guide.md#the-gyro)) |
 | ~1 m | 4-core shielded cable | Shared I²C link (5 V, GND, SDA, SCL) to the screen. Keep it short: I²C isn't built for long runs |
 
 ### 6. Transmission fluid temperature probe
+
+Goes in the **hot** cooler hose (transaxle → radiator), on a straight rubber section near the
+radiator. Step by step: [guide §9](docs/03-wiring-guide.md#the-atf-temperature-probe).
 
 | Qty | Part | Notes |
 |---|---|---|
@@ -160,12 +182,26 @@ Quantities are for one car. Part numbers are examples; equivalents are fine if t
 
 | Qty | Part | Notes |
 |---|---|---|
-| 1 | Project enclosure, ~200 × 150 × 75 mm | Behind the glovebox; leave room and airflow for the dummy resistors |
+| 1 | **3D-printed TCU enclosure** ([`hardware/`](hardware/README.md#tcu-enclosure)), 212 × 148 × 51 mm | Or a bought enclosure of about that size. Behind the glovebox, bolted flat (the gyro is inside) |
 | 1 | Perfboard or a custom PCB + screw terminals | |
 | 6 | Automotive connector pairs (Deutsch DT or Superseal): 3-pin (X1, X6), 4-pin (X5), 6-pin (X2), 8-pin (X3, X4) | So the box unplugs cleanly from the car (pin-outs: wiring guide §3) |
 | 1 | Extra 6-pin plug for X2 + 3 short jumpers | **Bypass plug**: jumpers 1–4, 2–5, 3–6; makes the car stock with the box removed |
 | — | Automotive wire (TXL/GXL): 18 AWG for the solenoid circuits, 22 AWG for signals | |
 | — | Heat-shrink, loom, zip ties | Solder and heat-shrink every tap into the car's harness (no Scotch-lock taps) |
+
+### 8. 3D printing (housings and shifter)
+
+| Qty | Part | Notes |
+|---|---|---|
+| ~1 kg | **PETG or ASA filament** | About 0.5 kg for the two housings and 0.5 kg for the shifter. Not PLA |
+| 8 | M3 heat-set inserts (~4 mm OD) | Pod and TCU box corners |
+| 4 + 4 | M3 countersunk screws, 8 mm and 10 mm | Pod bottom plate, TCU lid |
+| ~12 | M3 × 6 screws | Mega, main board and gyro standoffs |
+| 4 | M2 × 8 screws + nuts | OLED |
+| 4 | M6 bolts + nuts | Shifter to the pod deck |
+| 4 + 5 | PG9 + PG7 cable glands | TCU box (4 × PG9, 3 × PG7) and pod (2 × PG7) |
+
+Full list: [`hardware/README.md`](hardware/README.md#hardware-for-the-housings).
 
 ## Tools and equipment
 
@@ -180,7 +216,9 @@ Quantities are for one car. Part numbers are examples; equivalents are fine if t
 | **Lift, or four jack stands** | Your RAV4 is full-time 4WD: **all four wheels** must be off the ground for in-gear testing |
 | Drain pan, funnel, hose cutter | Installing the temperature probe |
 | Phone GPS speed app | Calibrating the speed signal |
-| IR thermometer | Checking the ATF probe's reading |
+| IR thermometer | Checking the ATF probe's reading, and finding the hot cooler line |
+| **3D printer** (250 mm bed; 220 mm works with the no-ears TCU box) | The housings and the shifter. Or use a print service |
+| Phone level app | Mounting the TCU box (and gyro) flat |
 | Optional: cheap oscilloscope or logic analyser | Checking the speed and tach signals, and whether SL is on/off or pulsed |
 
 ## First steps
@@ -206,6 +244,7 @@ Quantities are for one car. Part numbers are examples; equivalents are fine if t
 | [`docs/wiring-diagram.svg`](docs/wiring-diagram.svg) / [`wiring-detail-a.svg`](docs/wiring-detail-a.svg) | System wiring diagram; solenoid channel close-up (regenerate with `python3 tools/wiring_diagram.py`) |
 | [`docs/02-revised-spec.md`](docs/02-revised-spec.md) | The full design: wiring, pin map, solenoid logic, every control rule, self-test, calibration, test plan |
 | [`docs/oled-screens.png`](docs/oled-screens.png) | What each screen looks like |
+| [`hardware/README.md`](hardware/README.md) | 3D-printed console pod and TCU enclosure: print settings, hardware, assembly, mounting |
 | [`docs/01-audit.md`](docs/01-audit.md) | Review of the original spec this project started from (rev 0, which still had an oil sender and a Nextion dashboard) and what was fixed |
 
 ## Repository layout
@@ -221,6 +260,9 @@ firmware/tcu/imu.*          gyro (MPU-6050) yaw-rate reader
 test/                       unit tests
 tools/avr_build.sh          compile for the Mega without the Arduino IDE
 tools/wiring_diagram.py     regenerates the wiring diagrams in docs/
+tools/build_stl.sh          exports the STLs and preview in hardware/
+hardware/*.scad             3D-printable console pod and TCU enclosure (OpenSCAD)
+hardware/stl/               ready-to-print STL files
 ```
 
 ## Build and flash

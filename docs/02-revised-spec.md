@@ -223,7 +223,8 @@ Yes, this works, with these corrections to the usual "Option B" write-up:
   hose, use transmission-cooler hose (SAE J1532), not heater hose.
 - **Which line:** the line *from* the transaxle *to* the radiator carries the hottest fluid
   and gives the most useful reading. Confirm which one it is in the RM, or warm the engine and
-  feel or IR-check which hose heats first. Keep the probe away from the exhaust.
+  feel or IR-check which hose heats first. Keep the probe away from the exhaust. Step-by-step
+  placement: wiring guide §9.
 - **Fluid:** cutting the hose loses some ATF. Top up with the fluid listed in your owner's
   manual, and check the level hot, on the dipstick, as the manual describes.
 - **Wiring:** this is a 2–3 m run from the engine bay to the TCU behind the glovebox. Use
@@ -244,7 +245,8 @@ How the firmware reads it:
 ### 3.9 Gyro for corner detection (MPU-6050)
 - A GY-521 (MPU-6050) module on the same I²C bus as the OLED, at address 0x68. Mount it firmly
   inside or next to the TCU box with its chip **flat**, so the Z axis is vertical; which way it
-  points doesn't matter.
+  points doesn't matter. The 3D-printed TCU enclosure has standoffs for it
+  ([`hardware/`](../hardware/README.md)); placement and testing: wiring guide §9.
 - Only the yaw rate is used. Lateral g = yaw rate × road speed, which ignores road camber and a
   tilted mounting (an accelerometer would read both as cornering).
 - The gyro's zero offset drifts, so it is re-learned every time the car is stopped. After

@@ -111,7 +111,7 @@ ON/OFF falls back to STOCK, and ECO/SPORT fall back to NORMAL.
 
 **X5 OLED** (W21): 1 = 5 V, 2 = GND, 3 = SDA (D20), 4 = SCL (D21).
 **X6 ATF**: 1 = +5 V (W17), 2 = GND (W18), 3 = DQ (W19 → 100 Ω → D33, 4.7k pull-up to 5 V).
-The **MPU-6050 gyro** sits inside the box on the same I²C bus (5 V, GND, D20, D21). Mount it flat.
+The **MPU-6050 gyro** sits inside the box on the same I²C bus (5 V, GND, D20, D21). Mount it flat (§9).
 
 ## 4. Wire list
 
@@ -225,16 +225,102 @@ VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
 
 ## 8. Sequential shifter lever (instead of [+] and [−] buttons)
 
-Any sim-racing style sequential lever with **two microswitches** works, such as the DIY build in
-[Beavis Motorsport's DIY sequential shifter guide](https://www.beavismotorsport.com/sim-racing/diy-sequential-shifter/).
-Use only the mechanical lever and its two microswitches; you don't need the USB board those
-builds use for PC games.
+Any sim-racing style sequential lever with **two microswitches** works. This project is set up
+for the DIY build in
+[Beavis Motorsport's DIY sequential shifter guide](https://www.beavismotorsport.com/sim-racing/diy-sequential-shifter/)
+(printed parts: Thingiverse [4557771](https://www.thingiverse.com/thing:4557771)). The
+[console pod](../hardware/README.md#console-pod) has its 4 × M6, 116 × 74 mm bolt pattern on its
+top deck.
 
-- Upshift microswitch: COM → C7 (ground), NO → C1 ([+]).
-- Downshift microswitch: COM → C7 (ground), NO → C2 ([−]).
+- Build the lever as the guide describes, but **print it in PETG or ASA, not PLA**: PLA goes
+  soft in a hot car.
+- Use its two **V-155-1C25 roller limit switches**, and leave out the Arduino Pro Micro. That
+  board turns the switches into a USB game controller for a PC; the TCU reads the switches
+  directly.
+- Upshift switch: COM → C7 (ground), NO → C1 ([+]).
+- Downshift switch: COM → C7 (ground), NO → C2 ([−]).
+- Leave each switch's NC terminal unconnected.
 - To change between "pull = upshift" (rally style) and "push = upshift", set
-  `SWAP_SHIFT_INPUTS` in `config.h`. No rewiring needed.
+  `SWAP_SHIFT_INPUTS` in `config.h`. You don't need to rewire.
 - **In a car:** mount it rigidly where it can't foul the factory gear lever, your knee or the
-  handbrake, and give it hard end-stops. Use sealed microswitches (for example V-type, IP67).
-  The firmware's 25 ms debounce and edge detection mean one click is always exactly one shift,
+  handbrake, and give it hard end-stops. The V-155 switches are open-frame. That's fine inside
+  the cabin, but keep drinks away, or use sealed (IP67) V-type switches with the same footprint.
+- The firmware's 25 ms debounce and edge detection mean one click is always exactly one shift,
   even with a bouncy switch.
+
+## 9. Where everything goes (1999 RAV4 4WD)
+
+| Part | Where | Why / how |
+|---|---|---|
+| **TCU box** ([3D-printed](../hardware/README.md#tcu-enclosure)) | Behind the glovebox, bolted **flat** to the dash's metal structure or a steel bracket | Close to the ECM and the console. Flat and rigid because the gyro is inside it. Mounting needs four bolts, not Velcro |
+| **Gyro (MPU-6050)** | **Inside the TCU box**, on its two standoffs, chip up | See below |
+| **Dummy-load heatsink** | Under the dash on metal, in moving air, ≥ 50 mm from plastic, wiring and the TCU box | ~14 W per resistor. Never inside the box |
+| **Console pod** (switches, LED, OLED, shifter) | Centre console, bolted down through its bottom plate | Within ~1–1.5 m of the box, for the OLED's I²C cable |
+| **ATF probe** | Engine bay, in the hot ATF cooler hose | See below |
+| **Fuse tap** | Cabin fuse box, an IG (ignition-switched) fuse | §5 |
+
+### The gyro
+
+- It sits **inside the TCU box**. The box's floor has two standoffs for a GY-521 board and the
+  words "GYRO: CHIP UP, FLAT". It shares the I²C bus with the OLED, so it needs no extra cable.
+- **Flat matters; where doesn't.** The firmware only uses the yaw rate (how fast the car is
+  turning), and every point of a rigid car turns at the same rate. Behind the glovebox reads the
+  same as the middle of the car. A tilt only scales the reading by cos(tilt): 5° costs
+  0.4 %, 15° costs 3.4 %. Check the box with a phone level app as you bolt it in.
+- **Rigid matters.** If the box can rock on its mount, the gyro reads the rocking.
+- **Which way it points doesn't matter.** Any rotation flat on the floor works.
+- Keep it away from the heatsink and heater ducts. The zero offset drifts with temperature.
+  The firmware re-learns it at every stop, so this only reduces noise.
+- **Test:** the SENSORS page shows lateral g (LAT). A brisk roundabout or on-ramp reads about
+  0.2–0.5 g; driving straight it stays near 0.00. If it jumps around on a straight, bumpy road, the box
+  isn't mounted rigidly.
+
+### The ATF temperature probe
+
+The probe goes in a barbed tee spliced into the **hot** ATF cooler hose: the one carrying fluid
+*from* the transaxle *to* the cooler in the radiator's tank. Parts: README §6. Background:
+spec §3.8.
+
+1. **Find the two cooler lines.** On the RAV4 they are steel pipes from the transaxle to
+   the radiator, joined by short rubber hoses near the radiator. Your RM's ATF-cooler section
+   shows them.
+2. **Find the hot one.** Start the cold engine, idle in P, and IR-check or carefully feel
+   both hoses. The one that warms first is the outlet: that's the hot line. Stop the engine.
+3. **Pick the spot:** a **straight rubber section at least 50 mm long**, on the hot line near
+   the radiator end. That's easy to reach and away from the exhaust.
+   - At least 150 mm from the exhaust manifold and its heat shield.
+   - Clear of the fan, belts and anything that moves.
+   - Before any auxiliary cooler, if one is fitted, so it reads transaxle-out temperature.
+4. **Fit it:**
+   - Clamp the hose or have a drain pan ready, then cut the hose square.
+   - Fit the tee with fuel-injection clamps on both barbs.
+   - Point the probe's port **sideways**: pointing down collects debris, and pointing up
+     traps air.
+   - Seal the probe's thread with ATF-resistant sealant.
+5. **Route the cable** (3-core shielded):
+   - Run it along the existing engine harness with zip ties every 150–200 mm, well clear of
+     the exhaust, the steering shaft and the 4WD transfer/driveshaft area below.
+   - Go through a **firewall grommet**: an existing one on the glovebox side if you can (pierce
+     it and seal it with RTV), or a new grommet in a drilled hole with the edge painted.
+   - Inside, run it to the TCU box's **ATF** gland (X6).
+   - Ground the shield at the TCU end only.
+6. **Top up and check:** run the engine, shift through every gear, check for leaks, then check
+   the ATF level **hot** on the dipstick as the owner's manual describes. Top up with the fluid
+   it specifies.
+7. **Test:** the SENSORS page should show the ATF temperature climbing with the engine warm,
+   within a few degrees of an IR thermometer on the tee.
+
+### 4WD notes (SXA11)
+
+- **Solenoid connector pins:** on the 4WD transaxle, S1 / S2 / SL are terminals
+  **B3 / B6 / B5** (2WD: A3 / A1 / A2). This is Toyota service text; **confirm it** with the
+  continuity test in §5 before cutting anything.
+- **Lift all four wheels** for any in-gear testing. The full-time 4WD drives both axles through
+  the centre differential. With only the front wheels up, the rear wheels can drive the car
+  off the stands, and the centre diff is stressed.
+- **Transfer and centre-diff circuits stay on the factory ECU.** The TCU only intercepts S1,
+  S2 and SL.
+- **Speed signal:** use the same SPD wire at the ECM as on the 2WD (§5). Tyre size changes it
+  equally on both, which calibration (spec §8) corrects.
+- **Final drive:** the firmware's starting rpm-per-mph table uses ~4.40, the figure listed for
+  the 4WD automatic. Calibrate it anyway (spec §8): sources disagree.
