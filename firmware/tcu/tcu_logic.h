@@ -5,8 +5,11 @@
 
 namespace tcu {
 
-enum DriveMode : uint8_t { MODE_ECO = 0, MODE_NORMAL = 1, MODE_SPORT = 2 };
+// There is no NORMAL: you pick ECO, SPORT or MANUAL (which drives like SPORT).
+enum DriveMode : uint8_t { MODE_ECO = 0, MODE_SPORT = 1 };
 enum Control : uint8_t { CTRL_STOCK = 0, CTRL_AUTO = 1, CTRL_MANUAL = 2 };
+// The mode switches: exactly one of ECO, SPORT and MANUAL must be on.
+enum ModeSelect : uint8_t { SEL_OK = 0, SEL_NONE, SEL_SEVERAL };
 
 // Faults hand control back to the factory ECU and stay latched until the
 // ON/OFF switch is turned OFF.
@@ -23,7 +26,7 @@ enum WarnBits : uint16_t {
   WARN_ATF_SENSOR = 1u << 0,
   WARN_ATF_HOT = 1u << 1,
   WARN_ATF_CRITICAL = 1u << 2,
-  WARN_MODE_SWITCH = 1u << 3,   // ECO and SPORT both on: running NORMAL
+  WARN_MODE_SWITCH = 1u << 3,   // not exactly one mode switch on: factory ECU shifts
   WARN_BUTTON_STUCK = 1u << 4,
   WARN_WDT_RESET = 1u << 5,
 };
@@ -44,6 +47,7 @@ enum Event : uint8_t {
   EV_AUTO_RESUMED,       // MANUAL switch flipped off: back to the AUTO map
   EV_MANUAL,             // MANUAL switch flipped on: the shifter shifts
   EV_DENY_NOT_MANUAL,    // shifter clicked with the MANUAL switch off
+  EV_MODE_SELECT,        // handed back: no mode switch, or more than one, is on
 };
 
 struct Inputs {
@@ -84,7 +88,8 @@ struct Outputs {
   bool cornerHold = false;   // automatic shifts paused: cornering
   bool gearHold = false;     // upshifts paused: brake or lift-off hold
   Control control = CTRL_STOCK;
-  DriveMode mode = MODE_NORMAL;
+  DriveMode mode = MODE_ECO;      // the last valid selection
+  ModeSelect modeSelect = SEL_OK;  // shown after MODE_SWITCH_GRACE_MS
   bool armed = false;        // ON/OFF switch flipped OFF -> ON since boot
   uint16_t faults = 0;
   uint16_t warnings = 0;
@@ -193,6 +198,11 @@ class Controller {
   uint32_t liftHoldSinceMs_ = 0;
   bool highTpsSeen_ = false;
   uint32_t lastHighTpsMs_ = 0;
+
+  bool selValid_ = false;   // exactly one mode switch on right now
+  bool selError_ = false;   // ...not for MODE_SWITCH_GRACE_MS: back to STOCK
+  bool manualSel_ = false;  // MANUAL was the last valid selection
+  uint32_t selBadSince_ = 0;
 
   bool prevUp_ = false, prevDown_ = false;
   bool upEdge_ = false, downEdge_ = false;

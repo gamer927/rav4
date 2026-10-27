@@ -70,17 +70,20 @@ measure, a pen, your phone.
   Measure the rubber hose's inside size: **5/16"** or **3/8"**.
 - [ ] **Which hose is hot.** Start the cold engine, wait 2 minutes, and feel both hoses. The
   one that warms first is the **hot hose**. Put a piece of tape on it.
-- [ ] **Room for the box.** Take out the glovebox. You need a flat metal spot for a box
-  **216 × 178 × 51 mm** (244 mm wide with its ears), and somewhere nearby for the heatsink
-  (100 × 100 × 25 mm) where air moves.
-- [ ] **A spot for the dash pod** (210 × 64 × 64 mm, on a small tilting mount). Either the **dash
-  top on the driver's side**, or the **ceiling** above the windscreen. Sit in the driver's seat:
-  you must see it without it blocking the road or the gauges. **Never over the passenger airbag**
-  (the right-hand half of the dash top). For the ceiling, find a sun-visor screw point or the
-  metal roof bow to screw into: the headliner alone won't hold it.
-- [ ] **Room for the shifter base** (150 × 100 mm, plus the lever on top) on the centre console
-  next to the gear lever. Move a hand through the full lever travel: it mustn't hit the gear
-  lever, handbrake, cup holder or your knee.
+- [ ] **A spot for the box.** Kneel at the passenger footwell and look up under the dash, below
+  the glovebox. You need a metal spot (the dash support, or somewhere to hang a steel bracket)
+  for a box **216 × 178 × 51 mm** (244 mm wide with its ears), with ~10 cm in front for the
+  cables, clear of the passenger's knees and the heater ducts. That's the best place: you can
+  reach it later without taking anything apart. No room? Take out the glovebox and look behind
+  it instead. Also find somewhere nearby for the heatsink (100 × 100 × 25 mm) where air moves.
+  ([Why these spots](03-wiring-guide.md#where-the-tcu-box-goes).)
+- [ ] **A spot for the dash pod** (200 × 64 × 64 mm, on a small tilting mount) on the **dash top,
+  driver's side**. Sit in the driver's seat: you must see it without it blocking the road or the
+  gauges. **Never over the passenger airbag** (the right-hand half of the dash top).
+- [ ] **Room for the shifter base** (150 × 100 mm) on the centre console next to the gear lever,
+  long side pointing front-to-back. With the shifter on it, it's about **35 cm tall**: check it
+  clears the dash and the radio. Move a hand through the full lever travel: it mustn't hit the
+  gear lever, handbrake, cup holder or your knee.
 - [ ] **The ECM wires.** Find the engine computer (RM: "location of components"). For each wire
   below, do the meter test in [wiring guide §5](03-wiring-guide.md) and fill in the table.
   **Don't cut anything.** Take photos.
@@ -134,8 +137,10 @@ Prints take a long time, so start them first. They print while you solder parts 
   (about 1 h).
 - [ ] Shifter base: `shifter_base_box.stl` (about 5 h, prints upside down) and its bottom plate:
   `shifter_base_bottom.stl` (about 2 h).
-- [ ] Shifter parts from Thingiverse [4557771](https://www.thingiverse.com/thing:4557771), in PETG
-  (about 15–20 h).
+- [ ] The shifter's own parts, from [`hardware/beavis_shifter/`](../hardware/beavis_shifter/README.md)
+  (by bbeavis; about 1.5 days): `MainBody.stl` and `ShifterShaft.stl` with 3 walls and ~50 %
+  infill, **4 ×** `SwitchSpacer.stl`, and if you want them `PivotPin.stl`, `PivotCap.stl`,
+  `Knob.stl`. PETG, not the PLA its author used. Skip `BottomCover.stl`.
 
 ![The printed parts](../hardware/preview.png)
 
@@ -163,9 +168,9 @@ Prints take a long time, so start them first. They print while you solder parts 
 - [ ] **Bag P6**: 7× 5.08 mm screw-terminal positions; 6× PC817 chip; 3× 2.2k resistor (red-red-black-brown-brown); 6× 1N4148 diode; 6× 10k resistor (brown-black-black-red-brown); 3× 3.3k resistor (orange-orange-black-brown-brown)
 - [ ] **Bag P7**: 1× LM393 chip; 1× 22k resistor (red-red-black-red-brown); 3× 10k resistor (brown-black-black-red-brown); 1× 1N4733A 5.1 V diode; 1× 1M resistor (brown-black-black-yellow-brown); 1× 1.8k resistor (brown-grey-black-brown-brown)
 - [ ] **Bag P8**: 2× 10k resistor (brown-black-black-red-brown); 2× 100 nF capacitor; 4× BAT85 diode
-- [ ] **Bag L1**: 17× 5.08 mm screw-terminal positions; 1× 16-pin box header
+- [ ] **Bag L1**: 16× 5.08 mm screw-terminal positions; 1× 16-pin box header
 - [ ] **Bag L2**: 7× 2.2k resistor (red-red-black-brown-brown); 7× 1k resistor (brown-black-black-brown-brown); 7× 100 nF capacitor; 14× BAT85 diode
-- [ ] **Bag L3**: 1× 330 resistor (orange-orange-black-black-brown); 1× 4.7k resistor (yellow-violet-black-brown-brown); 1× 100 resistor (brown-black-black-black-brown); 1× 1N4733A 5.1 V diode
+- [ ] **Bag L3**: 1× 4.7k resistor (yellow-violet-black-brown-brown); 1× 100 resistor (brown-black-black-black-brown); 1× 1N4733A 5.1 V diode
 - [ ] **Bag L4**: 1× GY-521 module
 
 ✅ **CHECK:** the meter reads about 12 V after the fuse, and every bag is full.
@@ -743,18 +748,17 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 - [ ] **X4d**: C4 TEST screw terminal → col 13, row 1. X4-4: C4 TEST
 - [ ] **X4e**: C5 ON/OFF screw terminal → col 15, row 1. X4-5: C5 ON/OFF
-- [ ] **X4f**: C6 LED screw terminal → col 17, row 1. X4-6: C6 LED
-- [ ] **X4g**: C7 GND screw terminal → col 19, row 1. X4-7: C7 GND
+- [ ] **X4f**: C6 GND screw terminal → col 17, row 1. X4-6: C6 GND
 - [ ] **X5a**: 5V screw terminal → col 21, row 1. X5-1 screen
 - [ ] **X5b**: GND screw terminal → col 23, row 1. X5-2 screen
+- [ ] **X5c**: SDA screw terminal → col 25, row 1. X5-3 screen
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### L1.3 — Place 6 parts
+#### L1.3 — Place 5 parts
 
 ![L1.3](build/logic-L1-3.png)
 
-- [ ] **X5c**: SDA screw terminal → col 25, row 1. X5-3 screen
 - [ ] **X5d**: SCL screw terminal → col 27, row 1. X5-4 screen
 - [ ] **X6a**: 5V screw terminal → col 29, row 1. X6-1 ATF probe
 - [ ] **X6b**: GND screw terminal → col 31, row 1. X6-2 ATF probe
@@ -768,7 +772,7 @@ Push the legs through, bend them out a little underneath, solder, snip.
 ![L1.4](build/logic-L1-4.png)
 
 - [ ] **1** red 22 AWG: **JB** pin 1 → **X5a** (5V) → **X6a** (5V)
-- [ ] **2** black 22 AWG: **JB** pin 2 → **X7c** (GND) → **X4g** (C7 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
+- [ ] **2** black 22 AWG: **JB** pin 2 → **X7c** (GND) → **X4f** (C6 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
 - [ ] **3** blue 22 AWG: **JB** pin 11 → **X5c** (SDA)
 - [ ] **4** blue 22 AWG: **JB** pin 12 → **X5d** (SCL)
 
@@ -885,35 +889,32 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **4** black 22 AWG: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **DL7** plain end → **CF7** at col 15, row 16 → **CF6** at col 13, row 16 → **CF5** at col 11, row 16 → **CF4** at col 9, row 16 → **CF3** at col 7, row 16 → **CF2** at col 3, row 16 → **CF1** at col 1, row 16
 
 ✅ **CHECK** (5 V on): terminals **X7a, X7b and X4a to X4e** each read **5 V**. Touch each one to
-a ground terminal (X7c or X4g) and check its JB pin drops to **0 V**:
+a ground terminal (X7c or X4f) and check its JB pin drops to **0 V**:
 
 | Terminal | X7a UP | X7b DOWN | X4a ECO | X4b SPORT | X4c MANUAL | X4d TEST | X4e ON/OFF |
 |---|---|---|---|---|---|---|---|
 | JB pin | 3 | 4 | 5 | 6 | 15 | 8 | 7 |
 
-### Step L3 — Status light and ATF probe
+### Step L3 — ATF probe
 
-#### L3.1 — Place 4 parts
+#### L3.1 — Place 3 parts
 
 ![L3.1](build/logic-L3-1.png)
 
-- [ ] **RL**: 330 resistor (bands: orange-orange-black-black-brown) → col 17, row 4 and col 17, row 8. Status LED
 - [ ] **RA1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 29, row 5 and col 29, row 9. ATF pull-up
 - [ ] **RA2**: 100 resistor (bands: brown-black-black-black-brown) → col 31, row 5 and col 31, row 9. ATF series
 - [ ] **ZA**: 1N4733A 5.1 V diode → col 33, row 5 and col 33, row 9. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### L3.2 — Solder 6 wires (bottom side)
+#### L3.2 — Solder 4 wires (bottom side)
 
 ![L3.2](build/logic-L3-2.png)
 
-- [ ] **1** green 22 AWG: **JB** pin 9 → **RL** at col 17, row 8
-- [ ] **2** blue 22 AWG: **RL** at col 17, row 4 → **X4f** (C6 LED)
-- [ ] **3** green 22 AWG: **X6c** (DQ) → **RA1** at col 29, row 5 → **RA2** at col 31, row 5 → **ZA** band end
-- [ ] **4** blue 22 AWG: **RA2** at col 31, row 9 → **JB** pin 10
-- [ ] **5** red 22 AWG: **X6a** (5V) → **RA1** at col 29, row 9
-- [ ] **6** black 22 AWG: **X6b** (GND) → **ZA** plain end
+- [ ] **1** green 22 AWG: **X6c** (DQ) → **RA1** at col 29, row 5 → **RA2** at col 31, row 5 → **ZA** band end
+- [ ] **2** blue 22 AWG: **RA2** at col 31, row 9 → **JB** pin 10
+- [ ] **3** red 22 AWG: **X6a** (5V) → **RA1** at col 29, row 9
+- [ ] **4** black 22 AWG: **X6b** (GND) → **ZA** plain end
 
 ✅ **CHECK** (5 V on): X6c reads **5 V**.
 
@@ -989,7 +990,6 @@ The hub is the prototype shield that plugs onto the Mega. The two ribbon cables 
 - [ ] B6 → **D25** (SPORT)
 - [ ] B7 → **D26** (ON/OFF)
 - [ ] B8 → **D32** (TEST)
-- [ ] B9 → **D7** (LED)
 - [ ] B10 → **D33** (ATF probe)
 - [ ] B11 → **D20 (SDA)** (SDA)
 - [ ] B12 → **D21 (SCL)** (SCL)
@@ -997,7 +997,7 @@ The hub is the prototype shield that plugs onto the Mega. The two ribbon cables 
 - [ ] B14 → **GND** (GND)
 - [ ] B15 → **D34** (MANUAL)
 
-Pins A25, A26 and B16 stay empty.
+Pins A25, A26, B9 and B16 stay empty.
 
 ✅ **CHECK** (meter on beep, shield plugged onto the Mega): each socket pin beeps to its Mega pin,
 and no two neighbouring socket pins beep to each other (except 5 V to 5 V and GND to GND).
@@ -1039,9 +1039,9 @@ beep and the lever **up**, find the outer pin that beeps to the middle one. Use 
 
 ![Dash pod step 1](build/pod-1.png)
 
-**8.2 Screen, switches, LED.** Left to right on the front: the **screen** drops into the pocket
+**8.2 Screen and switches.** Left to right on the front: the **screen** drops into the pocket
 behind its window, face first, stuck with double-sided foam tape on its black glass border (it
-only goes in one way). Then the **LED** bezel (**TCU**), **ECO**, **SPORT**, **MANUAL** (the three
+only goes in one way). Then **ECO**, **SPORT**, **MANUAL** (the three
 small toggles), **TEST** (push button) and **ON/OFF** (big toggle, red cover hinge at the top).
 Tighten the nuts from inside. The names are engraved under each hole.
 
@@ -1060,8 +1060,7 @@ cable** through SWITCHES and the screen's **4-core cable** (from part 7) through
 | C3 | MANUAL switch |
 | C4 | TEST button |
 | C5 | ON/OFF switch |
-| C6 | the LED's long leg |
-| C7 (ground) | the other pin of **every** switch and the button, and the LED's short leg. Easiest: one black wire soldered from switch to switch, ECO → SPORT → MANUAL → TEST → ON/OFF → LED, with C7 joined to its end |
+| C6 (ground) | the other pin of **every** switch and the button. Easiest: one black wire soldered from switch to switch, ECO → SPORT → MANUAL → TEST → ON/OFF, with C6 joined to its end |
 
 **8.4 Back cover.** Screw the back cover on (4 × M3 × 10 countersunk). The two hinge lugs stick
 out of the back.
@@ -1072,18 +1071,20 @@ out of the back.
 
 ![Dash pod step 5](build/pod-5.png)
 
-✅ **CHECK** (meter on beep, at the 8-core's far end): C1 ↔ C7 beeps only with ECO on; C2 with
-SPORT; C3 with MANUAL; C4 with TEST pressed; C5 with ON/OFF on. With the meter on **diode**
-(red probe on C6, black on C7), the LED glows faintly.
+✅ **CHECK** (meter on beep, at the 8-core's far end): C1 ↔ C6 beeps only with ECO on; C2 with
+SPORT; C3 with MANUAL; C4 with TEST pressed; C5 with ON/OFF on.
 
 ### The shifter base
 
 **8.6 Inserts.** Heat-set 4 brass inserts into the base's corner posts, from underneath.
 
-**8.7 Lever.** Build the Beavis lever from its guide, in PETG. Use only its two **V-155-1C25**
-switches (no Arduino). Drop 4 M6 nuts into the hex slots under the deck. Cut the M6 bolts to
-**shifter base thickness + 6 mm** and bolt the lever down. Feed its switch wires down the
-rectangular hole.
+**8.7 Lever.** Build the Beavis lever as its guide and
+[assembly video](https://www.youtube.com/watch?v=a-w8Zu3LSlE) show: shaft into the body, pivot
+tube or M12 bolt, travel-stop bolts with the springs over them, then each **V-155-1C25** switch
+between two spacers on two M3 × 70 bolts. Leave out the Arduino. Drill the body's four mounting
+holes to **6.5 mm**. Drop 4 M6 nuts into the hex slots under the base's deck, cut the M6 bolts to
+**shifter body flange thickness + 6 mm**, and bolt the lever down with its long side matching
+the base's. Feed its switch wires down the rectangular hole.
 
 **8.8 Cable.** Fit a PG7 gland in the back wall (**TO TCU**) and push the **3-core cable** through.
 Join with 3 lever connectors:
@@ -1121,7 +1122,7 @@ Everything is connected on the table, outside the box.
 
 - [ ] Plug the hub onto the Mega. Plug **ribbon A** (power board ↔ socket A) and **ribbon B**
   (logic board ↔ socket B). The red stripe is pin 1.
-- [ ] Shifter cable → **X7a/X7b/X7c** (UP, DOWN, GND). Dash cable C1–C7 → **X4a–X4g**. Screen
+- [ ] Shifter cable → **X7a/X7b/X7c** (UP, DOWN, GND). Dash cable C1–C6 → **X4a–X4f**. Screen
   cable → **X5** (5V, GND, SDA, SCL). ATF probe → **X6** (red 5V, black GND, yellow DQ).
 - [ ] Dummy loads: LOAD 1/2/3/GND → **J4a/J4b/J4c/J4d**. For this test only, add three jumpers
   **J2d → J4a, J2e → J4b, J2f → J4c** (the resistors stand in for the solenoids).
@@ -1130,17 +1131,20 @@ Everything is connected on the table, outside the box.
 - [ ] Bench 12 V → **J1a and J1b** (+), **J1c** (−). The USB cable can stay plugged in.
 
 ✅ **CHECKS:**
-- [ ] The screen shows a big **–** and **STOCK**, and **NOT CALIBRATED** (correct for now).
-- [ ] Tap TEST: the **SENSORS** page shows battery about 12 V, the ATF probe at room temperature,
-  throttle 0 %, speed 0.
+- [ ] The screen shows a big **–**, **STOCK**, "TCU IS OFF: STOCK SHIFTING", and **TRANS** with
+  the room temperature in °F.
+- [ ] Flip ON/OFF on with ECO on: it says **NOT READY / NOT CALIBRATED** (correct for now). Flip
+  ECO and SPORT both on: after a second it says **MODE ERROR**. ON/OFF back off.
+- [ ] Tap TEST: the **SENSORS** page shows battery about 12 V, trans temp at room temperature,
+  gas pedal 0 %, speed 0.
 - [ ] With ON/OFF **off**, hold TEST for 2 seconds: the self-test runs. When it tests the
   solenoids, each should read about **0.8 A** (12 V ÷ 15 Ω). If they're more than 10 % out,
   change `IS_AMPS_PER_VOLT` in `firmware/tcu/config.h`, upload again, retest.
-- [ ] Follow the prompts on the screen: **SHIFTER UP** (pull the lever), **SHIFTER DOWN** (push
-  it), **ONLY ECO ON**, **ONLY SPORT ON**, **ONLY MANUAL ON** (each time with the other two off),
-  then press the brake (touch 12 V to J3b).
-- [ ] The result says **PASS** (CHK on the lamps is normal: it's asking you to confirm the lights
-  flashed).
+- [ ] Follow the prompts on the screen: **UPSHIFT THE LEVER**, **DOWNSHIFT THE LEVER**, **TURN ON
+  ONLY ECO**, **TURN ON ONLY SPORT**, **TURN ON ONLY MANUAL**, then **PRESS THE BRAKE** (touch
+  12 V to J3b).
+- [ ] The result says **ALL OK** ("SCREEN CHECK" is normal: it's asking you to confirm the
+  screen flashed).
 
 ---
 
@@ -1166,7 +1170,7 @@ Everything is connected on the table, outside the box.
 | Gland | Cable | Inside, to | Plug outside |
 |---|---|---|---|
 | SHIFT | 3-core from the shifter base | X7a–X7c | (straight to the shifter base) |
-| DASH | 8-core from the dash pod | X4a–X4g | (straight to the dash pod) |
+| DASH | 8-core from the dash pod | X4a–X4f (cut the 2 spare cores) | (straight to the dash pod) |
 | SCREEN | 4-core from the dash pod | X5a–X5d | (straight to the dash pod) |
 | ATF | 3-core | X6a–X6c | X6, 3-way |
 | SIG | 7 thin wires: D, STP, E1, SPD, TAC, VTA, E2 | J3a–J3g | X3, 8-way |
@@ -1194,7 +1198,9 @@ over until the very last job, and only when its ON/OFF switch is on.
 "Scotch-lock" taps.
 
 ### 12.1 Mount
-- [ ] Bolt the box **flat** behind the glovebox. Check it with a phone's level app (within 5°).
+- [ ] Bolt the box **flat** under the passenger side of the dash (or behind the glovebox), on the
+  spot from part 0. Check it with a phone's level app (within 5°).
+- [ ] Optional: a USB extension from the box's USB socket into the glovebox, for the laptop.
 - [ ] Bolt the heatsink where air moves, at least 50 mm from plastic and wires.
 
 ### 12.2 Power
@@ -1212,18 +1218,15 @@ over until the very last job, and only when its ON/OFF switch is on.
 700–800 at idle; brake shows when pressed; D shows only in D.
 
 ### 12.4 Dash pod and shifter base
-- [ ] **Dash pod mount.** On the dash top: 2 screws into the dash pad's frame, or VHB tape on a
-  cleaned spot, arm pointing up. On the ceiling: turn the mount upside down (arm pointing down)
-  and screw it through the headliner into a sun-visor screw point or the roof bow
-  ([wiring guide §9](03-wiring-guide.md#the-dash-pod)).
+- [ ] **Dash pod mount** on the dash top, driver's side: 2 screws into the dash pad's frame, or
+  VHB tape on a cleaned spot, arm pointing up ([wiring guide §9](03-wiring-guide.md#the-dash-pod)).
 - [ ] **Hang the pod.** Slide the mount's knuckle between the pod's two lugs. M5 × 25 bolt through
   all three, nyloc nut into the hex pocket. Tilt the screen to face you, then tighten until it
   holds that angle over bumps.
 - [ ] **Shifter base.** Bolt its bottom plate to the console next to the gear lever (4 bolts, big
   washers), then screw the base onto it from underneath (4 × M3).
 - [ ] Hide all three cables under the trim, to the box. The dash pod's two cables go down behind
-  the dash trim (dash top) or along the headliner edge and down the passenger A-pillar trim
-  (ceiling).
+  the dash trim.
 
 ✅ **CHECK:** hold TEST 2 s: every shifter and switch prompt passes.
 
@@ -1255,8 +1258,8 @@ drive again: also the same. Plug in the OBD-II scanner: **no trouble codes**.
    - [ ] In the driveway: hold TEST for the self-test.
    - [ ] **All four wheels on jack stands** (full-time 4WD: never only the front), ON/OFF on:
      go through the gears and watch the screen.
-   - [ ] An empty car park: ECO, NORM, SPORT, then flip **MANUAL** on and shift with the lever.
-     With MANUAL off, the lever does nothing (the screen says FLIP MANUAL ON).
+   - [ ] An empty car park: **ECO**, then **SPORT**, then **MANUAL** (only one on at a time) and
+     shift with the lever. In ECO or SPORT the lever does nothing (the screen says MANUAL OFF).
    - [ ] The road.
 
 ✅ **CHECK:** flip ON/OFF off at any time: the car goes straight back to the factory computer.

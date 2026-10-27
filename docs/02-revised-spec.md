@@ -15,14 +15,15 @@ Mega, and 3D-printed housings. Rev 3.1 splits the hardware into three pieces (a 
 screen and switches, a shifter base on the centre console, and the TCU box), each with its own
 cables, and makes MANUAL a switch of its own instead of tapping a shift button.
 
-**Dash pod controls** (left to right, after the screen)
+**Dash pod controls** (left to right, after the screen). There is no NORMAL mode and no status
+light: **exactly one of ECO, SPORT and MANUAL must be on**. With none, or more than one, on for
+more than 1 s, the screen shows the error and the factory ECU shifts until you fix it (§1).
 
 | Control | Type | What it does |
 |---|---|---|
-| TCU | LED | Lit = the TCU is shifting (§6.7 for the blink codes) |
 | ECO | Toggle switch | Early upshifts, early lockup |
-| SPORT | Toggle switch | Holds gears longer, quick kickdown. ECO and SPORT both off = NORMAL; both on = NORMAL plus an `ECO+SPT` warning |
-| MANUAL | Toggle switch | ON = you shift with the shifter lever (SPORT's lockup and pedal response). OFF = the TCU shifts by itself in the ECO/NORMAL/SPORT map |
+| SPORT | Toggle switch | Holds gears longer, quick kickdown |
+| MANUAL | Toggle switch | You shift with the shifter lever (SPORT's lockup and pedal response) |
 | TEST | Push button | Tap: next screen. Hold 2 s: run the self-test (§7) |
 | ON/OFF | Toggle switch with a flip-up cover | OFF = factory transmission control (STOCK). ON = this controller drives the shifts (CUSTOM) |
 
@@ -69,9 +70,9 @@ What this means:
 
 | State | Who drives the solenoids | How you get there |
 |---|---|---|
-| **STOCK** | Factory ECU (relays de-energised) | Power-up, ON/OFF switch OFF, lever not in D, any fault, MCU reset |
-| **CUSTOM-AUTO** | TCU, using the ECO/NORMAL/SPORT shift and lockup maps | ON/OFF switch flipped OFF→ON with the lever in D and MANUAL off; or MANUAL flipped off while in CUSTOM |
-| **CUSTOM-MANUAL** | TCU, holding the gear you selected with the shifter lever | As CUSTOM-AUTO but with MANUAL on; or MANUAL flipped on while in CUSTOM |
+| **STOCK** | Factory ECU (relays de-energised) | Power-up, ON/OFF switch OFF, lever not in D, any fault, MCU reset, or not exactly one of ECO/SPORT/MANUAL on for 1 s |
+| **CUSTOM-AUTO** | TCU, using the ECO or SPORT shift and lockup maps | ON/OFF switch flipped OFF→ON with the lever in D and ECO or SPORT on; or switching from MANUAL to ECO or SPORT while in CUSTOM |
+| **CUSTOM-MANUAL** | TCU, holding the gear you selected with the shifter lever | As CUSTOM-AUTO but with MANUAL on |
 
 Rules that never change:
 1. **De-energised = factory.** Power loss, reset, watchdog, firmware hang or a broken ON/OFF
@@ -85,12 +86,17 @@ Rules that never change:
    standstill, in 1st.
 5. **Faults latch.** A critical fault hands control back to the ECU until the ON/OFF switch is
    turned OFF, which acknowledges the fault.
+6. **One mode at a time.** Exactly one of ECO, SPORT and MANUAL must be on. If none, or more
+   than one, is on for more than 1 s (`MODE_SWITCH_GRACE_MS`), the ECU takes over and the
+   screen says MODE ERROR or PICK MODE. This isn't a latched fault: as soon as exactly one is on
+   again, the TCU takes back over by itself (synced to the ECU's gear, as in rule 4). The 1 s
+   lets you move from one switch to the next without a handover.
 
 ## 2. Architecture
 
 ```
- DASH POD (dash top or ceiling)          8-core shielded (shield grounded at TCU end only)
- [OLED] LED [ECO] [SPORT] [MANUAL] [TEST] [ON/OFF] ─────────────────────────┐
+ DASH POD (dash top, driver's side)      8-core shielded (shield grounded at TCU end only)
+ [OLED] [ECO] [SPORT] [MANUAL] [TEST] [ON/OFF] ─────────────────────────────┐
  SHIFTER BASE (centre console)           3-core shielded                    │
  sequential lever: UP / DOWN microswitches ─────────────────────────────────┤
                                                                             v
@@ -205,30 +211,35 @@ Step-by-step wiring, connector pin-outs and the full wire list are in
 [`03-wiring-guide.md`](03-wiring-guide.md), with diagrams
 [`wiring-diagram.svg`](wiring-diagram.svg) and [`wiring-detail-a.svg`](wiring-detail-a.svg).
 
-Dash pod switch cable (X4, 8-core shielded, one core spare):
+Dash pod switch cable (X4, 8-core shielded, two cores spare):
 1. ECO switch
 2. SPORT switch
 3. MANUAL switch
 4. TEST button
 5. ON/OFF switch
-6. LED anode (D7 → 330 Ω; the cathode goes to the common ground)
-7. Switch common (ground)
+6. Switch common (ground)
 
 Shifter cable (X7, 3-core shielded): 1 = upshift microswitch, 2 = downshift microswitch,
 3 = common (ground).
 
 Ground each shield drain at the TCU end only. Every control switches to ground, so a broken wire
-reads as "off": ON/OFF falls back to STOCK, ECO/SPORT fall back to NORMAL, MANUAL falls back to
-AUTO, and a broken shifter wire just stops that shift direction.
+reads as "off": ON/OFF falls back to STOCK, a broken mode-switch wire leaves no mode on (STOCK,
+with PICK MODE on the screen), and a broken shifter wire just stops that shift direction.
 
 ### 3.7 Dash pod display (OLED)
 - A **2.42" 128×64 I²C OLED** (SSD1309), in the dash pod, within 2.5 m of cable from the TCU
   box. At the driver's eye distance (60–75 cm), text needs to be about 4 mm tall to read at a
   glance. A 0.96" screen's small text is 1.2 mm tall and its big line 2.4 mm; on the 2.42" they
   are 3.0 mm and 6.0 mm, and the MAIN page's gear digit is **18 mm**.
-- The MAIN page puts the gear as one giant digit on the left and the mode (ECO / NORM / SPORT /
-  MANUAL / STOCK) in double-size text beside it: everything you need while driving. The small
-  status lines (self-test, faults, warnings, speed, ATF) are for when you're parked.
+- Everything on the screen is plain English: no codes. The MAIN page puts the gear as one giant
+  digit on the left, the mode (ECO / SPORT / MANUAL / STOCK) in double-size text beside it, and
+  one double-size line across the bottom: the trans temperature (°F), or, when something needs
+  you, a headline such as MODE ERROR, NO SHIFT, TRANS HOT or PROBLEM. Up to four small lines
+  beside the gear say what it means and what to do ("TWO MODES ON. TURN ON ONLY ECO, SPORT OR
+  MANUAL."). See [`oled-screens.png`](oled-screens.png).
+- The SENSORS page (tap TEST) lists speed, engine rpm, gas pedal, trans temp, battery and side
+  force in words; the self-test page lists each check as OK, BAD, CHECK (look yourself) or SKIP.
+  `TEMP_IN_F` in `config.h` switches the screen to °C.
 - `OLED_CHIP` in `config.h` selects the controller: 0 = SSD1306 (0.96"), 1 = SH1106 (1.3"),
   2 = SSD1309 (2.42", default). The SSD1309 is the SSD1306 command set without the internal
   charge pump.
@@ -241,8 +252,8 @@ AUTO, and a broken shifter wire just stops that shift direction.
   module lacks pull-ups, add 4.7 kΩ on SDA and SCL at the TCU end.
 - Keep the I²C cable under 2.5 m. At 100 kHz the bus allows 400 pF; a shielded cable is about
   100 pF/m, so 2.5 m plus the two modules stays well inside it, and the modules' pull-ups (about
-  2.4 kΩ together) keep the rise time under the 1 µs limit. A ceiling-mounted pod's run (behind
-  the glovebox, up the A-pillar, along the headliner) is about 2 m.
+  2.4 kΩ together) keep the rise time under the 1 µs limit. A dash-top pod's run from the TCU
+  box under the passenger side of the dash is usually 1–1.5 m.
 
 ### 3.8 ATF temperature probe (DS18B20 in the cooler line)
 Yes, this works, with these corrections to the usual "Option B" write-up:
@@ -281,8 +292,9 @@ How the firmware reads it:
 
 ### 3.9 Gyro for corner detection (MPU-6050)
 - A GY-521 (MPU-6050) module on the same I²C bus as the OLED, at address 0x68. Mount it firmly
-  inside or next to the TCU box with its chip **flat**, so the Z axis is vertical; which way it
-  points doesn't matter. The 3D-printed TCU enclosure has standoffs for it
+  inside the TCU box, on the logic board. One of its axes must be vertical in the car: Z with the
+  box bolted flat (the default), or X/Y with the box on its side (set `GYRO_AXIS`). Which way it
+  faces around that axis doesn't matter. The 3D-printed TCU enclosure has standoffs for it
   ([`hardware/`](../hardware/README.md)); placement and testing: wiring guide §9.
 - Only the yaw rate is used. Lateral g = yaw rate × road speed, which ignores road camber and a
   tilted mounting (an accelerometer would read both as cornering).
@@ -297,11 +309,11 @@ How the firmware reads it:
 | D2 (INT4) | in | VSS pulses | falling edge | Comparator or opto output |
 | D3 (INT5) | in | Tach pulses | falling edge | 2 pulses/rev (4-cyl) |
 | D6 | out | Relay bank driver | HIGH = TCU in control | 10 k pull-down; MOSFET/ULN, never the coil directly |
-| D7 | out | Dash pod TCU LED | HIGH | 330 Ω series |
+| D7 | – | not used (was the dash LED) | – | |
 | D8 | out | S1 high-side IN | HIGH = on | 10 k pull-down |
 | D9 | out | S2 high-side IN | HIGH = on | 10 k pull-down |
 | D10 | out | SL high-side IN | HIGH = on | 10 k pull-down |
-| D13 | out | Status LED (on-board) | HIGH | Mirrors D7 |
+| D13 | out | Status LED (on-board, inside the box) | HIGH | Solid = TCU in control; blinks = waiting / fault |
 | D22 | in | Shifter upshift microswitch | LOW | Edge-triggered; `SWAP_SHIFT_INPUTS` swaps D22/D23 |
 | D23 | in | Shifter downshift microswitch | LOW | Edge-triggered |
 | D24 | in | Mode ECO | LOW | |
@@ -366,12 +378,12 @@ If the request is accepted with lockup applied, SL releases first and the gear c
 ### 6.3 CUSTOM-AUTO
 - **Upshift** when `speed ≥ UPSHIFT_MPH[mode][gear](tps)`. The tables are interpolated at
   0/25/50/75/100 % throttle.
-- **Downshift** when `speed < upshift(tps) − hysteresis[mode]` (ECO 7, NORMAL 7.5, SPORT 4.5 mph).
+- **Downshift** when `speed < upshift(tps) − hysteresis[mode]` (ECO 7, SPORT 4.5 mph).
   Opening the throttle raises the downshift line, which gives kickdown; the over-rev guard
   refuses any kickdown that would over-rev.
 - At least **1.2 s** in gear between automatic shifts, so the box doesn't hunt between gears at
   part throttle.
-- **Kickdown** (throttle ≥ 80 % in ECO/NORMAL, ≥ 60 % in SPORT) skips that 1.2 s wait.
+- **Kickdown** (throttle ≥ 80 % in ECO, ≥ 60 % in SPORT) skips that 1.2 s wait.
   Downshifts then only wait for the previous shift to finish (700 ms), so 4→3 is immediate and
   3→2 follows 0.7 s later. Example in SPORT, flooring it in 4th at 40 mph: 3rd at once, 2nd at
   0.7 s, then upshift to 3rd at 68 mph.
@@ -379,13 +391,11 @@ If the request is accepted with lockup applied, SL releases first and the gear c
 | Upshift mph at 0 / 25 / 50 / 75 / 100 % TPS | 1→2 | 2→3 | 3→4 |
 |---|---|---|---|
 | ECO (short-shift) | 11/12/18/29/34 | 19/22/34/49/64 | 30/33/46/67/93 |
-| NORMAL | 11/15/24/33/36 | 22/30/43/58/66 | 34/41/58/78/97 |
 | SPORT (hold) | 14/21/31/36/37 | 26/37/52/63/68 | 41/52/71/93/104 |
 
 With the 1999 RAV4 default ratios, the WOT points sit at about 5,000–5,700 rpm, measured as
 "locked converter" rpm (speed × ratio). At full throttle the converter slips 5–10 %, and rpm keeps
-climbing during the ~0.5 s shift. So the engine really peaks at roughly **5,400–5,800 (ECO and
-NORMAL)** and **6,000–6,200 (SPORT)**, just under a 6,300 redline. These are starting maps:
+climbing during the ~0.5 s shift. So the engine really peaks at roughly **5,400–5,800 (ECO)** and **6,000–6,200 (SPORT)**, just under a 6,300 redline. These are starting maps:
 re-check them against your calibrated `RPM_PER_MPH` and logged rpm.
 
 **Why SPORT shifts near the redline, not at 5,200–5,500.** Shifting "back into the torque band"
@@ -400,23 +410,22 @@ sounds right but is slower with these gear steps. After an upshift, the engine d
 At a given road speed, acceleration follows engine *power*. Every lower gear still makes more
 power than the next gear would, all the way to the redline, even though torque is falling past
 4,600. The power figures use the estimated curve, so they're approximate, but the gap is too big
-to flip. So for maximum acceleration SPORT holds each gear to near the redline. ECO and NORMAL
-shift earlier on purpose, for quietness and economy, not speed.
+to flip. So for maximum acceleration SPORT holds each gear to near the redline. ECO shifts
+earlier on purpose, for quietness and economy, not speed.
 
 ### 6.4 CUSTOM-MANUAL
 - **MANUAL is SPORT that you shift yourself.** It uses SPORT's lockup rules, coast unlock and
-  tip-in release whatever the ECO/SPORT switches are set to. Going back to AUTO restores the
-  switch mode. Brake downshifts and corner hold are automatic-shift features, so they don't apply:
+  tip-in release. Brake downshifts and corner hold are automatic-shift features, so they don't apply:
   in MANUAL the gear is yours.
-- The **MANUAL switch** picks it: on = CUSTOM-MANUAL, off = CUSTOM-AUTO. Flipping it never shifts
-  by itself; the gear you're in carries over.
+- The **MANUAL switch** picks it (with ECO and SPORT off). Switching between MANUAL and ECO or
+  SPORT never shifts by itself; the gear you're in carries over.
 - One click of the shifter lever gives one shift. Holding it never repeats. With MANUAL off, a
   click does nothing except show `FLIP MANUAL ON`.
 - **Forced downshift** when slowing below 22 mph (4th), 11 mph (3rd) or 5 mph (2nd), so the
   car never stops in a high gear. To allow 2nd-gear snow starts, set `MANUAL_MIN_MPH[2] = 0`.
 - **Forced upshift** at 6,200 rpm held for 150 ms (configurable).
-- Refused requests show on the display: `DENIED: OVER-REV`, `DENIED: TOO SLOW` or
-  `DENIED: SHIFTING`.
+- Refused requests show on the display as NO SHIFT with the reason: the engine would
+  over-rev, too slow for that gear, or still doing the last shift.
 
 ### 6.5 Torque-converter lockup
 SL is **applied** when all of these are true:
@@ -433,11 +442,11 @@ SL is **released immediately** when any of these happens:
 - Speed falls below the OFF speed, or TPS rises above the OFF limit.
 - The TCU leaves CUSTOM.
 
-| Lockup thresholds | ECO | NORMAL | SPORT | HOT (ATF ≥ 110 °C) |
-|---|---|---|---|---|
-| ON / OFF speed (mph) | 22 / 19 | 36 / 32 | 43 / 40 | 25 / 21 |
-| Locked-rpm floor (ON / OFF) | 1,250 / 1,100 | 1,400 / 1,250 | 1,800 / 1,650 | 1,250 / 1,100 |
-| ON / OFF TPS (%) | 45 / 55 | 55 / 65 | 35 / 45 | 85 / 95 |
+| Lockup thresholds | ECO | SPORT | HOT (ATF ≥ 110 °C) |
+|---|---|---|---|
+| ON / OFF speed (mph) | 22 / 19 | 43 / 40 | 25 / 21 |
+| Locked-rpm floor (ON / OFF) | 1,250 / 1,100 | 1,800 / 1,650 | 1,250 / 1,100 |
+| ON / OFF TPS (%) | 45 / 55 | 35 / 45 | 85 / 95 |
 
 Lockup needs **both** the speed and the locked-rpm floor (speed × gear ratio), so the floor makes
 it per gear. ECO locks 3rd from ~23 mph but 4th only from ~32 mph; it releases at ~20 and
@@ -477,32 +486,31 @@ Coast release (SPORT, §6.8) also counts as a release condition.
 |---|---|
 | `WARN_ATF_SENSOR` | ATF thermistor open or short |
 | `WARN_ATF_HOT` / `WARN_ATF_CRITICAL` | 110 °C / 125 °C |
-| `WARN_MODE_SWITCH` | ECO and SPORT both on; running NORMAL |
-| `WARN_BUTTON_STUCK` | A shifter microswitch held closed for 10 s (`SHIFTR` on the screen) |
+| `WARN_MODE_SWITCH` | Not exactly one of ECO, SPORT and MANUAL on for 1 s: the ECU shifts until it's fixed (rule 6) |
+| `WARN_BUTTON_STUCK` | A shifter microswitch held closed for 10 s (SHIFTER? on the screen) |
 | `WARN_WDT_RESET` | The last reset was caused by the watchdog |
 
-The dash pod's TCU LED shows the state:
-- **Solid:** TCU in control.
-- **Slow blink:** armed and waiting to stop before engaging.
-- **Fast blink:** fault (turn the ON/OFF switch OFF to acknowledge).
+The screen says all of this in words. The Mega's own LED (D13, inside the box) also shows it,
+for the bench: solid = TCU in control, slow blink = waiting to stop before engaging, fast blink =
+fault (turn the ON/OFF switch OFF to acknowledge).
 
 ### 6.8 Per-mode driving features
 
-| Feature | ECO | NORMAL | SPORT | What it does |
-|---|---|---|---|---|
-| Hold gears longer, shift near the top at full throttle | – | – | ✓ | The SPORT shift map (§6.3): full-throttle upshifts at about 6,000–6,200 real engine rpm, just under the redline, which is the fastest way through these gears |
-| **Corner hold** | ✓ | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own shifter clicks (in MANUAL) and the over-rev upshift always work |
-| **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 2 mph/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
-| **Early lockup** | ✓ | – | – | ECO locks the converter as soon as the engine can take it (1,250 rpm locked: ~23 mph in 3rd, ~32 in 4th) and keeps it through light throttle. A slipping converter is the biggest fuel waste in an automatic, so this is ECO's main economy gain |
-| **Highway lockup** | ✓ | ✓ | ✓ | In 4th above ~51 mph, lockup holds up to 95 % throttle, so a long fast run or a highway grade doesn't slip and heat the fluid (§6.5) |
-| **Coast lockup** | ✓ | ✓ | – | Lockup stays on when you lift, down to the rpm floor, keeping the engine turning with the wheels so the ECU's deceleration fuel cut lasts longer |
-| **Anti-lug** | ✓ | ✓ | ✓ | Below 1,600 locked rpm, more than 25 % throttle releases lockup, so early lockup never makes the engine labour |
-| **Coast unlock** | – | – | ✓ | Lockup released on a closed throttle (< 2 %, re-allowed at 5 %), so the converter is already slipping when you get back on the throttle |
-| **Throttle smoothing** | 0.8 s | 0.25 s | off | The shift map sees a smoothed throttle, so a quick stab of the pedal doesn't cause a downshift; only a sustained push does. That's what makes ECO feel calm. Flooring it (≥ 80 %) bypasses the smoothing, so kickdown is never delayed |
-| **Kickdown threshold** | 80 % | 80 % | 60 % | Throttle at or above this is a kickdown: downshifts skip the 1.2 s anti-hunting wait and the throttle smoothing |
-| **Lift-off hold** | – | – | ✓ | Snap off the throttle after a hard push (≥ 40 % → ≤ 10 % within 0.5 s) and it holds the gear instead of upshifting, for up to 4 s or until you're back on the throttle (≥ 20 %). Keeps SPORT in gear between corners. A gentle ease-off still upshifts normally. The screen shows `HOLD` |
-| **Tip-in release** | – | – | ✓ | A fast stab (≥ 150 %/s) releases lockup at once, even below SPORT's lockup throttle limit, so the converter's torque multiplication is there immediately. Not when the ATF is hot |
-| Lockup released on the brake | ✓ | ✓ | ✓ | Always (stall protection) |
+| Feature | ECO | SPORT | What it does |
+|---|---|---|---|
+| Hold gears longer, shift near the top at full throttle | – | ✓ | The SPORT shift map (§6.3): full-throttle upshifts at about 6,000–6,200 real engine rpm, just under the redline, which is the fastest way through these gears |
+| **Corner hold** | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own shifter clicks (in MANUAL) and the over-rev upshift always work |
+| **Brake downshift** | – | ✓ | Braking in a straight line (≥ 2 mph/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
+| **Early lockup** | ✓ | – | ECO locks the converter as soon as the engine can take it (1,250 rpm locked: ~23 mph in 3rd, ~32 in 4th) and keeps it through light throttle. A slipping converter is the biggest fuel waste in an automatic, so this is ECO's main economy gain |
+| **Highway lockup** | ✓ | ✓ | In 4th above ~51 mph, lockup holds up to 95 % throttle, so a long fast run or a highway grade doesn't slip and heat the fluid (§6.5) |
+| **Coast lockup** | ✓ | – | Lockup stays on when you lift, down to the rpm floor, keeping the engine turning with the wheels so the ECU's deceleration fuel cut lasts longer |
+| **Anti-lug** | ✓ | ✓ | Below 1,600 locked rpm, more than 25 % throttle releases lockup, so early lockup never makes the engine labour |
+| **Coast unlock** | – | ✓ | Lockup released on a closed throttle (< 2 %, re-allowed at 5 %), so the converter is already slipping when you get back on the throttle |
+| **Throttle smoothing** | 0.8 s | off | The shift map sees a smoothed throttle, so a quick stab of the pedal doesn't cause a downshift; only a sustained push does. That's what makes ECO feel calm. Flooring it (≥ 80 %) bypasses the smoothing, so kickdown is never delayed |
+| **Kickdown threshold** | 80 % | 60 % | Throttle at or above this is a kickdown: downshifts skip the 1.2 s anti-hunting wait and the throttle smoothing |
+| **Lift-off hold** | – | ✓ | Snap off the throttle after a hard push (≥ 40 % → ≤ 10 % within 0.5 s) and it holds the gear instead of upshifting, for up to 4 s or until you're back on the throttle (≥ 20 %). Keeps SPORT in gear between corners. A gentle ease-off still upshifts normally. The screen shows `HOLD` |
+| **Tip-in release** | – | ✓ | A fast stab (≥ 150 %/s) releases lockup at once, even below SPORT's lockup throttle limit, so the converter's torque multiplication is there immediately. Not when the ATF is hot |
+| Lockup released on the brake | ✓ | ✓ | Always (stall protection) |
 
 MANUAL behaves as SPORT for every row except the two automatic-shift features (corner hold,
 brake downshift): there, you choose the gear.
@@ -515,7 +523,6 @@ How each mode feels, overall:
 - **ECO (calm):** early upshifts, early lockup that stays on when you lift, and a 0.8 s
   smoothed throttle for shift decisions. It ignores pedal stabs and settles into the
   highest sensible gear.
-- **NORMAL:** in between, with light smoothing.
 - **SPORT (sharp):** holds gears, kicks down on any real push, releases lockup on a fast stab
   and on a closed throttle, and pre-selects the exit gear under braking.
 
@@ -566,14 +573,14 @@ On an abort, every output switches off at once.
 
 | # | Step | Pass condition |
 |---|---|---|
-| 1 | Lamp test: dash pod LED, on-board status LED and the OLED (screen inverts) for 1.5 s | You look. Recorded as CHK |
+| 1 | Screen test: the OLED inverts (and the Mega's on-board LED lights) for 1.5 s | You look. Recorded as CHECK |
 | 2 | Re-run the PBIT checks | As PBIT |
 | 3 | Relays on; pulse S1, then S2, then SL for 0.4 s each, one at a time | 0.6–1.6 A on the pulsed solenoid. Engine off means no line pressure, so the valves only click |
 | 4 | Relays off; all drivers on for 0.4 s | ≤ 0.2 A. Current here means a welded or stuck relay |
 | 5 | Prompts: SHIFTER UP, SHIFTER DOWN, ONLY ECO ON, ONLY SPORT ON, ONLY MANUAL ON, PRESS BRAKE | Detected within 8 s. "Only" means the other two mode switches off, which also catches two switches wired to one core. TEST skips a prompt (SKIP); a timeout is a FAIL. Covers the whole shifter and dash cables |
 | 6 | Watchdog: the board deliberately stops servicing the watchdog | It must reboot within 0.25 s; the results survive the reset and the test records PASS. If the screen freezes on `WATCHDOG TEST`, it failed |
 
-Results are PASS, FAIL, CHK (needs a human: lamps, or solenoids without current sense) or SKIP.
+Results show as OK, BAD, CHECK (needs a human: the screen flash, or solenoids without current sense) or SKIP.
 The full table also prints on the USB log.
 
 **TEST button:**
@@ -582,10 +589,11 @@ The full table also prints on the USB log.
 - During IBIT, a press skips the current prompt.
 
 **Screens** (rendered from the real firmware in a simulator: [`oled-screens.png`](oled-screens.png)):
-- **MAIN:** gear and mode in large text; control state (STOCK/AUTO/MAN) and lockup; BIT
-  status; active faults and warnings; the event line; speed and ATF temperature.
-- **SENSORS:** speed, rpm, throttle, ATF temperature, battery and solenoid currents.
-- **TEST:** test progress and prompts, then the summary with FAIL items first, then CHK items.
+- **MAIN:** the gear (giant digit), the mode (ECO / SPORT / MANUAL / STOCK) and one big line:
+  the trans temperature, or a headline for whatever needs you, explained in short lines beside
+  the gear (§3.7).
+- **SENSORS:** speed, engine rpm, gas pedal, trans temperature, battery and side force.
+- **TEST:** test progress and prompts, then the summary with BAD items first, then CHECK items.
 
 
 ## 8. Calibration (do this in STOCK mode first)
@@ -613,12 +621,11 @@ Log columns: `ms, ctrl, mode, gear, lockup, mph, rpm, rpm_per_mph, tps, atf, vol
 4. **ATF thermistor:** check the reading at ambient and at hot operating temperature against an
    IR thermometer on the cooler line, then adjust `ATF_R25_OHMS` and `ATF_BETA`.
 5. **Battery:** compare with a multimeter, then trim `VBAT_DIVIDER`.
-6. **Factory shift map (for tuning NORMAL):** with the switch OFF, the log also prints every
-   shift and lockup change the factory ECU makes, for example
-   `# ECU shift 2>3 at 28 mph, TPS 30 %, 2400 rpm`. Drive a mix of gentle, normal and firm
-   acceleration and collect these lines. The NORMAL map is an estimate of a stock-like schedule;
-   adjust its `UPSHIFT_MPH` row so NORMAL lands near the factory points, so NORMAL feels like
-   stock plus the extras.
+6. **Factory shift map (a reference):** with the switch OFF, the log also prints every shift and
+   lockup change the factory ECU makes, for example `# ECU shift 2>3 at 28 mph, TPS 30 %,
+   2400 rpm`. Drive a mix of gentle, normal and firm acceleration and collect these lines. Stock
+   should land between the ECO and SPORT rows of `UPSHIFT_MPH`; if your ECO shifts later than
+   stock anywhere, pull that point down.
 
 ## 9. Bring-up and test plan
 1. **Host tests:** `make test`. Every logic rule in §6, and the self-test sequence and interlocks

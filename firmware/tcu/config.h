@@ -117,6 +117,9 @@ constexpr float TEST_SUPPLY_MIN_V = 11.0f;
 //   0 = SSD1306 (most 0.96" modules)   1 = SH1106 (many 1.3" modules)
 //   2 = SSD1309 (2.42" modules)
 constexpr bool OLED_INSTALLED = true;
+// Temperatures on the screen in Fahrenheit (false = Celsius). The settings in
+// this file and the USB log stay in Celsius.
+constexpr bool TEMP_IN_F = true;
 constexpr uint8_t OLED_CHIP = 2;
 constexpr uint8_t OLED_I2C_ADDR = 0x3C;
 
@@ -128,7 +131,7 @@ constexpr uint32_t MIN_SHIFT_INTERVAL_MS = 700;   // one shift must finish first
 constexpr uint32_t AUTO_MIN_TIME_IN_GEAR_MS = 1200;  // anti-hunting dwell
 // Throttle at or above this is a kickdown: AUTO downshifts skip the dwell
 // above and only wait for the previous shift to finish (MIN_SHIFT_INTERVAL).
-constexpr float KICKDOWN_TPS[3] = {80.0f, 80.0f, 60.0f};  // per mode: ECO, NORMAL, SPORT
+constexpr float KICKDOWN_TPS[2] = {80.0f, 60.0f};  // per mode: ECO, SPORT
 constexpr uint32_t LOCKUP_RELEASE_BEFORE_SHIFT_MS = 200;
 constexpr uint32_t LOCKUP_SETTLE_AFTER_SHIFT_MS = 1500;
 constexpr uint32_t LOCKUP_MIN_OFF_MS = 1000;      // anti-chatter before re-apply
@@ -137,6 +140,11 @@ constexpr uint32_t LOCKUP_MIN_OFF_MS = 1000;      // anti-chatter before re-appl
 // without rewiring the lever's two microswitches.
 constexpr bool SWAP_SHIFT_INPUTS = false;
 constexpr uint32_t STUCK_BUTTON_MS = 10000;
+// ECO, SPORT and MANUAL: exactly one must be on. None, or more than one, for
+// longer than this hands control to the factory ECU (with a message on the
+// screen) until it's fixed. Short enough to notice, long enough to flip from
+// one switch to another without a handover.
+constexpr uint32_t MODE_SWITCH_GRACE_MS = 1000;
 
 // ------------------------------------------------------------------- safety
 constexpr float STATIONARY_MPH = 2.0f;
@@ -184,14 +192,14 @@ constexpr float HOT_LU_TPS_ON = 85.0f;
 constexpr float HOT_LU_TPS_OFF = 95.0f;
 
 // ------------------------------------------------------- per-mode lockup map
-// Index: 0 = ECO, 1 = NORMAL, 2 = SPORT.
+// Index: 0 = ECO, 1 = SPORT (MANUAL uses SPORT's).
 constexpr uint8_t LU_MIN_GEAR = 3;
-constexpr float LU_ON_MPH[3] = {22.0f, 36.0f, 43.0f};   // ECO: as early as the rpm floor allows
-constexpr float LU_OFF_MPH[3] = {19.0f, 32.0f, 40.0f};
+constexpr float LU_ON_MPH[2] = {22.0f, 43.0f};   // ECO: as early as the rpm floor allows
+constexpr float LU_OFF_MPH[2] = {19.0f, 40.0f};
 // Lockup only when the locked engine speed (mph x ratio) is at least this,
 // so it is per gear: ECO locks 3rd from ~23 mph but 4th only from ~32 mph.
 // Released LU_MIN_RPM_HYST below it.
-constexpr float LU_MIN_RPM[3] = {1250.0f, 1400.0f, 1800.0f};
+constexpr float LU_MIN_RPM[2] = {1250.0f, 1800.0f};
 constexpr float LU_MIN_RPM_HYST = 150.0f;
 // Anti-lug: below LU_LUG_RPM, lockup only at light throttle (above it the
 // converter's slip and torque multiplication do the work instead).
@@ -202,30 +210,25 @@ constexpr float LU_LUG_TPS = 25.0f;
 // stay locked: lower rpm, less fuel, and far less ATF heat. A wide-open
 // kickdown still releases it, and in SPORT (and MANUAL) a quick stab of the
 // pedal does too (tip-in release), so SPORT keeps its response.
-constexpr bool HWY_LOCKUP[3] = {true, true, true};
+constexpr bool HWY_LOCKUP[2] = {true, true};
 constexpr float HWY_LU_MIN_RPM = 2000.0f;  // locked rpm in 4th: from ~51 mph
 // A RAV4 needs most of its power to hold 90 mph (roughly half to two-thirds
 // pedal), so only a near wide-open throttle releases highway lockup.
 constexpr float HWY_LU_TPS_ON = 85.0f;
 constexpr float HWY_LU_TPS_OFF = 95.0f;
-constexpr float LU_TPS_ON[3] = {45.0f, 55.0f, 35.0f};   // SPORT drops lockup early
-constexpr float LU_TPS_OFF[3] = {55.0f, 65.0f, 45.0f};
+constexpr float LU_TPS_ON[2] = {45.0f, 35.0f};   // SPORT drops lockup early
+constexpr float LU_TPS_OFF[2] = {55.0f, 45.0f};
 
 // ------------------------------------------------------ per-mode shift maps
 // Upshift speed (mph) vs throttle at 0/25/50/75/100 %.
-// [mode][shift: 0 = 1->2, 1 = 2->3, 2 = 3->4][tps point]
+// [mode: 0 = ECO, 1 = SPORT][shift: 0 = 1->2, 1 = 2->3, 2 = 3->4][tps point]
 // WOT points sit at ~5.0-5.8k rpm with the default RPM_PER_MPH.
 constexpr uint8_t TPS_POINTS = 5;
-constexpr float UPSHIFT_MPH[3][3][TPS_POINTS] = {
+constexpr float UPSHIFT_MPH[2][3][TPS_POINTS] = {
     {  // ECO: short-shift
         {11.0f, 12.0f, 18.0f, 29.0f, 34.0f},
         {19.0f, 22.0f, 34.0f, 49.0f, 64.0f},
         {30.0f, 33.0f, 46.0f, 67.0f, 93.0f},
-    },
-    {  // NORMAL
-        {11.0f, 15.0f, 24.0f, 33.0f, 36.0f},
-        {22.0f, 30.0f, 43.0f, 58.0f, 66.0f},
-        {34.0f, 41.0f, 58.0f, 78.0f, 97.0f},
     },
     {  // SPORT: hold gears
         {14.0f, 21.0f, 31.0f, 36.0f, 37.0f},
@@ -234,18 +237,23 @@ constexpr float UPSHIFT_MPH[3][3][TPS_POINTS] = {
     },
 };
 // Downshift = upshift(tps) - hysteresis. Small hysteresis = eager kickdown.
-constexpr float DOWNSHIFT_HYST_MPH[3] = {7.0f, 7.5f, 4.5f};
+constexpr float DOWNSHIFT_HYST_MPH[2] = {7.0f, 4.5f};
 constexpr float MIN_DOWNSHIFT_MPH = 2.0f;
 
 // ----------------------------------------------- per-mode driving features
-// Index: 0 = ECO, 1 = NORMAL, 2 = SPORT.
+// Index: 0 = ECO, 1 = SPORT (MANUAL uses SPORT's).
 
 // Corner hold: no automatic shifts (up or down, kickdown included) while the
 // car is cornering, so a shift can't unsettle it mid-turn. Manual shifts and
 // the over-rev upshift still work. Lateral g comes from the gyro's yaw rate x
 // road speed (MPU-6050 on I2C). No gyro, or no bias learned yet = no hold.
 constexpr bool IMU_INSTALLED = true;
-constexpr bool CORNER_HOLD[3] = {true, true, true};
+// Which of the gyro's axes points up in the car (the axes are printed on the
+// GY-521 board): 2 = Z, the TCU box bolted flat on its floor (default);
+// 0 = X or 1 = Y, the box bolted on its side, e.g. to the kick panel.
+// Left/right doesn't matter: corner hold uses the size of the side force.
+constexpr uint8_t GYRO_AXIS = 2;
+constexpr bool CORNER_HOLD[2] = {true, true};
 constexpr float CORNER_ENTER_G = 0.25f;
 constexpr float CORNER_EXIT_G = 0.12f;
 constexpr uint32_t CORNER_EXIT_MS = 700;          // straight this long before shifting resumes
@@ -258,8 +266,8 @@ constexpr float CORNER_MIN_MPH = 12.0f;
 // opens the throttle or BRAKE_HOLD_MS pass after releasing the brake.
 // Note: in D, 1st and 2nd freewheel on one-way clutches, so only 4->3 adds
 // engine braking; lower steps just pre-select the exit gear.
-constexpr bool BRAKE_DOWNSHIFT[3] = {false, false, true};
-constexpr float BRAKE_DOWNSHIFT_RPM[3] = {0.0f, 0.0f, 4200.0f};
+constexpr bool BRAKE_DOWNSHIFT[2] = {false, true};
+constexpr float BRAKE_DOWNSHIFT_RPM[2] = {0.0f, 4200.0f};
 constexpr float BRAKE_DOWNSHIFT_MIN_DECEL = 2.0f;  // mph per second
 constexpr uint32_t BRAKE_HOLD_MS = 3000;
 constexpr float BRAKE_HOLD_TPS = 20.0f;
@@ -267,7 +275,7 @@ constexpr float BRAKE_HOLD_TPS = 20.0f;
 // Coast unlock: release the converter clutch on a closed throttle, so the
 // converter is already slipping (multiplying torque) when you get back on it.
 // ECO keeps lockup on the coast for fuel cut.
-constexpr bool LU_COAST_RELEASE[3] = {false, false, true};
+constexpr bool LU_COAST_RELEASE[2] = {false, true};
 constexpr float COAST_TPS_OFF = 2.0f;             // release below this throttle
 constexpr float COAST_TPS_ON = 5.0f;              // allow re-lock above this
 
@@ -275,13 +283,13 @@ constexpr float COAST_TPS_ON = 5.0f;              // allow re-lock above this
 // throttle with this time constant, so a quick stab of the pedal doesn't
 // cause a downshift; only a sustained push does. A kickdown (>= KICKDOWN_TPS)
 // always uses the raw throttle, so it is never delayed.
-constexpr uint32_t SHIFT_TPS_SMOOTH_MS[3] = {800, 250, 0};
+constexpr uint32_t SHIFT_TPS_SMOOTH_MS[2] = {800, 0};
 
 // Lift-off hold: after a hard push (>= LIFT_FROM_TPS), lifting quickly
 // (to <= LIFT_TO_TPS within LIFT_WINDOW_MS) holds the gear instead of
 // upshifting, for up to LIFT_HOLD_MS or until the throttle comes back. Keeps
 // SPORT in gear between corners instead of short-shifting on every lift.
-constexpr bool LIFT_HOLD[3] = {false, false, true};
+constexpr bool LIFT_HOLD[2] = {false, true};
 constexpr float LIFT_FROM_TPS = 40.0f;
 constexpr float LIFT_TO_TPS = 10.0f;
 constexpr uint32_t LIFT_WINDOW_MS = 500;
@@ -290,7 +298,7 @@ constexpr float LIFT_RELEASE_TPS = 20.0f;
 
 // Tip-in release: a fast stab of the pedal releases lockup at once, even
 // below the mode's TPS limit, so the converter multiplies torque right away.
-constexpr bool LU_TIPIN_RELEASE[3] = {false, false, true};
+constexpr bool LU_TIPIN_RELEASE[2] = {false, true};
 constexpr float TIPIN_RATE_PCT_PER_S = 150.0f;    // e.g. +15 % throttle within 0.1 s
 
 }  // namespace cfg

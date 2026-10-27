@@ -8,10 +8,13 @@ namespace {
 
 inline bool elapsed(uint32_t now, uint32_t since, uint32_t ms) { return (uint32_t)(now - since) >= ms; }
 
+// Plain names, shown on the screen and in the USB log. At most 10 characters
+// for the ones that show a value (battery, pedal, probe, solenoids, relays).
 const char* const kNames[T_COUNT] = {
-    "SUPPLY", "TPS",     "ATF SENS", "GYRO",     "SWITCHES", "CALIBRATN", "LAST RST", "LAMPS",    "SOL S1",
-    "SOL S2", "SOL SL",  "RELAY REL", "SHIFT UP", "SHIFT DN",   "ECO SW",   "SPORT SW", "MANUAL SW", "BRAKE SW",
-    "WATCHDOG",
+    "BATTERY",    "GAS PEDAL",  "TEMP PROBE", "GYRO",          "SHIFTER",       "CALIBRATED",
+    "RESTARTS",   "SCREEN",     "SOLENOID 1", "SOLENOID 2",    "LOCKUP SOL",    "RELAYS",
+    "SHIFT UP",   "SHIFT DOWN", "ECO SWITCH", "SPORT SWITCH",  "MANUAL SWITCH", "BRAKE",
+    "SAFETY RESET",
 };
 
 constexpr uint8_t kPromptCount = PR_BRAKE - PR_UP + 1;

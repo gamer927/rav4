@@ -1,6 +1,7 @@
 // MPU-6050 gyro (GY-521 module) on the shared I2C bus, used only for yaw
 // rate. Lateral g is then yaw rate x road speed, which doesn't care how the
-// module is tilted, only that its Z axis is roughly vertical.
+// module is tilted, only that the axis it reads (cfg::GYRO_AXIS) is roughly
+// vertical in the car.
 #pragma once
 #include <stdint.h>
 

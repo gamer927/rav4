@@ -86,7 +86,7 @@ ax.text(12, 15.3, "W-numbers match the wire list in docs/03-wiring-guide.md.  Ca
         fontsize=11, ha="center", va="top", color="#444444")
 
 zone(0.2, 0.3, 7.0, 14.6, "1999 RAV4 (factory)", "#f6f1e7")
-zone(7.4, 0.3, 10.2, 14.6, "TCU box (behind the glovebox)", "#eaf2fb")
+zone(7.4, 0.3, 10.2, 14.6, "TCU box (under the passenger dash)", "#eaf2fb")
 zone(17.9, 0.3, 5.9, 14.6, "Dash pod & shifter", "#ecf7ea")
 
 # ------------------------------------------------------------------ TCU connectors
@@ -172,9 +172,9 @@ box(BX, 3.2, 3.9, 4.65, "Solenoid channel x3",
      "(Detail A in the guide)"], line_size=8.5)
 box(BX, 0.6, 3.9, 2.25, "ATF probe input",
     ["DQ -> 100 ohm -> D33", "4.7k pull-up DQ -> 5V", "5.1 V TVS to GND"], line_size=8.5)
-box(13.1, 0.6, 2.7, 2.3, "MPU-6050 gyro", ["GY-521 board,", "mounted FLAT", "I2C addr 0x68"], line_size=8.5)
+box(13.1, 0.6, 2.7, 2.3, "MPU-6050 gyro", ["GY-521 board,", "on the logic board", "I2C addr 0x68"], line_size=8.5)
 
-mega_pins = ["D2  VSS (int)", "D3  tach (int)", "D6  relay drv", "D7  status LED", "D8  S1 drv",
+mega_pins = ["D2  VSS (int)", "D3  tach (int)", "D6  relay drv", "D8  S1 drv",
              "D9  S2 drv", "D10 SL drv", "D20 SDA", "D21 SCL", "D22 shift up", "D23 shift dn", "D24 ECO",
              "D25 SPORT", "D26 ON/OFF", "D27 brake", "D28 lever D", "D29 ECU S1", "D30 ECU S2",
              "D31 ECU SL", "D32 TEST", "D33 ATF DQ", "D34 MANUAL", "A0  TPS (VTA)", "A1  TPS ref (E2)", "A3  battery", "A4  S1 amps",
@@ -200,11 +200,11 @@ label(12.85, 2.6, "D33", C["probe"])
 wire([(14.4, 2.9), (14.4, 3.3)], C["i2c"], lw=2)
 
 # ------------------------------------------------------------------ dash pod & shifter
-X4 = connector(18.0, 13.9, "X4 dash", ["ECO", "SPORT", "MANUAL", "TEST", "ON/OFF", "LED+", "GND"])
+X4 = connector(18.0, 13.9, "X4 dash", ["ECO", "SPORT", "MANUAL", "TEST", "ON/OFF", "GND"])
 X7 = connector(18.0, 8.3, "X7 shifter", ["UP", "DOWN", "GND"])
 X5 = connector(18.0, 5.5, "X5 screen", ["5V", "GND", "SDA", "SCL"])
 wire([(17.3, 11.9), (18.0, 11.9)], C["console"], lw=2)
-label(17.62, 11.92, "D7,24-26,32,34", C["console"])
+label(17.62, 11.92, "D24-26,32,34", C["console"])
 wire([(17.3, 7.9), (18.0, 7.9)], C["console"], lw=2)
 label(17.65, 7.92, "D22 D23", C["console"])
 wire([(17.3, 5.0), (18.0, 5.0)], C["i2c"], lw=2)
@@ -212,14 +212,14 @@ label(17.65, 5.02, "D20 D21", C["i2c"])
 
 box(19.7, 9.85, 3.9, 4.4, "Dash pod: switches",
     ["ECO     toggle (SPST)", "SPORT   toggle (SPST)", "MANUAL  toggle (SPST)", "TEST    push button",
-     "ON/OFF  toggle + cover", "LED     status", "every control switches", "to the common GND wire"],
+     "ON/OFF  toggle + cover", "exactly one of ECO,", "SPORT, MANUAL on", "all switch to GND"],
     line_size=9)
-for i, n in enumerate(["ECO", "SPORT", "MANUAL", "TEST", "ON/OFF", "LED+", "GND"]):
+for i, n in enumerate(["ECO", "SPORT", "MANUAL", "TEST", "ON/OFF", "GND"]):
     _, y, rx = X4[n]
     color = C["ground"] if n == "GND" else C["console"]
     wire([(rx, y), (19.7, y)], color, lw=1.8)
     label(19.15, y, "C%d %s" % (i + 1, n), color)
-ax.text(18.85, 11.15, "W20: 8-core shielded\n(1 spare core)", fontsize=8.5,
+ax.text(18.85, 11.15, "W20: 8-core shielded\n(2 spare cores)", fontsize=8.5,
         color=C["console"], ha="center", va="top", fontweight="bold")
 
 box(19.7, 6.85, 3.9, 1.75, "Shifter base", ["sequential lever,", "two microswitches (NO)", "COM -> GND"],

@@ -40,11 +40,12 @@ export_part tcu_enclosure lid
 
 if command -v xvfb-run >/dev/null 2>&1; then
     tmp=$(mktemp -d)
-    xvfb-run -a openscad -o "$tmp/pod.png" -D 'part="assembly"' --render --imgsize=900,750 \
-        --camera=-90,-230,120,105,60,20 --viewall --autocenter hardware/dash_pod.scad
-    xvfb-run -a openscad -o "$tmp/shift.png" -D 'part="assembly"' --render --imgsize=900,750 \
-        --camera=-80,-200,200,75,50,60 --viewall --autocenter hardware/shifter_base.scad
-    xvfb-run -a openscad -o "$tmp/tcu.png" -D 'part="assembly"' --render --imgsize=900,750 \
+    # Preview mode (no --render) keeps the colours: the real shifter shows green and black.
+    xvfb-run -a openscad -o "$tmp/pod.png" -D 'part="assembly"' --colorscheme=Tomorrow --imgsize=900,750 \
+        --camera=-90,-230,120,100,60,20 --viewall --autocenter hardware/dash_pod.scad
+    xvfb-run -a openscad -o "$tmp/shift.png" -D 'part="assembly"' --colorscheme=Tomorrow --imgsize=900,750 \
+        --camera=-260,-300,260,75,50,140 --viewall --autocenter hardware/shifter_base.scad
+    xvfb-run -a openscad -o "$tmp/tcu.png" -D 'part="assembly"' --colorscheme=Tomorrow --imgsize=900,750 \
         --camera=-80,-180,260,110,75,20 --viewall --autocenter hardware/tcu_enclosure.scad
     xvfb-run -a openscad -o hardware/fit-tcu.png -D 'part="fit"' --imgsize=1100,850 --colorscheme=Tomorrow \
         --camera=-60,-200,300,110,85,15 --viewall --autocenter hardware/tcu_enclosure.scad
@@ -55,8 +56,8 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 d = sys.argv[1]
 imgs = [Image.open(d + f) for f in ("/pod.png", "/shift.png", "/tcu.png")]
-titles = ["1. Dash pod (on the dash or ceiling)", "2. Shifter base (centre console)",
-          "3. TCU box (behind the glovebox)"]
+titles = ["1. Dash pod (dash top)", "2. Shifter base + Beavis shifter (console)",
+          "3. TCU box (under the passenger dash)"]
 w = imgs[0].width
 out = Image.new("RGB", (w * 3, imgs[0].height + 50), "white")
 draw = ImageDraw.Draw(out)
@@ -84,8 +85,8 @@ PY
         xvfb-run -a openscad -o "docs/build/pod-$n.png" -D 'part="build"' -D "bstep=$n" --imgsize=900,700 \
             --colorscheme=Tomorrow --camera=$cam --viewall --autocenter hardware/dash_pod.scad
     done
-    xvfb-run -a openscad -o docs/build/shifter.png -D 'part="assembly"' --imgsize=900,700 \
-        --colorscheme=Tomorrow --camera=-80,-200,200,75,50,60 --viewall --autocenter hardware/shifter_base.scad
+    xvfb-run -a openscad -o docs/build/shifter.png -D 'part="assembly"' --imgsize=900,900 \
+        --colorscheme=Tomorrow --camera=-260,-300,260,75,50,140 --viewall --autocenter hardware/shifter_base.scad
     python3 - <<'PY'
 import glob
 from PIL import Image

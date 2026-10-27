@@ -481,18 +481,17 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 - [ ] **X4d**: C4 TEST screw terminal → col 13, row 1. X4-4: C4 TEST
 - [ ] **X4e**: C5 ON/OFF screw terminal → col 15, row 1. X4-5: C5 ON/OFF
-- [ ] **X4f**: C6 LED screw terminal → col 17, row 1. X4-6: C6 LED
-- [ ] **X4g**: C7 GND screw terminal → col 19, row 1. X4-7: C7 GND
+- [ ] **X4f**: C6 GND screw terminal → col 17, row 1. X4-6: C6 GND
 - [ ] **X5a**: 5V screw terminal → col 21, row 1. X5-1 screen
 - [ ] **X5b**: GND screw terminal → col 23, row 1. X5-2 screen
+- [ ] **X5c**: SDA screw terminal → col 25, row 1. X5-3 screen
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### L1.3 — Place 6 parts
+#### L1.3 — Place 5 parts
 
 ![L1.3](build/logic-L1-3.png)
 
-- [ ] **X5c**: SDA screw terminal → col 25, row 1. X5-3 screen
 - [ ] **X5d**: SCL screw terminal → col 27, row 1. X5-4 screen
 - [ ] **X6a**: 5V screw terminal → col 29, row 1. X6-1 ATF probe
 - [ ] **X6b**: GND screw terminal → col 31, row 1. X6-2 ATF probe
@@ -506,7 +505,7 @@ Push the legs through, bend them out a little underneath, solder, snip.
 ![L1.4](build/logic-L1-4.png)
 
 - [ ] **1** red 22 AWG: **JB** pin 1 → **X5a** (5V) → **X6a** (5V)
-- [ ] **2** black 22 AWG: **JB** pin 2 → **X7c** (GND) → **X4g** (C7 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
+- [ ] **2** black 22 AWG: **JB** pin 2 → **X7c** (GND) → **X4f** (C6 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
 - [ ] **3** blue 22 AWG: **JB** pin 11 → **X5c** (SDA)
 - [ ] **4** blue 22 AWG: **JB** pin 12 → **X5d** (SCL)
 
@@ -620,27 +619,24 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **4** black 22 AWG: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **DL7** plain end → **CF7** at col 15, row 16 → **CF6** at col 13, row 16 → **CF5** at col 11, row 16 → **CF4** at col 9, row 16 → **CF3** at col 7, row 16 → **CF2** at col 3, row 16 → **CF1** at col 1, row 16
 
 <!-- STEP L3 -->
-#### L3.1 — Place 4 parts
+#### L3.1 — Place 3 parts
 
 ![L3.1](build/logic-L3-1.png)
 
-- [ ] **RL**: 330 resistor (bands: orange-orange-black-black-brown) → col 17, row 4 and col 17, row 8. Status LED
 - [ ] **RA1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 29, row 5 and col 29, row 9. ATF pull-up
 - [ ] **RA2**: 100 resistor (bands: brown-black-black-black-brown) → col 31, row 5 and col 31, row 9. ATF series
 - [ ] **ZA**: 1N4733A 5.1 V diode → col 33, row 5 and col 33, row 9. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### L3.2 — Solder 6 wires (bottom side)
+#### L3.2 — Solder 4 wires (bottom side)
 
 ![L3.2](build/logic-L3-2.png)
 
-- [ ] **1** green 22 AWG: **JB** pin 9 → **RL** at col 17, row 8
-- [ ] **2** blue 22 AWG: **RL** at col 17, row 4 → **X4f** (C6 LED)
-- [ ] **3** green 22 AWG: **X6c** (DQ) → **RA1** at col 29, row 5 → **RA2** at col 31, row 5 → **ZA** band end
-- [ ] **4** blue 22 AWG: **RA2** at col 31, row 9 → **JB** pin 10
-- [ ] **5** red 22 AWG: **X6a** (5V) → **RA1** at col 29, row 9
-- [ ] **6** black 22 AWG: **X6b** (GND) → **ZA** plain end
+- [ ] **1** green 22 AWG: **X6c** (DQ) → **RA1** at col 29, row 5 → **RA2** at col 31, row 5 → **ZA** band end
+- [ ] **2** blue 22 AWG: **RA2** at col 31, row 9 → **JB** pin 10
+- [ ] **3** red 22 AWG: **X6a** (5V) → **RA1** at col 29, row 9
+- [ ] **4** black 22 AWG: **X6b** (GND) → **ZA** plain end
 
 <!-- STEP L4 -->
 #### L4.1 — Place 1 part
@@ -698,7 +694,6 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] B6 → **D25** (SPORT)
 - [ ] B7 → **D26** (ON/OFF)
 - [ ] B8 → **D32** (TEST)
-- [ ] B9 → **D7** (LED)
 - [ ] B10 → **D33** (ATF probe)
 - [ ] B11 → **D20 (SDA)** (SDA)
 - [ ] B12 → **D21 (SCL)** (SCL)
@@ -706,4 +701,4 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] B14 → **GND** (GND)
 - [ ] B15 → **D34** (MANUAL)
 
-Pins A25, A26 and B16 stay empty.
+Pins A25, A26, B9 and B16 stay empty.

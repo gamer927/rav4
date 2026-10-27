@@ -27,17 +27,18 @@ Follow this guide alongside the two diagrams:
 The system is three separate pieces, each in its own 3D-printed housing
 ([hardware/README.md](../hardware/README.md)):
 
-1. **Dash pod**: screen and all the switches, on top of the dash or on the ceiling.
+1. **Dash pod**: the screen and all five switches, on top of the dash (driver's side).
 2. **Shifter base**: the sequential shifter lever, on the centre console next to the gear lever.
-3. **TCU box**: the electronics, behind the glovebox. It has no switches. The round things on
-   its front wall are cable glands, one per cable, each with its name above it.
+3. **TCU box**: the electronics, under the passenger side of the dash (§9). It has no switches.
+   The round things on its front wall are cable glands, one per cable, each with its name above
+   it.
 
 | Connector (at the TCU) | Goes to | Wires |
 |---|---|---|
 | **X1 power** (3-pin) | Fuse box (ignition-switched 12 V), body ground | W1–W3 |
 | **X2 solenoids** (6-pin) | The S1, S2, SL wires, cut between the ECM and the transaxle | W4–W9 |
 | **X3 signals** (8-pin, 7 used) | Taps: lever "D", brake, ECM ground, speed, tach, throttle, throttle ground | W10–W16 |
-| **X4 dash** (7-pin) | Dash pod: ECO, SPORT, MANUAL, TEST and ON/OFF switches, status LED | W20 (C1–C7) |
+| **X4 dash** (6-pin) | Dash pod: ECO, SPORT, MANUAL, TEST and ON/OFF switches | W20 (C1–C6) |
 | **X5 screen** (4-pin) | 2.42" OLED screen in the dash pod | W21 |
 | **X6 ATF** (3-pin) | Temperature probe in the cooler line | W17–W19 |
 | **X7 shifter** (3-pin) | The sequential shifter lever's two microswitches, in the shifter base | W22 |
@@ -57,7 +58,7 @@ are in the EWD. Label both ends of every wire with its W-number (heat-shrink mar
 | Colour | Use | Size |
 |---|---|---|
 | Red | +12 V (W1, W2) and +5 V (W17, screen 5V) | W1 16 AWG, others 18–22 AWG |
-| Black | Ground (W3, W18, screen GND, C7, shifter GND) | W3 16 AWG, others 18–22 AWG |
+| Black | Ground (W3, W18, screen GND, C6, shifter GND) | W3 16 AWG, others 18–22 AWG |
 | Black/white | ECM ground reference E1 (W12) | 18 AWG |
 | Yellow | S1/S2/SL, **ECM side** (W4–W6) | 18 AWG |
 | Orange | S1/S2/SL, **solenoid side** (W7–W9) | 18 AWG |
@@ -103,7 +104,7 @@ Ground every cable shield **at the TCU end only**.
 | 7 | W16 | Throttle ground **E2** | 10k series, 100 nF, clamp → A1 (measured, *not* tied to TCU ground) |
 | 8 | – | spare | |
 
-**X4 dash** (W20, 8-core; cut the eighth core back and tape it)
+**X4 dash** (W20, 8-core; cut the two spare cores back and tape them)
 
 | Pin | Core | Signal | Mega pin |
 |---|---|---|---|
@@ -112,11 +113,11 @@ Ground every cable shield **at the TCU end only**.
 | 3 | C3 | MANUAL switch | D34 |
 | 4 | C4 | TEST button | D32 |
 | 5 | C5 | ON/OFF switch | D26 |
-| 6 | C6 | Status LED anode (D7 → 330 Ω → C6) | D7 |
-| 7 | C7 | Common ground: the other side of every switch, and the LED cathode | GND |
+| 6 | C6 | Common ground: the other side of every switch | GND |
 
-Each control switches its core to C7 (ground). Closed means active. A broken wire reads as off:
-ON/OFF falls back to STOCK, ECO/SPORT fall back to NORMAL, and MANUAL falls back to AUTO.
+Each control switches its core to C6 (ground). Closed means active. A broken wire reads as off:
+ON/OFF falls back to STOCK, and a broken ECO, SPORT or MANUAL wire leaves no mode on, which also
+means STOCK (the screen says PICK MODE). Exactly one of ECO, SPORT and MANUAL must be on.
 
 **X7 shifter** (W22, 3-core): 1 = UP (upshift microswitch NO, D22), 2 = DOWN (downshift
 microswitch NO, D23), 3 = GND (both microswitches' COM).
@@ -147,7 +148,7 @@ The **MPU-6050 gyro** sits inside the box on the same I²C bus (5 V, GND, D20, D
 | W15 | ECM **VTA** | X3-6 | Shielded pair with W16 | Tap |
 | W16 | ECM **E2** | X3-7 | Shielded pair with W15 | Tap |
 | W17–W19 | DS18B20 probe red / black / yellow | X6-1/2/3 | Brown 3-core shielded | Through a firewall grommet |
-| W20 | Dash pod switches and LED | X4 | Green 8-core shielded | Behind the dash trim (dash top) or up the A-pillar trim (ceiling), away from the airbag |
+| W20 | Dash pod switches | X4 | Green 8-core shielded | Behind the dash trim, away from the passenger airbag |
 | W21 | Dash pod screen | X5 | Purple 4-core shielded | Same route as W20; 2.5 m maximum |
 | W22 | Shifter base | X7 | Grey 3-core shielded | Under the console trim, away from the handbrake and seat rails |
 
@@ -205,7 +206,7 @@ zener clamp lets the solenoid release quickly, like the ECM's own driver.
 +5V ── 2.2k ──┬── 1k ──┬── Mega pin
               │        ├── 100 nF ── GND
               │        └── BAT85 to 5V, BAT85 from GND (clamps)
-       X4 / X7 core ── switch ── GND (X4-7 / X7-3)
+       X4 / X7 core ── switch ── GND (X4-6 / X7-3)
 ```
 
 **12 V opto input** (brake D27, lever D28, ECU sense D29–D31, tach D3)
@@ -241,7 +242,6 @@ VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
 
 **Relay coils** (D6): `D6 ── ULN2803 IN1-3 (10k pull-down); OUT1-3 ── K1/K2/K3 coil (−); coil (+) ── +12 V DRV; ULN COM ── +12 V DRV`
 
-**Status LED** (D7): `D7 ── 330 Ω ── X4-6 (C6) ── LED ── X4-7 (C7)`
 
 ## 7. Build order
 
@@ -266,15 +266,26 @@ in order, with pictures.
 
 ## 8. Sequential shifter lever
 
-Any sim-racing style sequential lever with **two microswitches** works. This project is set up
-for the DIY build in
-[Beavis Motorsport's DIY sequential shifter guide](https://www.beavismotorsport.com/sim-racing/diy-sequential-shifter/)
-(printed parts: Thingiverse [4557771](https://www.thingiverse.com/thing:4557771)). It bolts onto
-the [shifter base](../hardware/README.md#shifter-base) (4 × M6, 116 × 74 mm), which sits on the
+Any sim-racing style sequential lever with **two microswitches** works. This project uses the
+**DIY Racing Sim Sequential Shifter by bbeavis (Beavis Motorsport)**: build guide at
+[beavismotorsport.com](https://beavismotorsport.com/sim-racing/diy-sequential-shifter/), printed
+parts on Thingiverse [4557771](https://www.thingiverse.com/thing:4557771) and
+[Printables](https://www.printables.com/model/371496-diy-racing-sim-sequential-shifter). It's
+shared under CC BY-NC; its STLs, credit and license are in
+[`hardware/beavis_shifter/`](../hardware/beavis_shifter/README.md). It bolts onto the
+[shifter base](../hardware/README.md#shifter-base) (4 × M6, 116 × 74 mm), which sits on the
 centre console next to the factory gear lever and has its own cable (W22) to the TCU box.
+
+![The real shifter on the shifter base](build/shifter.png)
 
 - Build the lever as the guide describes, but **print it in PETG or ASA, not PLA**: PLA goes
   soft in a hot car.
+- **Drill its four mounting holes to 6.5 mm.** They print at 6.0 mm, too tight for M6 bolts.
+- **Point the long side front-to-back.** The lever swings along the body's long side.
+- **It's tall:** about 33 cm from the base to the top of the printed knob (35 cm above the
+  console). Before you drill anything, hold it in place and check it clears the dash, the radio
+  and your arm. A shorter M10 stud or a lower knob brings it down a few centimetres.
+- Leave out the bottom cover: the shifter base's deck closes the pocket underneath instead.
 - Use its two **V-155-1C25 roller limit switches**, and leave out the Arduino Pro Micro. That
   board turns the switches into a USB game controller for a PC; the TCU reads the switches
   directly.
@@ -283,9 +294,10 @@ centre console next to the factory gear lever and has its own cable (W22) to the
   - Downshift switch NO → X7-2 (DOWN).
   - Both switches' COM → X7-3 (GND).
   - Leave each switch's NC terminal unconnected.
-- **The lever only shifts with the MANUAL switch on.** With it off, the TCU shifts by itself and
-  a click on the lever just shows FLIP MANUAL ON. Flipping MANUAL on or off never shifts by
-  itself: the TCU keeps the gear you're in, and you (or the AUTO map) shift from there.
+- **The lever only shifts with the MANUAL switch on** (and ECO and SPORT off). In ECO or SPORT
+  the TCU shifts by itself, and a click on the lever just shows MANUAL OFF on the screen.
+  Switching between MANUAL and ECO or SPORT never shifts by itself: the TCU keeps the gear
+  you're in, and you (or the map) shift from there.
 - To change between "pull = upshift" (rally style) and "push = upshift", set
   `SWAP_SHIFT_INPUTS` in `config.h`. You don't need to rewire.
 - **In the car:** bolt the base where the lever can't foul the factory gear lever, your knee,
@@ -299,46 +311,72 @@ centre console next to the factory gear lever and has its own cable (W22) to the
 
 | Part | Where | Why / how |
 |---|---|---|
-| **TCU box** ([3D-printed](../hardware/README.md#tcu-enclosure)) | Behind the glovebox, bolted **flat** to the dash's metal structure or a steel bracket | Close to the ECM. Flat and rigid because the gyro is inside it. Mounting needs four bolts, not Velcro |
-| **Gyro (MPU-6050)** | **Inside the TCU box**, on its two standoffs, chip up | See below |
+| **TCU box** ([3D-printed](../hardware/README.md#tcu-enclosure)) | Under the passenger side of the dash, below the glovebox, bolted **flat** to metal | See below |
+| **Gyro (MPU-6050)** | **Inside the TCU box**, soldered flat on the logic board | See below |
 | **Dummy-load heatsink** | Under the dash on metal, in moving air, ≥ 50 mm from plastic, wiring and the TCU box | ~14 W per resistor. Never inside the box |
-| **Dash pod** (screen, switches, LED) | On top of the dash on the driver's side, or on the ceiling above the windscreen | See below. Within 2.5 m of cable from the box, for the screen's I²C cable |
-| **Shifter base** (sequential lever) | Centre console, next to the factory gear lever | §8. Bolted down through its bottom plate |
+| **Dash pod** (screen and switches) | On top of the dash, driver's side | See below. Within 2.5 m of cable from the box, for the screen's I²C cable |
+| **Shifter base** (sequential lever) | Centre console, next to the factory gear lever, long side front-to-back | §8. Bolted down through its bottom plate |
 | **ATF probe** | Engine bay, in the hot ATF cooler hose | See below |
 | **Fuse tap** | Cabin fuse box, an IG (ignition-switched) fuse | §5 |
 
+### Where the TCU box goes
+
+It doesn't have to hide behind the glovebox. What it needs:
+
+1. **Inside the cabin, dry.** Not the engine bay (heat, water), and not the floor (wet shoes,
+   carpet shampoo, and feet).
+2. **Close to the ECM.** The three solenoid wires are cut at the ECM, and five signal wires are
+   tapped there; short runs keep them tidy and away from interference. Find the ECM with the RM's
+   "location of components" page (§5).
+3. **Bolted rigidly to metal**, because the gyro is inside: four bolts, not Velcro or tape.
+4. **Within 2.5 m of cable of the dash pod**, for the screen.
+5. **Room around it:** 244 × 178 × 51 mm with its mounting ears, plus about 10 cm in front for the
+   cables to bend out of the glands.
+
+**Best spot: under the passenger side of the dash, below the glovebox**, bolted to the metal dash
+support or a steel bracket hung from it. You can see and reach it by kneeling at the passenger
+footwell, without taking anything apart, and it's as close to the ECM as behind the glovebox.
+Check it clears the passenger's knees and the heater ducts. If there's no room there, behind the
+glovebox works too; it's just slower to reach.
+
+**On its side is fine.** If the best flat spot is the vertical kick panel, bolt the box on its
+side and set `GYRO_AXIS` in `config.h` to whichever axis printed on the gyro board now points up
+(X = 0, Y = 1). The relays and boards don't care which way up they are.
+
+**Laptop access without reaching the box:** a 50 cm USB-B panel-mount extension (optional on the
+shopping list) from the box's USB socket to the inside of the glovebox. Plug the laptop in there
+to log and calibrate.
+
+Avoid: under a seat (wet floor, seat rails, far from the ECM), the trunk (too far), and anywhere
+near the heater core outlets.
+
 ### The dash pod
 
-The pod hangs on a hinge from a small mount, so it stays upright and tilts to face you whichever
-way the mount is fixed. Tighten the hinge bolt's nyloc nut until the pod holds its angle over
-bumps.
+The pod hangs on a hinge from a small mount and tilts to face you. Tighten the hinge bolt's nyloc
+nut until the pod holds its angle over bumps.
 
-- **Dash top:** on the driver's side, where it doesn't block your view of the road or the
+- **On the dash top, driver's side**, where it doesn't block your view of the road or the
   gauges. **Never on or near the passenger airbag door** in the right-hand half of the dash top:
   an airbag would throw it at someone. Fix the mount with two screws into the dash pad's frame,
   or with 3M VHB tape on a clean, flat spot.
-- **Ceiling:** turn the mount upside down so its arm hangs down. The headliner alone won't hold
-  it. Screw the base through the headliner into something solid: one of the sun-visor bracket
-  screw points (with longer screws) or the metal roof bow above the windscreen. Keep it out of
-  the windscreen's view zone and clear of your head on bumps.
-- **Cables:** both cables (W20 switches, W21 screen) leave from the pod's back. For the dash top,
-  tuck them down behind the dash trim. For the ceiling, run them under the headliner edge and
-  down the passenger A-pillar trim. Keep the screen cable under 2.5 m: the firmware runs the
+- **Cables:** both cables (W20 switches, W21 screen) leave from the pod's back. Tuck them down
+  behind the dash trim to the box. Keep the screen cable under 2.5 m: the firmware runs the
   screen at the standard 100 kHz I²C speed, which a shielded cable that long handles.
 
 ### The gyro
 
-- It sits **inside the TCU box**. The box's floor has two standoffs for a GY-521 board and the
-  words "GYRO: CHIP UP, FLAT". It shares the I²C bus with the screen, so it needs no extra cable.
-- **Flat matters; where doesn't.** The firmware only uses the yaw rate (how fast the car is
-  turning), and every point of a rigid car turns at the same rate. Behind the glovebox reads the
-  same as the middle of the car. A tilt only scales the reading by cos(tilt): 5° costs
-  0.4 %, 15° costs 3.4 %. Check the box with a phone level app as you bolt it in.
+- It sits **inside the TCU box**, soldered flat on the logic board. It shares the I²C bus with
+  the screen, so it needs no extra cable.
+- **Level matters; where doesn't.** The firmware only uses the yaw rate (how fast the car is
+  turning), and every point of a rigid car turns at the same rate. Under the dash reads the
+  same as the middle of the car. The axis it reads (`GYRO_AXIS`: Z for a flat box) must point
+  up; a tilt only scales the reading by cos(tilt): 5° costs 0.4 %, 15° costs 3.4 %. Check the
+  box with a phone level app as you bolt it in.
 - **Rigid matters.** If the box can rock on its mount, the gyro reads the rocking.
-- **Which way it points doesn't matter.** Any rotation flat on the floor works.
+- **Which way it faces around that axis doesn't matter.**
 - Keep it away from the heatsink and heater ducts. The zero offset drifts with temperature.
   The firmware re-learns it at every stop, so this only reduces noise.
-- **Test:** the SENSORS page shows lateral g (LAT). A brisk roundabout or on-ramp reads about
+- **Test:** the SENSORS page shows SIDE FORCE. A brisk roundabout or on-ramp reads about
   0.2–0.5 g; driving straight it stays near 0.00. If it jumps around on a straight, bumpy road, the box
   isn't mounted rigidly.
 

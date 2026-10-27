@@ -3,10 +3,12 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#include "config.h"
+
 namespace {
 constexpr uint8_t REG_CONFIG = 0x1A;        // digital low-pass filter
 constexpr uint8_t REG_GYRO_CONFIG = 0x1B;   // full-scale range
-constexpr uint8_t REG_GYRO_ZOUT_H = 0x47;
+constexpr uint8_t REG_GYRO_XOUT_H = 0x43;  // then Y at 0x45, Z at 0x47
 constexpr uint8_t REG_PWR_MGMT_1 = 0x6B;
 constexpr float LSB_PER_DPS = 65.5f;        // +/-500 deg/s range
 }  // namespace
@@ -32,7 +34,7 @@ bool Imu::begin(uint8_t addr) {
 bool Imu::readYawDps(float& dps) {
   if (!present_) return false;
   Wire.beginTransmission(addr_);
-  Wire.write(REG_GYRO_ZOUT_H);
+  Wire.write((uint8_t)(REG_GYRO_XOUT_H + 2 * cfg::GYRO_AXIS));
   if (Wire.endTransmission(false) != 0 || Wire.requestFrom(addr_, (uint8_t)2) != 2) return false;
   const uint8_t hi = Wire.read();
   const uint8_t lo = Wire.read();

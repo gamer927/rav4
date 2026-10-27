@@ -37,6 +37,7 @@ struct Sim {
     in.atfValid = true;
     in.atfC = 80;
     in.batteryV = 14.2f;
+    in.eco = true;  // exactly one mode switch on
     c.begin(in.nowMs, wdt);
   }
   // When true, engine rpm follows speed x ratio of the engaged gear (as with a
@@ -82,10 +83,16 @@ struct Sim {
     solenoidsForGear(g, in.ecuS1, in.ecuS2);
   }
   void cruise(float mph) { rampTo(mph); }
-  // Arm, then flip the MANUAL switch on.
+  // Pick a mode: exactly one of ECO, SPORT, MANUAL on.
+  void select(bool eco, bool sport, bool manual) {
+    in.eco = eco;
+    in.sport = sport;
+    in.manual = manual;
+  }
+  // Arm, then flip MANUAL on (and ECO off).
   const Outputs& armManual() {
     arm();
-    in.manual = true;
+    select(false, false, true);
     return step(50);
   }
 };
@@ -288,7 +295,7 @@ static void test_manual_switch() {
   CHECK(s.c.outputs().control == CTRL_AUTO);
   CHECK(s.c.outputs().event == EV_DENY_NOT_MANUAL);
   CHECK(s.c.outputs().gear == g);
-  s.in.manual = true;
+  s.select(false, false, true);
   s.step(20);
   CHECK(s.c.outputs().control == CTRL_MANUAL);
   CHECK(s.c.outputs().event == EV_MANUAL);
@@ -297,14 +304,14 @@ static void test_manual_switch() {
   s.tap(s.in.up);
   s.step(300);
   CHECK(s.c.outputs().gear == g + 1);
-  s.in.manual = false;
+  s.select(true, false, false);
   s.step(20);
   CHECK(s.c.outputs().control == CTRL_AUTO);
   CHECK(s.c.outputs().event == EV_AUTO_RESUMED);
 
   // Switch already on when the TCU takes over: starts in MANUAL.
   Sim m;
-  m.in.manual = true;
+  m.select(false, false, true);
   m.arm();
   CHECK(m.c.outputs().control == CTRL_MANUAL);
   // And the switch does nothing in STOCK.
@@ -315,10 +322,9 @@ static void test_manual_switch() {
 
 static void test_auto_schedule() {
   std::printf("AUTO: upshifts with speed; ECO earlier than SPORT; kickdown\n");
-  auto upAt = [](bool eco, bool sport) {
+  auto upAt = [](bool eco) {
     Sim s;
-    s.in.eco = eco;
-    s.in.sport = sport;
+    s.select(eco, !eco, false);
     s.arm();
     s.in.tpsPct = 25;
     for (float v = 0; v < 93; v += 0.31f) {
@@ -328,10 +334,10 @@ static void test_auto_schedule() {
     }
     return -1.0f;
   };
-  const float eco = upAt(true, false), norm = upAt(false, false), sport = upAt(false, true);
-  std::printf("  1->2 at 25%%: eco %.1f  normal %.1f  sport %.1f mph\n", eco, norm, sport);
-  CHECK(eco > 0 && norm > 0 && sport > 0);
-  CHECK(eco < norm && norm < sport);
+  const float eco = upAt(true), sport = upAt(false);
+  std::printf("  1->2 at 25%%: eco %.1f  sport %.1f mph\n", eco, sport);
+  CHECK(eco > 0 && sport > 0);
+  CHECK(eco < sport);
 
   Sim s;
   s.arm();
@@ -350,7 +356,7 @@ static void test_auto_schedule() {
 static void test_kickdown_is_immediate() {
   std::printf("kickdown right after a shift goes 4->3->2 without the dwell\n");
   Sim s;
-  s.in.sport = true;
+  s.select(false, true, false);
   s.cruise(40.4);
   s.setEcuGear(4);
   s.arm();
@@ -366,7 +372,7 @@ static void test_kickdown_is_immediate() {
 
   // Part throttle in the same spot still respects the dwell.
   Sim t;
-  t.in.sport = true;
+  t.select(false, true, false);
   t.cruise(40.4);
   t.setEcuGear(4);
   t.arm();
@@ -411,7 +417,7 @@ static void test_corner_hold() {
   t.step(cfg::CORNER_HOLD_MAX_MS - 2000);
   CHECK(t.c.outputs().gear == 2);
   t.step(2500);
-  CHECK(t.c.outputs().gear == 3);
+  CHECK(t.c.outputs().gear >= 3);  // shifting resumed (ECO may go straight to 4th)
 
   // The driver's own shift is always honoured.
   Sim u;
@@ -420,7 +426,7 @@ static void test_corner_hold() {
   u.cruise(24.9);
   u.in.latValid = true;
   u.in.latG = 0.4f;
-  u.in.manual = true;
+  u.select(false, false, true);
   u.step(20);
   u.tap(u.in.up);
   CHECK(u.c.outputs().gear == 3);
@@ -434,13 +440,13 @@ static void test_corner_hold() {
   v.in.latG = 0.5f;
   v.cruise(37.3);
   v.step(1500);
-  CHECK(v.c.outputs().gear == 3);
+  CHECK(v.c.outputs().gear >= 3);
 }
 
 static void test_brake_downshift() {
   std::printf("SPORT brake downshift: gear ready for the exit, held until throttle\n");
   Sim s;
-  s.in.sport = true;
+  s.select(false, true, false);
   s.arm();
   s.in.tpsPct = 20;
   s.cruise(62.1);
@@ -452,7 +458,7 @@ static void test_brake_downshift() {
   CHECK(s.c.outputs().gear == 3);
   s.rampTo(37.3, 9.3f);
   CHECK(s.c.outputs().gear == 2);
-  CHECK(s.in.speedMph * cfg::RPM_PER_MPH[2] <= cfg::BRAKE_DOWNSHIFT_RPM[2]);
+  CHECK(s.in.speedMph * cfg::RPM_PER_MPH[2] <= cfg::BRAKE_DOWNSHIFT_RPM[MODE_SPORT]);
   s.rampTo(31.1, 9.3f);
   CHECK(s.c.outputs().gear == 2);  // 1st only below the 4200 rpm / 28 mph line
   s.in.brake = false;              // corner entry: off the brake, off the throttle
@@ -464,7 +470,7 @@ static void test_brake_downshift() {
 
   // Hold also ends on its own if the driver just coasts.
   Sim t;
-  t.in.sport = true;
+  t.select(false, true, false);
   t.arm();
   t.in.tpsPct = 20;
   t.cruise(62.1);
@@ -488,7 +494,7 @@ static void test_brake_downshift() {
   n.rampTo(37.3, 9.3f);
   CHECK(n.c.outputs().gear == 4);
   Sim c;
-  c.in.sport = true;
+  c.select(false, true, false);
   c.arm();
   c.in.tpsPct = 20;
   c.cruise(62.1);
@@ -561,7 +567,7 @@ static void test_eco_throttle_smoothing() {
 static void test_sport_tipin_release() {
   std::printf("SPORT: a fast stab releases lockup at once; a slow squeeze doesn't\n");
   auto setup = [](Sim& s) {
-    s.in.sport = true;
+    s.select(false, true, false);
     s.arm();
     s.in.tpsPct = 15;
     s.cruise(62.1);
@@ -599,7 +605,7 @@ static void test_manual_is_sport() {
   s.in.tpsPct = 20;
   s.step(1500);
 
-  s.in.manual = true;  // MANUAL switch on
+  s.select(false, false, true);  // MANUAL switch on
   s.tap(s.in.down);
   CHECK(s.c.outputs().control == CTRL_MANUAL);
   CHECK(s.c.outputs().mode == MODE_SPORT);
@@ -614,7 +620,7 @@ static void test_manual_is_sport() {
   s.step(2000);
   CHECK(s.c.outputs().gear == 3);  // and it holds the gear you chose
 
-  s.in.manual = false;  // MANUAL switch off: back to AUTO, back to ECO
+  s.select(true, false, false);  // MANUAL switch off: back to AUTO, back to ECO
   s.step(50);
   CHECK(s.c.outputs().control == CTRL_AUTO);
   CHECK(s.c.outputs().mode == MODE_ECO);
@@ -624,7 +630,7 @@ static void test_sport_lift_hold() {
   std::printf("SPORT lift-off hold: a quick lift after a hard push keeps the gear\n");
   auto run = [](bool sport, bool quickLift) {
     Sim s;
-    s.in.sport = sport;
+    s.select(!sport, sport, false);
     s.arm();
     s.in.tpsPct = 70;  // hard acceleration out of a corner, in 2nd
     s.rampTo(46.6, 5.0f);
@@ -645,13 +651,12 @@ static void test_sport_lift_hold() {
   CHECK(sportQuick.second == 2);  // held, ready for the next corner
   const auto sportSlow = run(true, false);
   CHECK(sportSlow.second > 2);    // a gentle lift is a cruise: upshift as usual
-  const auto normalQuick = run(false, true);
-  CHECK(normalQuick.first == 2);
-  CHECK(normalQuick.second > 2);  // NORMAL upshifts on the lift as before
+  const auto ecoQuick = run(false, true);
+  CHECK(ecoQuick.second > ecoQuick.first);  // ECO upshifts on the lift as usual
 
   // The hold ends on its own after LIFT_HOLD_MS, and when the throttle returns.
   Sim t;
-  t.in.sport = true;
+  t.select(false, true, false);
   t.arm();
   t.in.tpsPct = 70;
   t.rampTo(46.6, 5.0f);
@@ -674,11 +679,12 @@ static void test_eco_early_lockup() {
   CHECK(e.c.outputs().gear == 3);
   CHECK(e.c.outputs().sl);  // ~1,340 rpm locked in 3rd
   Sim n;
+  n.select(false, true, false);
   n.arm();
   n.in.tpsPct = 15;
   n.cruise(24.9);
   n.step(3000);
-  CHECK(!n.c.outputs().sl);  // NORMAL waits for 36 mph
+  CHECK(!n.c.outputs().sl);  // SPORT waits for 43 mph
 
   e.in.tpsPct = 35;  // more load at low rpm: let the converter help
   e.step(200);
@@ -731,7 +737,7 @@ static void test_highway_lockup() {
 
   // SPORT (and MANUAL) too: a 90 mph cruise must not slip and cook the ATF.
   Sim s;
-  s.in.sport = true;
+  s.select(false, true, false);
   s.arm();
   s.in.tpsPct = 20;
   s.cruise(90);
@@ -910,15 +916,78 @@ static void test_rev_limit_upshift() {
 }
 
 static void test_mode_switch_fault_and_stuck_button() {
-  std::printf("ECO+SPORT together -> NORMAL + warning; stuck button warning\n");
+  std::printf("mode switches: exactly one of ECO/SPORT/MANUAL, else factory ECU until fixed\n");
   Sim s;
-  s.in.eco = s.in.sport = true;
-  CHECK(s.step(20).mode == MODE_NORMAL);
+  s.setEcuGear(3);
+  s.in.ecuSL = false;
+  s.cruise(43.5);
+  s.arm();
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(s.c.outputs().mode == MODE_ECO);
+
+  // Two on: the last valid mode carries on through the grace time...
+  s.in.sport = true;  // ECO still on
+  s.step(cfg::MODE_SWITCH_GRACE_MS - 100);
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(s.c.outputs().mode == MODE_ECO);
+  CHECK(s.c.outputs().modeSelect == SEL_OK);
+  // ...then the factory ECU takes over, with a message, not a latched fault.
+  s.step(200);
+  CHECK(s.c.outputs().control == CTRL_STOCK);
+  CHECK(!s.c.outputs().relayCustom);
+  CHECK(s.c.outputs().modeSelect == SEL_SEVERAL);
   CHECK(s.c.outputs().warnings & WARN_MODE_SWITCH);
-  s.in.eco = s.in.sport = false;
-  s.in.down = true;
-  s.step(cfg::STUCK_BUTTON_MS + 100);
-  CHECK(s.c.outputs().warnings & WARN_BUTTON_STUCK);
+  CHECK(s.c.outputs().event == EV_MODE_SELECT);
+  CHECK(!s.c.outputs().faults);
+  s.step(2000);
+  CHECK(s.c.outputs().control == CTRL_STOCK);  // stays there while it's wrong
+
+  // Fixed: back in control by itself (no ON/OFF cycle), in the new mode.
+  s.setEcuGear(s.c.outputs().gear ? s.c.outputs().gear : 3);
+  s.in.eco = false;
+  s.step(100);
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(s.c.outputs().mode == MODE_SPORT);
+  CHECK(s.c.outputs().modeSelect == SEL_OK);
+  CHECK(!(s.c.outputs().warnings & WARN_MODE_SWITCH));
+
+  // Moving from one switch to another (a moment with none on) is no handover.
+  s.in.sport = false;
+  s.step(400);
+  s.in.eco = true;
+  s.step(50);
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(s.c.outputs().mode == MODE_ECO);
+
+  // None on, for longer than the grace time.
+  s.in.eco = false;
+  s.step(cfg::MODE_SWITCH_GRACE_MS + 100);
+  CHECK(s.c.outputs().control == CTRL_STOCK);
+  CHECK(s.c.outputs().modeSelect == SEL_NONE);
+
+  // MANUAL with SPORT (or ECO) on is not allowed either.
+  Sim m;
+  m.select(false, true, true);
+  m.arm();
+  m.step(cfg::MODE_SWITCH_GRACE_MS + 100);
+  CHECK(m.c.outputs().control == CTRL_STOCK);
+  CHECK(m.c.outputs().modeSelect == SEL_SEVERAL);
+  m.select(false, false, true);
+  m.step(50);
+  CHECK(m.c.outputs().control == CTRL_MANUAL);
+  CHECK(m.c.outputs().mode == MODE_SPORT);  // MANUAL drives like SPORT
+
+  // Nothing selected at key-on: arming doesn't engage.
+  Sim n;
+  n.select(false, false, false);
+  n.arm();
+  CHECK(n.c.outputs().control == CTRL_STOCK);
+
+  // A shifter switch held closed for 10 s is reported.
+  Sim b;
+  b.in.down = true;
+  b.step(cfg::STUCK_BUTTON_MS + 100);
+  CHECK(b.c.outputs().warnings & WARN_BUTTON_STUCK);
 }
 
 static void test_debouncer() {
@@ -981,7 +1050,7 @@ static void test_ds18b20_decode() {
 
 static void test_maps_are_sane() {
   std::printf("shift maps: hysteresis, monotonic, WOT points below rev limit\n");
-  for (int m = 0; m < 3; m++) {
+  for (int m = 0; m < 2; m++) {
     for (uint8_t g = 1; g <= 3; g++) {
       for (int tps = 0; tps <= 100; tps += 5) {
         const float up = upshiftMph((DriveMode)m, g, tps);

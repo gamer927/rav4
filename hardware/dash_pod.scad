@@ -1,15 +1,14 @@
 // Dash pod for the 1999 RAV4 transmission controller.
 //
-// A slim box that sits on top of the dashboard or hangs from the ceiling:
+// A slim box that sits on top of the dashboard, driver's side:
 //   * flat, driver-facing front: the 2.42" OLED screen on the left, then one
-//     row of controls, left to right: status LED, ECO, SPORT, MANUAL (6 mm
-//     mini toggles), TEST (12 mm push button), ON/OFF (12 mm toggle with
-//     flip-up safety cover)
+//     row of controls, left to right: ECO, SPORT, MANUAL (6 mm mini toggles),
+//     TEST (12 mm push button), ON/OFF (12 mm toggle with flip-up safety
+//     cover). No status light: the screen says everything.
 //   * a back cover with two cable glands (PG7: the switch cable and the
 //     screen cable, both to the TCU box) and a hinge
-//   * a separate mount: a small base with a hinge arm. Screw or tape the base
-//     to the dash; or screw it to the ceiling and the arm hangs down. Either
-//     way the pod hangs upright on the hinge and tilts to face you.
+//   * a separate mount: a small base with a hinge arm, screwed or taped to
+//     the dash. The pod hangs on the hinge and tilts to face you.
 //
 // Print in PETG or ASA, NOT PLA: a parked car's dash gets far hotter than
 // PLA's ~55 C softening point. Measure your parts and adjust the hole sizes
@@ -18,11 +17,11 @@
 // Render one part at a time: part = "shell", "back", "mount" (each exported
 // in its print orientation, no supports needed). part = "panel_test" is a
 // flat 3 mm copy of the front (about 1 hour to print): check that every
-// switch, the LED and the screen fit BEFORE printing the shell.
+// switch and the screen fit BEFORE printing the shell.
 part = "shell";  // [shell, back, mount, panel_test, assembly, fit, fit_check, build]
 
 /* [Overall size] */
-W = 210;            // width (x)
+W = 200;            // width (x)
 H = 64;             // height (z)
 D = 64;             // depth (y), front face to back of the back cover
 wall = 3;           // wall and front thickness
@@ -32,7 +31,6 @@ back_t = 4;         // back cover thickness
 toggle_big_d = 12.2;     // ON/OFF: 12 mm toggle with safety cover
 toggle_small_d = 6.3;    // ECO / SPORT / MANUAL: 6 mm mini toggle (MTS-102)
 button_d = 12.2;         // TEST: 12 mm momentary
-led_d = 8.0;             // 5 mm LED in an 8 mm panel bezel
 labels = true;
 label_depth = 0.6;
 label_size = 3.2;        // MANUAL is ~20 mm wide at this size: fits the 23 mm pitch
@@ -69,9 +67,8 @@ m5_nut_h = 4;         // depth of the hex trap
 base = [70, 44, 5];   // base plate
 pivot_h = 50;         // hinge axis above the base's underside
 base_screw = 4.5;     // two countersunk screws (or use 3M VHB tape instead)
-// fit_check sweeps the pod from tilted 35 degrees towards you to 5 degrees
-// away. On the ceiling the mount is upside down, so the same range is 35
-// degrees face-down (towards you) to 5 degrees face-up.
+// fit_check sweeps the pod from tilted 35 degrees back (screen facing up
+// towards you) to 5 degrees forward.
 tilt_toward = 35;
 tilt_away = 5;
 
@@ -84,13 +81,11 @@ $fn = 48;
 //    depth behind the front incl. terminals + wire bend]
 // To change the order, change the u values (and the labels follow).
 controls = [
-    [96,  row_v, toggle_small_d, "ECO",    9, 14, 32],
-    [119, row_v, toggle_small_d, "SPORT",  9, 14, 32],
-    [142, row_v, toggle_small_d, "MANUAL", 9, 14, 32],
-    [166, row_v, button_d,       "TEST",  16, 16, 38],
-    [193, row_v, toggle_big_d,   "ON/OFF", 14, 20, 50]];   // safety cover flips up
-led_uv = [76, row_v];
-led_depth = 30;              // bezel + LED legs + wires
+    [86,  row_v, toggle_small_d, "ECO",    9, 14, 32],
+    [110, row_v, toggle_small_d, "SPORT",  9, 14, 32],
+    [134, row_v, toggle_small_d, "MANUAL", 9, 14, 32],
+    [159, row_v, button_d,       "TEST",  16, 16, 38],
+    [185, row_v, toggle_big_d,   "ON/OFF", 14, 20, 50]];   // safety cover flips up
 ON_OFF_COVER = [22, 36, 18]; // flip cover outside the front: width, height (from 10 mm below the hole), depth (VERIFY)
 
 // Panel frame: u -> x, v -> z, outward normal -> -y (0 = outer surface).
@@ -107,7 +102,6 @@ pivot = [W / 2, D + hinge_off, H / 2];
 module face_cut() {
     on_face() {
         for (c = controls) translate([c[0], c[1], -10]) cylinder(h = 20, d = c[2]);
-        translate([led_uv[0], led_uv[1], -10]) cylinder(h = 20, d = led_d);
         translate([oled_uv[0] + oled_window_offset[0] - oled_window[0] / 2,
                    oled_uv[1] + oled_window_offset[1] - oled_window[1] / 2, -10])
             cube([oled_window[0], oled_window[1], 20]);
@@ -116,9 +110,6 @@ module face_cut() {
                 translate([c[0], label_v, -label_depth])
                     linear_extrude(label_depth + 1)
                         text(c[3], size = label_size, halign = "center", font = "DejaVu Sans:style=Bold");
-            translate([led_uv[0], label_v, -label_depth])
-                linear_extrude(label_depth + 1)
-                    text("TCU", size = label_size, halign = "center", font = "DejaVu Sans:style=Bold");
         }
     }
 }
@@ -186,8 +177,7 @@ module back() {
 }
 
 // ----------------------------------------------------------------- mount
-// Drawn for a dash mount: base underneath, arm up to the hinge. For the
-// ceiling, the same part is screwed up to the roof and the arm hangs down.
+// Base on the dash, arm up to the hinge.
 module mount() {
     bz = pivot[2] - pivot_h;   // underside of the base
     difference() {
@@ -213,14 +203,13 @@ module mount() {
 }
 
 // ------------------------------------------------------------ fit check
-// Everything inside the pod as solid blocks: switch, button and LED bodies
+// Everything inside the pod as solid blocks: switch and button bodies
 // with their terminals and a wire bend, the OLED module, the gland locknuts
 // with their cables, and a row of lever-nut connectors on the floor where
 // the switch cable's cores are joined.
 module control_bodies() {
     on_face() {
         for (c = controls) translate([c[0] - c[4] / 2, c[1] - c[5] / 2, -wall - 0.05 - c[6]]) cube([c[4], c[5], c[6]]);
-        translate([led_uv[0] - 5, led_uv[1] - 5, -wall - 0.05 - led_depth]) cube([10, 10, led_depth]);
         translate([oled_uv[0] - oled_module[0] / 2, oled_uv[1] - oled_module[1] / 2, -wall - 0.05 - oled_depth])
             cube([oled_module[0], oled_module[1], oled_depth]);
     }
@@ -284,12 +273,11 @@ module build_view() {
     // 1: heat-set inserts, drawn half out of their holes (being pressed in)
     hi(1) for (p = col_pos) translate([p[0], inner_d + (bstep == 1 ? 6 : 0) - 6, p[1]]) rotate([-90, 0, 0])
         cylinder(h = 6, d = insert_d + 1.5);
-    // 2: screen, switches, button, LED (bodies inside, levers and caps outside)
+    // 2: screen, switches, button (bodies inside, levers and caps outside)
     hi(2) {
         control_bodies();
         on_face() for (c = controls) translate([c[0], c[1], 0])
             cylinder(h = c[2] > 10 ? 9 : 12, d = c[2] > 10 ? c[2] : 3);
-        on_face() translate([led_uv[0], led_uv[1], 0]) cylinder(h = 4, d = led_d + 2);
         outside_parts();
     }
     // 3: glands, cables, lever-nut connectors
@@ -314,10 +302,9 @@ else if (part == "fit") { color("gold", 0.35) pod(); color("seagreen") control_b
 else if (part == "assembly") {
     color("gold") shell(); color("goldenrod") back(); color("grey") mount();
     color("firebrick") outside_parts();
-    // screen glass, LED, toggle levers and the TEST cap, so the picture isn't see-through
+    // screen glass, toggle levers and the TEST cap, so the picture isn't see-through
     color("black") on_face() translate([oled_uv[0] - oled_module[0] / 2, oled_uv[1] - oled_module[1] / 2, -wall - 2])
         cube([oled_module[0], oled_module[1], 1.9]);
     color("silver") on_face() for (c = controls) translate([c[0], c[1], 0])
         cylinder(h = c[2] > 10 ? 9 : 12, d = c[2] > 10 ? c[2] : 3);
-    color("limegreen") on_face() translate([led_uv[0], led_uv[1], 0]) cylinder(h = 4, d = led_d + 2);
 }

@@ -245,6 +245,7 @@ static void test_cbit_solenoid_fault() {
   in.atfC = 80;
   in.batteryV = 14.2f;
   in.solSenseValid = true;
+  in.eco = true;  // one mode switch on
   c.begin(in.nowMs, false);
   bool s1Broken = false;
   auto step = [&](uint32_t ms) {
@@ -284,6 +285,7 @@ static void test_cbit_solenoid_short() {
   in.atfC = 80;
   in.batteryV = 14.2f;
   in.solSenseValid = true;
+  in.eco = true;  // one mode switch on
   c.begin(in.nowMs, false);
   float s1On = 0.95f;
   auto step = [&](uint32_t ms) {

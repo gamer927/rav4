@@ -15,13 +15,13 @@ Everything for the 1999 RAV4 transmission controller, including the 3D-printed h
 | 3. Signal inputs | $42 |
 | 4. Boards and inside wiring | $66 |
 | 5. Car harness and connectors | $147 |
-| 6. Dash pod controls and screen | $68 |
+| 6. Dash pod controls and screen | $61 |
 | 7. ATF temperature probe | $59 |
 | 8. 3D printing | $65 |
-| 9. Sequential shifter (Beavis Motorsport DIY) | $54 |
-| **All parts, including the shifter** | **$649** |
-| Without the shifter (no manual shifting) | $595 |
-| Without filament (if your printer comes with it) | $613 |
+| 9. Sequential shifter (Beavis Motorsport DIY) | $59 |
+| **All parts, including the shifter** | **$647** |
+| Without the shifter (no manual shifting) | $588 |
+| Without filament (if your printer comes with it) | $611 |
 | Tools, if you own none of them | $197 |
 
 Expect roughly **±25 %** depending on where you shop. Many packs leave spares, which is useful: you'll want a spare relay, MOSFET and buck module if something goes wrong.
@@ -32,9 +32,9 @@ Build book **step 0** (one evening, nothing cut) settles these, so you order the
 
 1. **Fuse blade size** in the cabin fuse box (standard ATO/ATC or mini): for the fuse tap and inline fuse holders.
 2. **ATF cooler hose inside diameter** (usually 5/16" or 3/8"): for the barbed tee.
-3. **Space behind the glovebox**: the TCU box is 216 × 178 × 51 mm (244 mm wide with its mounting ears).
-4. **A spot for the dash pod**: 210 × 64 × 64 mm, plus its hinge mount, on the dash top (driver's side, never over the passenger airbag) or on the ceiling above the windscreen.
-5. **Space on the centre console** beside the gear lever for the shifter base: 150 × 100 × 29 mm, plus the shifter on top.
+3. **A spot for the TCU box**, ideally under the passenger side of the dash where you can reach it: 216 × 178 × 51 mm (244 mm wide with its mounting ears), bolted to metal.
+4. **A spot for the dash pod**: 200 × 64 × 64 mm, plus its hinge mount, on the dash top (driver's side, never over the passenger airbag).
+5. **Space on the centre console** beside the gear lever for the shifter base: 150 × 100 mm, long side front-to-back. With the shifter on it, it stands about 35 cm tall: check it clears the dash and the radio.
 
 ## Where to order
 
@@ -75,7 +75,7 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 | ☐ | LM393 comparator, DIP-8 | 1 | pack of 10 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
 | ☐ | BAT85 Schottky diode (DO-35) | 18 | pack of 25 | DigiKey / Mouser | $5 | Input clamps |
 | ☐ | 1N4148 diode | 6 | pack of 100 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
-| ☐ | Resistor kit, 1/4 W 1 % metal film (600+ pcs) | ≈ 70 | kit | Amazon (or AliExpress, cheaper but slower) | $12 | Needs 100, 330, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M |
+| ☐ | Resistor kit, 1/4 W 1 % metal film (600+ pcs) | ≈ 70 | kit | Amazon (or AliExpress, cheaper but slower) | $12 | Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M |
 | ☐ | Extra 10 kΩ resistors | 19 total | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $4 | Most kits only have 10–20 of each value |
 | ☐ | 100 nF ceramic capacitors, 50 V | 10 | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
 
@@ -103,14 +103,13 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 | ☐ | Wago 221 lever-nut connectors, assorted | ~9 | pack | Hardware store | $12 | Joins the cables to the switch wires inside the dash pod and the shifter base |
 | ☐ | Cable glands PG7 + PG9, nylon, with locknuts | 7 + 4 | assortment | Amazon (or AliExpress, cheaper but slower) | $10 | TCU box 4 × PG7 + 4 × PG9; dash pod 2 × PG7; shifter base 1 × PG7 |
 
-## 6. Dash pod controls and screen — $68
+## 6. Dash pod controls and screen — $61
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
 | ☐ | 12 mm ON/OFF toggle with flip-up safety cover | 1 | 1 | Amazon (or AliExpress, cheaper but slower) | $10 |  |
 | ☐ | 6 mm mini toggle switch, MTS-101/102 | 3 | pack of 5 | Amazon (or AliExpress, cheaper but slower) | $8 | ECO, SPORT and MANUAL |
 | ☐ | 12 mm momentary push button, normally open | 1 | pack of 5 | Amazon (or AliExpress, cheaper but slower) | $10 | TEST |
-| ☐ | 5 mm LED + 8 mm chrome panel bezel | 1 | pack | Amazon (or AliExpress, cheaper but slower) | $7 | Status light |
 | ☐ | 2.42" OLED module, 128 × 64, SSD1309, I²C-capable | 1 | 1 | Amazon (or AliExpress, cheaper but slower) | $20 | e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat |
 | ☐ | 1 µF capacitor (ceramic or electrolytic, 16 V+) | 1 | pack | Amazon (or AliExpress, cheaper but slower) | $4 | Power-on reset for the screen, with a 10k from the resistor kit |
 | ☐ | GY-521 (MPU-6050) gyro module | 1 | pack of 3 | Amazon (or AliExpress, cheaper but slower) | $9 |  |
@@ -136,16 +135,17 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 | ☐ | M3 screw kit with countersunk screws and nuts | ~20 | kit | Amazon (or AliExpress, cheaper but slower) | $12 | 8 and 10 mm countersunk, 6 mm pan head |
 | ☐ | M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge) | 4 + 8 + 1 | loose | Hardware store | $9 |  |
 
-## 9. Sequential shifter (Beavis Motorsport DIY) — $54
+## 9. Sequential shifter (Beavis Motorsport DIY) — $59
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
 | ☐ | V-155-1C25 roller-lever microswitch | 2 | pack of 5 | Amazon (or AliExpress, cheaper but slower) | $9 | Genuine Omron is $4–6 each |
-| ☐ | 12 mm OD steel pivot tube, or an M12 bolt + nyloc nut | 1 | 1 | Hardware store | $6 |  |
-| ☐ | M3 × 70 bolts + nuts | as the guide says | pack | Hardware store | $5 |  |
-| ☐ | M12 ball plungers | 2 | 2 | Amazon (or AliExpress, cheaper but slower) | $14 |  |
-| ☐ | Compression spring assortment | 1 | kit | Amazon (or AliExpress, cheaper but slower) | $8 |  |
-| ☐ | Shift knob, M10 × 1.5 thread | 1 | 1 | Amazon (or AliExpress, cheaper but slower) | $12 |  |
+| ☐ | Pivot: 12 mm OD tube, 64 mm long, 1.6 mm wall; or an M12 × 75 bolt + nyloc nut + 2 washers | 1 | 1 | Hardware store | $6 | The tube needs the printed pivot pin and cap |
+| ☐ | M3 × 70 hex-head bolts + washers + nyloc nuts | 4 each | pack | Hardware store | $5 | Hold the two switches and their spacers |
+| ☐ | M10 × 1.5 bolts: 2 × 30–35 mm (travel stops) + 1 × ~65 mm (cut into the knob stud) | 3 | loose | Hardware store | $5 | Cut the head off the long one: 60–70 mm of thread |
+| ☐ | M12 × 1.75 spring ball plungers (Kipp K0309 type) | 2 | 2 | Amazon (or AliExpress, cheaper but slower) | $14 | Optional: the detent 'click' |
+| ☐ | Compression springs, 1.8 mm wire, 14 mm OD, 40 mm long | 2 | pack | Amazon (or AliExpress, cheaper but slower) | $8 | Centre the lever; they sit over the travel-stop bolts |
+| ☐ | Shift knob, M10 × 1.5 thread | 1 | 1 | Amazon (or AliExpress, cheaper but slower) | $12 | Or print Knob.stl from hardware/beavis_shifter/ |
 
 ## Tools — up to $197 if you own none
 
@@ -161,7 +161,7 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 | ☐ | IR thermometer |  | $15 |
 | ☐ | Drain pan + funnel |  | $10 |
 | ☐ | Hot-glue gun |  | $10 |
-| ☐ | Drill + 3 mm bit | Only if your perfboards have no corner holes; Usually owned | — |
+| ☐ | Drill + 3 mm and 6.5 mm bits | 6.5 mm opens the shifter's M6 holes; 3 mm only if your perfboards have no corner holes; Usually owned | — |
 | ☐ | 3D printer | You have one | owned |
 | ☐ | Four jack stands | You have them | owned |
 
@@ -169,14 +169,15 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 
 - Genuine Arduino Mega instead of a clone: +$26
 - 3M VHB tape, to stick the dash-pod mount down instead of screwing it: +$8
+- USB-B panel-mount extension, 50 cm: plug the laptop in from the glovebox: +$8
 - Cheap logic analyser (checks speed and tach signals): +$12
 
 ## By store (for ordering)
 
 **DigiKey / Mouser** — 9 items, about $55: 1.5KE27A TVS diode; 1N5822 Schottky diode, 3 A; 100 µF 50 V electrolytic capacitor; Omron G2RL-2-DC12 relay (DPDT, 12 V); IRF4905 P-channel MOSFET, TO-220; ULN2803A driver, DIP-18; UF4007 fast diode; 15 Ω 50 W aluminium-housed resistor; BAT85 Schottky diode (DO-35).
 
-**Amazon (or AliExpress, cheaper but slower)** — 39 items, about $468: Arduino Mega 2560 R3; Prototype shield for the Mega ("Mega ProtoShield"); LM2596HV buck converter module, 4.5–60 V in; ACS712-05B current sensor module (5 A); 1 W zener diode kit (1N4728A–1N4764A); Finned aluminium heatsink, ≥ 100 × 100 × 25 mm; Thermal paste; PC817 optocoupler, DIP-4; LM393 comparator, DIP-8; 1N4148 diode; Resistor kit, 1/4 W 1 % metal film (600+ pcs); Extra 10 kΩ resistors; 100 nF ceramic capacitors, 50 V; Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm; Screw terminals, 5.08 mm, 2- and 3-way, interlocking; Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~20 cm); Silicone hook-up wire 22 AWG, 6 colours; Silicone wire 18 AWG, red/black/yellow; Double-sided foam mounting tape; Deutsch DT connector kit, 2–12 way, with crimper; 18 AWG automotive wire, multi-colour kit; Shielded cable: 8-core 24 AWG, 4-core, 3-core; Heat-shrink assortment incl. adhesive-lined; Cable glands PG7 + PG9, nylon, with locknuts; 12 mm ON/OFF toggle with flip-up safety cover; 6 mm mini toggle switch, MTS-101/102; 12 mm momentary push button, normally open; 5 mm LED + 8 mm chrome panel bezel; 2.42" OLED module, 128 × 64, SSD1309, I²C-capable; 1 µF capacitor (ceramic or electrolytic, 16 V+); GY-521 (MPU-6050) gyro module; DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C); PETG filament, 1 kg; M3 heat-set inserts (~4 mm OD); M3 screw kit with countersunk screws and nuts; V-155-1C25 roller-lever microswitch; M12 ball plungers; Compression spring assortment; Shift knob, M10 × 1.5 thread.
+**Amazon (or AliExpress, cheaper but slower)** — 38 items, about $461: Arduino Mega 2560 R3; Prototype shield for the Mega ("Mega ProtoShield"); LM2596HV buck converter module, 4.5–60 V in; ACS712-05B current sensor module (5 A); 1 W zener diode kit (1N4728A–1N4764A); Finned aluminium heatsink, ≥ 100 × 100 × 25 mm; Thermal paste; PC817 optocoupler, DIP-4; LM393 comparator, DIP-8; 1N4148 diode; Resistor kit, 1/4 W 1 % metal film (600+ pcs); Extra 10 kΩ resistors; 100 nF ceramic capacitors, 50 V; Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm; Screw terminals, 5.08 mm, 2- and 3-way, interlocking; Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~20 cm); Silicone hook-up wire 22 AWG, 6 colours; Silicone wire 18 AWG, red/black/yellow; Double-sided foam mounting tape; Deutsch DT connector kit, 2–12 way, with crimper; 18 AWG automotive wire, multi-colour kit; Shielded cable: 8-core 24 AWG, 4-core, 3-core; Heat-shrink assortment incl. adhesive-lined; Cable glands PG7 + PG9, nylon, with locknuts; 12 mm ON/OFF toggle with flip-up safety cover; 6 mm mini toggle switch, MTS-101/102; 12 mm momentary push button, normally open; 2.42" OLED module, 128 × 64, SSD1309, I²C-capable; 1 µF capacitor (ceramic or electrolytic, 16 V+); GY-521 (MPU-6050) gyro module; DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C); PETG filament, 1 kg; M3 heat-set inserts (~4 mm OD); M3 screw kit with countersunk screws and nuts; V-155-1C25 roller-lever microswitch; M12 × 1.75 spring ball plungers (Kipp K0309 type); Compression springs, 1.8 mm wire, 14 mm OD, 40 mm long; Shift knob, M10 × 1.5 thread.
 
-**Hardware store** — 7 items, about $56: Wago 221 lever-nut connectors, assorted; Brass barbed tee with a 1/8" NPT female side port; 1/8" NPT male × 6 mm compression fitting, brass; ATF-safe thread sealant (PTFE paste); M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge); 12 mm OD steel pivot tube, or an M12 bolt + nyloc nut; M3 × 70 bolts + nuts.
+**Hardware store** — 8 items, about $61: Wago 221 lever-nut connectors, assorted; Brass barbed tee with a 1/8" NPT female side port; 1/8" NPT male × 6 mm compression fitting, brass; ATF-safe thread sealant (PTFE paste); M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge); Pivot: 12 mm OD tube, 64 mm long, 1.6 mm wall; or an M12 × 75 bolt + nyloc nut + 2 washers; M3 × 70 hex-head bolts + washers + nyloc nuts; M10 × 1.5 bolts: 2 × 30–35 mm (travel stops) + 1 × ~65 mm (cut into the knob stud).
 
 **Auto-parts store** — 7 items, about $70: Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses; Add-a-circuit fuse tap; 16 AWG automotive wire, red and black; Split loom + zip ties; Fuel-injection hose clamps; Firewall grommet assortment; ATF to top up (Toyota Type T-IV, or as your owner's manual says).

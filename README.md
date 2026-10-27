@@ -13,15 +13,20 @@ car then drives exactly as it did from the factory.
 
 ## What it does
 
-All speeds (screen, logs, settings, docs) are in **mph**.
+All speeds are in **mph**; the screen shows temperatures in **°F**.
+
+Three mode switches sit on the dash: **ECO, SPORT and MANUAL. Exactly one is on at a time.** If
+none is on, or two or more are, the screen says so in plain words (MODE ERROR / PICK MODE) and
+the factory computer shifts until you fix it; then the box takes back over by itself. There is
+no NORMAL mode: with the ON/OFF switch off, you have stock.
 
 | Mode | Feel | What changes |
 |---|---|---|
 | **ECO** | Calm, economical | Early upshifts; torque-converter lockup as early as the engine can take it (from ~23 mph in 3rd), kept on when you lift for longer fuel cut, released if the engine would labour; pedal stabs ignored (0.8 s throttle smoothing). Flooring it still kicks down instantly. |
 | **Highway (all modes)** | Locked and steady | In 4th above ~51 mph the torque converter stays locked up to 95 % throttle, so a long 90 mph run (~3,550 rpm) or a highway grade doesn't let it slip: lower rpm, less fuel, much less transmission heat. Only flooring it releases lockup (in SPORT, a quick stab does too). |
-| **NORMAL** | Like stock, plus the extras | Shift points close to a factory-style schedule (tune them to your car's logged factory shifts), light throttle smoothing, plus everything stock doesn't have: corner hold, the over-rev guards and the fault hand-back. |
 | **SPORT** | Sharp | Holds each gear to just under the redline at full throttle (the fastest way through these gears), kicks down from 60 % throttle, holds the gear when you snap off the throttle between corners, downshifts while braking so you're in the right gear for the exit, and releases lockup on a closed throttle or a fast pedal stab. |
-| **MANUAL** | SPORT, you shift | Flip the **MANUAL** switch on, then pull or push the sequential shifter lever: one click, one gear. Same lockup and pedal response as SPORT, but the box never shifts for you, except to protect the engine (upshift at 6,200 rpm, downshift when slowing to a stop). Flip MANUAL off to go back to automatic in the ECO/SPORT switches' mode. With MANUAL off the lever does nothing. |
+| **MANUAL** | SPORT, you shift | Turn on **MANUAL** (with ECO and SPORT off), then pull or push the sequential shifter lever: one click, one gear. Same lockup and pedal response as SPORT, but the box never shifts for you, except to protect the engine (upshift at 6,200 rpm, downshift when slowing to a stop). In ECO or SPORT the lever does nothing. |
+| **STOCK** | Factory | ON/OFF off, the lever not in D, a fault, or a mode-switch mistake: the factory computer shifts, exactly as before. |
 | **All automatic modes** | | No automatic shifts mid-corner (gyro), lockup off when braking. |
 
 **Protection, always on:**
@@ -33,7 +38,7 @@ All speeds (screen, logs, settings, docs) are in **mph**.
 - **Faults hand back to the factory computer:** a lost speed signal, a failed throttle sensor,
   bad voltage, the wrong gear engaged, or a broken solenoid wire.
 - **Built-in self-test:** hold TEST for 2 s with the car parked and the engine off. It checks
-  the lamps, each solenoid's current, the relays, the shifter and every dash switch, and the watchdog. It
+  the screen, each solenoid's current, the relays, the shifter and every dash switch, and the watchdog. It
   refuses to run unless the car is parked with the engine off.
 - **Locked until calibrated:** the box can't take control until you've calibrated it on your car
   (see [First steps](#first-steps)).
@@ -81,14 +86,15 @@ restores stock driving with the box removed.
 Three separate pieces, each with its own cables to the TCU box. They're parametric OpenSCAD
 models with ready-to-print STLs in [`hardware/`](hardware/README.md):
 
-1. **Dash pod**, on top of the dash or on the ceiling: the 2.42" screen on the left, then one row
-   of controls, **TCU light, ECO, SPORT, MANUAL, TEST, ON/OFF** (with a flip-up safety cover). It
-   hangs on a hinge from a small mount, so it stays upright and tilts to face you either way up.
-2. **Shifter base**, on the centre console next to the gear lever: the Beavis sequential shifter
-   bolts on top, with its own cable to the box.
-3. **TCU box**, behind the glovebox: the Mega with its hub shield, the power board and the logic
-   board (which carries the gyro). It has no switches: the round things on its front are eight
-   labelled cable glands, one per cable. USB access for the laptop.
+1. **Dash pod**, on top of the dash (driver's side): the 2.42" screen on the left, then one row of
+   switches, **ECO, SPORT, MANUAL, TEST, ON/OFF** (with a flip-up safety cover). It sits on a
+   small hinged mount and tilts to face you.
+2. **Shifter base**, on the centre console next to the gear lever: the real
+   [Beavis Motorsport sequential shifter](hardware/beavis_shifter/README.md) (by bbeavis,
+   CC BY-NC) bolts on top, with its own cable to the box.
+3. **TCU box**, under the passenger side of the dash where you can reach it: the Mega with its
+   hub shield, the power board and the logic board (which carries the gyro). It has no switches:
+   the round things on its front are eight labelled cable glands, one per cable.
 
 A **fit check** in each model confirms that every part fits: switch bodies, terminals, wire
 bends, board parts at their real heights, glands and bolts. It runs every time the STLs are
@@ -103,8 +109,8 @@ outside on a finned heatsink. Print settings, hardware and assembly:
 ## Status
 
 - **Done:** full design, firmware and documentation.
-  - 1,423 automated test checks pass.
-  - The firmware compiles for the Arduino Mega 2560 without warnings (13 % flash, 41 % RAM).
+  - 1,196 automated test checks pass.
+  - The firmware compiles for the Arduino Mega 2560 without warnings (14 % flash, 48 % RAM).
   - The screens above come from the real firmware running in a simulator.
 - **Not done yet:** nothing has been built or run on real hardware or in the car. The gear
   ratios, speed-sensor scaling and throttle-sensor voltages are best estimates until you
@@ -126,10 +132,10 @@ measure on the car first so you order the right sizes once.
 | Signal inputs (optos, comparator, resistors, diodes) | $42 |
 | Boards and inside wiring | $66 |
 | Car harness and connectors (Deutsch kit with crimper, wire, shielded cable, glands) | $147 |
-| Dash pod controls, OLED, gyro | $68 |
+| Dash pod controls, OLED, gyro | $61 |
 | ATF temperature probe and fittings | $59 |
 | 3D printing (filament, inserts, screws) | $65 |
-| Sequential shifter (Beavis Motorsport DIY) | $54 |
+| Sequential shifter (Beavis Motorsport DIY) | $59 |
 | **Total parts** | **≈ $650** (±25 %) |
 | Tools, if you own none (your 3D printer and jack stands aren't counted) | ≈ $200 |
 
@@ -147,7 +153,7 @@ The key parts:
   "solenoid" while the box is in control. Outside the box: they make ~14 W each.
 - **LM2596HV buck converter** (60 V input), PC817 optos, LM393, ULN2803A.
 - **Dash pod:** ON/OFF toggle with a flip-up cover, ECO, SPORT and MANUAL mini toggles, TEST
-  button, status LED, and a **2.42" OLED** (the gear shows 18 mm tall).
+  button, and a **2.42" OLED** (the gear shows 18 mm tall, everything else in plain words).
 - **Shifter base:** the **Beavis sequential shifter** (two V-155-1C25 switches).
 - **MPU-6050 gyro (GY-521)** on the logic board, and a **DS18B20 ATF probe** in a brass tee.
 

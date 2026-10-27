@@ -1,9 +1,10 @@
 // Minimal text driver for a 128x64 I2C OLED (SSD1306, SH1106 or SSD1309).
-// Layout: one double-size line (10 chars) on pages 0-1, then six normal
-// lines (21 chars) on pages 2-7.
-// Hero layout (setHero): one giant character (6x: 30 x 42 px) on the left of
-// pages 0-5, the double-size line (7 chars) and lines 2-5 (14 chars) to its
-// right, lines 6-7 full width. Made for reading the gear at a glance.
+// Eight rows of normal text (21 chars, 3 mm tall on a 2.42" screen). Any
+// pair of rows (0-1, 2-3, 4-5, 6-7) can instead hold one double-size line
+// (10 chars, 6 mm tall): setBigLine(). Rows 0-1 start out double-size.
+// Hero layout (setHero): one giant character (6x: 30 x 42 px, 18 mm) on the
+// left of rows 0-5, with 7 double-size or 14 normal chars to its right;
+// rows 6-7 stay full width. Made for reading the gear at a glance.
 // No frame buffer: glyphs are rendered on the fly and sent in 16-byte chunks,
 // one chunk per service() call, so the display never blocks the control loop
 // for more than ~2 ms.
@@ -16,16 +17,16 @@ class Oled {
  public:
   static constexpr uint8_t BIG_CHARS = 10;
   static constexpr uint8_t LINE_CHARS = 21;
-  static constexpr uint8_t FIRST_LINE = 2;  // rows 2..7 are normal-size lines
   static constexpr uint8_t HERO_X = 40;     // hero layout: text starts here
   static constexpr uint8_t HERO_BIG_CHARS = 7;
   static constexpr uint8_t HERO_LINE_CHARS = 14;
 
   void begin(uint8_t addr, OledType type);
   bool present() const { return present_; }
-  void setBig(const char* text);
+  void setBig(const char* text) { setBigLine(0, text); }
+  void setBigLine(uint8_t row, const char* text);  // row 0, 2, 4 or 6 (and the next)
   void setHero(char c);  // '\0' = normal layout
-  void setLine(uint8_t row, const char* text);
+  void setLine(uint8_t row, const char* text);   // row 0-7, normal size
   void setInvert(bool on);  // lamp test
   void service(uint32_t nowMs);
 
@@ -42,8 +43,8 @@ class Oled {
   uint32_t lastProbeMs_ = 0;
   bool invert_ = false;
   bool invertDirty_ = false;
-  char big_[BIG_CHARS + 1] = {};
   char line_[8][LINE_CHARS + 1] = {};
+  uint8_t bigPairs_ = 0x01;  // one bit per row pair: double-size text
   uint8_t dirty_ = 0xFF;  // one bit per page
   bool busy_ = false;
   uint8_t page_ = 0;

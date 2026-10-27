@@ -1,7 +1,9 @@
 // Shifter base for the 1999 RAV4 transmission controller.
 //
-// A low box that the Beavis Motorsport DIY sequential shifter bolts onto,
-// mounted on the centre console next to the factory gear lever:
+// A low box that the Beavis Motorsport DIY sequential shifter (by bbeavis,
+// CC BY-NC, see beavis_shifter/README.md) bolts onto, mounted on the centre
+// console next to the factory gear lever. The lever swings along the long
+// side (x), so that side points front-to-back in the car:
 //   * top deck with the shifter's bolt pattern (4 x M6, 116 x 74 mm, nuts
 //     trapped underneath) and a hole for the shifter's two switch wires
 //   * inside: three lever-nut connectors join the switch wires to the cable
@@ -11,6 +13,10 @@
 //
 // Print in PETG or ASA, NOT PLA. Print the box upside down (deck on the bed).
 part = "box";  // [box, bottom, assembly, fit, fit_check]
+// The real shifter's STLs, for the assembly picture and the fit check. They
+// keep the author's assembled positions (upside down); beavis() stands them
+// on the deck.
+beavis_dir = "beavis_shifter/";
 
 /* [Overall size] */
 W = 150;            // width (x)
@@ -24,7 +30,8 @@ shifter_holes = [116, 74];   // Beavis shifter M6 pattern, centre to centre
 m6_clear = 6.6;
 m6_nut_af = 10.2;            // across flats (+ clearance)
 m6_nut_h = 5.2;
-wire_hole = [26, 14];        // the shifter's switch wires come down through here
+wire_hole = [26, 14];        // the shifter's switch wires come down through here,
+wire_hole_at = [-0.5, -8.5]; // into the pocket under the shifter's body (its Arduino pocket)
 shifter_offset = [0, 0];     // move the shifter on the deck (e.g. towards the driver)
 
 /* [Cable] */
@@ -63,7 +70,7 @@ module box() {
             translate([cx + sx * shifter_holes[0] / 2, cy + sy * shifter_holes[1] / 2, H - deck_t - 0.01])
                 cylinder(h = m6_nut_h, d = m6_nut_af / cos(30), $fn = 6);
         }
-        translate([cx - wire_hole[0] / 2, cy - wire_hole[1] / 2, H - deck_t - 1])
+        translate([cx + wire_hole_at[0] - wire_hole[0] / 2, cy + wire_hole_at[1] - wire_hole[1] / 2, H - deck_t - 1])
             cube([wire_hole[0], wire_hole[1], deck_t + 2]);
         translate([W * gland_x, D + 1, gland_z]) rotate([90, 0, 0]) cylinder(h = wall + 2, d = gland_d);
         translate([W * gland_x, D - 0.6, gland_z + gland_d / 2 + 2.5]) rotate([90, 0, 180])
@@ -99,9 +106,41 @@ module contents() {
     }
     translate([cx - 25, cy - 8, 0.01]) cube([50, 16, 9]);   // 3 lever-nut connectors (WAGO 221-413)
 }
+// The real shifter, standing on the deck. Its STLs are the whole assembly
+// upside down, with the mounting-hole pattern centred on (-4.5, 40).
+module beavis_frame() { translate([cx + 4.5, cy + 40, H + 266.5]) rotate([180, 0, 0]) children(); }
+module beavis_body() { beavis_frame() import(str(beavis_dir, "MainBody.stl")); }
+module beavis(with_switches = true) {
+    beavis_frame() {
+        color("forestgreen") import(str(beavis_dir, "MainBody.stl"));
+        color([0.15, 0.15, 0.15]) import(str(beavis_dir, "ShifterShaft.stl"));
+        color([0.1, 0.1, 0.1]) import(str(beavis_dir, "Knob.stl"));
+        color("silver") { import(str(beavis_dir, "PivotPin.stl")); import(str(beavis_dir, "PivotCap.stl")); }
+        // the 4 switch spacers (one exported; the others mirror it) and the two
+        // V-155-1C25 switches between them
+        for (mx = [0, 1]) translate([mx * -9, 0, 0]) mirror([mx, 0, 0]) {
+            color([0.1, 0.1, 0.1]) for (dy = [0, 25]) translate([0, dy, 0]) import(str(beavis_dir, "SwitchSpacer.stl"));
+            if (with_switches) color("firebrick") translate([23.1, 35, 199]) cube([15.9, 10, 27.8]);
+        }
+    }
+}
+
 module fit_check() {
     // Must be EMPTY.
     intersection() { box(); contents(); }
+    // the shifter's body stands on the deck without sinking into it
+    intersection() { box(); beavis_body(); }
+    // the wire hole opens into the pocket under the body, not into solid plastic
+    intersection() {
+        beavis_body();
+        translate([cx + wire_hole_at[0] - wire_hole[0] / 2, cy + wire_hole_at[1] - wire_hole[1] / 2, H + 0.01])
+            cube([wire_hole[0], wire_hole[1], 1]);
+    }
+    // the body's footprint is on the deck
+    difference() {
+        intersection() { beavis_body(); translate([-50, -50, H]) cube([W + 100, D + 100, 1]); }
+        translate([0, 0, H - 1]) cube([W, D, 3]);
+    }
 }
 
 if (part == "box") translate([0, D, H]) rotate([180, 0, 0]) box();
@@ -111,10 +150,5 @@ else if (part == "fit") { color("gold", 0.35) box(); color("dimgray") contents()
 else if (part == "assembly") {
     color("gold") box();
     color("grey") translate([0, 0, -plate_t - 5]) bottom();
-    // the shifter itself (rough outline)
-    color("dimgray") translate([cx, cy, H]) {
-        translate([-67, -45, 0]) cube([134, 90, 10]);
-        translate([0, 0, 10]) cylinder(h = 140, d = 12);
-        translate([0, 0, 155]) sphere(d = 40);
-    }
+    beavis();   // the real shifter (bbeavis, CC BY-NC)
 }

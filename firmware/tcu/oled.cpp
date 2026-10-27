@@ -39,9 +39,8 @@ void Oled::begin(uint8_t addr, OledType type) {
   addr_ = addr;
   type_ = type;
   Wire.begin();
-  Wire.setClock(100000);           // runs of up to ~1 m to the dash
+  Wire.setClock(100000);           // standard speed: fine for the 2.5 m cable to the dash pod
   Wire.setWireTimeout(3000, true);  // a bad cable must never hang the TCU
-  copyPadded(big_, "", BIG_CHARS);
   for (uint8_t r = 0; r < 8; r++) copyPadded(line_[r], "", LINE_CHARS);
   present_ = probe() && init();
   lastProbeMs_ = millis();
@@ -77,12 +76,15 @@ bool Oled::init() {
   return ok;
 }
 
-void Oled::setBig(const char* text) {
-  char tmp[BIG_CHARS + 1];
+void Oled::setBigLine(uint8_t row, const char* text) {
+  if (row > 6 || (row & 1)) return;
+  const uint8_t pair = 1 << (row / 2);
+  char tmp[LINE_CHARS + 1];
   copyPadded(tmp, text, BIG_CHARS);
-  if (strcmp(tmp, big_) == 0) return;
-  memcpy(big_, tmp, sizeof(tmp));
-  dirty_ |= 0x03;
+  if ((bigPairs_ & pair) && strcmp(tmp, line_[row]) == 0) return;
+  bigPairs_ |= pair;
+  memcpy(line_[row], tmp, sizeof(tmp));
+  dirty_ |= 3 << row;
 }
 
 void Oled::setHero(char c) {
@@ -92,7 +94,15 @@ void Oled::setHero(char c) {
 }
 
 void Oled::setLine(uint8_t row, const char* text) {
-  if (row < FIRST_LINE || row > 7) return;
+  if (row > 7) return;
+  const uint8_t pair = 1 << (row / 2);
+  if (bigPairs_ & pair) {
+    // The pair goes back to two normal rows; the other one starts blank.
+    bigPairs_ &= ~pair;
+    copyPadded(line_[row ^ 1], "", LINE_CHARS);
+    line_[row][0] = '\0';  // force the update below
+    dirty_ |= 3 << (row & ~1);
+  }
   char tmp[LINE_CHARS + 1];
   copyPadded(tmp, text, LINE_CHARS);
   if (strcmp(tmp, line_[row]) == 0) return;
@@ -107,7 +117,8 @@ void Oled::setInvert(bool on) {
 }
 
 uint8_t Oled::columnByte(uint8_t page, uint8_t x) const {
-  if (hero_ && page < 6) {
+  const bool heroArea = hero_ && page < 6;
+  if (heroArea) {
     if (x < HERO_X) {
       // 5x7 glyph scaled 6x: columns 2..31, rows 3..44.
       if (x < 2 || x >= 32) return 0;
@@ -120,24 +131,15 @@ uint8_t Oled::columnByte(uint8_t page, uint8_t x) const {
       return out;
     }
     x -= HERO_X;
-    if (page < FIRST_LINE) {
-      const uint8_t idx = x / 12;
-      if (idx >= HERO_BIG_CHARS) return 0;
-      const uint8_t b = glyphColumn(big_[idx], (x % 12) / 2);
-      return stretch(page == 0 ? (b & 0x0F) : (b >> 4));
-    }
-    const uint8_t idx = x / 6;
-    if (idx >= HERO_LINE_CHARS) return 0;
-    return glyphColumn(line_[page][idx], x % 6);
   }
-  if (page < FIRST_LINE) {
+  if (bigPairs_ & (1 << (page / 2))) {
     const uint8_t idx = x / 12;
-    if (idx >= BIG_CHARS) return 0;
-    const uint8_t b = glyphColumn(big_[idx], (x % 12) / 2);
-    return stretch(page == 0 ? (b & 0x0F) : (b >> 4));
+    if (idx >= (heroArea ? HERO_BIG_CHARS : BIG_CHARS)) return 0;
+    const uint8_t b = glyphColumn(line_[page & ~1][idx], (x % 12) / 2);
+    return stretch((page & 1) ? (b >> 4) : (b & 0x0F));
   }
   const uint8_t idx = x / 6;
-  if (idx >= LINE_CHARS) return 0;
+  if (idx >= (heroArea ? HERO_LINE_CHARS : LINE_CHARS)) return 0;
   return glyphColumn(line_[page][idx], x % 6);
 }
 

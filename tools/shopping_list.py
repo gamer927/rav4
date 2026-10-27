@@ -55,7 +55,7 @@ ITEMS = [
     ("3. Signal inputs", "BAT85 Schottky diode (DO-35)", "18", "pack of 25", DK, 5, "Input clamps"),
     ("3. Signal inputs", "1N4148 diode", "6", "pack of 100", AMZ, 5, ""),
     ("3. Signal inputs", "Resistor kit, 1/4 W 1 % metal film (600+ pcs)", "≈ 70", "kit", AMZ, 12,
-     "Needs 100, 330, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"),
+     "Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"),
     ("3. Signal inputs", "Extra 10 kΩ resistors", "19 total", "pack of 50", AMZ, 4,
      "Most kits only have 10–20 of each value"),
     ("3. Signal inputs", "100 nF ceramic capacitors, 50 V", "10", "pack of 50", AMZ, 5, ""),
@@ -91,7 +91,6 @@ ITEMS = [
      "ECO, SPORT and MANUAL"),
     ("6. Dash pod controls and screen", "12 mm momentary push button, normally open", "1",
      "pack of 5", AMZ, 10, "TEST"),
-    ("6. Dash pod controls and screen", "5 mm LED + 8 mm chrome panel bezel", "1", "pack", AMZ, 7, "Status light"),
     ("6. Dash pod controls and screen", "2.42\" OLED module, 128 × 64, SSD1309, I²C-capable", "1", "1", AMZ, 20,
      "e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat"),
     ("6. Dash pod controls and screen", "1 µF capacitor (ceramic or electrolytic, 16 V+)", "1", "pack", AMZ, 4,
@@ -120,12 +119,18 @@ ITEMS = [
     # ---------------------------------------------------------------- 9
     ("9. Sequential shifter (Beavis Motorsport DIY)", "V-155-1C25 roller-lever microswitch", "2", "pack of 5", AMZ, 9,
      "Genuine Omron is $4–6 each"),
-    ("9. Sequential shifter (Beavis Motorsport DIY)", "12 mm OD steel pivot tube, or an M12 bolt + nyloc nut", "1",
-     "1", HW, 6, ""),
-    ("9. Sequential shifter (Beavis Motorsport DIY)", "M3 × 70 bolts + nuts", "as the guide says", "pack", HW, 5, ""),
-    ("9. Sequential shifter (Beavis Motorsport DIY)", "M12 ball plungers", "2", "2", AMZ, 14, ""),
-    ("9. Sequential shifter (Beavis Motorsport DIY)", "Compression spring assortment", "1", "kit", AMZ, 8, ""),
-    ("9. Sequential shifter (Beavis Motorsport DIY)", "Shift knob, M10 × 1.5 thread", "1", "1", AMZ, 12, ""),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "Pivot: 12 mm OD tube, 64 mm long, 1.6 mm wall; or an M12 × 75 bolt + nyloc nut + 2 washers", "1",
+     "1", HW, 6, "The tube needs the printed pivot pin and cap"),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "M3 × 70 hex-head bolts + washers + nyloc nuts", "4 each", "pack", HW, 5,
+     "Hold the two switches and their spacers"),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "M10 × 1.5 bolts: 2 × 30–35 mm (travel stops) + 1 × ~65 mm (cut into the knob stud)",
+     "3", "loose", HW, 5, "Cut the head off the long one: 60–70 mm of thread"),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "M12 × 1.75 spring ball plungers (Kipp K0309 type)", "2", "2", AMZ, 14,
+     "Optional: the detent 'click'"),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "Compression springs, 1.8 mm wire, 14 mm OD, 40 mm long", "2", "pack", AMZ, 8,
+     "Centre the lever; they sit over the travel-stop bolts"),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "Shift knob, M10 × 1.5 thread", "1", "1", AMZ, 12,
+     "Or print Knob.stl from hardware/beavis_shifter/"),
 ]
 
 # Tools you may already own. The 3D printer and jack stands are yours already.
@@ -141,7 +146,7 @@ TOOLS = [
     ("IR thermometer", "", 15, ""),
     ("Drain pan + funnel", "", 10, ""),
     ("Hot-glue gun", "", 10, ""),
-    ("Drill + 3 mm bit", "Only if your perfboards have no corner holes", 0, "Usually owned"),
+    ("Drill + 3 mm and 6.5 mm bits", "6.5 mm opens the shifter's M6 holes; 3 mm only if your perfboards have no corner holes", 0, "Usually owned"),
     ("3D printer", "You have one", 0, "Owned"),
     ("Four jack stands", "You have them", 0, "Owned"),
 ]
@@ -149,6 +154,7 @@ TOOLS = [
 OPTIONAL = [
     ("Genuine Arduino Mega instead of a clone", 26),
     ("3M VHB tape, to stick the dash-pod mount down instead of screwing it", 8),
+    ("USB-B panel-mount extension, 50 cm: plug the laptop in from the glovebox", 8),
     ("Cheap logic analyser (checks speed and tach signals)", 12),
 ]
 
@@ -204,12 +210,13 @@ def main():
     md.append("1. **Fuse blade size** in the cabin fuse box (standard ATO/ATC or mini): for the fuse "
               "tap and inline fuse holders.")
     md.append("2. **ATF cooler hose inside diameter** (usually 5/16\" or 3/8\"): for the barbed tee.")
-    md.append("3. **Space behind the glovebox**: the TCU box is 216 × 178 × 51 mm (244 mm wide with "
-              "its mounting ears).")
-    md.append("4. **A spot for the dash pod**: 210 × 64 × 64 mm, plus its hinge mount, on the dash top "
-              "(driver's side, never over the passenger airbag) or on the ceiling above the windscreen.")
+    md.append("3. **A spot for the TCU box**, ideally under the passenger side of the dash where you "
+              "can reach it: 216 × 178 × 51 mm (244 mm wide with its mounting ears), bolted to metal.")
+    md.append("4. **A spot for the dash pod**: 200 × 64 × 64 mm, plus its hinge mount, on the dash top "
+              "(driver's side, never over the passenger airbag).")
     md.append("5. **Space on the centre console** beside the gear lever for the shifter base: "
-              "150 × 100 × 29 mm, plus the shifter on top.")
+              "150 × 100 mm, long side front-to-back. With the shifter on it, it stands about 35 cm "
+              "tall: check it clears the dash and the radio.")
     md.append("")
     md.append("## Where to order")
     md.append("")

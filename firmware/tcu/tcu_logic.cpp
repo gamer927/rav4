@@ -64,6 +64,7 @@ void Controller::begin(uint32_t nowMs, bool watchdogReset) {
   now_ = nowMs;
   wdtReset_ = watchdogReset;
   upSince_ = downSince_ = nowMs;
+  selBadSince_ = nowMs;
   dropRefMs_ = nowMs;
   decelRefMs_ = nowMs;
   lastStepMs_ = tpsRefMs_ = nowMs;
@@ -86,10 +87,12 @@ const Outputs& Controller::step(const Inputs& in) {
       exitToStock(EV_FAULT);
     } else if (!armed_ || !in.customRequested || !in.leverInD) {
       exitToStock(EV_STOCK);
+    } else if (selError_) {
+      exitToStock(EV_MODE_SELECT);  // not latched: fixing the switches re-engages
     } else {
       runCustom(in);
     }
-  } else if (armed_ && in.customRequested && in.leverInD && !latched_ && !active_) {
+  } else if (armed_ && in.customRequested && in.leverInD && !latched_ && !active_ && selValid_) {
     tryEnterCustom(in);
   }
 
@@ -97,20 +100,24 @@ const Outputs& Controller::step(const Inputs& in) {
   return out_;
 }
 
+// Exactly one of ECO, SPORT and MANUAL must be on. Anything else (none, or
+// two or three) for longer than MODE_SWITCH_GRACE_MS hands control back to
+// the factory ECU until the switches are fixed. The grace time lets you move
+// from one switch to another (both on, or none, for a moment) without a
+// handover; meanwhile the last valid selection carries on.
 void Controller::updateMode(const Inputs& in) {
-  if (out_.control == CTRL_MANUAL) {
-    // MANUAL is SPORT that you shift yourself: SPORT's lockup and pedal
-    // response whatever the switches say. Back in AUTO the switches apply.
-    out_.mode = MODE_SPORT;
-  } else if (in.eco && in.sport) {
-    out_.mode = MODE_NORMAL;  // both switches on: no single mode wins
-  } else if (in.eco) {
-    out_.mode = MODE_ECO;
-  } else if (in.sport) {
-    out_.mode = MODE_SPORT;
-  } else {
-    out_.mode = MODE_NORMAL;
+  const uint8_t on = (in.eco ? 1 : 0) + (in.sport ? 1 : 0) + (in.manual ? 1 : 0);
+  selValid_ = on == 1;
+  if (selValid_) {
+    selBadSince_ = now_;
+    selError_ = false;
+    manualSel_ = in.manual;
+    // MANUAL is SPORT that you shift yourself: SPORT's lockup and pedal response.
+    out_.mode = in.eco ? MODE_ECO : MODE_SPORT;
+  } else if (elapsed(now_, selBadSince_, cfg::MODE_SWITCH_GRACE_MS)) {
+    selError_ = true;
   }
+  out_.modeSelect = !selError_ ? SEL_OK : on ? SEL_SEVERAL : SEL_NONE;
 }
 
 void Controller::updateButtons(const Inputs& in) {
@@ -139,7 +146,7 @@ void Controller::updateWarnings(const Inputs& in) {
     w |= WARN_ATF_SENSOR;
   }
 
-  if (in.eco && in.sport) w |= WARN_MODE_SWITCH;
+  if (selError_) w |= WARN_MODE_SWITCH;
   if ((in.up && elapsed(now_, upSince_, cfg::STUCK_BUTTON_MS)) ||
       (in.down && elapsed(now_, downSince_, cfg::STUCK_BUTTON_MS))) {
     w |= WARN_BUTTON_STUCK;
@@ -234,7 +241,7 @@ void Controller::tryEnterCustom(const Inputs& in) {
   brakeHold_ = liftHold_ = highTpsSeen_ = false;
   lastLockupChangeMs_ = now_;
   overRev_ = Persist();
-  out_.control = in.manual ? CTRL_MANUAL : CTRL_AUTO;
+  out_.control = manualSel_ ? CTRL_MANUAL : CTRL_AUTO;
   raise(EV_CUSTOM, true);
 }
 
@@ -253,7 +260,7 @@ void Controller::runCustom(const Inputs& in) {
   }
 
   // The MANUAL switch picks who shifts: on, the shifter lever; off, the map.
-  const Control want = in.manual ? CTRL_MANUAL : CTRL_AUTO;
+  const Control want = manualSel_ ? CTRL_MANUAL : CTRL_AUTO;
   if (out_.control != want) {
     out_.control = want;
     raise(want == CTRL_MANUAL ? EV_MANUAL : EV_AUTO_RESUMED, true);
@@ -266,7 +273,6 @@ void Controller::runCustom(const Inputs& in) {
     }
   }
 
-  updateMode(in);  // the MANUAL switch may have changed AUTO <-> MANUAL this step
   revLimitGuard(in);
   if (out_.control == CTRL_AUTO) {
     autoSchedule(in);

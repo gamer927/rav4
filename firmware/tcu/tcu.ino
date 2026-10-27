@@ -29,7 +29,6 @@ namespace pin {
 constexpr uint8_t VSS = 2;           // INT4, conditioned VSS square wave
 constexpr uint8_t TACH = 3;          // INT5, conditioned tach square wave
 constexpr uint8_t RELAY = 6;         // relay-bank driver, HIGH = TCU in control
-constexpr uint8_t CONSOLE_LED = 7;   // dash pod "TCU" LED (330 R to the LED)
 constexpr uint8_t S1 = 8;            // high-side driver on (via ULN2803 + P-MOSFET), solenoid S1
 constexpr uint8_t S2 = 9;            // high-side driver on, shift solenoid 2
 constexpr uint8_t SL = 10;           // high-side driver on, lockup solenoid
@@ -38,7 +37,7 @@ constexpr uint8_t STATUS_LED = 13;
 constexpr uint8_t UP = 22;           // shifter lever upshift microswitch (X7)
 constexpr uint8_t DOWN = 23;         // shifter lever downshift microswitch (X7)
 constexpr uint8_t ECO = 24;          // ECO switch
-constexpr uint8_t SPORT = 25;        // SPORT switch (both off = NORMAL)
+constexpr uint8_t SPORT = 25;        // SPORT switch (exactly one of ECO/SPORT/MANUAL on)
 constexpr uint8_t MASTER = 26;       // ON/OFF switch: closed = ON (CUSTOM); open/broken wire = STOCK
 constexpr uint8_t BRAKE = 27;        // opto from stop-lamp switch (STP)
 constexpr uint8_t LEVER_D = 28;      // opto from park/neutral switch "D" output
@@ -336,7 +335,6 @@ void applyTestOutputs(const tcu::TestOutputs& t) {
   digitalWrite(pin::S1, t.s1 ? HIGH : LOW);
   digitalWrite(pin::S2, t.s2 ? HIGH : LOW);
   digitalWrite(pin::SL, t.sl ? HIGH : LOW);
-  digitalWrite(pin::CONSOLE_LED, t.lamps ? HIGH : LOW);
   digitalWrite(pin::STATUS_LED, t.lamps ? HIGH : LOW);
 }
 
@@ -346,46 +344,22 @@ void updateLeds(const tcu::Outputs& o, uint32_t now) {
   else if (o.control != tcu::CTRL_STOCK) on = true;                     // solid: TCU active
   else if (o.armed && o.event == tcu::EV_NEED_SYNC) on = (now / 500) & 1;  // slow: stop to engage
   else on = false;
-  digitalWrite(pin::CONSOLE_LED, on ? HIGH : LOW);
   digitalWrite(pin::STATUS_LED, on ? HIGH : LOW);
 }
 
 // --------------------------------------------------------------- text
-const char* controlText(tcu::Control c) {
-  switch (c) {
-    case tcu::CTRL_AUTO: return "AUTO";
-    case tcu::CTRL_MANUAL: return "MAN";
-    default: return "STOCK";
-  }
+// Everything on the screen is plain English: no codes to look up.
+const char* modeWord(const tcu::Outputs& o) {
+  if (o.control == tcu::CTRL_STOCK) return "STOCK";
+  if (o.control == tcu::CTRL_MANUAL) return "MANUAL";
+  return o.mode == tcu::MODE_ECO ? "ECO" : "SPORT";
 }
 
-const char* modeText(tcu::DriveMode m) {
-  switch (m) {
-    case tcu::MODE_ECO: return "ECO";
-    case tcu::MODE_SPORT: return "SPORT";
-    default: return "NORM";
-  }
+int32_t toDisplayTemp(float c) {
+  const float t = cfg::TEMP_IN_F ? c * 1.8f + 32.0f : c;
+  return (int32_t)(t + (t < 0 ? -0.5f : 0.5f));
 }
-
-const char* eventText(tcu::Event e) {
-  switch (e) {
-    case tcu::EV_CUSTOM: return "TCU ACTIVE";
-    case tcu::EV_STOCK: return "FACTORY ECU";
-    case tcu::EV_FAULT: return "FAULT - FACTORY ECU";
-    case tcu::EV_NEED_SYNC: return "STOP TO ENGAGE";
-    case tcu::EV_SHIFT: return "";
-    case tcu::EV_DENY_OVERREV: return "DENIED: OVER-REV";
-    case tcu::EV_DENY_TOO_SLOW: return "DENIED: TOO SLOW";
-    case tcu::EV_DENY_BUSY: return "DENIED: SHIFTING";
-    case tcu::EV_DENY_LIMIT: return "";
-    case tcu::EV_AUTO_DOWNSHIFT: return "AUTO DOWNSHIFT";
-    case tcu::EV_REV_LIMIT_UPSHIFT: return "REV LIMIT UPSHIFT";
-    case tcu::EV_AUTO_RESUMED: return "AUTO";
-    case tcu::EV_MANUAL: return "MANUAL";
-    case tcu::EV_DENY_NOT_MANUAL: return "FLIP MANUAL ON";
-    default: return "";
-  }
-}
+const char* tempUnit() { return cfg::TEMP_IN_F ? "F" : "C"; }
 
 // Small fixed-width text builder (AVR printf has no %f).
 struct Text {
@@ -422,20 +396,22 @@ struct Text {
 
 const char* inhibitText(tcu::TestInhibit i) {
   switch (i) {
-    case tcu::INH_MASTER: return "ON/OFF SWITCH IS ON";
-    case tcu::INH_LEVER_D: return "SHIFT OUT OF D";
-    case tcu::INH_MOVING: return "VEHICLE MOVING";
-    case tcu::INH_ENGINE: return "ENGINE RUNNING";  // or a charger connected
-    case tcu::INH_SUPPLY: return "BATTERY LOW";
+    case tcu::INH_MASTER: return "ON/OFF IS ON";
+    case tcu::INH_LEVER_D: return "LEVER IS IN D";
+    case tcu::INH_MOVING: return "THE CAR IS MOVING";
+    case tcu::INH_ENGINE: return "ENGINE IS RUNNING";  // or a charger connected
+    case tcu::INH_SUPPLY: return "BATTERY IS TOO LOW";
     default: return "";
   }
 }
 
+// OK = passed, BAD = failed, CHECK = done, but you have to check it yourself
+// (did the screen flash? a solenoid without current sensing), SKIP = skipped.
 const char* resultText(tcu::TestResult r) {
   switch (r) {
-    case tcu::TR_PASS: return "PASS";
-    case tcu::TR_FAIL: return "FAIL";
-    case tcu::TR_CHECK: return "CHK";
+    case tcu::TR_PASS: return "OK";
+    case tcu::TR_FAIL: return "BAD";
+    case tcu::TR_CHECK: return "CHECK";
     case tcu::TR_SKIP: return "SKIP";
     default: return "--";
   }
@@ -443,80 +419,113 @@ const char* resultText(tcu::TestResult r) {
 
 const char* promptText(tcu::TestPrompt p) {
   switch (p) {
-    case tcu::PR_UP: return "SHIFTER UP";
-    case tcu::PR_DOWN: return "SHIFTER DOWN";
-    case tcu::PR_ECO: return "ONLY ECO ON";
-    case tcu::PR_SPORT: return "ONLY SPORT ON";
-    case tcu::PR_MANUAL: return "ONLY MANUAL ON";
-    case tcu::PR_BRAKE: return "PRESS BRAKE";
+    case tcu::PR_UP: return "UPSHIFT THE LEVER";
+    case tcu::PR_DOWN: return "DOWNSHIFT THE LEVER";
+    case tcu::PR_ECO: return "TURN ON ONLY ECO";
+    case tcu::PR_SPORT: return "TURN ON ONLY SPORT";
+    case tcu::PR_MANUAL: return "TURN ON ONLY MANUAL";
+    case tcu::PR_BRAKE: return "PRESS THE BRAKE";
     default: return "";
   }
 }
 
-// "SOL S2    FAIL 0.02A"
+// "SOLENOID 2 BAD  0.01A" or "MANUAL SWITCH   OK"
 Text itemLine(tcu::TestId id) {
   Text t;
   const tcu::TestResult r = selfTest.result(id);
-  t.s(tcu::testName(id)).pad(10).s(resultText(r)).pad(15);
-  if (r == tcu::TR_NONE || r == tcu::TR_SKIP) return t;
   const float v = selfTest.value(id);
+  bool hasValue = r != tcu::TR_NONE && r != tcu::TR_SKIP;
+  switch (id) {
+    case tcu::T_SUPPLY: case tcu::T_TPS: case tcu::T_ATF: break;
+    case tcu::T_SOL_S1: case tcu::T_SOL_S2: case tcu::T_SOL_SL: case tcu::T_RELAY_RELEASE:
+      hasValue = hasValue && r != tcu::TR_CHECK;
+      break;
+    default: hasValue = false; break;
+  }
+  t.s(tcu::testName(id)).pad(hasValue ? 11 : 16).s(resultText(r));
+  if (!hasValue) return t;
+  t.pad(16);
   switch (id) {
     case tcu::T_SUPPLY: t.fixed(v, 1).s("V"); break;
     case tcu::T_TPS: t.n((int32_t)v).s("%"); break;
-    case tcu::T_ATF: t.n((int32_t)v).s("C"); break;
-    case tcu::T_SOL_S1:
-    case tcu::T_SOL_S2:
-    case tcu::T_SOL_SL:
-    case tcu::T_RELAY_RELEASE:
-      if (r != tcu::TR_CHECK) t.fixed(v, 2).s("A");
-      break;
-    default: break;
+    case tcu::T_ATF: t.n(toDisplayTemp(v)).s(tempUnit()); break;
+    default: t.fixed(v, 2).s("A"); break;
   }
   return t;
 }
 
-void bitStatus(Text& t) {
-  if (selfTest.active()) {
-    t.s("TESTING");
-  } else if (selfTest.aborted()) {
-    t.s("ABORTED");
-  } else if (!selfTest.hasRun()) {
-    t.s("NOT RUN");
-  } else {
-    // Compact, to fit beside the gear digit: "FAIL 2", "PASS CHK 3" or "PASS".
-    const tcu::TestSummary m = selfTest.summary();
-    if (m.fail) t.s("FAIL ").n(m.fail);
-    else if (m.check) t.s("PASS CHK ").n(m.check);
-    else t.s("PASS");
-  }
+// The first fault, in words (at most 14 characters).
+const char* faultWords(uint16_t faults) {
+  if (faults & tcu::FAULT_SUPPLY) return "BATTERY VOLTS";
+  if (faults & tcu::FAULT_VSS) return "NO SPEED SIGNL";
+  if (faults & tcu::FAULT_TPS) return "PEDAL SENSOR";
+  if (faults & tcu::FAULT_RATIO) return "WRONG GEAR";
+  if (faults & tcu::FAULT_SOLENOID) return "SOLENOID WIRE";
+  return "";
 }
 
-void appendFlags(Text& t, uint16_t bits, const char* const* names, uint8_t count) {
-  if (!bits) {
-    t.s("none");
-    return;
-  }
-  for (uint8_t i = 0; i < count; i++) {
-    if (bits & (1u << i)) t.s(names[i]).s(" ");
-  }
-}
-const char* const kFaultNames[] = {"SUPPLY", "VSS", "TPS", "RATIO", "SOLND"};
-const char* const kWarnNames[] = {"ATFSNS", "HOT", "CRIT", "ECO+SPT", "SHIFTR", "WDT"};
+uint32_t inhibitShownUntil = 0;  // show a refused self-test for a few seconds
 
-uint32_t inhibitShownUntil = 0;  // show an IBIT refusal for a few seconds
+// What the MAIN page says: a headline (double size, 10 chars, under the
+// gear) and up to four short lines (14 chars, beside the gear). Highest
+// priority first; returns false when there's nothing to report.
+struct Message {
+  Text head;
+  Text line[4];
+};
 
-// Event / prompt line on the MAIN page.
-void messageText(Text& t, const tcu::Outputs& o, uint32_t now) {
-  if (selfTest.active()) {
-    const tcu::TestPrompt pr = selfTest.prompt();
-    t.s(pr ? promptText(pr) : "SELF TEST RUNNING");
-  } else if ((int32_t)(inhibitShownUntil - now) > 0) {
-    t.s("NO TEST: ").s(inhibitText(selfTest.inhibit()));
-  } else if (!cfg::CALIBRATED && dbMaster.state()) {
-    t.s("NOT CALIBRATED");
-  } else {
-    t.s(eventText(o.event));
+bool alertMessage(const tcu::Outputs& o, uint32_t now, Message& m) {
+  static uint8_t seenSeq = 0;
+  static uint32_t eventAt = 0;
+  if (o.eventSeq != seenSeq) {
+    seenSeq = o.eventSeq;
+    eventAt = now;
   }
+  const bool switchOn = dbMaster.state();
+  auto say = [&](const char* h, const char* a, const char* b = "", const char* c = "", const char* d = "") {
+    m.head.s(h);
+    m.line[0].s(a);
+    m.line[1].s(b);
+    m.line[2].s(c);
+    m.line[3].s(d);
+    return true;
+  };
+  if (o.faults) return say("PROBLEM", faultWords(o.faults), "STOCK SHIFTS.", "ON/OFF OFF+ON", "TO TRY AGAIN.");
+  if (switchOn && o.modeSelect == tcu::SEL_SEVERAL)
+    return say("MODE ERROR", "TWO MODES ON.", "TURN ON ONLY", "ECO, SPORT OR", "MANUAL.");
+  if (switchOn && o.modeSelect == tcu::SEL_NONE)
+    return say("PICK MODE", "NO MODE ON.", "TURN ON ONE:", "ECO, SPORT OR", "MANUAL.");
+  if (switchOn && !cfg::CALIBRATED) return say("NOT READY", "NOT CALIBRATED", "STOCK SHIFTS", "UNTIL IT IS:", "BUILD BOOK 13");
+  if (o.warnings & tcu::WARN_ATF_CRITICAL) {
+    Text t;
+    t.s("OVER ").n(toDisplayTemp(cfg::ATF_CRITICAL_C)).s(tempUnit()).s("!");
+    return say("TRANS HOT!", t.buf, "PULL OVER AND", "LET IT COOL.");
+  }
+  if (o.warnings & tcu::WARN_ATF_HOT) {
+    Text t;
+    t.s("OVER ").n(toDisplayTemp(cfg::ATF_HOT_C)).s(tempUnit()).s(".");
+    return say("TRANS HOT", t.buf, "EASE OFF A BIT.");
+  }
+  if ((uint32_t)(now - eventAt) < 4000 || o.event == tcu::EV_NEED_SYNC) {
+    switch (o.event) {
+      case tcu::EV_DENY_OVERREV: return say("NO SHIFT", "TOO FAST FOR", "THAT GEAR: THE", "ENGINE WOULD", "OVER-REV.");
+      case tcu::EV_DENY_TOO_SLOW: return say("NO SHIFT", "TOO SLOW FOR", "THAT GEAR.");
+      case tcu::EV_DENY_BUSY: return say("NO SHIFT", "STILL DOING", "THE LAST ONE.", "TRY AGAIN.");
+      case tcu::EV_DENY_NOT_MANUAL: return say("MANUAL OFF", "FLIP MANUAL ON", "TO SHIFT WITH", "THE LEVER.");
+      case tcu::EV_AUTO_DOWNSHIFT: return say("DOWNSHIFT", "AUTOMATIC:", "SLOWING DOWN.");
+      case tcu::EV_REV_LIMIT_UPSHIFT: return say("UPSHIFT", "AUTOMATIC:", "ENGINE AT", "REDLINE.");
+      case tcu::EV_NEED_SYNC: return say("STOP FIRST", "TCU TAKES", "OVER WHEN", "STOPPED.");
+      case tcu::EV_CUSTOM: return say("TCU ON", "TCU IS DOING", "THE SHIFTING.");
+      case tcu::EV_STOCK: return say("TCU OFF", "STOCK", "SHIFTING.");
+      case tcu::EV_MANUAL: return say("MANUAL", "YOU SHIFT WITH", "THE LEVER.");
+      case tcu::EV_AUTO_RESUMED: return say("AUTO", "TCU SHIFTS", "FOR YOU.");
+      default: break;
+    }
+  }
+  if (switchOn && !o.armed) return say("WAITING", "ON/OFF WAS ON", "AT KEY-ON.", "FLIP IT OFF,", "THEN ON.");
+  if (o.warnings & tcu::WARN_ATF_SENSOR) return say("NO TEMP", "TEMP PROBE", "NOT WORKING.", "CHECK ITS PLUG.");
+  if (o.warnings & tcu::WARN_BUTTON_STUCK) return say("SHIFTER?", "A LEVER SWITCH", "IS STUCK ON.", "CHECK THE", "SHIFTER.");
+  return false;
 }
 
 // In STOCK, log every shift and lockup change the factory ECU makes, with
@@ -590,120 +599,115 @@ void serviceUsbLog(uint32_t now) {
 enum Page : uint8_t { PG_MAIN, PG_SENSORS, PG_TEST, PG_COUNT };
 uint8_t page = PG_MAIN;
 
-// MAIN page, hero layout: the gear as one giant digit on the left (18 mm tall
-// on a 2.42" screen) and the mode beside it, both readable at a glance from
-// the driver's seat. The small lines are for when you're parked.
+// MAIN page: the gear as one giant digit (18 mm tall on a 2.42" screen),
+// the mode beside it (ECO / SPORT / MANUAL / STOCK), and one big line under
+// both: the trans temperature, or what needs your attention. The small lines
+// beside the gear explain the big one.
 void renderMain(const tcu::Outputs& o, uint32_t now) {
   oled.setHero(o.gear ? (char)('0' + o.gear) : '-');
-  oled.setBig(o.control == tcu::CTRL_MANUAL ? "MANUAL"
-              : o.control == tcu::CTRL_STOCK ? "STOCK"
-                                             : modeText(o.mode));
-  Text r2, r3, r4, r5, r6, r7;
-  if (!cfg::CALIBRATED) {
-    r2.s("NOT CALIBRATED");
-  } else {
-    if (o.lockup) r2.s("LOCKUP ");
-    if (o.cornerHold) r2.s("CORNER");
-    else if (o.gearHold) r2.s("HOLD");
+  oled.setBigLine(0, modeWord(o));
+  Message m;
+  if (!alertMessage(o, now, m)) {
+    m.head.s("TRANS ");
+    if (lastIn.atfValid) m.head.n(toDisplayTemp(lastIn.atfC)).s(tempUnit());
+    else m.head.s("--");
+    if (!dbMaster.state()) {
+      m.line[0].s("TCU IS OFF:");
+      m.line[1].s("STOCK SHIFTING");
+    } else if (o.control == tcu::CTRL_STOCK && !lastIn.leverInD) {
+      m.line[0].s("LEVER NOT IN D");
+      m.line[1].s("STOCK SHIFTING");
+    } else if (o.cornerHold) {
+      m.line[0].s("CORNER:");
+      m.line[1].s("HOLDING GEAR");
+    } else if (o.gearHold) {
+      m.line[0].s("HOLDING GEAR");
+    }
+    if (o.warnings & tcu::WARN_WDT_RESET) {
+      m.line[2].s("TCU RESTARTED");
+    }
+    if (selfTest.hasRun() && !selfTest.active() && selfTest.summary().fail) {
+      m.line[2].s("SELF-TEST BAD:");
+      m.line[3].s("TAP TEST: INFO");
+    }
   }
-  r3.s("BIT ");
-  bitStatus(r3);
-  r4.s("FLT ");
-  appendFlags(r4, o.faults, kFaultNames, 5);
-  r5.s("WRN ");
-  appendFlags(r5, o.warnings, kWarnNames, 6);
-  messageText(r6, o, now);
-  r7.n((int32_t)(lastIn.speedMph + 0.5f)).s(" mph  ATF ");
-  if (lastIn.atfValid) r7.n((int32_t)lastIn.atfC).s("C");
-  else r7.s("--");
-  oled.setLine(2, r2.buf);
-  oled.setLine(3, r3.buf);
-  oled.setLine(4, r4.buf);
-  oled.setLine(5, r5.buf);
-  oled.setLine(6, r6.buf);
-  oled.setLine(7, r7.buf);
+  for (uint8_t i = 0; i < 4; i++) oled.setLine(2 + i, m.line[i].buf);
+  oled.setBigLine(6, m.head.buf);
 }
 
 void renderSensors() {
   oled.setHero('\0');
-  oled.setBig("SENSORS");
-  Text r2, r3, r4, r5, r6, r7;
-  r2.s("SPEED").pad(9).n((int32_t)(lastIn.speedMph + 0.5f)).s(" mph");
-  r3.s("ENGINE").pad(9);
-  if (lastIn.rpmValid) r3.n((int32_t)lastIn.engineRpm).s(" rpm");
-  else r3.s("--");
-  r4.s("THROTTLE").pad(9);
-  if (lastIn.tpsValid) r4.n((int32_t)(lastIn.tpsPct + 0.5f)).s(" %");
-  else r4.s("FAULT");
-  r5.s("ATF TEMP").pad(9);
-  if (lastIn.atfValid) r5.n((int32_t)lastIn.atfC).s(" C");
-  else r5.s("FAULT");
-  r6.s("BATT ").fixed(lastIn.batteryV, 1).s("V").pad(11).s("LAT ");
-  if (lastIn.latValid) r6.fixed(lastIn.latG < 0 ? -lastIn.latG : lastIn.latG, 2).s("g");
-  else r6.s("--");
-  if (lastIn.solSenseValid) {
-    r7.s("SOL A ");
-    for (uint8_t i = 0; i < 3; i++) r7.fixed(lastIn.solAmps[i], 2).s(" ");
-  } else {
-    r7.s("SOL A  not wired");
-  }
-  oled.setLine(2, r2.buf);
-  oled.setLine(3, r3.buf);
-  oled.setLine(4, r4.buf);
-  oled.setLine(5, r5.buf);
-  oled.setLine(6, r6.buf);
-  oled.setLine(7, r7.buf);
+  oled.setLine(0, "SENSORS   (TAP: NEXT)");
+  Text r[7];
+  r[0].s("SPEED").pad(12).n((int32_t)(lastIn.speedMph + 0.5f)).s(" MPH");
+  r[1].s("ENGINE").pad(12);
+  if (lastIn.rpmValid) r[1].n((int32_t)lastIn.engineRpm).s(" RPM");
+  else r[1].s("--");
+  r[2].s("GAS PEDAL").pad(12);
+  if (lastIn.tpsValid) r[2].n((int32_t)(lastIn.tpsPct + 0.5f)).s(" %");
+  else r[2].s("NOT WORKING");
+  r[3].s("TRANS TEMP").pad(12);
+  if (lastIn.atfValid) r[3].n(toDisplayTemp(lastIn.atfC)).s(" ").s(tempUnit());
+  else r[3].s("NOT WORKING");
+  r[4].s("BATTERY").pad(12).fixed(lastIn.batteryV, 1).s(" V");
+  r[5].s("SIDE FORCE").pad(12);
+  if (lastIn.latValid) r[5].fixed(lastIn.latG < 0 ? -lastIn.latG : lastIn.latG, 2).s(" G");
+  else r[5].s("--");
+  r[6].s("BRAKE ").s(lastIn.brake ? "ON " : "OFF").s("  ").s(lastIn.leverInD ? "LEVER IN D" : "NOT IN D");
+  for (uint8_t i = 0; i < 7; i++) oled.setLine(1 + i, r[i].buf);
 }
 
 void renderTest(uint32_t now) {
   oled.setHero('\0');
-  Text big;
-  if (selfTest.active()) big.s("TESTING");
-  else if (selfTest.aborted()) big.s("ABORTED");
-  else if (!selfTest.hasRun()) big.s("BIT");
-  else big.s(selfTest.ibitDone() ? "BIT " : "PBIT ").s(selfTest.summary().fail ? "FAIL" : "PASS");
-  oled.setBig(big.buf);
+  const tcu::TestSummary sum = selfTest.summary();
+  const bool refused = (int32_t)(inhibitShownUntil - now) > 0;
+  if (refused) oled.setBig("CAN'T TEST");
+  else if (selfTest.active()) oled.setBig("TESTING");
+  else if (selfTest.aborted()) oled.setBig("STOPPED");
+  else if (!selfTest.hasRun()) oled.setBig("SELF-TEST");
+  else oled.setBig(sum.fail ? "PROBLEM" : "ALL OK");
   uint8_t row = 2;
   auto line = [&](const char* t) {
     if (row <= 7) oled.setLine(row++, t);
   };
 
-  if ((int32_t)(inhibitShownUntil - now) > 0) {
-    line("CAN'T TEST:");
+  if (refused) {
+    line("NOT NOW, BECAUSE:");
     line(inhibitText(selfTest.inhibit()));
     line("");
-    line("NEEDS: PARKED, ENGINE");
-    line("OFF, LEVER NOT IN D,");
-    line("ON/OFF SWITCH OFF");
+    line("IT NEEDS: PARKED,");
+    line("ENGINE OFF, LEVER IN");
+    line("P, ON/OFF OFF");
     return;
   }
   if (selfTest.active()) {
-    Text t;
     const tcu::TestPrompt pr = selfTest.prompt();
     if (pr) {
+      Text t;
       line(promptText(pr));
-      t.n((int32_t)((selfTest.promptRemainingMs(now) + 999) / 1000)).s("s  (TEST = SKIP)");
+      t.n((int32_t)((selfTest.promptRemainingMs(now) + 999) / 1000)).s("s LEFT. TEST = SKIP");
       line(t.buf);
     } else if (selfTest.phase() == tcu::PH_LAMPS) {
-      line("LAMP TEST: CHECK LEDS");
-      line("AND SCREEN");
+      line("THE SCREEN SHOULD");
+      line("FLASH NOW");
     } else {
-      line(tcu::testName(selfTest.currentTest()));
+      Text t;
+      t.s("CHECKING ").s(tcu::testName(selfTest.currentTest()));
+      line(t.buf);
       line("");
     }
   } else if (selfTest.aborted()) {
-    line("ABORTED:");
+    line("STOPPED BECAUSE");
     line(inhibitText(selfTest.inhibit()));
   } else if (selfTest.hasRun()) {
-    const tcu::TestSummary m = selfTest.summary();
     Text t;
-    t.s("P").n(m.pass).s(" F").n(m.fail).s(" CHK").n(m.check).s(" SKIP").n(m.skip);
+    t.n(sum.pass).s(" OK, ").n(sum.fail).s(" BAD, ").n(sum.check).s(" CHECK");
     line(t.buf);
   } else {
-    line("HOLD TEST 2s TO RUN");
-    line("");
+    line("HOLD TEST 2 SECONDS");
+    line("TO RUN IT");
   }
-  // Remaining rows: failures first, then items needing a human check.
+  // Remaining rows: what failed first, then what needs you to look.
   uint8_t ids[tcu::T_COUNT];
   uint8_t count = 0;
   const tcu::TestResult order[] = {tcu::TR_FAIL, tcu::TR_CHECK};
@@ -717,11 +721,11 @@ void renderTest(uint32_t now) {
   for (uint8_t k = 0; k < shown; k++) line(itemLine((tcu::TestId)ids[k]).buf);
   if (shown < count) {
     Text t;
-    t.s("+").n(count - shown).s(" MORE (USB LOG)");
+    t.s("+").n(count - shown).s(" MORE ON LAPTOP LOG");
     line(t.buf);
   }
-  if (!selfTest.active() && !selfTest.aborted() && selfTest.hasRun() && !count) line("ALL CHECKS PASSED");
-  if (!selfTest.active()) line(selfTest.hasRun() ? "HOLD TEST 2s = RUN" : "");
+  if (!selfTest.active() && !selfTest.aborted() && selfTest.hasRun() && !count) line("EVERY CHECK PASSED");
+  if (!selfTest.active()) line(selfTest.hasRun() ? "HOLD TEST 2s: AGAIN" : "");
   while (row <= 7) line("");
 }
 
@@ -791,9 +795,10 @@ void runWatchdogTest() {
   }
   if (cfg::OLED_INSTALLED) {
     oled.setHero('\0');
-    oled.setBig("WATCHDOG");
-    oled.setLine(2, "TEST: BOARD SHOULD");
-    oled.setLine(3, "RESTART NOW");
+    oled.setBig("RESTART");
+    oled.setLine(2, "SAFETY RESET TEST:");
+    oled.setLine(3, "THE TCU SHOULD");
+    oled.setLine(4, "RESTART NOW");
     for (uint8_t i = 0; i < 40 && oled.present(); i++) {  // flush the changed pages
       wdt_reset();
       oled.service(millis());
@@ -816,7 +821,6 @@ void setup() {
   pinMode(pin::S1, OUTPUT);
   pinMode(pin::S2, OUTPUT);
   pinMode(pin::SL, OUTPUT);
-  pinMode(pin::CONSOLE_LED, OUTPUT);
   pinMode(pin::STATUS_LED, OUTPUT);
 
   // External 2.2k pull-ups do the real work; internal ones are a backstop.

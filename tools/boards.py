@@ -820,7 +820,7 @@ def logic_board():
     # X7 shifter, X4 dash switches, X5 screen, X6 ATF probe.
     for i, n in enumerate(["UP", "DOWN", "GND"]):
         A(Part(f"X7{chr(97 + i)}", fp_tb(), 1 + 2 * i, 1, value=n, step="L1", note=f"X7-{i + 1} shifter {n}"))
-    dash = ["C1 ECO", "C2 SPORT", "C3 MANUAL", "C4 TEST", "C5 ON/OFF", "C6 LED", "C7 GND"]
+    dash = ["C1 ECO", "C2 SPORT", "C3 MANUAL", "C4 TEST", "C5 ON/OFF", "C6 GND"]
     for i, n in enumerate(dash):
         A(Part(f"X4{chr(97 + i)}", fp_tb(), 7 + 2 * i, 1, value=n, step="L1",
                note=f"X4-{i + 1}: {n}"))
@@ -831,7 +831,7 @@ def logic_board():
     A(Part("JB", fp_boxhdr(16), 9, 24, rot=270, value="16-pin box header", step="L1",
            note="notch facing the back edge; pin 1 (square pad) at the right-hand end, back row"))
     b.wire("L1", "5V", "JB.1", "X5a.1", "X6a.1")
-    b.wire("L1", "GND", "JB.2", "X7c.1", "X4g.1", "X5b.1", "X6b.1", "JB.13")
+    b.wire("L1", "GND", "JB.2", "X7c.1", "X4f.1", "X5b.1", "X6b.1", "JB.13")
     b.wire("L1", "SDA (D20)", "JB.11", "X5c.1")
     b.wire("L1", "SCL (D21)", "JB.12", "X5d.1")
 
@@ -852,13 +852,10 @@ def logic_board():
     b.wire("L2", "5V", "JB.1", *[f"RU{i}.2" for i in range(1, n + 1)], *[f"DH{i}.K" for i in range(n, 0, -1)])
     b.wire("L2", "GND", "JB.14", *[f"DL{i}.A" for i in range(1, n + 1)], *[f"CF{i}.2" for i in range(n, 0, -1)])
 
-    # L3: status LED resistor, ATF probe
-    A(Part("RL", fp_r(), 17, 4, rot=90, value="330", step="L3", note="status LED"),
-      Part("RA1", fp_r(), 29, 5, rot=90, value="4.7k", step="L3", note="ATF pull-up"),
+    # L3: ATF probe
+    A(Part("RA1", fp_r(), 29, 5, rot=90, value="4.7k", step="L3", note="ATF pull-up"),
       Part("RA2", fp_r(), 31, 5, rot=90, value="100", step="L3", note="ATF series"),
       Part("ZA", fp_d41(), 33, 5, rot=90, value="1N4733A 5.1 V", step="L3", note="band (K) towards the back"))
-    b.wire("L3", "LED (D7)", "JB.9", "RL.2")
-    b.wire("L3", "C6 LED+", "RL.1", "X4f.1")
     b.wire("L3", "DQ", "X6c.1", "RA1.1", "RA2.1", "ZA.K")
     b.wire("L3", "ATF (D33)", "RA2.2", "JB.10")
     b.wire("L3", "5V", "X6a.1", "RA1.2")
@@ -886,7 +883,7 @@ HUB_A = [  # ribbon A (power board) pin -> Mega pin
 HUB_B = [  # ribbon B (logic board) pin -> Mega pin
     (1, "5V", "5V"), (2, "GND", "GND"), (3, "shifter UP", "D22"), (4, "shifter DOWN", "D23"),
     (5, "ECO", "D24"), (6, "SPORT", "D25"), (7, "ON/OFF", "D26"), (8, "TEST", "D32"),
-    (9, "LED", "D7"), (10, "ATF probe", "D33"), (11, "SDA", "D20 (SDA)"), (12, "SCL", "D21 (SCL)"),
+    (9, "–", "not connected"), (10, "ATF probe", "D33"), (11, "SDA", "D20 (SDA)"), (12, "SCL", "D21 (SCL)"),
     (13, "GND", "GND"), (14, "GND", "GND"), (15, "MANUAL", "D34"), (16, "–", "not connected")]
 
 
@@ -895,7 +892,7 @@ def hub_markdown():
     lines += [f"- [ ] A{p} → **{m}** ({s})" for p, s, m in HUB_A if m != "not connected"]
     lines += ["", "**Header B** (16-way, to the logic board):", ""]
     lines += [f"- [ ] B{p} → **{m}** ({s})" for p, s, m in HUB_B if m != "not connected"]
-    lines += ["", "Pins A25, A26 and B16 stay empty."]
+    lines += ["", "Pins A25, A26, B9 and B16 stay empty."]
     return "\n".join(lines)
 
 
