@@ -97,7 +97,7 @@ static void test_interlocks() {
   const Case cases[] = {
       {"master at CUSTOM", [](Inputs& i) { i.customRequested = true; }, INH_MASTER},
       {"lever in D", [](Inputs& i) { i.leverInD = true; }, INH_LEVER_D},
-      {"moving", [](Inputs& i) { i.speedKmh = 5; }, INH_MOVING},
+      {"moving", [](Inputs& i) { i.speedMph = 5; }, INH_MOVING},
       {"engine rpm", [](Inputs& i) { i.engineRpm = 750; }, INH_ENGINE},
       {"charging voltage (no tach)", [](Inputs& i) { i.rpmValid = false; i.batteryV = 14.1f; }, INH_ENGINE},
       {"low battery", [](Inputs& i) { i.batteryV = 10.2f; }, INH_SUPPLY},

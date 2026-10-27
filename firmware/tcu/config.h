@@ -10,25 +10,28 @@ namespace cfg {
 
 // CUSTOM mode cannot be armed until this is true. Set it only after the
 // driveline and sensor calibration in docs/02-revised-spec.md §8 is done:
-// the over-rev guard is only as good as RPM_PER_KMH and VSS_PULSES_PER_KM.
+// the over-rev guard is only as good as RPM_PER_MPH and VSS_PULSES_PER_MILE.
 constexpr bool CALIBRATED = false;
 
 // ---------------------------------------------------------------- driveline
-// Engine RPM per km/h in each gear with the torque converter LOCKED.
+// All speeds in this file are in mph.
+//
+// Engine RPM per mph in each gear with the torque converter LOCKED.
 // Index 0 is unused. Defaults: 1999 RAV4 automatic ratios as published
 // (2.810 / 1.549 / 1.000 / 0.734, final drive ~4.40) on the factory
-// 215/70R16 tyres (~455 rev/km). Published final-drive figures for this car
+// 215/70R16 tyres (~732 rev/mile). Published final-drive figures for this car
 // disagree (3.18-4.40), so CALIBRATE from logged data (§8.3) before arming.
-constexpr float RPM_PER_KMH[5] = {0.0f, 93.8f, 51.7f, 33.4f, 24.5f};
+// e.g. 4th: 39.4 rpm per mph -> ~3,550 rpm at 90 mph.
+constexpr float RPM_PER_MPH[5] = {0.0f, 151.0f, 83.2f, 53.8f, 39.4f};
 
 // ------------------------------------------------------------------ sensors
 constexpr float ADC_VREF = 5.0f;
 
 // Vehicle speed sensor. Toyota meter-driven SPD is typically 4 pulses/rev at
-// 637 rev/km = 2548 pulses/km. CALIBRATE against GPS.
-constexpr float VSS_PULSES_PER_KM = 2548.0f;
-constexpr uint32_t VSS_MIN_PERIOD_US = 2000;      // reject glitches (> ~700 km/h)
-constexpr uint32_t VSS_TIMEOUT_US = 1500000;      // no pulse for 1.5 s -> 0 km/h
+// 637 rev/km = 2548 pulses/km = ~4101 pulses/mile. CALIBRATE against GPS.
+constexpr float VSS_PULSES_PER_MILE = 4101.0f;
+constexpr uint32_t VSS_MIN_PERIOD_US = 2000;      // reject glitches (> ~440 mph)
+constexpr uint32_t VSS_TIMEOUT_US = 1500000;      // no pulse for 1.5 s -> 0 mph
 
 // Engine tach (4-cyl, wasted-spark igniter): 2 pulses per crank revolution.
 constexpr bool TACH_INSTALLED = true;
@@ -117,16 +120,16 @@ constexpr uint32_t LONG_PRESS_MS = 1000;          // hold [+] = back to AUTO
 constexpr uint32_t STUCK_BUTTON_MS = 10000;
 
 // ------------------------------------------------------------------- safety
-constexpr float STATIONARY_KMH = 3.0f;
+constexpr float STATIONARY_MPH = 2.0f;
 constexpr float MAX_DOWNSHIFT_RPM = 5800.0f;      // predicted rpm after downshift
-constexpr float FIRST_GEAR_MAX_KMH = 45.0f;       // hard cap, independent of ratios
+constexpr float FIRST_GEAR_MAX_MPH = 28.0f;       // hard cap, independent of ratios
 constexpr float REV_LIMIT_UPSHIFT_RPM = 6200.0f;
 constexpr uint32_t REV_LIMIT_HOLD_MS = 150;
 constexpr bool MANUAL_REV_LIMIT_UPSHIFT = true;
 // MANUAL: forced downshift below these speeds (index = current gear) so the
 // car never stops in 3rd/4th. Set [2] to 0 to allow 2nd-gear (snow) starts.
-constexpr float MANUAL_MIN_KMH[5] = {0.0f, 0.0f, 8.0f, 18.0f, 35.0f};
-constexpr float UPSHIFT_MARGIN_KMH = 4.0f;        // no upshift into a forced-downshift zone
+constexpr float MANUAL_MIN_MPH[5] = {0.0f, 0.0f, 5.0f, 11.0f, 22.0f};
+constexpr float UPSHIFT_MARGIN_MPH = 2.5f;        // no upshift into a forced-downshift zone
 constexpr bool ENTER_IN_MANUAL = false;           // CUSTOM starts in AUTO map
 
 constexpr float SUPPLY_MIN_V = 10.5f;
@@ -139,12 +142,12 @@ constexpr float VSS_CHECK_RPM = 2500.0f;
 constexpr float VSS_CHECK_TPS = 15.0f;
 constexpr uint32_t VSS_CHECK_MS = 3000;
 // VSS plausibility: deceleration no car can do (~2.3 g) = signal loss.
-constexpr float VSS_DROP_CHECK_MIN_KMH = 15.0f;
-constexpr float VSS_MAX_DROP_KMH_PER_100MS = 8.0f;
+constexpr float VSS_DROP_CHECK_MIN_MPH = 9.0f;
+constexpr float VSS_MAX_DROP_MPH_PER_100MS = 5.0f;
 
 // Locked-converter ratio check: catches swapped S1/S2, wrong gear, bad VSS.
 constexpr bool RATIO_CHECK_ENABLED = true;
-constexpr float RATIO_CHECK_MIN_KMH = 30.0f;
+constexpr float RATIO_CHECK_MIN_MPH = 19.0f;
 constexpr float RATIO_TOLERANCE = 0.25f;
 constexpr uint32_t RATIO_SETTLE_MS = 1500;
 constexpr uint32_t RATIO_FAULT_MS = 1500;
@@ -157,18 +160,18 @@ constexpr float ATF_COLD_RELEASE_C = 40.0f;
 constexpr float ATF_HOT_C = 110.0f;               // 230 F
 constexpr float ATF_HOT_EXIT_C = 105.0f;
 constexpr float ATF_CRITICAL_C = 125.0f;
-constexpr float HOT_LU_ON_KMH = 40.0f;
-constexpr float HOT_LU_OFF_KMH = 34.0f;
+constexpr float HOT_LU_ON_MPH = 25.0f;
+constexpr float HOT_LU_OFF_MPH = 21.0f;
 constexpr float HOT_LU_TPS_ON = 85.0f;
 constexpr float HOT_LU_TPS_OFF = 95.0f;
 
 // ------------------------------------------------------- per-mode lockup map
 // Index: 0 = ECO, 1 = NORMAL, 2 = SPORT.
 constexpr uint8_t LU_MIN_GEAR = 3;
-constexpr float LU_ON_KMH[3] = {35.0f, 58.0f, 70.0f};   // ECO: as early as the rpm floor allows
-constexpr float LU_OFF_KMH[3] = {30.0f, 52.0f, 64.0f};
-// Lockup only when the locked engine speed (km/h x ratio) is at least this,
-// so it is per gear: ECO locks 3rd from ~37 km/h but 4th only from ~51 km/h.
+constexpr float LU_ON_MPH[3] = {22.0f, 36.0f, 43.0f};   // ECO: as early as the rpm floor allows
+constexpr float LU_OFF_MPH[3] = {19.0f, 32.0f, 40.0f};
+// Lockup only when the locked engine speed (mph x ratio) is at least this,
+// so it is per gear: ECO locks 3rd from ~23 mph but 4th only from ~32 mph.
 // Released LU_MIN_RPM_HYST below it.
 constexpr float LU_MIN_RPM[3] = {1250.0f, 1400.0f, 1800.0f};
 constexpr float LU_MIN_RPM_HYST = 150.0f;
@@ -176,34 +179,44 @@ constexpr float LU_MIN_RPM_HYST = 150.0f;
 // converter's slip and torque multiplication do the work instead).
 constexpr float LU_LUG_RPM = 1600.0f;
 constexpr float LU_LUG_TPS = 25.0f;
+// Highway lockup: in 4th at highway rpm, lockup holds up to a much higher
+// throttle than the mode's normal limit, so long fast runs and highway grades
+// stay locked: lower rpm, less fuel, and far less ATF heat. A kickdown-level
+// throttle still releases it. Off in SPORT, which wants response instead.
+constexpr bool HWY_LOCKUP[3] = {true, true, false};
+constexpr float HWY_LU_MIN_RPM = 2000.0f;  // locked rpm in 4th: from ~51 mph
+// A RAV4 needs ~90 % of its power to hold 90 mph, so only a true wide-open
+// kickdown releases highway lockup.
+constexpr float HWY_LU_TPS_ON = 85.0f;
+constexpr float HWY_LU_TPS_OFF = 95.0f;
 constexpr float LU_TPS_ON[3] = {45.0f, 55.0f, 35.0f};   // SPORT drops lockup early
 constexpr float LU_TPS_OFF[3] = {55.0f, 65.0f, 45.0f};
 
 // ------------------------------------------------------ per-mode shift maps
-// Upshift speed (km/h) vs throttle at 0/25/50/75/100 %.
+// Upshift speed (mph) vs throttle at 0/25/50/75/100 %.
 // [mode][shift: 0 = 1->2, 1 = 2->3, 2 = 3->4][tps point]
-// WOT points sit at ~5.0-5.8k rpm with the default RPM_PER_KMH.
+// WOT points sit at ~5.0-5.8k rpm with the default RPM_PER_MPH.
 constexpr uint8_t TPS_POINTS = 5;
-constexpr float UPSHIFT_KMH[3][3][TPS_POINTS] = {
+constexpr float UPSHIFT_MPH[3][3][TPS_POINTS] = {
     {  // ECO: short-shift
-        {17.0f, 19.0f, 29.0f, 46.0f, 55.0f},
-        {31.0f, 36.0f, 54.0f, 79.0f, 103.0f},
-        {48.0f, 53.0f, 74.0f, 108.0f, 150.0f},
+        {11.0f, 12.0f, 18.0f, 29.0f, 34.0f},
+        {19.0f, 22.0f, 34.0f, 49.0f, 64.0f},
+        {30.0f, 33.0f, 46.0f, 67.0f, 93.0f},
     },
     {  // NORMAL
-        {18.0f, 24.0f, 38.0f, 53.0f, 58.0f},
-        {36.0f, 48.0f, 70.0f, 94.0f, 106.0f},
-        {54.0f, 66.0f, 94.0f, 126.0f, 156.0f},
+        {11.0f, 15.0f, 24.0f, 33.0f, 36.0f},
+        {22.0f, 30.0f, 43.0f, 58.0f, 66.0f},
+        {34.0f, 41.0f, 58.0f, 78.0f, 97.0f},
     },
     {  // SPORT: hold gears
-        {22.0f, 34.0f, 50.0f, 58.0f, 60.0f},
-        {42.0f, 60.0f, 84.0f, 102.0f, 110.0f},
-        {66.0f, 84.0f, 114.0f, 150.0f, 168.0f},
+        {14.0f, 21.0f, 31.0f, 36.0f, 37.0f},
+        {26.0f, 37.0f, 52.0f, 63.0f, 68.0f},
+        {41.0f, 52.0f, 71.0f, 93.0f, 104.0f},
     },
 };
 // Downshift = upshift(tps) - hysteresis. Small hysteresis = eager kickdown.
-constexpr float DOWNSHIFT_HYST_KMH[3] = {11.0f, 12.0f, 7.0f};
-constexpr float MIN_DOWNSHIFT_KMH = 3.0f;
+constexpr float DOWNSHIFT_HYST_MPH[3] = {7.0f, 7.5f, 4.5f};
+constexpr float MIN_DOWNSHIFT_MPH = 2.0f;
 
 // ----------------------------------------------- per-mode driving features
 // Index: 0 = ECO, 1 = NORMAL, 2 = SPORT.
@@ -218,7 +231,7 @@ constexpr float CORNER_ENTER_G = 0.25f;
 constexpr float CORNER_EXIT_G = 0.12f;
 constexpr uint32_t CORNER_EXIT_MS = 700;          // straight this long before shifting resumes
 constexpr uint32_t CORNER_HOLD_MAX_MS = 10000;    // long sweeper or bad sensor: stop holding
-constexpr float CORNER_MIN_KMH = 20.0f;
+constexpr float CORNER_MIN_MPH = 12.0f;
 
 // Brake downshift: while braking in a straight line, step down one gear at a
 // time as long as the lower gear lands at or below this rpm, so the car is in
@@ -228,7 +241,7 @@ constexpr float CORNER_MIN_KMH = 20.0f;
 // engine braking; lower steps just pre-select the exit gear.
 constexpr bool BRAKE_DOWNSHIFT[3] = {false, false, true};
 constexpr float BRAKE_DOWNSHIFT_RPM[3] = {0.0f, 0.0f, 4200.0f};
-constexpr float BRAKE_DOWNSHIFT_MIN_DECEL = 3.0f;  // km/h per second
+constexpr float BRAKE_DOWNSHIFT_MIN_DECEL = 2.0f;  // mph per second
 constexpr uint32_t BRAKE_HOLD_MS = 3000;
 constexpr float BRAKE_HOLD_TPS = 20.0f;
 

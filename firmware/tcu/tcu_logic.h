@@ -54,7 +54,7 @@ struct Inputs {
   // Factory ECU solenoid commands, sensed upstream of the relays.
   bool ecuSenseValid = false, ecuS1 = false, ecuS2 = false, ecuSL = false;
   // Sensors.
-  float speedKmh = 0.0f;
+  float speedMph = 0.0f;
   float engineRpm = 0.0f;
   bool rpmValid = false;
   float tpsPct = 0.0f;
@@ -92,8 +92,8 @@ struct Outputs {
 // 1999 RAV4 (Toyota 4-speed ECT) shift-solenoid truth table, D range.
 void solenoidsForGear(uint8_t gear, bool& s1, bool& s2);
 uint8_t gearFromSolenoids(bool s1, bool s2);
-float upshiftKmh(DriveMode mode, uint8_t fromGear, float tpsPct);
-float downshiftKmh(DriveMode mode, uint8_t fromGear, float tpsPct);
+float upshiftMph(DriveMode mode, uint8_t fromGear, float tpsPct);
+float downshiftMph(DriveMode mode, uint8_t fromGear, float tpsPct);
 
 // Time-based debouncer: a new level is accepted after it has been stable for
 // holdMs. Removes contact bounce and short noise bursts on long cable runs.
@@ -139,7 +139,7 @@ class Controller {
   void tryEnterCustom(const Inputs& in);
   void exitToStock(Event why);
   void runCustom(const Inputs& in);
-  bool requestShift(int target, float speedKmh, bool byDriver);
+  bool requestShift(int target, float speedMph, bool byDriver);
   void commitGear(uint8_t gear);
   void revLimitGuard(const Inputs& in);
   void autoSchedule(const Inputs& in);
@@ -175,9 +175,9 @@ class Controller {
   bool cornering_ = false;
   uint32_t cornerSinceMs_ = 0;
   Persist straight_;
-  float decelRefKmh_ = 0.0f;
+  float decelRefMph_ = 0.0f;
   uint32_t decelRefMs_ = 0;
-  float decelKmhPerS_ = 0.0f;
+  float decelMphPerS_ = 0.0f;
   bool brakeHold_ = false;
   uint32_t brakeReleasedMs_ = 0;
   bool prevBrake_ = false;
@@ -196,7 +196,7 @@ class Controller {
   uint32_t upSince_ = 0, downSince_ = 0;
 
   Persist supplyBad_, tpsBad_, vssStall_, ratioBad_, overRev_, solBad_[3];
-  float dropRefKmh_ = 0.0f;
+  float dropRefMph_ = 0.0f;
   uint32_t dropRefMs_ = 0;
 };
 

@@ -48,19 +48,19 @@ struct Sim {
       in.nowMs += 10;
       if (autoRpm) {
         const uint8_t g = c.outputs().gear ? c.outputs().gear : 1;
-        const float rpm = in.speedKmh * cfg::RPM_PER_KMH[g];
+        const float rpm = in.speedMph * cfg::RPM_PER_MPH[g];
         in.engineRpm = rpm < 750 ? 750 : rpm;
       }
       o = &c.step(in);
     }
     return *o;
   }
-  // Change speed at a physically plausible rate (default 20 km/h per second).
-  const Outputs& rampTo(float kmh, float kmhPerS = 20.0f) {
-    const float stepKmh = kmhPerS / 100.0f;
-    while (in.speedKmh != kmh) {
-      if (in.speedKmh < kmh) in.speedKmh = in.speedKmh + stepKmh > kmh ? kmh : in.speedKmh + stepKmh;
-      else in.speedKmh = in.speedKmh - stepKmh < kmh ? kmh : in.speedKmh - stepKmh;
+  // Change speed at a physically plausible rate (default 12 mph per second).
+  const Outputs& rampTo(float mph, float mphPerS = 12.0f) {
+    const float stepMph = mphPerS / 100.0f;
+    while (in.speedMph != mph) {
+      if (in.speedMph < mph) in.speedMph = in.speedMph + stepMph > mph ? mph : in.speedMph + stepMph;
+      else in.speedMph = in.speedMph - stepMph < mph ? mph : in.speedMph - stepMph;
       step(10);
     }
     return c.outputs();
@@ -81,7 +81,7 @@ struct Sim {
   void setEcuGear(uint8_t g) {
     solenoidsForGear(g, in.ecuS1, in.ecuS2);
   }
-  void cruise(float kmh) { rampTo(kmh); }
+  void cruise(float mph) { rampTo(mph); }
   // Arm, then drop into MANUAL at a standstill (a refused [-] in 1st).
   const Outputs& armManual() {
     arm();
@@ -132,14 +132,14 @@ static void test_entry_sync() {
   Sim s;
   s.setEcuGear(3);
   s.in.ecuSL = true;
-  s.cruise(70);
+  s.cruise(43.5);
   s.arm();
   CHECK(s.c.outputs().control == CTRL_AUTO || s.c.outputs().control == CTRL_MANUAL);
   // AUTO may legitimately upshift later, but at entry the gear must match the ECU.
   Sim s2;
   s2.setEcuGear(3);
   s2.in.ecuSL = true;
-  s2.in.speedKmh = 70;
+  s2.in.speedMph = 43.5;
   s2.in.customRequested = false;
   s2.step(50);
   s2.in.customRequested = true;
@@ -151,11 +151,11 @@ static void test_entry_sync() {
 
   Sim s3;
   s3.in.ecuSenseValid = false;
-  s3.in.speedKmh = 60;
+  s3.in.speedMph = 37.3;
   s3.arm();
   CHECK(s3.c.outputs().control == CTRL_STOCK);
   CHECK(s3.c.outputs().event == EV_NEED_SYNC);
-  s3.in.speedKmh = 0;  // car stopped: now it can engage in 1st
+  s3.in.speedMph = 0;  // car stopped: now it can engage in 1st
   CHECK(s3.step(20).control != CTRL_STOCK);
   CHECK(s3.c.outputs().gear == 1);
 }
@@ -176,7 +176,7 @@ static void test_no_autorepeat_and_interval() {
   std::printf("held button shifts once; min shift interval enforced\n");
   Sim s;
   s.armManual();
-  s.cruise(40);
+  s.cruise(24.9);
   s.in.up = true;
   s.step(900);  // held for 0.9 s: the original 250 ms auto-repeat gave 1->4
   CHECK(s.c.outputs().gear == 2);
@@ -207,39 +207,39 @@ static void test_downshift_overrev_guard() {
   std::printf("downshift guards (directive 1, all gears)\n");
   Sim s;
   s.armManual();
-  s.cruise(30);
+  s.cruise(18.6);
   s.tap(s.in.up); s.step(800);
-  s.cruise(60);
+  s.cruise(37.3);
   s.tap(s.in.up); s.step(800);
-  s.cruise(100);
+  s.cruise(62.1);
   s.tap(s.in.up); s.step(800);
   CHECK(s.c.outputs().gear == 4);
   // Just above the speed where 3rd would exceed the downshift rpm limit.
-  s.cruise(cfg::MAX_DOWNSHIFT_RPM / cfg::RPM_PER_KMH[3] + 5);
+  s.cruise(cfg::MAX_DOWNSHIFT_RPM / cfg::RPM_PER_MPH[3] + 5);
   s.tap(s.in.down);
   CHECK(s.c.outputs().gear == 4);
   CHECK(s.c.outputs().event == EV_DENY_OVERREV);
   s.step(800);
-  s.cruise(110);  // 3rd well under the limit
+  s.cruise(68.4);  // 3rd well under the limit
   s.tap(s.in.down);
   s.step(300);
   CHECK(s.c.outputs().gear == 3);
   s.step(800);
-  s.cruise(80);  // 2nd under the limit
+  s.cruise(49.7);  // 2nd under the limit
   s.tap(s.in.down);
   s.step(300);
   CHECK(s.c.outputs().gear == 2);
   s.step(800);
-  s.cruise(80);  // 1st would be far over the limit
+  s.cruise(49.7);  // 1st would be far over the limit
   s.tap(s.in.down);
   CHECK(s.c.outputs().gear == 2);
   CHECK(s.c.outputs().event == EV_DENY_OVERREV);
   s.step(800);
-  s.cruise(cfg::FIRST_GEAR_MAX_KMH + 2);  // under rpm limit but over hard cap
+  s.cruise(cfg::FIRST_GEAR_MAX_MPH + 2);  // under rpm limit but over hard cap
   s.tap(s.in.down);
   CHECK(s.c.outputs().gear == 2);
   s.step(800);
-  s.cruise(30);
+  s.cruise(18.6);
   s.tap(s.in.down);
   CHECK(s.c.outputs().gear == 1);
 }
@@ -248,7 +248,7 @@ static void test_upshift_too_slow() {
   std::printf("upshift into forced-downshift zone is refused\n");
   Sim s;
   s.arm();
-  s.cruise(5);
+  s.cruise(3.1);
   s.tap(s.in.up);
   CHECK(s.c.outputs().gear == 1);
   CHECK(s.c.outputs().event == EV_DENY_TOO_SLOW);
@@ -258,18 +258,18 @@ static void test_manual_auto_downshift_to_stop() {
   std::printf("MANUAL: forced downshifts while stopping, ends in 1st\n");
   Sim s;
   s.armManual();
-  float v = 30;
+  float v = 18.6f;
   s.cruise(v); s.tap(s.in.up); s.step(800);
-  s.cruise(60); s.tap(s.in.up); s.step(800);
-  s.cruise(90); s.tap(s.in.up); s.step(800);
+  s.cruise(37.3); s.tap(s.in.up); s.step(800);
+  s.cruise(55.9); s.tap(s.in.up); s.step(800);
   CHECK(s.c.outputs().gear == 4);
   s.in.brake = true;
-  for (v = 90; v > 0; v -= 0.25f) {  // ~25 km/h/s braking
-    s.in.speedKmh = v;
+  for (v = 56; v > 0; v -= 0.155f) {  // ~15.5 mph/s braking
+    s.in.speedMph = v;
     s.step(10);
     CHECK(!s.c.outputs().sl);
   }
-  s.in.speedKmh = 0;
+  s.in.speedMph = 0;
   s.step(3000);
   CHECK(s.c.outputs().gear == 1);
   CHECK(s.c.outputs().control == CTRL_MANUAL);
@@ -279,7 +279,7 @@ static void test_long_press_resumes_auto() {
   std::printf("long-press [+] returns MANUAL -> AUTO\n");
   Sim s;
   s.arm();
-  s.cruise(40);
+  s.cruise(24.9);
   s.tap(s.in.up);
   CHECK(s.c.outputs().control == CTRL_MANUAL);
   s.step(800);
@@ -298,28 +298,28 @@ static void test_auto_schedule() {
     s.in.sport = sport;
     s.arm();
     s.in.tpsPct = 25;
-    for (float v = 0; v < 150; v += 0.5f) {
-      s.in.speedKmh = v;
+    for (float v = 0; v < 93; v += 0.31f) {
+      s.in.speedMph = v;
       s.step(50);
       if (s.c.outputs().gear == 2) return v;
     }
     return -1.0f;
   };
   const float eco = upAt(true, false), norm = upAt(false, false), sport = upAt(false, true);
-  std::printf("  1->2 at 25%%: eco %.1f  normal %.1f  sport %.1f km/h\n", eco, norm, sport);
+  std::printf("  1->2 at 25%%: eco %.1f  normal %.1f  sport %.1f mph\n", eco, norm, sport);
   CHECK(eco > 0 && norm > 0 && sport > 0);
   CHECK(eco < norm && norm < sport);
 
   Sim s;
   s.arm();
   s.in.tpsPct = 20;
-  for (float v = 0; v <= 100; v += 0.5f) {
-    s.in.speedKmh = v;
+  for (float v = 0; v <= 62; v += 0.31f) {
+    s.in.speedMph = v;
     s.step(50);
   }
   s.step(3000);
   CHECK(s.c.outputs().gear == 4);
-  s.in.tpsPct = 100;  // kickdown at 100 km/h -> 3rd, but not on to 2nd
+  s.in.tpsPct = 100;  // kickdown at 62 mph -> 3rd, but not on to 2nd
   s.step(3000);
   CHECK(s.c.outputs().gear == 3);
 }
@@ -328,7 +328,7 @@ static void test_kickdown_is_immediate() {
   std::printf("kickdown right after a shift goes 4->3->2 without the dwell\n");
   Sim s;
   s.in.sport = true;
-  s.cruise(65);
+  s.cruise(40.4);
   s.setEcuGear(4);
   s.arm();
   CHECK(s.c.outputs().gear == 4);
@@ -337,14 +337,14 @@ static void test_kickdown_is_immediate() {
   s.step(20);
   CHECK(s.c.outputs().gear == 3);
   s.step(cfg::MIN_SHIFT_INTERVAL_MS);
-  CHECK(s.c.outputs().gear == 2);  // 2nd at 65 km/h is under the rpm limit
+  CHECK(s.c.outputs().gear == 2);  // 2nd at 40 mph is under the rpm limit
   s.step(2000);
-  CHECK(s.c.outputs().gear == 2);  // and it doesn't go on to 1st (45 km/h cap)
+  CHECK(s.c.outputs().gear == 2);  // and it doesn't go on to 1st (28 mph cap)
 
   // Part throttle in the same spot still respects the dwell.
   Sim t;
   t.in.sport = true;
-  t.cruise(65);
+  t.cruise(40.4);
   t.setEcuGear(4);
   t.arm();
   t.step(300);
@@ -360,13 +360,13 @@ static void test_corner_hold() {
   Sim s;
   s.arm();
   s.in.tpsPct = 20;
-  s.cruise(40);
+  s.cruise(24.9);
   CHECK(s.c.outputs().gear == 2);
   s.in.latValid = true;
   s.in.latG = -0.35f;  // turning left
   s.step(50);
   CHECK(s.c.outputs().cornerHold);
-  s.cruise(60);  // past the 2->3 point, but mid-corner
+  s.cruise(37.3);  // past the 2->3 point, but mid-corner
   s.step(1000);
   CHECK(s.c.outputs().gear == 2);
   s.in.latG = 0.05f;  // straightening out
@@ -380,11 +380,11 @@ static void test_corner_hold() {
   Sim t;
   t.arm();
   t.in.tpsPct = 20;
-  t.cruise(40);
+  t.cruise(24.9);
   t.in.latValid = true;
   t.in.latG = 0.3f;
   t.step(20);
-  t.cruise(60);
+  t.cruise(37.3);
   t.step(cfg::CORNER_HOLD_MAX_MS - 2000);
   CHECK(t.c.outputs().gear == 2);
   t.step(2500);
@@ -394,7 +394,7 @@ static void test_corner_hold() {
   Sim u;
   u.arm();
   u.in.tpsPct = 20;
-  u.cruise(40);
+  u.cruise(24.9);
   u.in.latValid = true;
   u.in.latG = 0.4f;
   u.step(20);
@@ -405,10 +405,10 @@ static void test_corner_hold() {
   Sim v;
   v.arm();
   v.in.tpsPct = 20;
-  v.cruise(40);
+  v.cruise(24.9);
   v.in.latValid = false;
   v.in.latG = 0.5f;
-  v.cruise(60);
+  v.cruise(37.3);
   v.step(1500);
   CHECK(v.c.outputs().gear == 3);
 }
@@ -419,35 +419,35 @@ static void test_brake_downshift() {
   s.in.sport = true;
   s.arm();
   s.in.tpsPct = 20;
-  s.cruise(100);
+  s.cruise(62.1);
   s.step(1500);
   CHECK(s.c.outputs().gear == 4);
   s.in.tpsPct = 0;
   s.in.brake = true;
-  s.rampTo(85, 15.0f);  // hard braking
+  s.rampTo(52.8, 9.3f);  // hard braking
   CHECK(s.c.outputs().gear == 3);
-  s.rampTo(60, 15.0f);
+  s.rampTo(37.3, 9.3f);
   CHECK(s.c.outputs().gear == 2);
-  CHECK(s.in.speedKmh * cfg::RPM_PER_KMH[2] <= cfg::BRAKE_DOWNSHIFT_RPM[2]);
-  s.rampTo(50, 15.0f);
-  CHECK(s.c.outputs().gear == 2);  // 1st only below the 4200 rpm / 45 km/h line
+  CHECK(s.in.speedMph * cfg::RPM_PER_MPH[2] <= cfg::BRAKE_DOWNSHIFT_RPM[2]);
+  s.rampTo(31.1, 9.3f);
+  CHECK(s.c.outputs().gear == 2);  // 1st only below the 4200 rpm / 28 mph line
   s.in.brake = false;              // corner entry: off the brake, off the throttle
   s.step(cfg::BRAKE_HOLD_MS - 500);
   CHECK(s.c.outputs().gear == 2);  // the 0 % map would have gone back to 3rd at 50
   s.in.tpsPct = 40;                // exit: back on the throttle
   s.step(100);
-  CHECK(s.c.outputs().gear == 2);  // 40 % in SPORT holds 2nd at 50 km/h
+  CHECK(s.c.outputs().gear == 2);  // 40 % in SPORT holds 2nd at 31 mph
 
   // Hold also ends on its own if the driver just coasts.
   Sim t;
   t.in.sport = true;
   t.arm();
   t.in.tpsPct = 20;
-  t.cruise(100);
+  t.cruise(62.1);
   t.step(1500);
   t.in.tpsPct = 0;
   t.in.brake = true;
-  t.rampTo(60, 15.0f);
+  t.rampTo(37.3, 9.3f);
   CHECK(t.c.outputs().gear == 2);
   t.in.brake = false;
   t.step(cfg::BRAKE_HOLD_MS + 1500);
@@ -457,23 +457,23 @@ static void test_brake_downshift() {
   Sim n;
   n.arm();
   n.in.tpsPct = 20;
-  n.cruise(100);
+  n.cruise(62.1);
   n.step(1500);
   n.in.tpsPct = 0;
   n.in.brake = true;
-  n.rampTo(60, 15.0f);
+  n.rampTo(37.3, 9.3f);
   CHECK(n.c.outputs().gear == 4);
   Sim c;
   c.in.sport = true;
   c.arm();
   c.in.tpsPct = 20;
-  c.cruise(100);
+  c.cruise(62.1);
   c.step(1500);
   c.in.latValid = true;
   c.in.latG = 0.4f;
   c.in.tpsPct = 0;
   c.in.brake = true;
-  c.rampTo(70, 10.0f);
+  c.rampTo(43.5, 6.2f);
   CHECK(c.c.outputs().gear == 4);
 }
 
@@ -485,7 +485,7 @@ static void test_coast_unlock() {
     s.in.eco = mode == 0;
     s.arm();
     s.in.tpsPct = 20;
-    s.cruise(100);
+    s.cruise(62.1);
     s.step(3000);
     CHECK(s.c.outputs().gear == 4);
     CHECK(s.c.outputs().sl);
@@ -507,7 +507,7 @@ static void test_eco_throttle_smoothing() {
     s.in.eco = true;
     s.arm();
     s.in.tpsPct = 15;
-    s.cruise(70);
+    s.cruise(43.5);
     s.step(3000);
   };
   Sim s;
@@ -540,7 +540,7 @@ static void test_sport_tipin_release() {
     s.in.sport = true;
     s.arm();
     s.in.tpsPct = 15;
-    s.cruise(100);
+    s.cruise(62.1);
     s.step(3000);
   };
   Sim s;
@@ -565,7 +565,7 @@ static void test_manual_is_sport() {
   s.in.eco = true;  // ECO switch on
   s.arm();
   s.in.tpsPct = 20;
-  s.cruise(100);
+  s.cruise(62.1);
   s.step(3000);
   CHECK(s.c.outputs().mode == MODE_ECO);
   CHECK(s.c.outputs().gear == 4 && s.c.outputs().sl);
@@ -581,7 +581,7 @@ static void test_manual_is_sport() {
   s.step(cfg::LOCKUP_RELEASE_BEFORE_SHIFT_MS);
   CHECK(s.c.outputs().gear == 3);
   s.step(3000);
-  CHECK(s.c.outputs().sl);  // SPORT lockup rules in 3rd at 100 km/h, 20 %
+  CHECK(s.c.outputs().sl);  // SPORT lockup rules in 3rd at 62 mph, 20 %
   s.in.tpsPct = 0;          // SPORT: coast unlock
   s.step(200);
   CHECK(!s.c.outputs().sl);
@@ -604,7 +604,7 @@ static void test_sport_lift_hold() {
     s.in.sport = sport;
     s.arm();
     s.in.tpsPct = 70;  // hard acceleration out of a corner, in 2nd
-    s.rampTo(75, 8.0f);
+    s.rampTo(46.6, 5.0f);
     const uint8_t g = s.c.outputs().gear;
     if (quickLift) {
       s.in.tpsPct = 0;  // snap off the throttle for the next corner
@@ -631,7 +631,7 @@ static void test_sport_lift_hold() {
   t.in.sport = true;
   t.arm();
   t.in.tpsPct = 70;
-  t.rampTo(75, 8.0f);
+  t.rampTo(46.6, 5.0f);
   t.in.tpsPct = 0;
   t.step(100);
   CHECK(t.c.outputs().gearHold);
@@ -641,21 +641,21 @@ static void test_sport_lift_hold() {
 }
 
 static void test_eco_early_lockup() {
-  std::printf("ECO: lockup from ~37 km/h in 3rd, rpm floor in 4th, never lugs\n");
+  std::printf("ECO: lockup from ~23 mph in 3rd, rpm floor in 4th, never lugs\n");
   Sim e;
   e.in.eco = true;
   e.arm();
   e.in.tpsPct = 15;
-  e.cruise(40);
+  e.cruise(24.9);
   e.step(3000);
   CHECK(e.c.outputs().gear == 3);
   CHECK(e.c.outputs().sl);  // ~1,340 rpm locked in 3rd
   Sim n;
   n.arm();
   n.in.tpsPct = 15;
-  n.cruise(40);
+  n.cruise(24.9);
   n.step(3000);
-  CHECK(!n.c.outputs().sl);  // NORMAL waits for 58 km/h
+  CHECK(!n.c.outputs().sl);  // NORMAL waits for 36 mph
 
   e.in.tpsPct = 35;  // more load at low rpm: let the converter help
   e.step(200);
@@ -664,28 +664,69 @@ static void test_eco_early_lockup() {
   e.step(1500);
   CHECK(e.c.outputs().sl);
 
-  // 4th: floor 1,250 rpm (~51 km/h), released below 1,100 rpm (~45 km/h).
-  e.cruise(58);
+  // 4th: floor 1,250 rpm (~32 mph), released below 1,100 rpm (~28 mph).
+  e.cruise(36);
   e.step(3000);
   CHECK(e.c.outputs().gear == 4);
   CHECK(e.c.outputs().sl);
-  e.rampTo(47, 5.0f);
+  e.rampTo(29.2, 3.1f);
   CHECK(e.c.outputs().gear == 4);
   CHECK(e.c.outputs().sl);   // hysteresis: still above 1,100 rpm
-  e.rampTo(43, 5.0f);
+  e.rampTo(26.7, 3.1f);
   CHECK(!e.c.outputs().sl);  // below the floor: unlocked, no lugging
-  CHECK(e.in.speedKmh * cfg::RPM_PER_KMH[4] < cfg::LU_MIN_RPM[MODE_ECO] - cfg::LU_MIN_RPM_HYST);
+  CHECK(e.in.speedMph * cfg::RPM_PER_MPH[4] < cfg::LU_MIN_RPM[MODE_ECO] - cfg::LU_MIN_RPM_HYST);
+}
+
+static void test_highway_lockup() {
+  std::printf("highway: ECO/NORMAL stay locked in 4th at 90 mph under heavy throttle\n");
+  Sim e;
+  e.in.eco = true;
+  e.arm();
+  e.in.tpsPct = 20;
+  e.cruise(90);
+  e.step(3000);
+  CHECK(e.c.outputs().gear == 4 && e.c.outputs().sl);
+  e.in.tpsPct = 88;  // what it takes to hold 90 mph, or a grade
+  e.step(3000);
+  CHECK(e.c.outputs().gear == 4);
+  CHECK(e.c.outputs().sl);  // ~3,550 rpm, locked: no slip, no extra heat
+  e.in.tpsPct = 98;         // floored: release so the converter multiplies torque
+  e.step(100);
+  CHECK(!e.c.outputs().sl);
+
+  // Below highway rpm the normal ECO limit applies.
+  Sim l;
+  l.in.eco = true;
+  l.arm();
+  l.in.tpsPct = 20;
+  l.cruise(45);  // 4th, ~1,770 rpm
+  l.step(3000);
+  CHECK(l.c.outputs().gear == 4 && l.c.outputs().sl);
+  l.in.tpsPct = 60;
+  l.step(100);
+  CHECK(!l.c.outputs().sl);
+
+  // SPORT doesn't use it: response first.
+  Sim s;
+  s.in.sport = true;
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(90);
+  s.step(3000);
+  s.in.tpsPct = 60;
+  s.step(3000);
+  CHECK(!s.c.outputs().sl);
 }
 
 static void test_lockup_rules() {
   std::printf("lockup: gear/speed/brake/cold/hot/shift sequencing\n");
   Sim s;
   s.armManual();
-  s.cruise(30); s.tap(s.in.up); s.step(800);
-  s.cruise(55); s.tap(s.in.up); s.step(800);
-  s.cruise(80); s.tap(s.in.up);
+  s.cruise(18.6); s.tap(s.in.up); s.step(800);
+  s.cruise(34.2); s.tap(s.in.up); s.step(800);
+  s.cruise(49.7); s.tap(s.in.up);
   s.in.tpsPct = 20;
-  s.cruise(80);
+  s.cruise(49.7);
   s.step(2000);
   CHECK(s.c.outputs().gear == 4);
   CHECK(s.c.outputs().sl);
@@ -707,17 +748,17 @@ static void test_lockup_rules() {
   CHECK(g == 4 || g == 3);
   s.step(cfg::LOCKUP_SETTLE_AFTER_SHIFT_MS - 300);
   CHECK(!s.c.outputs().sl);  // still settling after the shift
-  s.cruise(80);
+  s.cruise(49.7);
   s.step(1500);
   CHECK(s.c.outputs().sl);
 
-  s.rampTo(40);  // below every non-hot lockup threshold
+  s.rampTo(24.9);  // below every non-hot lockup threshold
   CHECK(!s.c.outputs().sl);
   CHECK(s.c.outputs().control == CTRL_MANUAL);
 
   // Cold ATF inhibits lockup.
   s.in.atfC = 20;
-  s.cruise(80);
+  s.cruise(49.7);
   s.step(3000);
   CHECK(!s.c.outputs().sl);
   CHECK(s.c.outputs().control == CTRL_MANUAL);
@@ -728,21 +769,21 @@ static void test_lockup_rules() {
 
 static void test_hot_atf_widens_lockup() {
   std::printf("directive 2 corrected: hot ATF widens lockup instead of cancelling it\n");
-  auto lockedAt = [](float atf, float kmh, float tps) {
+  auto lockedAt = [](float atf, float mph, float tps) {
     Sim s;
     s.in.atfC = atf;
     s.armManual();
-    s.cruise(30); s.tap(s.in.up); s.step(800);
-    s.cruise(55); s.tap(s.in.up); s.step(800);
-    s.cruise(kmh);
+    s.cruise(18.6); s.tap(s.in.up); s.step(800);
+    s.cruise(34.2); s.tap(s.in.up); s.step(800);
+    s.cruise(mph);
     s.in.tpsPct = tps;
     s.step(3000);
     return s.c.outputs().gear == 3 && s.c.outputs().sl;
   };
-  CHECK(!lockedAt(80, 45, 20));   // NORMAL: 45 km/h is below the lockup speed
-  CHECK(lockedAt(115, 45, 20));   // hot: locked to stop converter heating
-  CHECK(!lockedAt(80, 80, 70));   // NORMAL: heavy throttle unlocks
-  CHECK(lockedAt(115, 80, 70));   // hot: stays locked
+  CHECK(!lockedAt(80, 28, 20));   // NORMAL: 28 mph is below the lockup speed
+  CHECK(lockedAt(115, 28, 20));   // hot: locked to stop converter heating
+  CHECK(!lockedAt(80, 49.7, 70));   // NORMAL: heavy throttle unlocks
+  CHECK(lockedAt(115, 49.7, 70));   // hot: stays locked
   Sim s;
   s.in.atfC = 130;
   s.step(20);
@@ -754,15 +795,15 @@ static void test_vss_faults() {
   std::printf("VSS loss at speed and VSS stall both hand back to ECU (latched)\n");
   Sim s;
   s.armManual();
-  s.cruise(30); s.tap(s.in.up); s.step(800);
-  s.cruise(60); s.tap(s.in.up); s.step(800);
+  s.cruise(18.6); s.tap(s.in.up); s.step(800);
+  s.cruise(37.3); s.tap(s.in.up); s.step(800);
   CHECK(s.c.outputs().control != CTRL_STOCK);
-  s.in.speedKmh = 0;  // signal collapses
+  s.in.speedMph = 0;  // signal collapses
   s.step(200);
   CHECK(s.c.outputs().control == CTRL_STOCK);
   CHECK(s.c.outputs().faults & FAULT_VSS);
   CHECK(s.c.outputs().event == EV_FAULT);
-  s.in.speedKmh = 60;
+  s.in.speedMph = 37.3;
   s.step(500);
   CHECK(s.c.outputs().control == CTRL_STOCK);  // latched
   s.setEcuGear(3);
@@ -789,15 +830,15 @@ static void test_ratio_fault() {
   std::printf("locked-converter ratio mismatch (e.g. S1/S2 swapped) -> ECU\n");
   Sim s;
   s.armManual();
-  s.cruise(30); s.tap(s.in.up); s.step(800);
-  s.cruise(55); s.tap(s.in.up); s.step(800);
-  s.cruise(80); s.tap(s.in.up);
+  s.cruise(18.6); s.tap(s.in.up); s.step(800);
+  s.cruise(34.2); s.tap(s.in.up); s.step(800);
+  s.cruise(49.7); s.tap(s.in.up);
   s.in.tpsPct = 20;
-  s.cruise(80);
+  s.cruise(49.7);
   s.step(2500);
   CHECK(s.c.outputs().sl && s.c.outputs().gear == 4);
   s.autoRpm = false;
-  s.in.engineRpm = 80 * cfg::RPM_PER_KMH[3];  // car is really in 3rd
+  s.in.engineRpm = 80 * cfg::RPM_PER_MPH[3];  // car is really in 3rd
   s.step(cfg::RATIO_SETTLE_MS + cfg::RATIO_FAULT_MS + 200);
   CHECK(s.c.outputs().control == CTRL_STOCK);
   CHECK(s.c.outputs().faults & FAULT_RATIO);
@@ -830,7 +871,7 @@ static void test_rev_limit_upshift() {
   s.arm();
   s.tap(s.in.down);  // enter MANUAL (refused shift, already 1st)
   CHECK(s.c.outputs().control == CTRL_MANUAL);
-  s.in.speedKmh = 52;
+  s.in.speedMph = 32.3;
   s.autoRpm = false;
   s.in.engineRpm = cfg::REV_LIMIT_UPSHIFT_RPM + 200;
   s.step(cfg::REV_LIMIT_HOLD_MS + 50);
@@ -913,13 +954,13 @@ static void test_maps_are_sane() {
   for (int m = 0; m < 3; m++) {
     for (uint8_t g = 1; g <= 3; g++) {
       for (int tps = 0; tps <= 100; tps += 5) {
-        const float up = upshiftKmh((DriveMode)m, g, tps);
-        const float down = downshiftKmh((DriveMode)m, g + 1, tps);
+        const float up = upshiftMph((DriveMode)m, g, tps);
+        const float down = downshiftMph((DriveMode)m, g + 1, tps);
         CHECK(down < up);
-        CHECK(up * cfg::RPM_PER_KMH[g] < cfg::REV_LIMIT_UPSHIFT_RPM);
+        CHECK(up * cfg::RPM_PER_MPH[g] < cfg::REV_LIMIT_UPSHIFT_RPM);
         // Auto upshift must clear the MANUAL forced-downshift margin.
-        CHECK(up >= cfg::MANUAL_MIN_KMH[g + 1] + cfg::UPSHIFT_MARGIN_KMH);
-        if (tps > 0) CHECK(up >= upshiftKmh((DriveMode)m, g, tps - 5));
+        CHECK(up >= cfg::MANUAL_MIN_MPH[g + 1] + cfg::UPSHIFT_MARGIN_MPH);
+        if (tps > 0) CHECK(up >= upshiftMph((DriveMode)m, g, tps - 5));
       }
     }
   }
@@ -946,6 +987,7 @@ int main() {
   test_manual_is_sport();
   test_sport_lift_hold();
   test_eco_early_lockup();
+  test_highway_lockup();
   test_lockup_rules();
   test_hot_atf_widens_lockup();
   test_vss_faults();

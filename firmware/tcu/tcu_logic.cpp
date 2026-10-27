@@ -36,15 +36,15 @@ uint8_t gearFromSolenoids(bool s1, bool s2) {
   return s2 ? 3 : 4;
 }
 
-float upshiftKmh(DriveMode mode, uint8_t fromGear, float tpsPct) {
+float upshiftMph(DriveMode mode, uint8_t fromGear, float tpsPct) {
   if (fromGear < 1 || fromGear > 3) return 1e9f;
-  return interpTps(cfg::UPSHIFT_KMH[mode][fromGear - 1], tpsPct);
+  return interpTps(cfg::UPSHIFT_MPH[mode][fromGear - 1], tpsPct);
 }
 
-float downshiftKmh(DriveMode mode, uint8_t fromGear, float tpsPct) {
+float downshiftMph(DriveMode mode, uint8_t fromGear, float tpsPct) {
   if (fromGear < 2 || fromGear > 4) return -1.0f;
-  const float v = upshiftKmh(mode, fromGear - 1, tpsPct) - cfg::DOWNSHIFT_HYST_KMH[mode];
-  return v < cfg::MIN_DOWNSHIFT_KMH ? cfg::MIN_DOWNSHIFT_KMH : v;
+  const float v = upshiftMph(mode, fromGear - 1, tpsPct) - cfg::DOWNSHIFT_HYST_MPH[mode];
+  return v < cfg::MIN_DOWNSHIFT_MPH ? cfg::MIN_DOWNSHIFT_MPH : v;
 }
 
 bool Persist::update(bool cond, uint32_t nowMs, uint32_t holdMs) {
@@ -170,16 +170,16 @@ uint16_t Controller::evaluateFaults(const Inputs& in) {
   if (custom) g = gear_;
   else if (in.ecuSenseValid) g = gearFromSolenoids(in.ecuS1, in.ecuS2);
   const bool stall = in.leverInD && g >= 2 && !in.brake && in.rpmValid && in.engineRpm > cfg::VSS_CHECK_RPM &&
-                     in.tpsValid && in.tpsPct > cfg::VSS_CHECK_TPS && in.speedKmh < cfg::STATIONARY_KMH;
+                     in.tpsValid && in.tpsPct > cfg::VSS_CHECK_TPS && in.speedMph < cfg::STATIONARY_MPH;
   if (vssStall_.update(stall, now_, cfg::VSS_CHECK_MS)) f |= FAULT_VSS;
 
   // VSS lost at speed: reported speed collapses faster than any car can brake
   // (also trips on a locked-wheel skid, where handing back to the ECU is fine).
   if (elapsed(now_, dropRefMs_, 100)) {
-    if (dropRefKmh_ >= cfg::VSS_DROP_CHECK_MIN_KMH && dropRefKmh_ - in.speedKmh > cfg::VSS_MAX_DROP_KMH_PER_100MS) {
+    if (dropRefMph_ >= cfg::VSS_DROP_CHECK_MIN_MPH && dropRefMph_ - in.speedMph > cfg::VSS_MAX_DROP_MPH_PER_100MS) {
       f |= FAULT_VSS;
     }
-    dropRefKmh_ = in.speedKmh;
+    dropRefMph_ = in.speedMph;
     dropRefMs_ = now_;
   }
 
@@ -188,8 +188,8 @@ uint16_t Controller::evaluateFaults(const Inputs& in) {
   // hydraulic fault, or bad VSS/tach data.
   bool ratioBad = false;
   if (custom && slCmd_ && !pendingGear_ && elapsed(now_, lastLockupChangeMs_, cfg::RATIO_SETTLE_MS) && in.rpmValid &&
-      in.speedKmh >= cfg::RATIO_CHECK_MIN_KMH) {
-    const float expected = in.speedKmh * cfg::RPM_PER_KMH[gear_];
+      in.speedMph >= cfg::RATIO_CHECK_MIN_MPH) {
+    const float expected = in.speedMph * cfg::RPM_PER_MPH[gear_];
     ratioBad = absf(in.engineRpm - expected) > expected * cfg::RATIO_TOLERANCE;
   }
   if (cfg::RATIO_CHECK_ENABLED && ratioBad_.update(ratioBad, now_, cfg::RATIO_FAULT_MS)) f |= FAULT_RATIO;
@@ -221,12 +221,12 @@ void Controller::updateArming(const Inputs& in) {
 
 void Controller::tryEnterCustom(const Inputs& in) {
   uint8_t g = 0;
-  if (in.speedKmh < cfg::STATIONARY_KMH) {
+  if (in.speedMph < cfg::STATIONARY_MPH) {
     g = 1;
   } else if (in.ecuSenseValid) {
     // Bumpless handover: start in the gear the ECU is holding right now.
     g = gearFromSolenoids(in.ecuS1, in.ecuS2);
-    if (in.speedKmh * cfg::RPM_PER_KMH[g] > cfg::MAX_DOWNSHIFT_RPM) g = 0;
+    if (in.speedMph * cfg::RPM_PER_MPH[g] > cfg::MAX_DOWNSHIFT_RPM) g = 0;
   }
   if (!g) {
     raise(EV_NEED_SYNC, false);
@@ -264,7 +264,7 @@ void Controller::runCustom(const Inputs& in) {
   } else if (upEdge_ || downEdge_) {
     // Tiptronic-style: any tap in AUTO drops into MANUAL and shifts.
     out_.control = CTRL_MANUAL;
-    if (requestShift(gear_ + (upEdge_ ? 1 : -1), in.speedKmh, true)) raise(EV_SHIFT, true);
+    if (requestShift(gear_ + (upEdge_ ? 1 : -1), in.speedMph, true)) raise(EV_SHIFT, true);
   }
 
   updateMode(in);  // a tap may have switched AUTO <-> MANUAL this step
@@ -277,7 +277,7 @@ void Controller::runCustom(const Inputs& in) {
   updateLockup(in);
 }
 
-bool Controller::requestShift(int target, float speedKmh, bool byDriver) {
+bool Controller::requestShift(int target, float speedMph, bool byDriver) {
   Event deny = EV_NONE;
   if (target < 1 || target > 4) {
     deny = EV_DENY_LIMIT;
@@ -285,11 +285,11 @@ bool Controller::requestShift(int target, float speedKmh, bool byDriver) {
     deny = EV_DENY_BUSY;
   } else if (target < gear_) {
     // Directive 1, generalised: guard every downshift, not only into 1st.
-    if (speedKmh * cfg::RPM_PER_KMH[target] > cfg::MAX_DOWNSHIFT_RPM ||
-        (target == 1 && speedKmh > cfg::FIRST_GEAR_MAX_KMH)) {
+    if (speedMph * cfg::RPM_PER_MPH[target] > cfg::MAX_DOWNSHIFT_RPM ||
+        (target == 1 && speedMph > cfg::FIRST_GEAR_MAX_MPH)) {
       deny = EV_DENY_OVERREV;
     }
-  } else if (speedKmh < cfg::MANUAL_MIN_KMH[target] + cfg::UPSHIFT_MARGIN_KMH) {
+  } else if (speedMph < cfg::MANUAL_MIN_MPH[target] + cfg::UPSHIFT_MARGIN_MPH) {
     deny = EV_DENY_TOO_SLOW;
   }
   if (deny != EV_NONE) {
@@ -319,14 +319,14 @@ void Controller::revLimitGuard(const Inputs& in) {
     overRev_.active = false;
     return;
   }
-  const float rpm = in.rpmValid ? in.engineRpm : in.speedKmh * cfg::RPM_PER_KMH[gear_];
+  const float rpm = in.rpmValid ? in.engineRpm : in.speedMph * cfg::RPM_PER_MPH[gear_];
   if (overRev_.update(rpm > cfg::REV_LIMIT_UPSHIFT_RPM, now_, cfg::REV_LIMIT_HOLD_MS)) {
-    if (requestShift(gear_ + 1, in.speedKmh, false)) raise(EV_REV_LIMIT_UPSHIFT, true);
+    if (requestShift(gear_ + 1, in.speedMph, false)) raise(EV_REV_LIMIT_UPSHIFT, true);
   }
 }
 
 void Controller::updateCorner(const Inputs& in) {
-  if (!in.latValid || in.speedKmh < cfg::CORNER_MIN_KMH) {
+  if (!in.latValid || in.speedMph < cfg::CORNER_MIN_MPH) {
     cornering_ = false;
     straight_.active = false;
     return;
@@ -348,11 +348,11 @@ bool Controller::cornerHoldActive() const {
 }
 
 void Controller::updateDecel(const Inputs& in) {
-  // Deceleration over ~300 ms windows, km/h per second (positive = slowing).
+  // Deceleration over ~300 ms windows, mph per second (positive = slowing).
   if (elapsed(now_, decelRefMs_, 300)) {
     const float dt = (now_ - decelRefMs_) / 1000.0f;
-    decelKmhPerS_ = (decelRefKmh_ - in.speedKmh) / dt;
-    decelRefKmh_ = in.speedKmh;
+    decelMphPerS_ = (decelRefMph_ - in.speedMph) / dt;
+    decelRefMph_ = in.speedMph;
     decelRefMs_ = now_;
   }
 }
@@ -375,9 +375,9 @@ void Controller::updateThrottle(const Inputs& in) {
 bool Controller::brakeDownshift(const Inputs& in) {
   const uint8_t m = out_.mode;
   if (!cfg::BRAKE_DOWNSHIFT[m] || !in.brake || cornering_ || gear_ <= 1) return false;
-  if (decelKmhPerS_ < cfg::BRAKE_DOWNSHIFT_MIN_DECEL) return false;
-  if (in.speedKmh * cfg::RPM_PER_KMH[gear_ - 1] > cfg::BRAKE_DOWNSHIFT_RPM[m]) return false;
-  if (!requestShift(gear_ - 1, in.speedKmh, false)) return false;
+  if (decelMphPerS_ < cfg::BRAKE_DOWNSHIFT_MIN_DECEL) return false;
+  if (in.speedMph * cfg::RPM_PER_MPH[gear_ - 1] > cfg::BRAKE_DOWNSHIFT_RPM[m]) return false;
+  if (!requestShift(gear_ - 1, in.speedMph, false)) return false;
   brakeHold_ = true;
   return true;
 }
@@ -416,20 +416,20 @@ void Controller::autoSchedule(const Inputs& in) {
   const bool kickdown = in.tpsPct >= cfg::KICKDOWN_TPS[m];
   const float tps = kickdown ? in.tpsPct : tpsShift_;
   if (!kickdown && !elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS)) return;
-  if (gear_ < 4 && in.speedKmh >= upshiftKmh(out_.mode, gear_, tps)) {
+  if (gear_ < 4 && in.speedMph >= upshiftMph(out_.mode, gear_, tps)) {
     if (!brakeHold_ && !liftHold_ && (!kickdown || elapsed(now_, gearSinceMs_, cfg::AUTO_MIN_TIME_IN_GEAR_MS))) {
-      requestShift(gear_ + 1, in.speedKmh, false);
+      requestShift(gear_ + 1, in.speedMph, false);
     }
-  } else if (gear_ > 1 && in.speedKmh < downshiftKmh(out_.mode, gear_, tps)) {
+  } else if (gear_ > 1 && in.speedMph < downshiftMph(out_.mode, gear_, tps)) {
     // Kickdowns that would over-rev are refused by requestShift().
-    requestShift(gear_ - 1, in.speedKmh, false);
+    requestShift(gear_ - 1, in.speedMph, false);
   }
 }
 
 void Controller::manualSafety(const Inputs& in) {
   if (pendingGear_ || gear_ <= 1) return;
-  if (in.speedKmh < cfg::MANUAL_MIN_KMH[gear_]) {
-    if (requestShift(gear_ - 1, in.speedKmh, false)) raise(EV_AUTO_DOWNSHIFT, true);
+  if (in.speedMph < cfg::MANUAL_MIN_MPH[gear_]) {
+    if (requestShift(gear_ - 1, in.speedMph, false)) raise(EV_AUTO_DOWNSHIFT, true);
   }
 }
 
@@ -438,18 +438,23 @@ void Controller::updateLockup(const Inputs& in) {
   // Per-gear rpm floor on top of the mode's speed thresholds. Hot ATF wants
   // as much lockup as possible, so it uses the lowest floor (the anti-lug
   // rule below still protects the engine).
-  const float k = cfg::RPM_PER_KMH[gear_ >= 1 && gear_ <= 4 ? gear_ : 4];
+  const float k = cfg::RPM_PER_MPH[gear_ >= 1 && gear_ <= 4 ? gear_ : 4];
   const float minRpm = hot_ ? cfg::LU_MIN_RPM[MODE_ECO] : cfg::LU_MIN_RPM[m];
   const float floorOn = minRpm / k;
   const float floorOff = (minRpm - cfg::LU_MIN_RPM_HYST) / k;
-  const float baseOn = hot_ ? cfg::HOT_LU_ON_KMH : cfg::LU_ON_KMH[m];
-  const float baseOff = hot_ ? cfg::HOT_LU_OFF_KMH : cfg::LU_OFF_KMH[m];
-  const float onKmh = baseOn > floorOn ? baseOn : floorOn;
-  const float offKmh = baseOff > floorOff ? baseOff : floorOff;
+  const float baseOn = hot_ ? cfg::HOT_LU_ON_MPH : cfg::LU_ON_MPH[m];
+  const float baseOff = hot_ ? cfg::HOT_LU_OFF_MPH : cfg::LU_OFF_MPH[m];
+  const float onMph = baseOn > floorOn ? baseOn : floorOn;
+  const float offMph = baseOff > floorOff ? baseOff : floorOff;
   // Never lug the engine: at low locked rpm, lockup only on a light throttle.
-  const bool lug = in.speedKmh * k < cfg::LU_LUG_RPM && in.tpsPct > cfg::LU_LUG_TPS;
-  const float tpsOn = hot_ ? cfg::HOT_LU_TPS_ON : cfg::LU_TPS_ON[m];
-  const float tpsOff = hot_ ? cfg::HOT_LU_TPS_OFF : cfg::LU_TPS_OFF[m];
+  const bool lug = in.speedMph * k < cfg::LU_LUG_RPM && in.tpsPct > cfg::LU_LUG_TPS;
+  float tpsOn = hot_ ? cfg::HOT_LU_TPS_ON : cfg::LU_TPS_ON[m];
+  float tpsOff = hot_ ? cfg::HOT_LU_TPS_OFF : cfg::LU_TPS_OFF[m];
+  // Highway: stay locked under load in 4th (cruise, grades, headwind).
+  if (cfg::HWY_LOCKUP[m] && gear_ == 4 && in.speedMph * k >= cfg::HWY_LU_MIN_RPM) {
+    if (tpsOn < cfg::HWY_LU_TPS_ON) tpsOn = cfg::HWY_LU_TPS_ON;
+    if (tpsOff < cfg::HWY_LU_TPS_OFF) tpsOff = cfg::HWY_LU_TPS_OFF;
+  }
 
   // Brake and low speed always release: a locked converter stalls the engine.
   // Coast release (per mode) keeps the converter slipping, ready for throttle.
@@ -458,8 +463,8 @@ void Controller::updateLockup(const Inputs& in) {
                        !elapsed(now_, gearSinceMs_, cfg::LOCKUP_SETTLE_AFTER_SHIFT_MS);
   const bool tipIn = cfg::LU_TIPIN_RELEASE[m] && tipIn_ && !hot_;
   if (slCmd_) {
-    if (blocked || tipIn || lug || in.speedKmh < offKmh || in.tpsPct > tpsOff) setLockup(false);
-  } else if (!blocked && !lug && in.speedKmh >= onKmh && in.tpsPct <= tpsOn &&
+    if (blocked || tipIn || lug || in.speedMph < offMph || in.tpsPct > tpsOff) setLockup(false);
+  } else if (!blocked && !lug && in.speedMph >= onMph && in.tpsPct <= tpsOn &&
              elapsed(now_, lastLockupChangeMs_, cfg::LOCKUP_MIN_OFF_MS)) {
     setLockup(true);
   }

@@ -211,12 +211,12 @@ void serviceGyro(uint32_t now) {
     return;
   }
   gyro.misses = 0;
-  if (lastIn.speedKmh < 1.0f && fabs(dps - gyro.biasDps) < 10.0f) {
+  if (lastIn.speedMph < 0.6f && fabs(dps - gyro.biasDps) < 10.0f) {
     gyro.biasDps = gyro.stillSamples ? gyro.biasDps + 0.02f * (dps - gyro.biasDps) : dps;
     if (gyro.stillSamples < 1000) gyro.stillSamples++;
   }
   const float yawRadS = (dps - gyro.biasDps) * (3.14159265f / 180.0f);
-  gyro.latG = (lastIn.speedKmh / 3.6f) * yawRadS / 9.81f;
+  gyro.latG = (lastIn.speedMph * 0.44704f) * yawRadS / 9.81f;  // mph -> m/s
 }
 
 // --------------------------------------------------------------- switches
@@ -256,11 +256,11 @@ tcu::Inputs readInputs(uint32_t now) {
 
   // Speed is not low-pass filtered heavily: the VSS-loss check needs to see a
   // collapse, and the over-rev guard must not lag a real slowdown.
-  in.speedKmh = speedF.update(pulseHz(vss, cfg::VSS_TIMEOUT_US) * 3600.0f / cfg::VSS_PULSES_PER_KM, 0.5f);
+  in.speedMph = speedF.update(pulseHz(vss, cfg::VSS_TIMEOUT_US) * 3600.0f / cfg::VSS_PULSES_PER_MILE, 0.5f);  // pulses/s -> mph
   in.engineRpm = rpmF.update(pulseHz(tach, cfg::TACH_TIMEOUT_US) * 60.0f / cfg::TACH_PULSES_PER_REV, 0.5f);
   // A dead tach wire while driving reads 0 rpm: treat as invalid so the logic
   // falls back to speed x ratio instead of trusting it.
-  in.rpmValid = cfg::TACH_INSTALLED && !(in.engineRpm < 300.0f && in.speedKmh > 10.0f);
+  in.rpmValid = cfg::TACH_INSTALLED && !(in.engineRpm < 300.0f && in.speedMph > 6.0f);
 
   const float tpsV = tpsF.update(rawToVolts(readRaw(pin::TPS)), 0.4f);
   in.tpsValid = tpsV >= cfg::TPS_VALID_MIN_V && tpsV <= cfg::TPS_VALID_MAX_V;
@@ -520,8 +520,8 @@ void logEcuShifts(const tcu::Outputs& o) {
       Serial.print(o.lockup ? F("# ECU lockup ON") : F("# ECU lockup OFF"));
     }
     Serial.print(F(" at "));
-    Serial.print((int16_t)(lastIn.speedKmh + 0.5f));
-    Serial.print(F(" km/h, TPS "));
+    Serial.print((int16_t)(lastIn.speedMph + 0.5f));
+    Serial.print(F(" mph, TPS "));
     Serial.print((int16_t)(lastIn.tpsPct + 0.5f));
     Serial.print(F(" %, "));
     Serial.print((int32_t)lastIn.engineRpm);
@@ -537,7 +537,7 @@ void serviceUsbLog(uint32_t now) {
   if (Serial.availableForWrite() < 60) return;  // never block on a slow host
   last = now;
   const tcu::Outputs& o = controller.outputs();
-  // ms,ctrl,mode,gear,lockup,kmh,rpm,rpm_per_kmh,tps,atf,volts,faults,warnings
+  // ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings
   Serial.print(now);
   Serial.print(',');
   Serial.print(o.control);
@@ -548,11 +548,11 @@ void serviceUsbLog(uint32_t now) {
   Serial.print(',');
   Serial.print(o.lockup);
   Serial.print(',');
-  Serial.print(lastIn.speedKmh, 1);
+  Serial.print(lastIn.speedMph, 1);
   Serial.print(',');
   Serial.print((int32_t)lastIn.engineRpm);
   Serial.print(',');
-  Serial.print(lastIn.speedKmh > 5.0f ? lastIn.engineRpm / lastIn.speedKmh : 0.0f, 1);
+  Serial.print(lastIn.speedMph > 5.0f ? lastIn.engineRpm / lastIn.speedMph : 0.0f, 1);
   Serial.print(',');
   Serial.print((int16_t)lastIn.tpsPct);
   Serial.print(',');
@@ -590,7 +590,7 @@ void renderMain(const tcu::Outputs& o, uint32_t now) {
   r5.s("WRN  ");
   appendFlags(r5, o.warnings, kWarnNames, 6);
   messageText(r6, o, now);
-  r7.n((int32_t)(lastIn.speedKmh + 0.5f)).s("km/h  ATF ");
+  r7.n((int32_t)(lastIn.speedMph + 0.5f)).s(" mph  ATF ");
   if (lastIn.atfValid) r7.n((int32_t)lastIn.atfC).s("C");
   else r7.s("--");
   oled.setLine(2, r2.buf);
@@ -604,7 +604,7 @@ void renderMain(const tcu::Outputs& o, uint32_t now) {
 void renderSensors() {
   oled.setBig("SENSORS");
   Text r2, r3, r4, r5, r6, r7;
-  r2.s("SPEED").pad(9).n((int32_t)(lastIn.speedKmh + 0.5f)).s(" km/h");
+  r2.s("SPEED").pad(9).n((int32_t)(lastIn.speedMph + 0.5f)).s(" mph");
   r3.s("ENGINE").pad(9);
   if (lastIn.rpmValid) r3.n((int32_t)lastIn.engineRpm).s(" rpm");
   else r3.s("--");

@@ -23,7 +23,7 @@ const char* testName(TestId id) { return id < T_COUNT ? kNames[id] : "?"; }
 TestInhibit testInhibit(const Inputs& in) {
   if (in.customRequested) return INH_MASTER;
   if (in.leverInD) return INH_LEVER_D;
-  if (in.speedKmh > 1.0f) return INH_MOVING;
+  if (in.speedMph > 0.6f) return INH_MOVING;
   // Two independent "engine running" indicators, so a missing tach can't
   // let the solenoid test run on a running engine.
   if ((in.rpmValid && in.engineRpm > cfg::TEST_ENGINE_RUNNING_RPM) || in.batteryV > cfg::TEST_CHARGING_V) {

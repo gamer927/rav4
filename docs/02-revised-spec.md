@@ -1,5 +1,7 @@
 # Engineering Specification rev 2: RAV4 Transmission Controller
 
+*All speeds in this document and in the firmware are in mph.*
+
 **Vehicle:** 1999 Toyota RAV4 (first generation, SXA10 2WD / SXA11 4WD), 4-speed ECT automatic,
 3S-FE 2.0 L engine
 **Controller:** Arduino Mega 2560 (`firmware/tcu/`)
@@ -34,7 +36,7 @@ These are the facts the design depends on, with how sure each one is.
 | Compression ratio | 9.5:1 or 9.8:1 | Sources disagree |
 | Redline / fuel cut | ~6,300 rpm redline, fuel cut ~6,500 rpm | **Not found in any published source.** The firmware's limits (downshift guard 5,800, forced upshift 6,200) already sit below it. Check your tachometer's red zone |
 | Torque curve | Peak 4,600, broad from ~2,500, falling off past ~5,500 | No factory curve published; shape is an estimate |
-| Tyres | 215/70R16 (~455 rev/km) | Published specs and VIN decodes |
+| Tyres | 215/70R16 (~732 rev/mile) | Published specs and VIN decodes |
 | Solenoid drive | ECM output S1/S2/SL → solenoid → transaxle case → ground (ECM switches +12 V) | Toyota service text for this car |
 | Shift logic | S1 on in 1st and 2nd; S2 joins in 2nd; SL = lockup | Toyota service text for this car; full table in §5 |
 | Solenoid connector | S1 / S2 / SL = terminals A3 / A1 / A2 (2WD), B3 / B6 / B5 (4WD) | Toyota service text; **VERIFY** on your harness |
@@ -309,37 +311,37 @@ debounced.
 A request is **refused** if any of these is true:
 - The target is outside 1–4, or isn't exactly one step from the current gear.
 - A previous shift happened less than **700 ms** ago, or one is still pending.
-- **Downshift:** `km/h × RPM_PER_KMH[target] > 5,800`, or the target is 1st above **45 km/h**.
+- **Downshift:** `mph × RPM_PER_MPH[target] > 5,800`, or the target is 1st above **28 mph**.
 - **Upshift:** speed is below the MANUAL forced-downshift threshold for the target gear plus a
-  4 km/h margin. Without this, the TCU would immediately undo the shift.
+  2.5 mph margin. Without this, the TCU would immediately undo the shift.
 
 If the request is accepted with lockup applied, SL releases first and the gear changes
 **200 ms** later. After any gear change, lockup stays inhibited for **1.5 s**.
 
 ### 6.3 CUSTOM-AUTO
-- **Upshift** when `speed ≥ UPSHIFT_KMH[mode][gear](tps)`. The tables are interpolated at
+- **Upshift** when `speed ≥ UPSHIFT_MPH[mode][gear](tps)`. The tables are interpolated at
   0/25/50/75/100 % throttle.
-- **Downshift** when `speed < upshift(tps) − hysteresis[mode]` (ECO 11, NORMAL 12, SPORT 7 km/h).
+- **Downshift** when `speed < upshift(tps) − hysteresis[mode]` (ECO 7, NORMAL 7.5, SPORT 4.5 mph).
   Opening the throttle raises the downshift line, which gives kickdown; the over-rev guard
   refuses any kickdown that would over-rev.
 - At least **1.2 s** in gear between automatic shifts, so the box doesn't hunt between gears at
   part throttle.
-- **Kickdown** (throttle ≥ 80 %) skips that 1.2 s wait. Downshifts then only wait for the
-  previous shift to finish (700 ms), so 4→3 is immediate and 3→2 follows 0.7 s later. Example
-  in SPORT, flooring it in 4th at 65 km/h: 3rd at once, 2nd at 0.7 s, then upshift to 3rd at
-  110 km/h.
+- **Kickdown** (throttle ≥ 80 % in ECO/NORMAL, ≥ 60 % in SPORT) skips that 1.2 s wait.
+  Downshifts then only wait for the previous shift to finish (700 ms), so 4→3 is immediate and
+  3→2 follows 0.7 s later. Example in SPORT, flooring it in 4th at 40 mph: 3rd at once, 2nd at
+  0.7 s, then upshift to 3rd at 68 mph.
 
-| Upshift km/h at 0 / 25 / 50 / 75 / 100 % TPS | 1→2 | 2→3 | 3→4 |
+| Upshift mph at 0 / 25 / 50 / 75 / 100 % TPS | 1→2 | 2→3 | 3→4 |
 |---|---|---|---|
-| ECO (short-shift) | 17/19/29/46/55 | 31/36/54/79/103 | 48/53/74/108/150 |
-| NORMAL | 18/24/38/53/58 | 36/48/70/94/106 | 54/66/94/126/156 |
-| SPORT (hold) | 22/34/50/58/60 | 42/60/84/102/110 | 66/84/114/150/168 |
+| ECO (short-shift) | 11/12/18/29/34 | 19/22/34/49/64 | 30/33/46/67/93 |
+| NORMAL | 11/15/24/33/36 | 22/30/43/58/66 | 34/41/58/78/97 |
+| SPORT (hold) | 14/21/31/36/37 | 26/37/52/63/68 | 41/52/71/93/104 |
 
 With the 1999 RAV4 default ratios, the WOT points sit at about 5,000–5,700 rpm, measured as
 "locked converter" rpm (speed × ratio). At full throttle the converter slips 5–10 %, and rpm keeps
 climbing during the ~0.5 s shift. So the engine really peaks at roughly **5,400–5,800 (ECO and
 NORMAL)** and **6,000–6,200 (SPORT)**, just under a 6,300 redline. These are starting maps:
-re-check them against your calibrated `RPM_PER_KMH` and logged rpm.
+re-check them against your calibrated `RPM_PER_MPH` and logged rpm.
 
 **Why SPORT shifts near the redline, not at 5,200–5,500.** Shifting "back into the torque band"
 sounds right but is slower with these gear steps. After an upshift, the engine drops a long way:
@@ -364,8 +366,8 @@ shift earlier on purpose, for quietness and economy, not speed.
 - A tap on [+] or [-] gives one shift. Holding a button never repeats. Any tap while in AUTO
   switches to MANUAL.
 - Hold [+] for **1 s** to return to AUTO.
-- **Forced downshift** when slowing below 35 km/h (4th), 18 km/h (3rd) or 8 km/h (2nd), so the
-  car never stops in a high gear. To allow 2nd-gear snow starts, set `MANUAL_MIN_KMH[2] = 0`.
+- **Forced downshift** when slowing below 22 mph (4th), 11 mph (3rd) or 5 mph (2nd), so the
+  car never stops in a high gear. To allow 2nd-gear snow starts, set `MANUAL_MIN_MPH[2] = 0`.
 - **Forced upshift** at 6,200 rpm held for 150 ms (configurable).
 - Refused requests show on the display: `DENIED: OVER-REV`, `DENIED: TOO SLOW` or
   `DENIED: SHIFTING`.
@@ -387,14 +389,21 @@ SL is **released immediately** when any of these happens:
 
 | Lockup thresholds | ECO | NORMAL | SPORT | HOT (ATF ≥ 110 °C) |
 |---|---|---|---|---|
-| ON / OFF speed (km/h) | 35 / 30 | 58 / 52 | 70 / 64 | 40 / 34 |
+| ON / OFF speed (mph) | 22 / 19 | 36 / 32 | 43 / 40 | 25 / 21 |
 | Locked-rpm floor (ON / OFF) | 1,250 / 1,100 | 1,400 / 1,250 | 1,800 / 1,650 | 1,250 / 1,100 |
 | ON / OFF TPS (%) | 45 / 55 | 55 / 65 | 35 / 45 | 85 / 95 |
 
 Lockup needs **both** the speed and the locked-rpm floor (speed × gear ratio), so the floor makes
-it per gear. ECO locks 3rd from ~37 km/h but 4th only from ~51 km/h; it releases at ~33 and
-~45 km/h. **Anti-lug:** below 1,600 locked rpm, lockup only holds at ≤ 25 % throttle. Above
+it per gear. ECO locks 3rd from ~23 mph but 4th only from ~32 mph; it releases at ~20 and
+~28 mph. **Anti-lug:** below 1,600 locked rpm, lockup only holds at ≤ 25 % throttle. Above
 that, the converter's slip and torque multiplication do the work instead of the engine labouring.
+
+**Highway lockup (ECO and NORMAL).** In 4th from 2,000 locked rpm (~51 mph), the throttle
+limits rise to 85 % on / 95 % off. A RAV4 needs roughly 90 % of its power to hold 90 mph, so
+without this the converter would unlock exactly when you're cruising fast or climbing a highway
+grade. Staying locked at 90 mph (~3,550 rpm) means no slip: lower rpm, less fuel, and much less
+ATF heat on long runs. Only a true wide-open kickdown releases it. SPORT doesn't use it, because
+it prefers response.
 
 Coast release (SPORT, §6.8) also counts as a release condition.
 
@@ -413,8 +422,8 @@ Coast release (SPORT, §6.8) also counts as a release condition.
 |---|---|
 | `FAULT_SUPPLY` | Battery below 10.5 V or above 16.0 V for 500 ms |
 | `FAULT_TPS` | TPS voltage outside 0.15–4.85 V for 200 ms |
-| `FAULT_VSS` | Speed drops more than 8 km/h in 100 ms from 15 km/h or above (signal loss), **or** more than 2,500 rpm and 15 % TPS in a gear of 2nd or higher, brake off, at 0 km/h for 3 s |
-| `FAULT_RATIO` | Lockup applied for 1.5 s, 30 km/h or more, and rpm differs from `km/h × RPM_PER_KMH[gear]` by more than 25 % for 1.5 s (wrong gear engaged, swapped S1/S2 wiring, bad VSS or tach) |
+| `FAULT_VSS` | Speed drops more than 5 mph in 100 ms from 9 mph or above (signal loss), **or** more than 2,500 rpm and 15 % TPS in a gear of 2nd or higher, brake off, at 0 mph for 3 s |
+| `FAULT_RATIO` | Lockup applied for 1.5 s, 19 mph or more, and rpm differs from `mph × RPM_PER_MPH[gear]` by more than 25 % for 1.5 s (wrong gear engaged, swapped S1/S2 wiring, bad VSS or tach) |
 | `FAULT_SOLENOID` | For 300 ms, a solenoid commanded on draws less than 0.6 A, or one commanded off draws more than 0.2 A (broken wire, relay didn't switch, shorted driver). Needs the current-sense wiring |
 
 | Warning | Condition |
@@ -436,8 +445,8 @@ The console LED shows the state:
 |---|---|---|---|---|
 | Hold gears longer, shift near the top at full throttle | – | – | ✓ | The SPORT shift map (§6.3): full-throttle upshifts at about 6,000–6,200 real engine rpm, just under the redline, which is the fastest way through these gears |
 | **Corner hold** | ✓ | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own [+]/[−] and the over-rev upshift always work |
-| **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 3 km/h/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
-| **Early lockup** | ✓ | – | – | ECO locks the converter as soon as the engine can take it (1,250 rpm locked: ~37 km/h in 3rd, ~51 in 4th) and keeps it through light throttle. A slipping converter is the biggest fuel waste in an automatic, so this is ECO's main economy gain |
+| **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 2 mph/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
+| **Early lockup** | ✓ | – | – | ECO locks the converter as soon as the engine can take it (1,250 rpm locked: ~23 mph in 3rd, ~32 in 4th) and keeps it through light throttle. A slipping converter is the biggest fuel waste in an automatic, so this is ECO's main economy gain |
 | **Coast lockup** | ✓ | ✓ | – | Lockup stays on when you lift, down to the rpm floor, keeping the engine turning with the wheels so the ECU's deceleration fuel cut lasts longer |
 | **Anti-lug** | ✓ | ✓ | ✓ | Below 1,600 locked rpm, more than 25 % throttle releases lockup, so early lockup never makes the engine labour |
 | **Coast unlock** | – | – | ✓ | Lockup released on a closed throttle (< 2 %, re-allowed at 5 %), so the converter is already slipping when you get back on the throttle |
@@ -535,14 +544,14 @@ The full table also prints on the USB log.
 The CSV log on USB (115200 baud) works in STOCK. While the ECU is in control, gear and lockup
 come from the ECU sense inputs, so you can calibrate everything while the factory ECU drives.
 
-Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, volts, faults, warnings`
+Log columns: `ms, ctrl, mode, gear, lockup, mph, rpm, rpm_per_mph, tps, atf, volts, faults, warnings`
 
 1. **TPS:** with the engine off and the ignition on, log closed throttle and WOT. Set
    `TPS_CLOSED_V` and `TPS_WOT_V`.
-2. **VSS:** at a steady 50 and 100 km/h by GPS, scale `VSS_PULSES_PER_KM` so that `kmh`
+2. **VSS:** at a steady 30 and 60 mph by GPS, scale `VSS_PULSES_PER_MILE` so that `mph`
    matches.
-3. **RPM_PER_KMH:**
-   - Cruise at a steady speed in 3rd and in 4th with `lockup = 1` and average `rpm_per_kmh`.
+3. **RPM_PER_MPH:**
+   - Cruise at a steady speed in 3rd and in 4th with `lockup = 1` and average `rpm_per_mph`.
      Because 3rd is direct (1.000), K3 is the final drive × tyre factor on its own, so it's the
      cleanest number to measure.
    - Check 4th: K4 / K3 should be about 0.734. If it isn't, your ratios differ from the
@@ -558,9 +567,9 @@ Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, vol
 5. **Battery:** compare with a multimeter, then trim `VBAT_DIVIDER`.
 6. **Factory shift map (for tuning NORMAL):** with the switch OFF, the log also prints every
    shift and lockup change the factory ECU makes, for example
-   `# ECU shift 2>3 at 45 km/h, TPS 30 %, 2400 rpm`. Drive a mix of gentle, normal and firm
+   `# ECU shift 2>3 at 28 mph, TPS 30 %, 2400 rpm`. Drive a mix of gentle, normal and firm
    acceleration and collect these lines. The NORMAL map is an estimate of a stock-like schedule;
-   adjust its `UPSHIFT_KMH` row so NORMAL lands near the factory points, so NORMAL feels like
+   adjust its `UPSHIFT_MPH` row so NORMAL lands near the factory points, so NORMAL feels like
    stock plus the extras.
 
 ## 9. Bring-up and test plan
@@ -599,7 +608,7 @@ Log columns: `ms, ctrl, mode, gear, lockup, kmh, rpm, rpm_per_kmh, tps, atf, vol
 | Solenoid resistance | 11–15 Ω | RM; measure |
 | SL on/off vs duty-cycle | on/off | RM; scope the ECU output |
 | Gear ratios and final drive | 2.810/1.549/1.000/0.734, FD ~4.40 | RM; then calibrate (§8) |
-| VSS pulses/km | 2548 | Calibrate (§8) |
+| VSS pulses/mile | ~4101 (2548/km) | Calibrate (§8) |
 | Tach source | ECU/DLC TAC, 2 pulses/rev | EWD |
 | PNP "D" signal | +12 V in D | EWD |
 | Redline / fuel cut | Guard at 5,800, forced upshift at 6,200 | RM |
