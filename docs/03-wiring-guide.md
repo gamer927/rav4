@@ -65,7 +65,7 @@ Ground every cable shield **at the TCU end only**.
 
 | Pin | Wire | Signal | Inside the TCU |
 |---|---|---|---|
-| 1 | W1 | +12 V drivers, **5 A fuse** | TVS → high-side switches U1–U3, relay coils |
+| 1 | W1 | +12 V drivers, **5 A fuse** | TVS → current sensors and MOSFET drivers Q1–Q3, relay coils |
 | 2 | W2 | +12 V logic, **2 A fuse** | Reverse-polarity diode → TVS → 5 V buck; battery sense (47k/10k → A3) |
 | 3 | W3 | Body ground | Star ground point |
 
@@ -162,15 +162,35 @@ each end into its X2 harness wire and seal it.
 
 ## 6. Inside the TCU (Detail B: input and output circuits)
 
-Detail A (the solenoid channel) is in [`wiring-detail-a.svg`](wiring-detail-a.svg). The other
-circuits are below. Fit a 10 kΩ pull-down on **every** output that drives something (D6, D8, D9,
-D10), so everything is off while the Mega resets.
+The TCU is three boards joined by two ribbon cables. Exact part positions, every wire, and the
+order to build them in are in the [build book](05-build-book.md).
 
-**Console switch input** (×6: D22–D26, D32)
+| Board | What's on it |
+|---|---|
+| **Power board** (90 × 150 mm perfboard) | Everything that touches the car's 12 V wiring: X1/X2/X3 and LOAD terminals, protection, the 5 V buck converter, relays, drivers, current sensors, optocouplers, speed comparator, throttle taps. Ribbon A (26-way) to the hub |
+| **Logic board** (90 × 70 mm perfboard) | X4 console, X5 OLED and X6 ATF terminals, console input filters, ATF probe parts, the **gyro**. Ribbon B (16-way) to the hub |
+| **Hub** (Mega prototype shield) | Two ribbon sockets, each pin wired to its Mega pin |
+
+Detail A (the solenoid channel) is in [`wiring-detail-a.svg`](wiring-detail-a.svg). The other
+circuits are below. A 10 kΩ pull-down sits on **every** output that drives something (D6, D8,
+D9, D10), so everything is off while the Mega resets.
+
+**Solenoid driver** (×3: D8/D9/D10 → S1/S2/SL)
+```
+D8 ── ULN2803 IN4 (10k pull-down) ; ULN2803 OUT4 ── 4.7k ── Q1 gate
++12 V DRV ── CS1 ACS712 (IP+ → IP−) ── Q1 source (IRF4905 P-MOSFET)
+Q1 gate ── 10k ── source (pull-up = off) ; 15 V zener gate–source (cathode on source)
+Q1 drain ── K1 COM-B ; clamp: drain ── UF4007 (cathode on drain) ── 24 V zener ── GND
+CS1 OUT ── A4 (185 mV/A around ~2.5 V)
+```
+D8 high → the ULN2803 pulls the gate down → the MOSFET switches +12 V to the solenoid. The
+zener clamp lets the solenoid release quickly, like the ECM's own driver.
+
+**Console switch input** (×6: D22–D26, D32), on the logic board
 ```
 +5V ── 2.2k ──┬── 1k ──┬── Mega pin
               │        ├── 100 nF ── GND
-              │        └── BAT54S clamp to 5V / GND
+              │        └── BAT85 to 5V, BAT85 from GND (clamps)
             X4 core ── switch ── C7 (GND)
 ```
 
@@ -178,28 +198,31 @@ D10), so everything is off while the Mega resets.
 ```
 car signal ── 2.2k (3.3k for ECU sense) ──┬── PC817 LED (+) ── LED (−) ── GND
                                           └── 1N4148 reverse across the LED
-PC817 transistor: collector ── Mega pin (internal pull-up + 10k to 5V), emitter ── GND
+PC817 transistor: collector ── Mega pin (10k pull-up to 5V), emitter ── GND
 Mega reads LOW when the car signal is at +12 V.
 ```
 
 **Speed (SPD) comparator**, high impedance so it never loads the car's line (D2)
 ```
-SPD ── 47k ──┬── LM393 (+)        LM393 (−) ── 2.5 V (10k/10k from 5V)
+SPD ── 22k ──┬── LM393 (+)        LM393 (−) ── 0.76 V (10k / 1.8k from 5V)
              ├── 10k ── GND       1M feedback (+) ← output (hysteresis)
              └── 5.1V zener       output ── 10k pull-up to 5V ── D2
 ```
+The 22k/10k divider scales the signal by about 0.31, so a 5 V speed signal reaches 1.56 V and
+a 12 V one 3.75 V, both well over the 0.76 V threshold. (Revision 3 fix: the earlier 47k/10k
+divider with a 2.5 V threshold never switched.)
 
 **Throttle tap** (A0, A1)
 ```
 VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
            100 nF                  100 nF
-           BAT54S                  BAT54S
+        BAT85 clamps            BAT85 clamps
 (Firmware reads A0 − A1. E2 is never tied to the TCU ground.)
 ```
 
 **Battery sense** (A3): `X1-2 (+12 V) ── 47k ──┬── A3; 10k to GND, 100 nF, 5.1 V zener`
 
-**ATF probe** (D33): `X6-3 DQ ── 100 Ω ── D33; 4.7k from DQ to 5 V; 5.1 V TVS to GND`
+**ATF probe** (D33): `X6-3 DQ ── 100 Ω ── D33; 4.7k from DQ to 5 V; 5.1 V zener to GND`
 (use 2.2k if readings drop out on the long run)
 
 **Relay coils** (D6): `D6 ── ULN2803 IN1-3 (10k pull-down); OUT1-3 ── K1/K2/K3 coil (−); coil (+) ── +12 V DRV; ULN COM ── +12 V DRV`
@@ -207,6 +230,9 @@ VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
 **Status LED** (D7): `D7 ── 330 Ω ── X4-8 (C8) ── LED ── X4-7 (C7)`
 
 ## 7. Build order
+
+This is the short version. The [build book](05-build-book.md) is the full step-by-step version,
+in order, with pictures.
 
 1. **Bench:** build the TCU on the bench with 15 Ω power resistors (plus LEDs) in place of the
    three solenoids. Flash the firmware, calibrate `IS_AMPS_PER_VOLT`, hold TEST, and check every

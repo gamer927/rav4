@@ -1,0 +1,256 @@
+#!/usr/bin/env python3
+"""Shopping list with cost estimates.
+
+Writes docs/04-shopping-list.md and docs/shopping-list.csv from the table
+below, so the totals always add up. Prices are rough US estimates (late
+2026) for what you actually have to buy (often a pack), not unit prices.
+
+  python3 tools/shopping_list.py
+"""
+import csv
+import os
+
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+
+# Stores: one order each keeps shipping down.
+DK = "DigiKey / Mouser"
+AMZ = "Amazon (or AliExpress, cheaper but slower)"
+HW = "Hardware store"
+AUTO = "Auto-parts store"
+
+# (section, item, need, buy, store, est. US$, notes)
+ITEMS = [
+    # ---------------------------------------------------------------- 1
+    ("1. Brain and power", "Arduino Mega 2560 R3", "1", "1 (Elegoo or similar clone with the 16U2 USB chip)", AMZ, 22,
+     "Genuine Arduino is ~$48. Comes with a USB cable"),
+    ("1. Brain and power", "Prototype shield for the Mega (\"Mega ProtoShield\")", "1", "1", AMZ, 8,
+     "The hub: two ribbon sockets wired to the Mega's pins"),
+    ("1. Brain and power", "LM2596HV buck converter module, 4.5–60 V in", "1", "pack of 2 (one spare)", AMZ, 8,
+     "Must say **HV** (60 V input). Plain LM2596 is only 40 V"),
+    ("1. Brain and power", "1.5KE27A TVS diode", "2", "pack of 10", DK, 4, "Littelfuse 1.5KE27A"),
+    ("1. Brain and power", "1N5822 Schottky diode, 3 A", "1", "pack of 10", DK, 3, "Reverse-polarity protection"),
+    ("1. Brain and power", "100 µF 50 V electrolytic capacitor", "1", "pack of 10", DK, 3, ""),
+    ("1. Brain and power", "Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses", "2 + fuses", "kit", AUTO, 10,
+     "Match your fuse box's blade size (step 0 checks it)"),
+    ("1. Brain and power", "Add-a-circuit fuse tap", "1", "1", AUTO, 8, "Same blade size as the fuse box"),
+    # ---------------------------------------------------------------- 2
+    ("2. Solenoid control", "Omron G2RL-2-DC12 relay (DPDT, 12 V)", "3", "4 (one spare)", DK, 10,
+     "The factory/box changeover. Don't substitute a single-pole relay"),
+    ("2. Solenoid control", "IRF4905 P-channel MOSFET, TO-220", "3", "pack of 5", DK, 9, "Infineon IRF4905PBF"),
+    ("2. Solenoid control", "ACS712-05B current sensor module (5 A)", "3", "pack of 3–5", AMZ, 11,
+     "Measures each solenoid's current for the self-test"),
+    ("2. Solenoid control", "ULN2803A driver, DIP-18", "1", "2 (one spare)", DK, 3,
+     "Through-hole DIP: e.g. Toshiba ULN2803APG. Not the SOIC version"),
+    ("2. Solenoid control", "1 W zener diode kit (1N4728A–1N4764A)", "9", "kit", AMZ, 11,
+     "Uses 1N4733A 5.1 V ×3, 1N4744A 15 V ×3, 1N4749A 24 V ×3"),
+    ("2. Solenoid control", "UF4007 fast diode", "3", "pack of 10", DK, 3, "1N4007 also works"),
+    ("2. Solenoid control", "15 Ω 50 W aluminium-housed resistor", "3", "3", DK, 15,
+     "Dummy loads, e.g. TE HSA5015RJ or Arcol HS50 15R"),
+    ("2. Solenoid control", "Finned aluminium heatsink, ≥ 100 × 100 × 25 mm", "1", "1", AMZ, 14,
+     "For the dummy resistors, outside the box"),
+    ("2. Solenoid control", "Thermal paste", "1", "small tube", AMZ, 6, "Skip if you have some"),
+    # ---------------------------------------------------------------- 3
+    ("3. Signal inputs", "PC817 optocoupler, DIP-4", "6", "pack of 20", AMZ, 6, ""),
+    ("3. Signal inputs", "LM393 comparator, DIP-8", "1", "pack of 10", AMZ, 5, ""),
+    ("3. Signal inputs", "BAT85 Schottky diode (DO-35)", "16", "pack of 25", DK, 5, "Input clamps"),
+    ("3. Signal inputs", "1N4148 diode", "6", "pack of 100", AMZ, 5, ""),
+    ("3. Signal inputs", "Resistor kit, 1/4 W 1 % metal film (600+ pcs)", "≈ 70", "kit", AMZ, 12,
+     "Needs 100, 330, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"),
+    ("3. Signal inputs", "Extra 10 kΩ resistors", "19 total", "pack of 50", AMZ, 4,
+     "Most kits only have 10–20 of each value"),
+    ("3. Signal inputs", "100 nF ceramic capacitors, 50 V", "9", "pack of 50", AMZ, 5, ""),
+    # ---------------------------------------------------------------- 4
+    ("4. Boards and inside wiring", "Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm", "1 + 1",
+     "assorted pack", AMZ, 10, "Power board 9 × 15, logic board 7 × 9"),
+    ("4. Boards and inside wiring", "Screw terminals, 5.08 mm, 2- and 3-way, interlocking", "35 positions",
+     "pack of ~40 pieces", AMZ, 9, "KF301 / DG301 type"),
+    ("4. Boards and inside wiring", "Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~20 cm)",
+     "1 + 1", "headers + 2 cables", AMZ, 12, "Or crimp your own from ribbon and IDC sockets"),
+    ("4. Boards and inside wiring", "Silicone hook-up wire 22 AWG, 6 colours", "~5 m", "kit", AMZ, 15, ""),
+    ("4. Boards and inside wiring", "Silicone wire 18 AWG, red/black/yellow", "~3 m", "kit", AMZ, 14,
+     "Board power paths and the dummy-load cable (heat-proof)"),
+    ("4. Boards and inside wiring", "Double-sided foam mounting tape", "1", "roll", AMZ, 6,
+     "Holds the current sensors and buck module"),
+    # ---------------------------------------------------------------- 5
+    ("5. Car harness and connectors", "Deutsch DT connector kit, 2–12 way, with crimper", "X1–X6 + bypass plug",
+     "kit (~200 pcs)", AMZ, 40, "Needs 3-, 4-, 6- and 8-way pairs"),
+    ("5. Car harness and connectors", "16 AWG automotive wire, red and black", "~4 m", "25 ft each", AUTO, 15, "W1–W3"),
+    ("5. Car harness and connectors", "18 AWG automotive wire, multi-colour kit", "~15 m", "kit", AMZ, 20,
+     "Solenoid wires W4–W9 and taps"),
+    ("5. Car harness and connectors", "Shielded cable: 8-core 24 AWG, 4-core, 3-core", "3 m + 1.5 m + 3 m",
+     "5 m of each", AMZ, 26, "Console, OLED and ATF probe cables"),
+    ("5. Car harness and connectors", "Heat-shrink assortment incl. adhesive-lined", "1", "kit", AMZ, 12, ""),
+    ("5. Car harness and connectors", "Split loom + zip ties", "1", "pack", AUTO, 12, ""),
+    ("5. Car harness and connectors", "Wago 221 lever-nut connectors, assorted", "~6", "pack", HW, 12,
+     "Joins the console cable to the switches inside the pod"),
+    ("5. Car harness and connectors", "Cable glands PG7 + PG9, nylon, with locknuts", "5 + 4", "assortment", AMZ, 10,
+     "TCU box 3 × PG7 + 4 × PG9; pod 2 × PG7"),
+    # ---------------------------------------------------------------- 6
+    ("6. Console pod controls and screen", "12 mm ON/OFF toggle with flip-up safety cover", "1", "1", AMZ, 10, ""),
+    ("6. Console pod controls and screen", "6 mm mini toggle switch, MTS-101/102", "2", "pack of 5", AMZ, 8,
+     "ECO and SPORT"),
+    ("6. Console pod controls and screen", "12 mm momentary push button, normally open", "1 (3 with [+]/[−])",
+     "pack of 5", AMZ, 10, "TEST"),
+    ("6. Console pod controls and screen", "5 mm LED + 8 mm chrome panel bezel", "1", "pack", AMZ, 7, "Status light"),
+    ("6. Console pod controls and screen", "0.96\" I²C OLED, SSD1306, 128 × 64, 4-pin", "1", "pack of 2", AMZ, 10, ""),
+    ("6. Console pod controls and screen", "GY-521 (MPU-6050) gyro module", "1", "pack of 3", AMZ, 9, ""),
+    # ---------------------------------------------------------------- 7
+    ("7. ATF temperature probe", "DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C)", "1", "1", AMZ, 10,
+     "Not the PVC-cable kind"),
+    ("7. ATF temperature probe", "Brass barbed tee with a 1/8\" NPT female side port", "1", "1", HW, 10,
+     "Barb size = your cooler hose's inside diameter (step 0 measures it)"),
+    ("7. ATF temperature probe", "1/8\" NPT male × 6 mm compression fitting, brass", "1", "1", HW, 7,
+     "Seals around the probe's 6 mm tube"),
+    ("7. ATF temperature probe", "Fuel-injection hose clamps", "2", "2", AUTO, 8, ""),
+    ("7. ATF temperature probe", "ATF-safe thread sealant (PTFE paste)", "1", "1", HW, 7, ""),
+    ("7. ATF temperature probe", "Firewall grommet assortment", "1", "kit", AUTO, 7, ""),
+    ("7. ATF temperature probe", "ATF to top up (Toyota Type T-IV, or as your owner's manual says)", "~1 qt",
+     "1 qt", AUTO, 10, ""),
+    # ---------------------------------------------------------------- 8
+    ("8. 3D printing", "PETG filament, 1 kg", "~1 kg", "2 rolls (don't run out mid-print)", AMZ, 36,
+     "Skip if filament comes with the printer. Not PLA"),
+    ("8. 3D printing", "M3 heat-set inserts (~4 mm OD)", "8", "pack of 50", AMZ, 8, ""),
+    ("8. 3D printing", "M3 screw kit with countersunk screws and nuts", "~20", "kit", AMZ, 12,
+     "8 and 10 mm countersunk, 6 mm pan head"),
+    ("8. 3D printing", "M2 × 8 screws + nuts", "4", "small kit", AMZ, 7, "OLED"),
+    ("8. 3D printing", "M6 bolts + nuts (shifter); M5 bolts + large washers (mounting)", "4 + 8", "loose", HW, 8, ""),
+    # ---------------------------------------------------------------- 9
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "V-155-1C25 roller-lever microswitch", "2", "pack of 5", AMZ, 9,
+     "Genuine Omron is $4–6 each"),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "12 mm OD steel pivot tube, or an M12 bolt + nyloc nut", "1",
+     "1", HW, 6, ""),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "M3 × 70 bolts + nuts", "as the guide says", "pack", HW, 5, ""),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "M12 ball plungers", "2", "2", AMZ, 14, ""),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "Compression spring assortment", "1", "kit", AMZ, 8, ""),
+    ("9. Sequential shifter (Beavis Motorsport DIY)", "Shift knob, M10 × 1.5 thread", "1", "1", AMZ, 12, ""),
+]
+
+# Tools you may already own. The 3D printer and jack stands are yours already.
+TOOLS = [
+    ("Factory repair manual + wiring diagram for your VIN", "Toyota TIS 2-day pass, or a used paper set", 25,
+     "$25 (TIS) to $60 (paper)"),
+    ("Multimeter with continuity beep", "", 25, ""),
+    ("Temperature-controlled soldering iron, solder, flux", "e.g. Pinecil kit", 45, ""),
+    ("Wire stripper", "", 12, ""),
+    ("Heat gun", "", 20, "For heat-shrink; a lighter is a poor substitute"),
+    ("12 V 5 A DC power adapter + screw-terminal barrel jack", "Bench power for testing", 15, ""),
+    ("OBD-II scanner", "1999 is OBD-II", 20, ""),
+    ("IR thermometer", "", 15, ""),
+    ("Drain pan + funnel", "", 10, ""),
+    ("Hot-glue gun", "", 10, ""),
+    ("Drill + 3 mm bit", "Only if your perfboards have no corner holes", 0, "Usually owned"),
+    ("3D printer", "You have one", 0, "Owned"),
+    ("Four jack stands", "You have them", 0, "Owned"),
+]
+
+OPTIONAL = [
+    ("Genuine Arduino Mega instead of a clone", 26),
+    ("Two extra 12 mm push buttons for [+]/[−] on the pod", 0),
+    ("Cheap logic analyser (checks speed and tach signals)", 12),
+]
+
+
+def money(x):
+    return f"${x:,.0f}"
+
+
+def main():
+    sections = []
+    for s, *_ in ITEMS:
+        if s not in sections:
+            sections.append(s)
+    tot = {s: sum(i[5] for i in ITEMS if i[0] == s) for s in sections}
+    parts_total = sum(tot.values())
+    shifter = tot["9. Sequential shifter (Beavis Motorsport DIY)"]
+    filament = 36
+    tools_total = sum(t[2] for t in TOOLS)
+
+    md = []
+    md.append("# Shopping list (with cost estimates)")
+    md.append("")
+    md.append("<!-- Generated by tools/shopping_list.py: edit the table there, then re-run it. -->")
+    md.append("")
+    md.append("Everything for the 1999 RAV4 transmission controller, including the 3D-printed housings "
+              "and the sequential shifter. Quantities match the board layouts and the "
+              "[build book](05-build-book.md). A spreadsheet version is in "
+              "[`shopping-list.csv`](shopping-list.csv).")
+    md.append("")
+    md.append("> **Prices are estimates** (US, late 2026), for what you actually have to buy, which "
+              "is often a pack. Shop around: AliExpress is often half the Amazon price but takes weeks. "
+              "Your 3D printer and jack stands aren't counted.")
+    md.append("")
+    md.append("## Totals")
+    md.append("")
+    md.append("| | Estimate |")
+    md.append("|---|---|")
+    for s in sections:
+        md.append(f"| {s} | {money(tot[s])} |")
+    md.append(f"| **All parts, including the shifter** | **{money(parts_total)}** |")
+    md.append(f"| Without the shifter (buttons instead) | {money(parts_total - shifter)} |")
+    md.append(f"| Without filament (if your printer comes with it) | {money(parts_total - filament)} |")
+    md.append(f"| Tools, if you own none of them | {money(tools_total)} |")
+    md.append("")
+    md.append("Expect roughly **±25 %** depending on where you shop. Many packs leave spares, which is "
+              "useful: you'll want a spare relay, MOSFET and buck module if something goes wrong.")
+    md.append("")
+    md.append("## Before you buy: measure these on the car first")
+    md.append("")
+    md.append("Build book **step 0** (one evening, nothing cut) settles these, so you order the right "
+              "sizes once:")
+    md.append("")
+    md.append("1. **Fuse blade size** in the cabin fuse box (standard ATO/ATC or mini): for the fuse "
+              "tap and inline fuse holders.")
+    md.append("2. **ATF cooler hose inside diameter** (usually 5/16\" or 3/8\"): for the barbed tee.")
+    md.append("3. **Space behind the glovebox**: the TCU box is 216 × 178 × 51 mm (244 mm wide with "
+              "its mounting ears).")
+    md.append("4. **Space on the centre console**: the pod is 150 × 130 × 70 mm, plus the shifter on top.")
+    md.append("")
+    md.append("## Where to order")
+    md.append("")
+    md.append("Batching keeps shipping down: one **DigiKey or Mouser** order for the exact electronic "
+              "parts, one **Amazon/AliExpress** order for modules and kits, then a trip to the "
+              "**hardware store** and the **auto-parts store**.")
+    md.append("")
+    for s in sections:
+        md.append(f"## {s} — {money(tot[s])}")
+        md.append("")
+        md.append("| ✓ | Item | Need | Buy | Where | Est. | Notes |")
+        md.append("|---|---|---|---|---|---|---|")
+        for sec, item, need, buy, store, price, notes in ITEMS:
+            if sec == s:
+                md.append(f"| ☐ | {item} | {need} | {buy} | {store} | {money(price)} | {notes} |")
+        md.append("")
+    md.append(f"## Tools — up to {money(tools_total)} if you own none")
+    md.append("")
+    md.append("| ✓ | Tool | Notes | Est. |")
+    md.append("|---|---|---|---|")
+    for name, note, price, extra in TOOLS:
+        p = "owned" if extra == "Owned" else money(price) if price else "—"
+        md.append(f"| ☐ | {name} | {note}{'; ' + extra if extra and extra != 'Owned' else ''} | {p} |")
+    md.append("")
+    md.append("## Optional extras")
+    md.append("")
+    for name, price in OPTIONAL:
+        md.append(f"- {name}{': +' + money(price) if price else ' (already in the button pack above)'}")
+    md.append("")
+    md.append("## By store (for ordering)")
+    md.append("")
+    for store in (DK, AMZ, HW, AUTO):
+        items = [i for i in ITEMS if i[4] == store]
+        md.append(f"**{store}** — {len(items)} items, about {money(sum(i[5] for i in items))}: "
+                  + "; ".join(i[1] for i in items) + ".")
+        md.append("")
+    with open(os.path.join(ROOT, "docs", "04-shopping-list.md"), "w") as f:
+        f.write("\n".join(md))
+    with open(os.path.join(ROOT, "docs", "shopping-list.csv"), "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["Section", "Item", "Need", "Buy", "Where", "Est. US$", "Notes"])
+        for row in ITEMS:
+            w.writerow(row)
+        for name, note, price, extra in TOOLS:
+            w.writerow(["Tools", name, "", "", "", price, (note + " " + extra).strip()])
+    print(f"parts {money(parts_total)} (shifter {money(shifter)}), tools {money(tools_total)}")
+
+
+if __name__ == "__main__":
+    main()

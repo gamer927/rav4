@@ -1,4 +1,4 @@
-# Engineering Specification rev 2: RAV4 Transmission Controller
+# Engineering Specification rev 3: RAV4 Transmission Controller
 
 *All speeds in this document and in the firmware are in mph.*
 
@@ -8,7 +8,10 @@
 **Supersedes:** rev 0 (audit: [`01-audit.md`](01-audit.md)) and rev 1. Rev 2 is
 transmission-only: the oil-pressure sender and the Nextion dashboard are gone, and the console is
 an ON/OFF switch, an ECO switch, a SPORT switch, [+]/[−] shift buttons and a TEST button, with a
-small OLED screen.
+small OLED screen. Rev 3 makes it buildable by hand: through-hole MOSFET drivers with
+current-sensor modules instead of surface-mount PROFETs (§3.3), a corrected speed-signal
+comparator (wiring guide §6), the TCU split into a power board, a logic board and a hub on the
+Mega, and 3D-printed housings.
 
 **Console controls**
 
@@ -87,7 +90,7 @@ Rules that never change:
  │  Fused IG feed → reverse-polarity + TVS → 5 V/3 A automotive buck → Mega 5 V, OLED    │
  │                                                                                       │
  │  Arduino Mega 2560 ── input conditioning (RC + clamps, optos for 12 V signals)        │
- │        │  D8/D9/D10 → 3 × high-side smart switch (PROFET) ──┐                         │
+ │        │  D8/D9/D10 → 3 × P-MOSFET high-side + ACS712 ──────┐                         │
  │        │  D6 → MOSFET/ULN → 3 × DPDT relay coils             │                         │
  │        │  I²C → console OLED (dash)                          v                         │
  │        │                           ┌── DPDT ×3 (S1, S2, SL) ─────────────┐             │
@@ -128,18 +131,27 @@ transaxle case to ground (Toyota service text, §0). Confirm on your car: with t
 and the ECM commanding a solenoid, you should measure about 12 V between the ECM's S1 terminal
 and ground.
 
-- Use 3 × **high-side smart switches** (PROFET class, for example Infineon BTS6143D or
-  BTS50085), each rated 3 A continuous or more. They have a built-in inductive clamp, short and
-  over-temperature protection, and a current-sense (IS) pin.
-- Wire each IS pin to the Mega (A4/A5/A6) through its datasheet sense resistor (R_IS to
-  ground), plus 1 kΩ series and 100 nF. The firmware uses it to prove each solenoid circuit
-  draws its rated current, both in the self-test and continuously while driving (§7).
-  `IS_AMPS_PER_VOLT = kILIS / R_IS`; calibrate it on the bench with a 15 Ω load.
-- Put a 10 kΩ pull-down on every IN pin, so the drivers are off during reset.
-- If you use a discrete P-FET instead: add an NPN level shifter, a gate pull-up to +B (off), and
-  a freewheel diode across the solenoid (cathode to the driver output, anode to ground).
-  A freewheel diode slows solenoid release. A diode plus 24 V zener clamp releases faster and is
-  closer to the ECU's behaviour.
+- Each channel is a **P-channel MOSFET high-side switch** (IRF4905, TO-220, through-hole, so it
+  can be hand-soldered on perfboard). D8/D9/D10 drive spare channels of the relay driver
+  (ULN2803), which pulls the gate down through 4.7 kΩ; a 10 kΩ gate–source pull-up keeps it off,
+  and a 15 V zener protects the gate during a load dump.
+- A **UF4007 + 24 V zener clamp** from the drain to ground catches the solenoid's inductive kick
+  and lets it release quickly, like the ECM's own driver (a plain freewheel diode would slow the
+  release).
+- An **ACS712-05B hall current-sensor module** in each MOSFET's +12 V feed reports the solenoid
+  current to A4/A5/A6 (185 mV/A, around ~2.5 V at zero). The firmware proves each solenoid
+  draws its rated current, both in the self-test and continuously while driving (§7). Each
+  sensor's zero is re-learned while the relays are released and that driver is off, when no
+  current can flow. `IS_AMPS_PER_VOLT` and `IS_ZERO_V` are in `config.h`; calibrate on the bench
+  with a 15 Ω load.
+- A 10 kΩ pull-down on every drive pin keeps the drivers off during reset.
+- No short-circuit protection is built into a MOSFET (a PROFET has it). The 5 A fuse on X1-1
+  protects the wiring, and the firmware hands control back to the ECU if a driven solenoid draws
+  more than `SOL_OVER_A` (2.5 A) for 0.3 s.
+- *Revision 3 change:* earlier revisions specified PROFET smart switches (BTS6143D/BTS50085).
+  The only through-hole one is end-of-life with a long lead time, and the surface-mount ones are
+  hard to hand-solder. A PROFET still works: set `IS_ZERO_V = 0` and
+  `IS_AMPS_PER_VOLT = kILIS / R_IS`.
 
 ### 3.4 ECU isolation relays and dummy loads
 Use one **automotive DPDT relay per solenoid**: 12 V coil, contacts rated for 5 A DC or more.

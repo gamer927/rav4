@@ -8,9 +8,10 @@ top of the file, so you can measure your switches and boards, change the numbers
 | Model | What it holds | Print files (`stl/`) |
 |---|---|---|
 | [`console_pod.scad`](console_pod.scad) | A wedge pod for the centre console. **Sloped front panel:** ON/OFF, ECO and SPORT toggles, TEST button, status LED, OLED window (optional [+]/[−] buttons). **Flat top deck:** bolt pattern for the Beavis Motorsport sequential shifter. Two rear cable glands | `console_pod_shell.stl`, `console_pod_bottom.stl` |
-| [`tcu_enclosure.scad`](tcu_enclosure.scad) | The controller box behind the glovebox: Arduino Mega, main board, buck converter, **gyro**, seven labelled cable glands, USB access, screw-on lid | `tcu_enclosure_box.stl` (or `tcu_enclosure_box_no_ears.stl`), `tcu_enclosure_lid.stl` |
+| [`tcu_enclosure.scad`](tcu_enclosure.scad) | The controller box behind the glovebox: Arduino Mega + hub shield, power board, logic board (with the **gyro**), seven labelled cable glands, USB access, screw-on lid | `tcu_enclosure_box.stl` (or `tcu_enclosure_box_no_ears.stl`), `tcu_enclosure_lid.stl` |
 
-Regenerate the STLs and the preview with `tools/build_stl.sh` (needs OpenSCAD 2021.01 or later).
+Regenerate the STLs and the previews with `tools/build_stl.sh` (needs OpenSCAD 2021.01 or later).
+It runs the **fit check** first and stops if anything collides.
 To change a size, open the `.scad` file in OpenSCAD, edit the variable (or use the Customizer
 panel), press F6, and export the STL.
 
@@ -32,13 +33,39 @@ PLA box will let its standoffs creep.
 | Part | Orientation on the bed (the STLs are already oriented) | Approx. size |
 |---|---|---|
 | Pod shell | Upside down, top deck on the bed. The sloped panel is then a 30° overhang | 150 × 130 × 70 mm |
-| Pod bottom plate | Flat | 143 × 123 × 3 mm |
-| TCU box | Floor on the bed | 244 × 148 × 48 mm with ears; **212** × 148 without |
-| TCU lid | Upside down, lettering on the bed, locating lip up | 212 × 148 × 5 mm |
+| Pod bottom plate | Flat | 150 × 130 × 3 mm |
+| TCU box | Floor on the bed | 244 × 178 × 48 mm with ears; **216** × 178 without |
+| TCU lid | Upside down, lettering on the bed, locating lip up | 216 × 178 × 5 mm |
 
 **Bed size:** the TCU box with mounting ears needs a 250 mm bed (Prusa MK3/MK4, Bambu, Voron
 and similar). On a 220 × 220 mm bed (Ender 3 class), print `tcu_enclosure_box_no_ears.stl`
-(or set `ears = false`): it is 212 mm wide and bolts down through four M5 holes in its floor.
+(or set `ears = false`): it is 216 mm wide (no brim: there's only 2 mm to spare) and bolts down
+through four M5 holes in its floor.
+
+## Does everything fit? (the fit check)
+
+Yes. Both models have a `fit_check` part that models everything that goes inside as solid
+blocks and intersects them with the housing and with each other. An empty result means nothing
+collides. `tools/build_stl.sh` runs it every time.
+
+| Housing | What the check includes |
+|---|---|
+| TCU box | Every part on both boards at its real height (relays 15.7 mm, MOSFETs 19 mm standing, current sensors and buck module on foam tape, plugged ribbon headers), 3 mm under each board for solder joints and wires, the Mega + hub shield stack with its plugged ribbons (34 mm), the USB jack and its plug's moulding, every gland's locknut and cable, the lid-screw bosses and the lid's locating lip |
+| Console pod | Each switch and button body with its terminals and a wire bend (ON/OFF 50 mm deep, mini toggles 32 mm, buttons 38 mm), the LED and bezel (30 mm), the OLED module with soldered wires (16 mm), the shifter's M6 bolt tips, the mounting-bolt heads, the rear glands, and a cluster of lever-nut connectors. Checked with and without the optional [+]/[−] buttons |
+
+![Fit check: TCU box](fit-tcu.png)
+
+What the check found and fixed in this revision:
+
+- The original single 80 × 120 mm main board couldn't hold everything (its parts alone covered
+  about 80 % of it, with no room for wiring). It's now a 90 × 150 mm **power board** and a
+  90 × 70 mm **logic board**, about 43 % and 26 % covered by parts, and the box grew to 216 × 178 mm.
+- The USB cut-out was too small for a USB-B plug's moulding to reach the jack: now 18 × 15 mm.
+- One lid-screw boss clipped the power board's corner: the box is 2 mm deeper.
+- In the pod, the TEST button and the LED sat so low on the slope that their bodies hit the
+  bottom plate. The controls moved up the panel, and the OLED moved clear of a shifter bolt.
+- The gyro's header pins would have hit the floor on its old 5 mm standoffs. It now sits on
+  the logic board.
 
 ## Hardware for the housings
 
@@ -47,7 +74,7 @@ and similar). On a 220 × 220 mm bed (Ender 3 class), print `tcu_enclosure_box_n
 | 8 | **M3 heat-set inserts**, about 4 mm OD × 5–6 mm long (fits the 4.2 mm holes) | 4 in the pod's corner bosses, 4 in the TCU box corners |
 | 4 | M3 × 8 countersunk screws | Pod bottom plate |
 | 4 | M3 × 10 countersunk screws | TCU lid |
-| ~12 | M3 × 6 screws (self-tapping into the 2.6 mm standoff holes) | Mega (6), main board (4), gyro (2) |
+| 14 | M3 × 6 screws (self-tapping into the 2.6 mm standoff holes) | Mega (6), power board (4), logic board (4) |
 | 4 | M2 × 8 screws + nuts | OLED module behind its window |
 | 4 | M6 bolts + **M6 hex nuts** (length = shifter base thickness + 6 mm) | Shifter to the pod deck. The nuts drop into the hex traps under the deck |
 | 4 | M5 or M6 bolts, large washers | Pod bottom plate to the console (slots), TCU ears or floor holes to a bracket |
@@ -129,11 +156,14 @@ handbrake, your knee or the dash at either end of its travel.
 
 | Area | Part | Notes |
 |---|---|---|
-| Back left | **Arduino Mega 2560** on 6 standoffs (official hole pattern) | USB-B lines up with the cut-out in the left wall, for flashing and the USB log |
-| Right | **Main board**, 80 × 120 mm perfboard on 4 standoffs (holes 4 mm in from each corner) | PROFETs, relays, ULN2803, optos, LM393, screw terminals. Relays and PROFETs go towards the right-wall vents |
-| Front left | **Buck converter** in a cradle with zip-tie slots (`buck_size`) | |
-| Front centre | **MPU-6050 gyro (GY-521)** on 2 standoffs | Chip up. "GYRO: CHIP UP, FLAT" is engraved on the floor beside it. **Check `gyro_hole_spacing` against your module** |
-| Front wall | 7 glands, engraved **PWR SOL SIG LOAD CON OLED ATF** | Fit the inline connectors (X1–X6) on the cable tails outside the box |
+| Back left | **Arduino Mega 2560 + hub shield** on 6 standoffs (official hole pattern) | USB-B lines up with the cut-out in the left wall, for flashing and the USB log. "MEGA (USB TO THE LEFT)" is engraved under it |
+| Right | **Power board**, 90 × 150 mm perfboard on 4 standoffs (3 mm in from each corner) | Everything that touches the car's 12 V wiring. Faces the SIG, PWR, SOL and LOAD glands |
+| Front left | **Logic board**, 90 × 70 mm perfboard on 4 standoffs | Console, OLED and ATF terminals, and the **gyro**, flat on the board. Faces the CON, OLED and ATF glands |
+| Front wall | 7 glands, engraved **CON OLED ATF · SIG PWR SOL LOAD** | Fit the inline connectors (X1–X6) on the cable tails outside the box |
+
+The board names are engraved on the floor under each board. If your perfboards' corner holes
+aren't 3 mm in from the edges, change `pb_hole_inset` or drill new holes using the 1:1
+templates in [`docs/build/`](../docs/build/).
 
 | Gland | Connector / cable | Gland |
 |---|---|---|
@@ -145,7 +175,7 @@ handbrake, your knee or the dash at either end of its travel.
 | OLED | X5: screen, 4-core shielded | PG7 |
 | ATF | X6: ATF probe, 3-core shielded | PG7 |
 
-The box is 212 × 148 × 48 mm (51 mm with the lid).
+The box is 216 × 178 × 48 mm (51 mm with the lid; 244 mm wide with its mounting ears).
 
 ### The dummy resistors do NOT go in this box
 
@@ -161,7 +191,7 @@ box's control, and up to ~28 W in total. That would cook a plastic box. Mount th
 
 ### Mounting
 
-- **Mount the box flat, on its floor**, so the gyro's chip lies level. Check with a phone's
+- **Mount the box flat, on its floor**, so the gyro (on the logic board) lies level. Check with a phone's
   level app: within about 5° is plenty, since a 5° tilt changes the reading by less than 0.5 %.
 - **Bolt it rigidly** to metal: the dash support structure behind the glovebox, or a steel
   bracket screwed to it. Use the ears (M6 slots) or, on the no-ears version, the four M5 floor
@@ -175,9 +205,12 @@ box's control, and up to ~28 W in total. That would cook a plastic box. Mount th
 
 ### Assembly order
 
+The [build book](../docs/05-build-book.md) has the full sequence (part 7). In short:
+
 1. Fit the four heat-set inserts in the corner bosses.
 2. Fit the glands.
-3. Screw down the gyro, the Mega and the main board, and zip-tie the buck converter into its
-   cradle.
-4. Wire the inside, then feed each cable through its gland and tighten the gland nut.
+3. Screw down the Mega, the power board and the logic board, and plug the hub shield onto
+   the Mega.
+4. Plug in both ribbon cables, feed each cable through its gland, wire it to its terminals, and
+   tighten the gland nut.
 5. Screw the lid on (4 × M3 countersunk).

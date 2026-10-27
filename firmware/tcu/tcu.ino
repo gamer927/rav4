@@ -30,9 +30,9 @@ constexpr uint8_t VSS = 2;           // INT4, conditioned VSS square wave
 constexpr uint8_t TACH = 3;          // INT5, conditioned tach square wave
 constexpr uint8_t RELAY = 6;         // relay-bank driver, HIGH = TCU in control
 constexpr uint8_t CONSOLE_LED = 7;   // overhead "CUSTOM" indicator (via transistor)
-constexpr uint8_t S1 = 8;            // high-side driver IN, shift solenoid 1
-constexpr uint8_t S2 = 9;            // high-side driver IN, shift solenoid 2
-constexpr uint8_t SL = 10;           // high-side driver IN, lockup solenoid
+constexpr uint8_t S1 = 8;            // high-side driver on (via ULN2803 + P-MOSFET), solenoid S1
+constexpr uint8_t S2 = 9;            // high-side driver on, shift solenoid 2
+constexpr uint8_t SL = 10;           // high-side driver on, lockup solenoid
 constexpr uint8_t STATUS_LED = 13;
 // Active-LOW inputs: console switches close to ground, optos pull low.
 constexpr uint8_t UP = 22;           // [+] shift button
@@ -51,7 +51,7 @@ constexpr uint8_t TPS = A0;          // ECM VTA (10k series tap)
 constexpr uint8_t TPS_E2 = A1;       // ECM E2 sensor ground (10k series tap)
 constexpr uint8_t ATF = A2;
 constexpr uint8_t VBAT = A3;
-constexpr uint8_t IS_S1 = A4;        // high-side driver current-sense outputs
+constexpr uint8_t IS_S1 = A4;        // solenoid current sensors (ACS712 outputs)
 constexpr uint8_t IS_S2 = A5;
 constexpr uint8_t IS_SL = A6;
 // I2C (SDA = 20, SCL = 21): console OLED (0x3C) and MPU-6050 gyro (0x68).
@@ -292,8 +292,19 @@ tcu::Inputs readInputs(uint32_t now) {
 
   in.solSenseValid = cfg::SOLENOID_SENSE_INSTALLED;
   const uint8_t isPins[3] = {pin::IS_S1, pin::IS_S2, pin::IS_SL};
+  const uint8_t drvPins[3] = {pin::S1, pin::S2, pin::SL};
+  static float isZero[3] = {cfg::IS_ZERO_V, cfg::IS_ZERO_V, cfg::IS_ZERO_V};
+  // Each sensor's zero is tracked only when no current can flow through it:
+  // relays released (so even a shorted driver's output goes nowhere) AND its
+  // driver off (so a welded relay can't be mistaken for the zero).
+  const bool relaysReleased = digitalRead(pin::RELAY) == LOW;
   for (uint8_t i = 0; i < 3; i++) {
-    in.solAmps[i] = solF[i].update(rawToVolts(readRaw(isPins[i])) * cfg::IS_AMPS_PER_VOLT, 0.5f);
+    const float v = rawToVolts(readRaw(isPins[i]));
+    if (relaysReleased && digitalRead(drvPins[i]) == LOW &&
+        fabs(v - cfg::IS_ZERO_V) < cfg::IS_ZERO_LEARN_WINDOW_V) {
+      isZero[i] += (v - isZero[i]) * 0.02f;
+    }
+    in.solAmps[i] = solF[i].update((v - isZero[i]) * cfg::IS_AMPS_PER_VOLT, 0.5f);
   }
   return in;
 }

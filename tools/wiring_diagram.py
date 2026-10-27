@@ -167,7 +167,7 @@ box(BX, 8.15, 3.9, 3.85, "Input conditioning",
      "TAC -> PC817  -> D3", "VTA -> 10k/100nF -> A0", "E2  -> 10k/100nF -> A1", "+12 -> 47k/10k -> A3",
      "ECU S1/S2/SL -> PC817", "            -> D29-31"], line_size=8.5)
 box(BX, 3.2, 3.9, 4.65, "Solenoid channel x3",
-    ["K1-K3  DPDT relay, 12 V", "U1-U3  high-side switch", "R1-R3  15 ohm 50 W dummy", "ULN2803 drives coils",
+    ["K1-K3  DPDT relay, 12 V", "Q1-Q3  P-MOSFET drivers", "R1-R3  15 ohm 50 W dummy", "ULN2803 drives coils",
      "", "coil OFF: ECU -> solenoid", "coil ON : ECU -> dummy,", "          U -> solenoid", "",
      "(Detail A in the guide)"], line_size=8.5)
 box(BX, 0.6, 3.9, 2.25, "ATF probe input",
@@ -342,23 +342,18 @@ def detail_a():
     ground(8.9, 4.9)
 
     # high-side driver
-    blk(2.3, 2.6, 2.6, 1.9, "U1 high-side switch", ["PROFET class,", "with current sense"])
+    blk(2.3, 2.6, 2.6, 1.9, "Q1 high-side driver", ["IRF4905 P-MOSFET", "D8 -> ULN2803 -> gate", "clamp UF4007 + 24 V Z"])
     ln([(4.9, 3.6), (5.9, 3.6)], C["power"])
     txt(5.0, 3.8, "OUT", 9, color=C["power"])
     ln([(3.6, 4.5), (3.6, 5.2), (1.0, 5.2)], C["power"])
-    txt(1.0, 5.4, "+12 V DRV (X1-1, 5 A fuse)", 9, color=C["power"])
+    txt(1.0, 5.4, "+12 V DRV (X1-1, 5 A fuse) -> CS1 ACS712 ->", 9, color=C["power"])
     ln([(2.3, 3.4), (0.9, 3.4)], C["internal"])
     txt(0.9, 3.6, "D8 (S1 drv)", 9, bold=True)
     resistor_v(1.4, 3.4, 2.5, "10k")
     ground(1.4, 2.5)
     txt(1.6, 2.15, "pull-down: off during reset", 8.5, color="#666666")
-    ln([(3.6, 2.6), (3.6, 1.9), (5.6, 1.9)], C["internal"])
-    txt(3.75, 2.35, "IS", 9)
-    resistor_v(3.6, 1.9, 1.0, "R_IS (datasheet)")
-    ground(3.6, 1.0)
-    ln([(5.6, 1.9), (6.4, 1.9)], C["internal"])
-    txt(5.0, 2.1, "1k", 9)
-    txt(6.5, 1.9, "-> A4 (+100 nF to GND): S1 amps", 9, bold=True)
+    txt(2.3, 1.9, "CS1 (ACS712-05B, in the +12 V feed) OUT -> A4: S1 amps", 9, bold=True)
+    txt(2.3, 1.45, "185 mV/A around 2.5 V; zero re-learned with the relays released", 8.5, color="#666666")
 
     # ECU-side sense opto
     ln([(4.6, 6.6), (4.6, 8.5), (3.6, 8.5)], C["ecu"])
@@ -375,12 +370,12 @@ def detail_a():
         ["A mating plug with jumpers", "1-4, 2-5, 3-6.", "Unplug the TCU, plug this in:", "ECM -> solenoids directly,",
          "the car is 100 % stock."], fc="#fff7e6")
     blk(15.4, 2.6, 4.3, 3.9, "Fail-safe",
-        ["Power loss / reset / hang:", "D6 low -> coils off ->", "ECM drives the solenoid,", "U1 is disconnected.",
-         "", "Coil on: ECM sees R1 (no", "trouble code), U1 drives", "the solenoid, A4 checks", "its current."],
+        ["Power loss / reset / hang:", "D6 low -> coils off ->", "ECM drives the solenoid,", "Q1 is disconnected.",
+         "", "Coil on: ECM sees R1 (no", "trouble code), Q1 drives", "the solenoid, A4 checks", "its current."],
         fc="#eef8ee")
     blk(10.3, 0.4, 9.4, 1.8, "Wire sizes",
-        ["Solenoid path (W4-W9, relay contacts, U1 OUT): 18 AWG", "+12 V DRV feed: 16 AWG.  R1 leads: 18 AWG, keep away from loom",
-         "Signals (D8, IS, opto): 22-24 AWG"])
+        ["Solenoid path (W4-W9, relay contacts, Q1 drain): 18 AWG", "+12 V DRV feed: 16 AWG.  R1 leads: 18 AWG, keep away from loom",
+         "Signals (D8, sensor OUT, opto): 22-24 AWG"])
 
     f.savefig(os.path.join(ROOT, "docs", "wiring-detail-a.svg"))
     f.savefig(os.path.join(ROOT, "docs", "wiring-detail-a.png"), dpi=90)

@@ -1,0 +1,76 @@
+Section,Item,Need,Buy,Where,Est. US$,Notes
+1. Brain and power,Arduino Mega 2560 R3,1,1 (Elegoo or similar clone with the 16U2 USB chip),"Amazon (or AliExpress, cheaper but slower)",22,Genuine Arduino is ~$48. Comes with a USB cable
+1. Brain and power,"Prototype shield for the Mega (""Mega ProtoShield"")",1,1,"Amazon (or AliExpress, cheaper but slower)",8,The hub: two ribbon sockets wired to the Mega's pins
+1. Brain and power,"LM2596HV buck converter module, 4.5–60 V in",1,pack of 2 (one spare),"Amazon (or AliExpress, cheaper but slower)",8,Must say **HV** (60 V input). Plain LM2596 is only 40 V
+1. Brain and power,1.5KE27A TVS diode,2,pack of 10,DigiKey / Mouser,4,Littelfuse 1.5KE27A
+1. Brain and power,"1N5822 Schottky diode, 3 A",1,pack of 10,DigiKey / Mouser,3,Reverse-polarity protection
+1. Brain and power,100 µF 50 V electrolytic capacitor,1,pack of 10,DigiKey / Mouser,3,
+1. Brain and power,Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses,2 + fuses,kit,Auto-parts store,10,Match your fuse box's blade size (step 0 checks it)
+1. Brain and power,Add-a-circuit fuse tap,1,1,Auto-parts store,8,Same blade size as the fuse box
+2. Solenoid control,"Omron G2RL-2-DC12 relay (DPDT, 12 V)",3,4 (one spare),DigiKey / Mouser,10,The factory/box changeover. Don't substitute a single-pole relay
+2. Solenoid control,"IRF4905 P-channel MOSFET, TO-220",3,pack of 5,DigiKey / Mouser,9,Infineon IRF4905PBF
+2. Solenoid control,ACS712-05B current sensor module (5 A),3,pack of 3–5,"Amazon (or AliExpress, cheaper but slower)",11,Measures each solenoid's current for the self-test
+2. Solenoid control,"ULN2803A driver, DIP-18",1,2 (one spare),DigiKey / Mouser,3,Through-hole DIP: e.g. Toshiba ULN2803APG. Not the SOIC version
+2. Solenoid control,1 W zener diode kit (1N4728A–1N4764A),9,kit,"Amazon (or AliExpress, cheaper but slower)",11,"Uses 1N4733A 5.1 V ×3, 1N4744A 15 V ×3, 1N4749A 24 V ×3"
+2. Solenoid control,UF4007 fast diode,3,pack of 10,DigiKey / Mouser,3,1N4007 also works
+2. Solenoid control,15 Ω 50 W aluminium-housed resistor,3,3,DigiKey / Mouser,15,"Dummy loads, e.g. TE HSA5015RJ or Arcol HS50 15R"
+2. Solenoid control,"Finned aluminium heatsink, ≥ 100 × 100 × 25 mm",1,1,"Amazon (or AliExpress, cheaper but slower)",14,"For the dummy resistors, outside the box"
+2. Solenoid control,Thermal paste,1,small tube,"Amazon (or AliExpress, cheaper but slower)",6,Skip if you have some
+3. Signal inputs,"PC817 optocoupler, DIP-4",6,pack of 20,"Amazon (or AliExpress, cheaper but slower)",6,
+3. Signal inputs,"LM393 comparator, DIP-8",1,pack of 10,"Amazon (or AliExpress, cheaper but slower)",5,
+3. Signal inputs,BAT85 Schottky diode (DO-35),16,pack of 25,DigiKey / Mouser,5,Input clamps
+3. Signal inputs,1N4148 diode,6,pack of 100,"Amazon (or AliExpress, cheaper but slower)",5,
+3. Signal inputs,"Resistor kit, 1/4 W 1 % metal film (600+ pcs)",≈ 70,kit,"Amazon (or AliExpress, cheaper but slower)",12,"Needs 100, 330, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"
+3. Signal inputs,Extra 10 kΩ resistors,19 total,pack of 50,"Amazon (or AliExpress, cheaper but slower)",4,Most kits only have 10–20 of each value
+3. Signal inputs,"100 nF ceramic capacitors, 50 V",9,pack of 50,"Amazon (or AliExpress, cheaper but slower)",5,
+4. Boards and inside wiring,"Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm",1 + 1,assorted pack,"Amazon (or AliExpress, cheaper but slower)",10,"Power board 9 × 15, logic board 7 × 9"
+4. Boards and inside wiring,"Screw terminals, 5.08 mm, 2- and 3-way, interlocking",35 positions,pack of ~40 pieces,"Amazon (or AliExpress, cheaper but slower)",9,KF301 / DG301 type
+4. Boards and inside wiring,"Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~20 cm)",1 + 1,headers + 2 cables,"Amazon (or AliExpress, cheaper but slower)",12,Or crimp your own from ribbon and IDC sockets
+4. Boards and inside wiring,"Silicone hook-up wire 22 AWG, 6 colours",~5 m,kit,"Amazon (or AliExpress, cheaper but slower)",15,
+4. Boards and inside wiring,"Silicone wire 18 AWG, red/black/yellow",~3 m,kit,"Amazon (or AliExpress, cheaper but slower)",14,Board power paths and the dummy-load cable (heat-proof)
+4. Boards and inside wiring,Double-sided foam mounting tape,1,roll,"Amazon (or AliExpress, cheaper but slower)",6,Holds the current sensors and buck module
+5. Car harness and connectors,"Deutsch DT connector kit, 2–12 way, with crimper",X1–X6 + bypass plug,kit (~200 pcs),"Amazon (or AliExpress, cheaper but slower)",40,"Needs 3-, 4-, 6- and 8-way pairs"
+5. Car harness and connectors,"16 AWG automotive wire, red and black",~4 m,25 ft each,Auto-parts store,15,W1–W3
+5. Car harness and connectors,"18 AWG automotive wire, multi-colour kit",~15 m,kit,"Amazon (or AliExpress, cheaper but slower)",20,Solenoid wires W4–W9 and taps
+5. Car harness and connectors,"Shielded cable: 8-core 24 AWG, 4-core, 3-core",3 m + 1.5 m + 3 m,5 m of each,"Amazon (or AliExpress, cheaper but slower)",26,"Console, OLED and ATF probe cables"
+5. Car harness and connectors,Heat-shrink assortment incl. adhesive-lined,1,kit,"Amazon (or AliExpress, cheaper but slower)",12,
+5. Car harness and connectors,Split loom + zip ties,1,pack,Auto-parts store,12,
+5. Car harness and connectors,"Wago 221 lever-nut connectors, assorted",~6,pack,Hardware store,12,Joins the console cable to the switches inside the pod
+5. Car harness and connectors,"Cable glands PG7 + PG9, nylon, with locknuts",5 + 4,assortment,"Amazon (or AliExpress, cheaper but slower)",10,TCU box 3 × PG7 + 4 × PG9; pod 2 × PG7
+6. Console pod controls and screen,12 mm ON/OFF toggle with flip-up safety cover,1,1,"Amazon (or AliExpress, cheaper but slower)",10,
+6. Console pod controls and screen,"6 mm mini toggle switch, MTS-101/102",2,pack of 5,"Amazon (or AliExpress, cheaper but slower)",8,ECO and SPORT
+6. Console pod controls and screen,"12 mm momentary push button, normally open",1 (3 with [+]/[−]),pack of 5,"Amazon (or AliExpress, cheaper but slower)",10,TEST
+6. Console pod controls and screen,5 mm LED + 8 mm chrome panel bezel,1,pack,"Amazon (or AliExpress, cheaper but slower)",7,Status light
+6. Console pod controls and screen,"0.96"" I²C OLED, SSD1306, 128 × 64, 4-pin",1,pack of 2,"Amazon (or AliExpress, cheaper but slower)",10,
+6. Console pod controls and screen,GY-521 (MPU-6050) gyro module,1,pack of 3,"Amazon (or AliExpress, cheaper but slower)",9,
+7. ATF temperature probe,"DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C)",1,1,"Amazon (or AliExpress, cheaper but slower)",10,Not the PVC-cable kind
+7. ATF temperature probe,"Brass barbed tee with a 1/8"" NPT female side port",1,1,Hardware store,10,Barb size = your cooler hose's inside diameter (step 0 measures it)
+7. ATF temperature probe,"1/8"" NPT male × 6 mm compression fitting, brass",1,1,Hardware store,7,Seals around the probe's 6 mm tube
+7. ATF temperature probe,Fuel-injection hose clamps,2,2,Auto-parts store,8,
+7. ATF temperature probe,ATF-safe thread sealant (PTFE paste),1,1,Hardware store,7,
+7. ATF temperature probe,Firewall grommet assortment,1,kit,Auto-parts store,7,
+7. ATF temperature probe,"ATF to top up (Toyota Type T-IV, or as your owner's manual says)",~1 qt,1 qt,Auto-parts store,10,
+8. 3D printing,"PETG filament, 1 kg",~1 kg,2 rolls (don't run out mid-print),"Amazon (or AliExpress, cheaper but slower)",36,Skip if filament comes with the printer. Not PLA
+8. 3D printing,M3 heat-set inserts (~4 mm OD),8,pack of 50,"Amazon (or AliExpress, cheaper but slower)",8,
+8. 3D printing,M3 screw kit with countersunk screws and nuts,~20,kit,"Amazon (or AliExpress, cheaper but slower)",12,"8 and 10 mm countersunk, 6 mm pan head"
+8. 3D printing,M2 × 8 screws + nuts,4,small kit,"Amazon (or AliExpress, cheaper but slower)",7,OLED
+8. 3D printing,M6 bolts + nuts (shifter); M5 bolts + large washers (mounting),4 + 8,loose,Hardware store,8,
+9. Sequential shifter (Beavis Motorsport DIY),V-155-1C25 roller-lever microswitch,2,pack of 5,"Amazon (or AliExpress, cheaper but slower)",9,Genuine Omron is $4–6 each
+9. Sequential shifter (Beavis Motorsport DIY),"12 mm OD steel pivot tube, or an M12 bolt + nyloc nut",1,1,Hardware store,6,
+9. Sequential shifter (Beavis Motorsport DIY),M3 × 70 bolts + nuts,as the guide says,pack,Hardware store,5,
+9. Sequential shifter (Beavis Motorsport DIY),M12 ball plungers,2,2,"Amazon (or AliExpress, cheaper but slower)",14,
+9. Sequential shifter (Beavis Motorsport DIY),Compression spring assortment,1,kit,"Amazon (or AliExpress, cheaper but slower)",8,
+9. Sequential shifter (Beavis Motorsport DIY),"Shift knob, M10 × 1.5 thread",1,1,"Amazon (or AliExpress, cheaper but slower)",12,
+Tools,Factory repair manual + wiring diagram for your VIN,,,,25,"Toyota TIS 2-day pass, or a used paper set $25 (TIS) to $60 (paper)"
+Tools,Multimeter with continuity beep,,,,25,
+Tools,"Temperature-controlled soldering iron, solder, flux",,,,45,e.g. Pinecil kit
+Tools,Wire stripper,,,,12,
+Tools,Heat gun,,,,20,For heat-shrink; a lighter is a poor substitute
+Tools,12 V 5 A DC power adapter + screw-terminal barrel jack,,,,15,Bench power for testing
+Tools,OBD-II scanner,,,,20,1999 is OBD-II
+Tools,IR thermometer,,,,15,
+Tools,Drain pan + funnel,,,,10,
+Tools,Hot-glue gun,,,,10,
+Tools,Drill + 3 mm bit,,,,0,Only if your perfboards have no corner holes Usually owned
+Tools,3D printer,,,,0,You have one Owned
+Tools,Four jack stands,,,,0,You have them Owned

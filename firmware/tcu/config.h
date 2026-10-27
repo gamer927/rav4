@@ -74,16 +74,26 @@ constexpr uint16_t ATF_ADC_OPEN = 1018;           // raw ADC at/above = open
 // the input clamp described in the spec.
 constexpr float VBAT_DIVIDER = 5.7f;
 
-// Solenoid current sense: high-side driver IS pins on A4/A5/A6.
-// amps = volts x IS_AMPS_PER_VOLT, where IS_AMPS_PER_VOLT = kILIS / R_IS from
-// the driver datasheet. CALIBRATE on the bench with a 15 ohm load.
-// Set false if the IS pins aren't wired; the circuit tests then report CHK.
+// Solenoid current sense on A4/A5/A6: amps = (volts - zero) x IS_AMPS_PER_VOLT.
+// Default: ACS712-05B hall modules in each driver's +12 V feed, 185 mV/A
+// around ~2.5 V at 0 A. Each zero is re-learned while the relays are released
+// and that driver is off (no current can flow then), so module-to-module
+// offset doesn't matter.
+// (A PROFET-class driver's IS pin: IS_ZERO_V = 0, IS_AMPS_PER_VOLT = kILIS / R_IS.)
+// CALIBRATE IS_AMPS_PER_VOLT on the bench with a 15 ohm load.
+// Set SOLENOID_SENSE_INSTALLED false if the sensors aren't wired; the circuit
+// tests then report CHK.
 constexpr bool SOLENOID_SENSE_INSTALLED = true;
-constexpr float IS_AMPS_PER_VOLT = 1.0f;
+constexpr float IS_AMPS_PER_VOLT = 1.0f / 0.185f;
+constexpr float IS_ZERO_V = 2.5f;
+constexpr float IS_ZERO_LEARN_WINDOW_V = 0.3f;   // only learn a plausible zero
 // A healthy 11-15 ohm solenoid at 11.5-14.5 V draws 0.77-1.32 A.
 constexpr float SOL_MIN_A = 0.6f;
 constexpr float SOL_MAX_A = 1.6f;
 constexpr float SOL_OFF_MAX_A = 0.2f;
+// While driving: more than this means a short (wire to ground, damaged
+// solenoid). Well above a cold solenoid at charging voltage (~1.6 A).
+constexpr float SOL_OVER_A = 2.5f;
 constexpr uint32_t SOL_FAULT_MS = 300;
 
 // ------------------------------------------------------------- built-in test

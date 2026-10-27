@@ -252,6 +252,48 @@ static void test_cbit_solenoid_fault() {
   CHECK(c.outputs().faults & FAULT_SOLENOID);
 }
 
+static void test_cbit_solenoid_short() {
+  std::printf("CBIT: a shorted solenoid wire (over-current) hands back to the ECU\n");
+  Controller c;
+  Inputs in;
+  in.nowMs = 1000;
+  in.leverInD = true;
+  in.ecuSenseValid = true;
+  in.ecuS1 = true;
+  in.rpmValid = true;
+  in.engineRpm = 750;
+  in.tpsValid = true;
+  in.atfValid = true;
+  in.atfC = 80;
+  in.batteryV = 14.2f;
+  in.solSenseValid = true;
+  c.begin(in.nowMs, false);
+  float s1On = 0.95f;
+  auto step = [&](uint32_t ms) {
+    for (uint32_t x = 0; x < ms; x += 10) {
+      in.nowMs += 10;
+      const Outputs& o = c.outputs();
+      in.solAmps[0] = o.relayCustom && o.s1 ? s1On : 0.0f;
+      in.solAmps[1] = o.relayCustom && o.s2 ? 0.95f : 0.0f;
+      in.solAmps[2] = o.relayCustom && o.sl ? 0.95f : 0.0f;
+      c.step(in);
+    }
+  };
+  step(50);
+  in.customRequested = true;
+  step(1000);
+  CHECK(c.outputs().control == CTRL_AUTO);
+  CHECK(c.outputs().s1);
+  s1On = 1.55f;  // a cold solenoid at charging voltage is still fine
+  step(cfg::SOL_FAULT_MS + 50);
+  CHECK(c.outputs().control == CTRL_AUTO);
+  CHECK(!(c.outputs().faults & FAULT_SOLENOID));
+  s1On = 4.0f;   // shorted
+  step(cfg::SOL_FAULT_MS + 50);
+  CHECK(c.outputs().control == CTRL_STOCK);
+  CHECK(c.outputs().faults & FAULT_SOLENOID);
+}
+
 int main() {
   test_pbit();
   test_interlocks();
@@ -261,6 +303,7 @@ int main() {
   test_prompts_timeout_and_skip();
   test_abort();
   test_cbit_solenoid_fault();
+  test_cbit_solenoid_short();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }
