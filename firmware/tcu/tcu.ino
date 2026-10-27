@@ -539,7 +539,7 @@ uint8_t page = PG_MAIN;
 void renderMain(const tcu::Outputs& o, uint32_t now) {
   const char gear[2] = {o.gear ? (char)('0' + o.gear) : '-', '\0'};
   Text big;
-  big.s(gear).s("  ").s(modeText(o.mode));
+  big.s(gear).s("  ").s(o.control == tcu::CTRL_MANUAL ? "MANUAL" : modeText(o.mode));
   oled.setBig(big.buf);
   Text r2, r3, r4, r5, r6, r7;
   r2.s(controlText(o.control)).pad(7);

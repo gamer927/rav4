@@ -17,8 +17,9 @@ car then drives exactly as it did from the factory.
 |---|---|---|
 | **ECO** | Calm | Early upshifts, early torque-converter lockup that stays on when you lift, pedal stabs ignored (0.8 s throttle smoothing). Flooring it still kicks down instantly. |
 | **NORMAL** | In between | Middle shift points, light throttle smoothing. |
-| **SPORT** | Sharp | Holds gears (full-throttle upshifts at ~5,600–5,700 rpm), downshifts while braking so you're in the right gear for the corner exit, releases lockup on a closed throttle or a fast pedal stab. |
-| **All modes** | | No automatic shifts mid-corner (gyro), lockup off when braking. [+]/[−] give manual shifts at any time; hold [+] for 1 s to go back to automatic. |
+| **SPORT** | Sharp | Holds each gear to just under the redline at full throttle (the fastest way through these gears), downshifts while braking so you're in the right gear for the corner exit, releases lockup on a closed throttle or a fast pedal stab. |
+| **MANUAL** | SPORT, you shift | Tap [+] or [−] from any mode. Same lockup and pedal response as SPORT, but the box never shifts for you, except to protect the engine (upshift at 6,200 rpm, downshift when slowing to a stop). Hold [+] for 1 s to go back to automatic in the switch's mode. |
+| **All automatic modes** | | No automatic shifts mid-corner (gyro), lockup off when braking. |
 
 **Protection, always on:**
 - **No over-rev:** every downshift is checked against engine rpm (refused above 5,800), 1st is
@@ -39,7 +40,7 @@ car then drives exactly as it did from the factory.
 ## Status
 
 - **Done:** full design, firmware and documentation.
-  - 1,358 automated test checks pass.
+  - 1,369 automated test checks pass.
   - The firmware compiles for the Arduino Mega 2560 without warnings (12 % flash, 39 % RAM).
   - The screens above come from the real firmware running in a simulator.
 - **Not done yet:** nothing has been built or run on real hardware or in the car. The gear

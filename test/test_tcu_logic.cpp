@@ -558,6 +558,44 @@ static void test_sport_tipin_release() {
   CHECK(t.c.outputs().sl);
 }
 
+static void test_manual_is_sport() {
+  std::printf("MANUAL = SPORT you shift yourself; AUTO goes back to the switch mode\n");
+  Sim s;
+  s.in.eco = true;  // ECO switch on
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(100);
+  s.step(3000);
+  CHECK(s.c.outputs().mode == MODE_ECO);
+  CHECK(s.c.outputs().gear == 4 && s.c.outputs().sl);
+  s.in.tpsPct = 0;  // ECO keeps lockup on the coast
+  s.step(200);
+  CHECK(s.c.outputs().sl);
+  s.in.tpsPct = 20;
+  s.step(1500);
+
+  s.tap(s.in.down);  // into MANUAL
+  CHECK(s.c.outputs().control == CTRL_MANUAL);
+  CHECK(s.c.outputs().mode == MODE_SPORT);
+  s.step(cfg::LOCKUP_RELEASE_BEFORE_SHIFT_MS);
+  CHECK(s.c.outputs().gear == 3);
+  s.step(3000);
+  CHECK(s.c.outputs().sl);  // SPORT lockup rules in 3rd at 100 km/h, 20 %
+  s.in.tpsPct = 0;          // SPORT: coast unlock
+  s.step(200);
+  CHECK(!s.c.outputs().sl);
+  s.in.tpsPct = 20;
+  s.step(2000);
+  CHECK(s.c.outputs().gear == 3);  // and it holds the gear you chose
+
+  s.in.up = true;  // hold [+]: back to AUTO, back to ECO
+  s.step(cfg::LONG_PRESS_MS + 100);
+  s.in.up = false;
+  s.step(50);
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(s.c.outputs().mode == MODE_ECO);
+}
+
 static void test_lockup_rules() {
   std::printf("lockup: gear/speed/brake/cold/hot/shift sequencing\n");
   Sim s;
@@ -824,6 +862,7 @@ int main() {
   test_coast_unlock();
   test_eco_throttle_smoothing();
   test_sport_tipin_release();
+  test_manual_is_sport();
   test_lockup_rules();
   test_hot_atf_widens_lockup();
   test_vss_faults();

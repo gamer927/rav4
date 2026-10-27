@@ -98,7 +98,11 @@ const Outputs& Controller::step(const Inputs& in) {
 }
 
 void Controller::updateMode(const Inputs& in) {
-  if (in.eco && in.sport) {
+  if (out_.control == CTRL_MANUAL) {
+    // MANUAL is SPORT that you shift yourself: SPORT's lockup and pedal
+    // response whatever the switches say. Back in AUTO the switches apply.
+    out_.mode = MODE_SPORT;
+  } else if (in.eco && in.sport) {
     out_.mode = MODE_NORMAL;  // both switches on: no single mode wins
   } else if (in.eco) {
     out_.mode = MODE_ECO;
@@ -263,6 +267,7 @@ void Controller::runCustom(const Inputs& in) {
     if (requestShift(gear_ + (upEdge_ ? 1 : -1), in.speedKmh, true)) raise(EV_SHIFT, true);
   }
 
+  updateMode(in);  // a tap may have switched AUTO <-> MANUAL this step
   revLimitGuard(in);
   if (out_.control == CTRL_AUTO) {
     autoSchedule(in);

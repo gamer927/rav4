@@ -29,7 +29,11 @@ These are the facts the design depends on, with how sure each one is.
 
 | Item | 1999 RAV4 value | Status |
 |---|---|---|
-| Engine | 3S-FE 2.0 L, 127 hp @ 5,400 rpm, 132 lb-ft @ 4,600 rpm | Published specs |
+| Engine | 3S-FE 2.0 L, 127 hp @ 5,400 rpm, 132 lb-ft @ 4,600 rpm (US rating) | Published US specs. Other markets list 96–99 kW @ 5,800–6,000 and ~180 N·m @ 4,400 |
+| Bore × stroke | 86.0 × 86.0 mm (square) | Several sources agree |
+| Compression ratio | 9.5:1 or 9.8:1 | Sources disagree |
+| Redline / fuel cut | ~6,300 rpm redline, fuel cut ~6,500 rpm | **Not found in any published source.** The firmware's limits (downshift guard 5,800, forced upshift 6,200) already sit below it. Check your tachometer's red zone |
+| Torque curve | Peak 4,600, broad from ~2,500, falling off past ~5,500 | No factory curve published; shape is an estimate |
 | Tyres | 215/70R16 (~455 rev/km) | Published specs and VIN decodes |
 | Solenoid drive | ECM output S1/S2/SL → solenoid → transaxle case → ground (ECM switches +12 V) | Toyota service text for this car |
 | Shift logic | S1 on in 1st and 2nd; S2 joins in 2nd; SL = lockup | Toyota service text for this car; full table in §5 |
@@ -331,10 +335,32 @@ If the request is accepted with lockup applied, SL releases first and the gear c
 | NORMAL | 18/24/38/53/58 | 36/48/70/94/106 | 54/66/94/126/156 |
 | SPORT (hold) | 22/34/50/58/60 | 42/60/84/102/110 | 66/84/114/150/168 |
 
-With the 1999 RAV4 default ratios, the WOT points sit at about 5.0–5.7 k rpm (peak power is at
-5,400). These are starting maps: re-check them against your calibrated `RPM_PER_KMH`.
+With the 1999 RAV4 default ratios, the WOT points sit at about 5,000–5,700 rpm, measured as
+"locked converter" rpm (speed × ratio). At full throttle the converter slips 5–10 %, and rpm keeps
+climbing during the ~0.5 s shift. So the engine really peaks at roughly **5,400–5,800 (ECO and
+NORMAL)** and **6,000–6,200 (SPORT)**, just under a 6,300 redline. These are starting maps:
+re-check them against your calibrated `RPM_PER_KMH` and logged rpm.
+
+**Why SPORT shifts near the redline, not at 5,200–5,500.** Shifting "back into the torque band"
+sounds right but is slower with these gear steps. After an upshift, the engine drops a long way:
+
+| Shift | Ratio step | rpm drop from 6,000 | Power before → after (approx.) |
+|---|---|---|---|
+| 1→2 | 1.81 | 6,000 → 3,300 | ~123 hp → ~75 hp |
+| 2→3 | 1.55 | 6,000 → 3,900 | ~123 hp → ~95 hp |
+| 3→4 | 1.36 | 6,000 → 4,400 | ~123 hp → ~110 hp |
+
+At a given road speed, acceleration follows engine *power*. Every lower gear still makes more
+power than the next gear would, all the way to the redline, even though torque is falling past
+4,600. The power figures use the estimated curve, so they're approximate, but the gap is too big
+to flip. So for maximum acceleration SPORT holds each gear to near the redline. ECO and NORMAL
+shift earlier on purpose, for quietness and economy, not speed.
 
 ### 6.4 CUSTOM-MANUAL
+- **MANUAL is SPORT that you shift yourself.** It uses SPORT's lockup rules, coast unlock and
+  tip-in release whatever the ECO/SPORT switches are set to. Going back to AUTO restores the
+  switch mode. Brake downshifts and corner hold are automatic-shift features, so they don't apply:
+  in MANUAL the gear is yours.
 - A tap on [+] or [-] gives one shift. Holding a button never repeats. Any tap while in AUTO
   switches to MANUAL.
 - Hold [+] for **1 s** to return to AUTO.
@@ -402,13 +428,16 @@ The console LED shows the state:
 
 | Feature | ECO | NORMAL | SPORT | What it does |
 |---|---|---|---|---|
-| Hold gears longer, shift near the top at full throttle | – | – | ✓ | The SPORT shift map (§6.3): full-throttle upshifts at about 5,600–5,700 rpm (peak power is 5,400). Raise it once the redline is confirmed |
+| Hold gears longer, shift near the top at full throttle | – | – | ✓ | The SPORT shift map (§6.3): full-throttle upshifts at about 6,000–6,200 real engine rpm, just under the redline, which is the fastest way through these gears |
 | **Corner hold** | ✓ | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own [+]/[−] and the over-rev upshift always work |
 | **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 3 km/h/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
 | **Coast unlock** | – | – | ✓ | Lockup released on a closed throttle (< 2 %, re-allowed at 5 %), so the converter is already slipping when you get back on the throttle |
 | **Throttle smoothing** | 0.8 s | 0.25 s | off | The shift map sees a smoothed throttle, so a quick stab of the pedal doesn't cause a downshift; only a sustained push does. That's what makes ECO feel calm. Flooring it (≥ 80 %) bypasses the smoothing, so kickdown is never delayed |
 | **Tip-in release** | – | – | ✓ | A fast stab (≥ 150 %/s) releases lockup at once, even below SPORT's lockup throttle limit, so the converter's torque multiplication is there immediately. Not when the ATF is hot |
 | Lockup released on the brake | ✓ | ✓ | ✓ | Always (stall protection) |
+
+MANUAL behaves as SPORT for every row except the two automatic-shift features (corner hold,
+brake downshift): there, you choose the gear.
 
 Each one is a per-mode setting in `config.h` (`CORNER_HOLD`, `BRAKE_DOWNSHIFT`,
 `LU_COAST_RELEASE`, `SHIFT_TPS_SMOOTH_MS`, `LU_TIPIN_RELEASE`), so you can turn them on or off
