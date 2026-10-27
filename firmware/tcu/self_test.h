@@ -47,7 +47,7 @@ enum TestResult : uint8_t {
 // Why IBIT may not run (or was aborted).
 enum TestInhibit : uint8_t {
   INH_NONE = 0,
-  INH_MASTER,   // master switch not at STOCK
+  INH_MASTER,   // ON/OFF switch is ON
   INH_LEVER_D,  // lever in D
   INH_MOVING,
   INH_ENGINE,   // engine running (tach, or battery at charging voltage)
@@ -81,7 +81,7 @@ struct TestSummary {
 };
 
 const char* testName(TestId id);
-// Interlock. `in.customRequested` must be the raw master switch position.
+// Interlock. `in.customRequested` must be the raw ON/OFF switch position.
 TestInhibit testInhibit(const Inputs& in);
 
 class SelfTest {

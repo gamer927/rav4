@@ -18,7 +18,7 @@ All speeds (screen, logs, settings, docs) are in **mph**.
 | Mode | Feel | What changes |
 |---|---|---|
 | **ECO** | Calm, economical | Early upshifts; torque-converter lockup as early as the engine can take it (from ~23 mph in 3rd), kept on when you lift for longer fuel cut, released if the engine would labour; pedal stabs ignored (0.8 s throttle smoothing). Flooring it still kicks down instantly. |
-| **Highway (ECO & NORMAL)** | Locked and steady | In 4th above ~51 mph the torque converter stays locked up to 95 % throttle, so a long 90 mph run (~3,550 rpm) or a highway grade doesn't let it slip: lower rpm, less fuel, much less transmission heat. Only flooring it releases lockup. |
+| **Highway (all modes)** | Locked and steady | In 4th above ~51 mph the torque converter stays locked up to 95 % throttle, so a long 90 mph run (~3,550 rpm) or a highway grade doesn't let it slip: lower rpm, less fuel, much less transmission heat. Only flooring it releases lockup (in SPORT, a quick stab does too). |
 | **NORMAL** | Like stock, plus the extras | Shift points close to a factory-style schedule (tune them to your car's logged factory shifts), light throttle smoothing, plus everything stock doesn't have: corner hold, the over-rev guards and the fault hand-back. |
 | **SPORT** | Sharp | Holds each gear to just under the redline at full throttle (the fastest way through these gears), kicks down from 60 % throttle, holds the gear when you snap off the throttle between corners, downshifts while braking so you're in the right gear for the exit, and releases lockup on a closed throttle or a fast pedal stab. |
 | **MANUAL** | SPORT, you shift | Tap [+] or [−] from any mode. Same lockup and pedal response as SPORT, but the box never shifts for you, except to protect the engine (upshift at 6,200 rpm, downshift when slowing to a stop). Hold [+] for 1 s to go back to automatic in the switch's mode. |
@@ -43,7 +43,7 @@ All speeds (screen, logs, settings, docs) are in **mph**.
 ## Status
 
 - **Done:** full design, firmware and documentation.
-  - 1,397 automated test checks pass.
+  - 1,400 automated test checks pass.
   - The firmware compiles for the Arduino Mega 2560 without warnings (12 % flash, 39 % RAM).
   - The screens above come from the real firmware running in a simulator.
 - **Not done yet:** nothing has been built or run on real hardware or in the car. The gear

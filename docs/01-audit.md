@@ -1,5 +1,10 @@
 # Audit: "Unified TCU & Telemetry Dashboard" spec (rev 0)
 
+> **Historical document.** This is the review of the original spec this project started from.
+> It was written before the move to mph and before the oil sender and Nextion dashboard were
+> dropped, so its speeds are in km/h and some fixes mention parts that are no longer in the
+> design. The current design is [`02-revised-spec.md`](02-revised-spec.md).
+
 Scope: the original spec covered the architecture, the I/O matrix, the solenoid table, the
 pseudocode framework and the three directives. Each finding below gives what is wrong, what
 would happen in the car, and how the revised design fixes it (`docs/02-revised-spec.md`,

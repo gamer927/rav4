@@ -1,5 +1,5 @@
 /*
-  Unified TCU & Telemetry Controller - hardware layer
+  1999 RAV4 Transmission Controller - hardware layer
   Vehicle: 1999 Toyota RAV4 (SXA10/SXA11), 4-speed ECT automatic, 3S-FE
   Target:  Arduino Mega 2560 (5 V I/O, 16 ADC channels, 4 UARTs)
 
@@ -245,7 +245,7 @@ tcu::Inputs readInputs(uint32_t now) {
   in.down = dbDown.state();
   in.eco = dbEco.state();
   in.sport = dbSport.state();
-  // Until the car is calibrated the master switch is ignored (STOCK only).
+  // Until the car is calibrated the ON/OFF switch is ignored (STOCK only).
   in.customRequested = cfg::CALIBRATED && dbMaster.state();
   in.brake = dbBrake.state();
   in.leverInD = dbLeverD.state();
@@ -852,8 +852,8 @@ void loop() {
       logBitTable(selfTest.ibitDone() ? "IBIT done (after watchdog reset)" : "PBIT");
     }
     if (selfTest.active()) {
-      // IBIT owns the outputs. Its interlock requires the master switch at
-      // STOCK, so the controller is not driving anything meanwhile.
+      // IBIT owns the outputs. Its interlock requires the ON/OFF switch to be
+      // OFF, so the controller is not driving anything meanwhile.
       tcu::Inputs tin = lastIn;
       tin.customRequested = dbMaster.state();
       selfTest.step(tin, testEdgePending);

@@ -9,7 +9,7 @@ enum DriveMode : uint8_t { MODE_ECO = 0, MODE_NORMAL = 1, MODE_SPORT = 2 };
 enum Control : uint8_t { CTRL_STOCK = 0, CTRL_AUTO = 1, CTRL_MANUAL = 2 };
 
 // Faults hand control back to the factory ECU and stay latched until the
-// master switch is returned to STOCK.
+// ON/OFF switch is turned OFF.
 enum FaultBits : uint16_t {
   FAULT_SUPPLY = 1u << 0,
   FAULT_VSS = 1u << 1,
@@ -48,7 +48,7 @@ struct Inputs {
   uint32_t nowMs = 0;
   // Debounced switch states, true = active.
   bool up = false, down = false, eco = false, sport = false;
-  bool customRequested = false;  // master switch in CUSTOM position
+  bool customRequested = false;  // ON/OFF switch ON
   bool brake = false;
   bool leverInD = false;
   // Factory ECU solenoid commands, sensed upstream of the relays.
@@ -82,7 +82,7 @@ struct Outputs {
   bool gearHold = false;     // upshifts paused: brake or lift-off hold
   Control control = CTRL_STOCK;
   DriveMode mode = MODE_NORMAL;
-  bool armed = false;        // master switch cycled into CUSTOM since boot
+  bool armed = false;        // ON/OFF switch flipped OFF -> ON since boot
   uint16_t faults = 0;
   uint16_t warnings = 0;
   Event event = EV_NONE;

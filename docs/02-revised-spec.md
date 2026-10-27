@@ -398,12 +398,13 @@ it per gear. ECO locks 3rd from ~23 mph but 4th only from ~32 mph; it releases a
 ~28 mph. **Anti-lug:** below 1,600 locked rpm, lockup only holds at ≤ 25 % throttle. Above
 that, the converter's slip and torque multiplication do the work instead of the engine labouring.
 
-**Highway lockup (ECO and NORMAL).** In 4th from 2,000 locked rpm (~51 mph), the throttle
-limits rise to 85 % on / 95 % off. A RAV4 needs roughly 90 % of its power to hold 90 mph, so
-without this the converter would unlock exactly when you're cruising fast or climbing a highway
-grade. Staying locked at 90 mph (~3,550 rpm) means no slip: lower rpm, less fuel, and much less
-ATF heat on long runs. Only a true wide-open kickdown releases it. SPORT doesn't use it, because
-it prefers response.
+**Highway lockup (all modes, including MANUAL).** In 4th from 2,000 locked rpm (~51 mph), the
+throttle limits rise to 85 % on / 95 % off. Holding 90 mph takes most of the engine's power
+(roughly half to two-thirds pedal), so without this the converter would unlock exactly when
+you're cruising fast or climbing a highway grade. Staying locked at 90 mph (~3,550 rpm) means no
+slip: lower rpm, less fuel, and much less ATF heat on long runs. Only a near wide-open throttle
+releases it, and in SPORT/MANUAL a quick stab of the pedal still releases it instantly (tip-in
+release), so SPORT keeps its response.
 
 Coast release (SPORT, §6.8) also counts as a release condition.
 
@@ -447,6 +448,7 @@ The console LED shows the state:
 | **Corner hold** | ✓ | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own [+]/[−] and the over-rev upshift always work |
 | **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 2 mph/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
 | **Early lockup** | ✓ | – | – | ECO locks the converter as soon as the engine can take it (1,250 rpm locked: ~23 mph in 3rd, ~32 in 4th) and keeps it through light throttle. A slipping converter is the biggest fuel waste in an automatic, so this is ECO's main economy gain |
+| **Highway lockup** | ✓ | ✓ | ✓ | In 4th above ~51 mph, lockup holds up to 95 % throttle, so a long fast run or a highway grade doesn't slip and heat the fluid (§6.5) |
 | **Coast lockup** | ✓ | ✓ | – | Lockup stays on when you lift, down to the rpm floor, keeping the engine turning with the wheels so the ECU's deceleration fuel cut lasts longer |
 | **Anti-lug** | ✓ | ✓ | ✓ | Below 1,600 locked rpm, more than 25 % throttle releases lockup, so early lockup never makes the engine labour |
 | **Coast unlock** | – | – | ✓ | Lockup released on a closed throttle (< 2 %, re-allowed at 5 %), so the converter is already slipping when you get back on the throttle |

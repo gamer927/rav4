@@ -181,12 +181,13 @@ constexpr float LU_LUG_RPM = 1600.0f;
 constexpr float LU_LUG_TPS = 25.0f;
 // Highway lockup: in 4th at highway rpm, lockup holds up to a much higher
 // throttle than the mode's normal limit, so long fast runs and highway grades
-// stay locked: lower rpm, less fuel, and far less ATF heat. A kickdown-level
-// throttle still releases it. Off in SPORT, which wants response instead.
-constexpr bool HWY_LOCKUP[3] = {true, true, false};
+// stay locked: lower rpm, less fuel, and far less ATF heat. A wide-open
+// kickdown still releases it, and in SPORT (and MANUAL) a quick stab of the
+// pedal does too (tip-in release), so SPORT keeps its response.
+constexpr bool HWY_LOCKUP[3] = {true, true, true};
 constexpr float HWY_LU_MIN_RPM = 2000.0f;  // locked rpm in 4th: from ~51 mph
-// A RAV4 needs ~90 % of its power to hold 90 mph, so only a true wide-open
-// kickdown releases highway lockup.
+// A RAV4 needs most of its power to hold 90 mph (roughly half to two-thirds
+// pedal), so only a near wide-open throttle releases highway lockup.
 constexpr float HWY_LU_TPS_ON = 85.0f;
 constexpr float HWY_LU_TPS_OFF = 95.0f;
 constexpr float LU_TPS_ON[3] = {45.0f, 55.0f, 35.0f};   // SPORT drops lockup early

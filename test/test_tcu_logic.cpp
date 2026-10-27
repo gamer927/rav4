@@ -706,15 +706,23 @@ static void test_highway_lockup() {
   l.step(100);
   CHECK(!l.c.outputs().sl);
 
-  // SPORT doesn't use it: response first.
+  // SPORT (and MANUAL) too: a 90 mph cruise must not slip and cook the ATF.
   Sim s;
   s.in.sport = true;
   s.arm();
   s.in.tpsPct = 20;
   s.cruise(90);
   s.step(3000);
-  s.in.tpsPct = 60;
-  s.step(3000);
+  CHECK(s.c.outputs().gear == 4 && s.c.outputs().sl);
+  for (int i = 0; i < 200; i++) {  // settle onto a heavier cruise throttle over 2 s
+    s.in.tpsPct += 35.0f / 200.0f;
+    s.step(10);
+  }
+  s.step(2000);
+  CHECK(s.c.outputs().gear == 4);
+  CHECK(s.c.outputs().sl);   // 55 % at 90 mph: locked, no slip
+  s.in.tpsPct = 75;          // quick stab: SPORT still gets its instant release
+  s.step(120);
   CHECK(!s.c.outputs().sl);
 }
 
