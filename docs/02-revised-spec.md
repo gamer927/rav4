@@ -387,8 +387,14 @@ SL is **released immediately** when any of these happens:
 
 | Lockup thresholds | ECO | NORMAL | SPORT | HOT (ATF ≥ 110 °C) |
 |---|---|---|---|---|
-| ON / OFF speed (km/h) | 50 / 44 | 58 / 52 | 70 / 64 | 40 / 34 |
+| ON / OFF speed (km/h) | 35 / 30 | 58 / 52 | 70 / 64 | 40 / 34 |
+| Locked-rpm floor (ON / OFF) | 1,250 / 1,100 | 1,400 / 1,250 | 1,800 / 1,650 | 1,250 / 1,100 |
 | ON / OFF TPS (%) | 45 / 55 | 55 / 65 | 35 / 45 | 85 / 95 |
+
+Lockup needs **both** the speed and the locked-rpm floor (speed × gear ratio), so the floor makes
+it per gear. ECO locks 3rd from ~37 km/h but 4th only from ~51 km/h; it releases at ~33 and
+~45 km/h. **Anti-lug:** below 1,600 locked rpm, lockup only holds at ≤ 25 % throttle. Above
+that, the converter's slip and torque multiplication do the work instead of the engine labouring.
 
 Coast release (SPORT, §6.8) also counts as a release condition.
 
@@ -431,6 +437,9 @@ The console LED shows the state:
 | Hold gears longer, shift near the top at full throttle | – | – | ✓ | The SPORT shift map (§6.3): full-throttle upshifts at about 6,000–6,200 real engine rpm, just under the redline, which is the fastest way through these gears |
 | **Corner hold** | ✓ | ✓ | ✓ | No automatic up- or downshifts (kickdown included) while lateral g ≥ 0.25. Shifting resumes 0.7 s after it drops below 0.12 g, and after 10 s at most. Your own [+]/[−] and the over-rev upshift always work |
 | **Brake downshift** | – | – | ✓ | Braking in a straight line (≥ 3 km/h/s decel): step down one gear at a time while the lower gear lands at ≤ 4,200 rpm, then hold that gear until you open the throttle (≥ 20 %) or 3 s after releasing the brake. Never mid-corner |
+| **Early lockup** | ✓ | – | – | ECO locks the converter as soon as the engine can take it (1,250 rpm locked: ~37 km/h in 3rd, ~51 in 4th) and keeps it through light throttle. A slipping converter is the biggest fuel waste in an automatic, so this is ECO's main economy gain |
+| **Coast lockup** | ✓ | ✓ | – | Lockup stays on when you lift, down to the rpm floor, keeping the engine turning with the wheels so the ECU's deceleration fuel cut lasts longer |
+| **Anti-lug** | ✓ | ✓ | ✓ | Below 1,600 locked rpm, more than 25 % throttle releases lockup, so early lockup never makes the engine labour |
 | **Coast unlock** | – | – | ✓ | Lockup released on a closed throttle (< 2 %, re-allowed at 5 %), so the converter is already slipping when you get back on the throttle |
 | **Throttle smoothing** | 0.8 s | 0.25 s | off | The shift map sees a smoothed throttle, so a quick stab of the pedal doesn't cause a downshift; only a sustained push does. That's what makes ECO feel calm. Flooring it (≥ 80 %) bypasses the smoothing, so kickdown is never delayed |
 | **Kickdown threshold** | 80 % | 80 % | 60 % | Throttle at or above this is a kickdown: downshifts skip the 1.2 s anti-hunting wait and the throttle smoothing |

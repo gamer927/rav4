@@ -640,6 +640,43 @@ static void test_sport_lift_hold() {
   CHECK(t.c.outputs().gear > 2);
 }
 
+static void test_eco_early_lockup() {
+  std::printf("ECO: lockup from ~37 km/h in 3rd, rpm floor in 4th, never lugs\n");
+  Sim e;
+  e.in.eco = true;
+  e.arm();
+  e.in.tpsPct = 15;
+  e.cruise(40);
+  e.step(3000);
+  CHECK(e.c.outputs().gear == 3);
+  CHECK(e.c.outputs().sl);  // ~1,340 rpm locked in 3rd
+  Sim n;
+  n.arm();
+  n.in.tpsPct = 15;
+  n.cruise(40);
+  n.step(3000);
+  CHECK(!n.c.outputs().sl);  // NORMAL waits for 58 km/h
+
+  e.in.tpsPct = 35;  // more load at low rpm: let the converter help
+  e.step(200);
+  CHECK(!e.c.outputs().sl);
+  e.in.tpsPct = 15;
+  e.step(1500);
+  CHECK(e.c.outputs().sl);
+
+  // 4th: floor 1,250 rpm (~51 km/h), released below 1,100 rpm (~45 km/h).
+  e.cruise(58);
+  e.step(3000);
+  CHECK(e.c.outputs().gear == 4);
+  CHECK(e.c.outputs().sl);
+  e.rampTo(47, 5.0f);
+  CHECK(e.c.outputs().gear == 4);
+  CHECK(e.c.outputs().sl);   // hysteresis: still above 1,100 rpm
+  e.rampTo(43, 5.0f);
+  CHECK(!e.c.outputs().sl);  // below the floor: unlocked, no lugging
+  CHECK(e.in.speedKmh * cfg::RPM_PER_KMH[4] < cfg::LU_MIN_RPM[MODE_ECO] - cfg::LU_MIN_RPM_HYST);
+}
+
 static void test_lockup_rules() {
   std::printf("lockup: gear/speed/brake/cold/hot/shift sequencing\n");
   Sim s;
@@ -908,6 +945,7 @@ int main() {
   test_sport_tipin_release();
   test_manual_is_sport();
   test_sport_lift_hold();
+  test_eco_early_lockup();
   test_lockup_rules();
   test_hot_atf_widens_lockup();
   test_vss_faults();

@@ -435,8 +435,19 @@ void Controller::manualSafety(const Inputs& in) {
 
 void Controller::updateLockup(const Inputs& in) {
   const uint8_t m = out_.mode;
-  const float onKmh = hot_ ? cfg::HOT_LU_ON_KMH : cfg::LU_ON_KMH[m];
-  const float offKmh = hot_ ? cfg::HOT_LU_OFF_KMH : cfg::LU_OFF_KMH[m];
+  // Per-gear rpm floor on top of the mode's speed thresholds. Hot ATF wants
+  // as much lockup as possible, so it uses the lowest floor (the anti-lug
+  // rule below still protects the engine).
+  const float k = cfg::RPM_PER_KMH[gear_ >= 1 && gear_ <= 4 ? gear_ : 4];
+  const float minRpm = hot_ ? cfg::LU_MIN_RPM[MODE_ECO] : cfg::LU_MIN_RPM[m];
+  const float floorOn = minRpm / k;
+  const float floorOff = (minRpm - cfg::LU_MIN_RPM_HYST) / k;
+  const float baseOn = hot_ ? cfg::HOT_LU_ON_KMH : cfg::LU_ON_KMH[m];
+  const float baseOff = hot_ ? cfg::HOT_LU_OFF_KMH : cfg::LU_OFF_KMH[m];
+  const float onKmh = baseOn > floorOn ? baseOn : floorOn;
+  const float offKmh = baseOff > floorOff ? baseOff : floorOff;
+  // Never lug the engine: at low locked rpm, lockup only on a light throttle.
+  const bool lug = in.speedKmh * k < cfg::LU_LUG_RPM && in.tpsPct > cfg::LU_LUG_TPS;
   const float tpsOn = hot_ ? cfg::HOT_LU_TPS_ON : cfg::LU_TPS_ON[m];
   const float tpsOff = hot_ ? cfg::HOT_LU_TPS_OFF : cfg::LU_TPS_OFF[m];
 
@@ -447,8 +458,8 @@ void Controller::updateLockup(const Inputs& in) {
                        !elapsed(now_, gearSinceMs_, cfg::LOCKUP_SETTLE_AFTER_SHIFT_MS);
   const bool tipIn = cfg::LU_TIPIN_RELEASE[m] && tipIn_ && !hot_;
   if (slCmd_) {
-    if (blocked || tipIn || in.speedKmh < offKmh || in.tpsPct > tpsOff) setLockup(false);
-  } else if (!blocked && in.speedKmh >= onKmh && in.tpsPct <= tpsOn &&
+    if (blocked || tipIn || lug || in.speedKmh < offKmh || in.tpsPct > tpsOff) setLockup(false);
+  } else if (!blocked && !lug && in.speedKmh >= onKmh && in.tpsPct <= tpsOn &&
              elapsed(now_, lastLockupChangeMs_, cfg::LOCKUP_MIN_OFF_MS)) {
     setLockup(true);
   }

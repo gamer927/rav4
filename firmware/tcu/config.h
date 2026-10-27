@@ -165,8 +165,17 @@ constexpr float HOT_LU_TPS_OFF = 95.0f;
 // ------------------------------------------------------- per-mode lockup map
 // Index: 0 = ECO, 1 = NORMAL, 2 = SPORT.
 constexpr uint8_t LU_MIN_GEAR = 3;
-constexpr float LU_ON_KMH[3] = {50.0f, 58.0f, 70.0f};
-constexpr float LU_OFF_KMH[3] = {44.0f, 52.0f, 64.0f};
+constexpr float LU_ON_KMH[3] = {35.0f, 58.0f, 70.0f};   // ECO: as early as the rpm floor allows
+constexpr float LU_OFF_KMH[3] = {30.0f, 52.0f, 64.0f};
+// Lockup only when the locked engine speed (km/h x ratio) is at least this,
+// so it is per gear: ECO locks 3rd from ~37 km/h but 4th only from ~51 km/h.
+// Released LU_MIN_RPM_HYST below it.
+constexpr float LU_MIN_RPM[3] = {1250.0f, 1400.0f, 1800.0f};
+constexpr float LU_MIN_RPM_HYST = 150.0f;
+// Anti-lug: below LU_LUG_RPM, lockup only at light throttle (above it the
+// converter's slip and torque multiplication do the work instead).
+constexpr float LU_LUG_RPM = 1600.0f;
+constexpr float LU_LUG_TPS = 25.0f;
 constexpr float LU_TPS_ON[3] = {45.0f, 55.0f, 35.0f};   // SPORT drops lockup early
 constexpr float LU_TPS_OFF[3] = {55.0f, 65.0f, 45.0f};
 
