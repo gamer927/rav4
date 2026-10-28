@@ -57,6 +57,12 @@ check(log.cal.get("VSS_PULSES_PER_MILE") == cfg["VSS_PULSES_PER_MILE"], "# cal l
 check(len(log.rows) > 1000, "data rows read")
 check("tps_v" in log.rows[0], "tps_v column")
 check(len(log.between("pedal_up")) >= 20, "markers")
+check(len(log.health) >= 3, "# health lines read")
+line, notes = cal.health_check(log)
+check(line and "slowest loop" in line and not notes, f"health: {line} {notes}")
+sick = cal.Log(["# health slowest_loop_us=180000 stack_margin_bytes=300"])
+line, notes = cal.health_check(sick)
+check(len(notes) == 2 and "180 ms" in notes[0] and "300 bytes" in notes[1], "a slow loop and low memory are reported")
 
 print("bench: current sensors")
 values, info, notes = cal.bench_result(log, 12.6)

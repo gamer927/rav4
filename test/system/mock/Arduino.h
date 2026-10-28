@@ -21,6 +21,7 @@
 #define ARDUINO 10819
 #define naked
 static const uint8_t A0 = 54, A1 = 55, A2 = 56, A3 = 57, A4 = 58, A5 = 59, A6 = 60, A7 = 61;
+static const uint8_t A8 = 62, A9 = 63, A10 = 64, A11 = 65, A12 = 66, A13 = 67, A14 = 68, A15 = 69;
 extern uint32_t g_ms;
 extern int g_pin[100];       // digital levels the sketch reads
 extern int g_out[100];       // digital levels the sketch wrote

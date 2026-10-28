@@ -41,7 +41,21 @@ for src in "$SK/tcu.ino" "$SK"/*.cpp; do
   avr-g++ "${FLAGS[@]}" "${CXXFLAGS[@]}" -I"$WIRE" -x c++ -c "$src" -o "$o"
   sk_objs+=("$o")
 done
-avr-gcc "${FLAGS[@]}" -Wl,--gc-sections -o "$OUT/tcu.elf" "${sk_objs[@]}" "${objs[@]}" -lm
+# The core goes in as an archive, as the Arduino IDE does it: only what the
+# sketch uses gets linked (not Serial1-3), so the sizes below match the IDE's.
+rm -f "$OUT/core.a"
+avr-gcc-ar rcs "$OUT/core.a" "${objs[@]}"
+avr-gcc "${FLAGS[@]}" -Wl,--gc-sections -o "$OUT/tcu.elf" "${sk_objs[@]}" "$OUT/core.a" -lm
 avr-objcopy -O ihex -R .eeprom "$OUT/tcu.elf" "$OUT/tcu.hex"
 avr-size -C --mcu=atmega2560 "$OUT/tcu.elf" 2>/dev/null || avr-size "$OUT/tcu.elf"
+
+# The self-test's results and the watchdog mark live in .noinit RAM, which
+# must survive the bootloader: it runs on a stack at the top of RAM (about
+# 300 bytes) before it starts the sketch. Keep 1 KB clear below RAMEND.
+NOINIT_END=$(avr-nm "$OUT/tcu.elf" | awk '$3 == "_end" {print $1}')
+if [ -z "$NOINIT_END" ] || [ $((16#$NOINIT_END - 0x800000)) -gt $((0x21FF - 1024)) ]; then
+  echo "FAIL: .noinit ends at 0x${NOINIT_END:-?}: too close to the bootloader's stack" >&2
+  exit 1
+fi
+echo "noinit ends at 0x$(printf %04X $((16#$NOINIT_END - 0x800000))) (bootloader stack starts near 0x21FF)"
 echo "OK: $OUT/tcu.hex"

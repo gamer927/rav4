@@ -51,6 +51,7 @@ class Log:
         self.cal = {}       # the settings the firmware was built with
         self.bit = []       # self-test tables: list of {name: (result, value)}
         self.shifts = []    # "# ECU shift ..." lines
+        self.health = []    # (slowest loop us, stack margin bytes) from "# health" lines
         cols = COLS
         for raw in lines:
             line = raw.strip()
@@ -71,6 +72,10 @@ class Log:
                     self.bit[-1][m.group(1)] = (m.group(2), float(m.group(3)) if m.group(3) else None)
             elif line.startswith("# ECU"):
                 self.shifts.append(line[2:])
+            elif line.startswith("# health "):
+                h = dict(re.findall(r"(\w+)=(\d+)", line))
+                if "slowest_loop_us" in h and "stack_margin_bytes" in h:
+                    self.health.append((int(h["slowest_loop_us"]), int(h["stack_margin_bytes"])))
             elif not line.startswith("#"):
                 parts = line.split(",")
                 if len(parts) != len(cols):
@@ -370,7 +375,34 @@ def ask_float(prompt, default=None, ask=None):
             print("Please type a number, like 12.6")
 
 
-def report(title, values, info, notes, step, write=True, ask=None):
+# The firmware's own health, from its "# health" lines (every 10 s).
+SLOW_LOOP_US = 100_000    # the watchdog resets at 250 ms: keep well clear
+LOW_STACK_BYTES = 512
+
+
+def health_check(log):
+    """(one line for the report, notes) on the TCU's slowest loop and stack margin."""
+    if not log.health:
+        return None, []
+    slowest = max(h[0] for h in log.health)
+    margin = min(h[1] for h in log.health)
+    line = f"slowest loop {slowest / 1000:.1f} ms (the watchdog allows 250), stack margin {margin} bytes"
+    notes = []
+    if slowest > SLOW_LOOP_US:
+        notes.append(f"The TCU's program once took {slowest / 1000:.0f} ms for one loop. It still works, but "
+                     "that's close to the 250 ms safety reset: report it, with this log, on the project page.")
+    if margin < LOW_STACK_BYTES:
+        notes.append(f"The TCU's memory came within {margin} bytes of full. Report it, with this log, on the "
+                     "project page.")
+    return line, notes
+
+
+def report(title, values, info, notes, step, write=True, ask=None, log=None):
+    if log is not None:
+        line, more = health_check(log)
+        if line:
+            info = dict(info, **{"TCU health": line})
+        notes = list(notes) + more
     print(f"\n== {title}: the numbers ==")
     for k, v in info.items():
         print(f"  {k}: {v if not isinstance(v, float) else round(v, 3)}")
@@ -409,7 +441,7 @@ BENCH (build book part 10): sets the solenoid current sensors.
         values, info, notes = bench_result(log, supply, ohms)
     except CalError as e:
         sys.exit("\nPROBLEM: " + str(e))
-    report("Bench", values, info, notes, "bench")
+    report("Bench", values, info, notes, "bench", log=log)
 
 
 def cmd_parked(args):
@@ -445,7 +477,7 @@ PARKED: sets the gas pedal sensor and the battery reading.
         values, info, notes = parked_result(log, meter, cfg)
     except CalError as e:
         sys.exit("\nPROBLEM: " + str(e))
-    report("Parked", values, info, notes, "parked")
+    report("Parked", values, info, notes, "parked", log=log)
 
 
 def cmd_drive(args):
@@ -482,7 +514,7 @@ DRIVE: sets the speed and the engine-rpm-per-mph numbers. ON/OFF stays OFF.
         print("\nFor reference, the factory computer's upshifts (gas pedal %, mph):")
         for k, v in sorted(shifts.items()):
             print(f"  {k}: " + ", ".join(f"{t}% {m} mph" for t, m in sorted(v)))
-    report("Drive", values, info, notes, "drive")
+    report("Drive", values, info, notes, "drive", log=log)
 
 
 def cmd_status(args):

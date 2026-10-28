@@ -19,7 +19,10 @@
 //   * engine rpm from road speed and whichever gear is really engaged
 //   * VSS / tach pulses, throttle, battery, ATF temperature, the coil sense
 //   * the I2C screen and gyro (the cable can be unplugged)
-//   * the watchdog: the longest gap between kicks is recorded
+//   * the watchdog: the longest gap between kicks is recorded; a hang is
+//     its ISR running, then a reset
+//   * the Mega's bootloader: it clears MCUSR before the sketch starts, so
+//     the sketch never sees the reset cause there
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -27,7 +30,7 @@
 uint32_t g_ms = 0;
 int g_pin[100];
 int g_out[100];
-uint8_t MCUSR = 0;
+uint8_t MCUSR = 0, WDTCSR = 0;
 uint32_t g_wdtLastKick = 0, g_wdtMaxGap = 0;
 bool g_wdtEnabled = false;
 HardwareSerial Serial, Serial1;
@@ -191,6 +194,27 @@ void armAndDrive() {
   run(200);
   car.leverInD = true;
   run(300);
+}
+// The chip resets: every pin an input again. The Mega's bootloader
+// (stk500v2) then clears MCUSR before the sketch runs, whatever the cause.
+void reboot() {
+  for (int i = 0; i < 100; i++) g_out[i] = 0;
+  MCUSR = 0;
+  captureResetFlags();  // what the chip runs before main()
+  setup();
+}
+// The program hangs: 250 ms later the watchdog's timeout runs its ISR,
+// which arms the 15 ms reset.
+void watchdogFires() {
+  CHECK(g_wdtEnabled && (WDTCSR & _BV(WDIE)));  // setup() armed interrupt-then-reset
+  bool reset = false;
+  try {
+    WDT_vect();
+  } catch (WatchdogReset&) {
+    reset = true;
+  }
+  CHECK(reset);
+  for (int i = 0; i < 100; i++) g_out[i] = 0;
 }
 bool tcuInControl() { return g_out[pin::RELAY] && coilPowered(); }
 float tcuDriverAmps() {
@@ -628,16 +652,50 @@ void s_reset_mid_drive() {
   car.tps = 25;
   rampTo(50, 6);
   CHECK(tcuInControl());
-  for (int i = 0; i < 100; i++) g_out[i] = 0;  // reset: every pin an input again
+  watchdogFires();
   CHECK(factorySafe());
-  MCUSR = _BV(WDRF);
-  captureResetFlags();  // what the chip runs before main(): reads why it reset
-  setup();
+  reboot();
   run(3000);
   CHECK(!tcuInControl());
   CHECK(factorySafe());
   CHECK(controller.outputs().warnings & tcu::WARN_WDT_RESET);
   CHECK(screenSays("WAITING"));  // needs a fresh OFF -> ON flip
+}
+
+void s_reset_button_mid_drive() {
+  // Any other reset (the reset button, the laptop's USB opening the port, a
+  // power blip): just as safe, but no RESTARTED note: it wasn't a hang.
+  boot();
+  startEngine();
+  armAndDrive();
+  rampTo(30, 6);
+  CHECK(tcuInControl());
+  reboot();
+  CHECK(factorySafe());
+  run(3000);
+  CHECK(!tcuInControl());
+  CHECK(!(controller.outputs().warnings & tcu::WARN_WDT_RESET));
+  CHECK(screenSays("WAITING"));
+}
+
+void s_ibit_safety_reset() {
+  // The self-test's last step (SAFETY RESET) on a real Mega, whose
+  // bootloader hides the reset cause: the watchdog fires, the results come
+  // back after the reboot, and the step passes.
+  s_ibit_full();
+  saveBitForWatchdogTest();
+  watchdogFires();
+  reboot();
+  run(500);
+  CHECK(selfTest.result(tcu::T_WATCHDOG) == tcu::TR_PASS);
+  CHECK(selfTest.result(tcu::T_SOL_S1) == tcu::TR_PASS);  // the rest survived the reset
+  CHECK(!(controller.outputs().warnings & tcu::WARN_WDT_RESET));  // a test, not a hang
+  // A watchdog that never fires: you pressed reset (or cut the power)
+  // instead, and the step fails.
+  saveBitForWatchdogTest();
+  reboot();
+  run(500);
+  CHECK(selfTest.result(tcu::T_WATCHDOG) == tcu::TR_FAIL);
 }
 
 void s_solenoid_wire_shorted() {
@@ -706,6 +764,8 @@ const Scenario kScenarios[] = {
     {"battery voltage collapses: ECU back", s_battery_drops},
     {"ECU sense dead, take-over on the move: waits for a stop", s_ecu_sense_dead_take_over_moving},
     {"reset at 50 mph: relays drop, no take-over after the reboot", s_reset_mid_drive},
+    {"reset button at 30 mph: relays drop, no RESTARTED note", s_reset_button_mid_drive},
+    {"self-test SAFETY RESET with the Mega's bootloader: passes; reset button instead: fails", s_ibit_safety_reset},
     {"solenoid wire shorted: over-current, ECU back", s_solenoid_wire_shorted},
     {"ATF probe unplugged: warned, still in control", s_atf_probe_unplugged},
     {"ATF overheats: warned, lockup held to cool it", s_atf_overheats},

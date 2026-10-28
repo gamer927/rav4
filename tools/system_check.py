@@ -82,6 +82,17 @@ for hdr, rows in hub.items():
     for pin_no, label, mega in rows:
         check(mega in used, f"Mega pin table {hdr}{pin_no} goes to {mega}, which the firmware doesn't use")
 
+# Every Mega pin is either used, or pulled up by the firmware as unused, and
+# no pin the firmware calls unused has anything on the circuit board.
+unused = re.search(r"kUnusedPins\[\] = \{([^}]*)\}", ino).group(1)
+unused = {u if u.startswith("A") else f"D{u}" for u in re.findall(r"A?\d+", unused)}
+on_pcb = {p for n in pcb.Circuit().nets for r, p in n["pins"] if r == "MEGA"}
+every = {f"D{i}" for i in range(54)} | {f"A{i}" for i in range(16)}
+spoken_for = set(fw_pins.values()) | unused | {"D0", "D1", "D20", "D21"}  # USB serial, I²C
+check(every <= spoken_for, f"Mega pins neither used nor pulled up as unused: {sorted(every - spoken_for)}")
+check(not unused & on_pcb, f"pins the firmware pulls up as unused are wired on the board: {sorted(unused & on_pcb)}")
+check(not unused & set(fw_pins.values()), f"pins both used and 'unused': {sorted(unused & set(fw_pins.values()))}")
+
 # ------------------------------------------------- 2. nets at the headers
 
 

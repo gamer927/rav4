@@ -15,6 +15,7 @@
       driver and the relay off => car reverts to factory ECU control.
 */
 #include <Arduino.h>
+#include <avr/interrupt.h>
 #include <avr/wdt.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -60,17 +61,49 @@ constexpr uint8_t COIL_SENSE = A7;  // relay coil supply, after the ON/OFF switc
 // I2C (SDA = 20, SCL = 21): dash pod OLED (0x3C) and MPU-6050 gyro (0x68).
 }  // namespace pin
 
+// Pins with nothing on the circuit board: pulled up, so none floats and picks
+// up noise (the datasheet's advice for unused pins). D0/D1 are USB serial,
+// D13 the on-board LED, A2 the analog ATF sender when that's fitted.
+constexpr uint8_t kUnusedPins[] = {4,  5,  7,  11, 12, 14, 15, 16, 17, 18, 19, 35, 36, 37, 38, 39, 40,
+                                   41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, A8, A9, A10, A11,
+                                   A12, A13, A14, A15};
+
 // USB serial carries a CSV log for calibration (docs/02-revised-spec.md §8).
 constexpr bool USB_LOG_ENABLED = true;
 constexpr uint32_t USB_LOG_PERIOD_MS = 100;
 
 // Reset cause, captured before the C runtime and the Arduino core run.
+//
+// The Mega's own bootloader (stk500v2) clears MCUSR before it starts the
+// sketch, so on a real Mega MCUSR never says "watchdog". The watchdog runs in
+// interrupt-then-reset mode instead: its timeout first runs ISR(WDT_vect),
+// which leaves a mark in .noinit RAM (kept through a reset, random after
+// power-up), then resets. Either sign counts.
+constexpr uint32_t kWdtMark = 0x5AFE7D06;
 uint8_t resetFlags __attribute__((section(".noinit")));
+uint32_t wdtMark __attribute__((section(".noinit")));
+uint32_t wdtMarkInv __attribute__((section(".noinit")));
 void captureResetFlags() __attribute__((naked, used, section(".init3")));
 void captureResetFlags() {
   resetFlags = MCUSR;
+  if (wdtMark == kWdtMark && wdtMarkInv == ~kWdtMark) resetFlags |= _BV(WDRF);
+  wdtMark = 0;
   MCUSR = 0;
   wdt_disable();
+}
+
+// The watchdog: 250 ms without a kick runs the ISR below, then resets.
+void watchdogOn() {
+  wdt_enable(WDTO_250MS);
+  WDTCSR |= _BV(WDIE);  // interrupt first (WDE stays set: then reset)
+}
+
+ISR(WDT_vect) {
+  wdtMark = kWdtMark;
+  wdtMarkInv = ~kWdtMark;
+  wdt_enable(WDTO_15MS);  // reset in 15 ms, not after another 250
+  for (;;) {
+  }
 }
 
 // Built-in test results survive the deliberate watchdog reset at the end of
@@ -619,6 +652,44 @@ void serviceUsbLog(uint32_t now) {
   Serial.println(lastTpsV, 2);
 }
 
+// --------------------------------------------------------------- health
+// Every 10 s on the USB log: the slowest loop since the last line (the
+// watchdog allows 250 ms) and the closest the stack has come to the
+// variables below it. tools/calibrate.py checks both.
+constexpr uint32_t HEALTH_PERIOD_MS = 10000;
+constexpr uint8_t kStackPaint = 0xC5;
+uint32_t slowestLoopUs = 0;
+
+#ifdef __AVR__
+extern uint8_t __heap_start;  // the first byte after the variables (nothing uses the heap)
+// Fill the free RAM with a known value once, at boot; the stack overwrites it as it grows.
+void paintStack() {
+  noInterrupts();
+  for (uint8_t* p = &__heap_start; p < (uint8_t*)SP - 64; p++) *p = kStackPaint;
+  interrupts();
+}
+uint16_t stackMarginBytes() {
+  const uint8_t* p = &__heap_start;
+  while (*p == kStackPaint && p < (uint8_t*)SP) p++;
+  return (uint16_t)(p - &__heap_start);
+}
+#else
+void paintStack() {}
+uint16_t stackMarginBytes() { return 0xFFFF; }  // a PC: no such limit
+#endif
+
+void serviceHealthLog(uint32_t now, uint32_t loopUs) {
+  static uint32_t last = 0;
+  if (loopUs > slowestLoopUs) slowestLoopUs = loopUs;
+  if (!USB_LOG_ENABLED || (uint32_t)(now - last) < HEALTH_PERIOD_MS || Serial.availableForWrite() < 50) return;
+  last = now;
+  Serial.print(F("# health slowest_loop_us="));
+  Serial.print(slowestLoopUs);
+  Serial.print(F(" stack_margin_bytes="));
+  Serial.println(stackMarginBytes());
+  slowestLoopUs = 0;
+}
+
 // -------------------------------------------------------------- dash pod OLED
 enum Page : uint8_t { PG_MAIN, PG_SENSORS, PG_TEST, PG_COUNT };
 uint8_t page = PG_MAIN;
@@ -804,14 +875,18 @@ void handleTestButton(uint32_t now) {
 }
 
 // Last IBIT step: save results, then stop kicking the watchdog. A working
-// watchdog resets the board within 250 ms; setup() restores the results and
+// watchdog resets the board within about 265 ms; setup() restores the results and
 // records the pass. If the screen stays on "WATCHDOG TEST", it failed.
-void runWatchdogTest() {
-  applyTestOutputs(tcu::TestOutputs());
+void saveBitForWatchdogTest() {
   savedBit.magic = kWdtTestMagic;
   memcpy(savedBit.results, selfTest.results(), sizeof(savedBit.results));
   memcpy(savedBit.values, selfTest.values(), sizeof(savedBit.values));
   savedBit.check = savedBitChecksum();
+}
+
+void runWatchdogTest() {
+  applyTestOutputs(tcu::TestOutputs());
+  saveBitForWatchdogTest();
   if (USB_LOG_ENABLED) {
     Serial.println(F("# IBIT watchdog test: expecting a reset"));
     Serial.flush();
@@ -827,13 +902,14 @@ void runWatchdogTest() {
       oled.service(millis());
     }
   }
-  wdt_enable(WDTO_250MS);
+  watchdogOn();
   for (;;) {
   }
 }
 
 // --------------------------------------------------------------- setup / loop
 void setup() {
+  paintStack();
   // Outputs to the safe state before anything else (external pull-downs hold
   // them off until this point).
   digitalWrite(pin::RELAY, LOW);
@@ -861,6 +937,8 @@ void setup() {
   for (uint8_t i = 0; i < sizeof(dbPins); i++) *dbs[i] = tcu::Debouncer(activeLow(dbPins[i]));
   pinMode(pin::VSS, INPUT);
   pinMode(pin::TACH, INPUT);
+  for (uint8_t p : kUnusedPins) pinMode(p, INPUT_PULLUP);
+  if (cfg::ATF_SENSOR != cfg::ATF_NTC) pinMode(pin::ATF, INPUT_PULLUP);
 
   Serial.begin(115200);
 
@@ -908,11 +986,15 @@ void setup() {
     Serial.println(F("# cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v"));
   }
   // A hung loop stops kicking the dog; the reset drops the relays.
-  wdt_enable(WDTO_250MS);
+  watchdogOn();
 }
 
 void loop() {
   wdt_reset();
+  static uint32_t loopStartUs = micros();
+  const uint32_t startUs = micros();
+  const uint32_t loopUs = startUs - loopStartUs;  // the whole previous loop, Serial and screen included
+  loopStartUs = startUs;
   const uint32_t now = millis();
   sampleSwitches(now);
   handleTestButton(now);
@@ -954,4 +1036,5 @@ void loop() {
   serviceGyro(now);
   serviceOled(now);
   serviceUsbLog(now);
+  serviceHealthLog(now, loopUs);
 }
