@@ -21,6 +21,7 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 2. Solenoid control,Thermal paste,1,small tube,"Amazon (or AliExpress, cheaper but slower)",6,Skip if you have some
 3. Signal inputs,"PC817 optocoupler, DIP-4",6,pack of 20,"Amazon (or AliExpress, cheaper but slower)",6,
 3. Signal inputs,"LM393 comparator, DIP-8",1,pack of 10,"Amazon (or AliExpress, cheaper but slower)",5,
+3. Signal inputs,"DIP sockets, 8-pin and 18-pin (0.3"" wide)",1 + 1,assorted pack,"Amazon (or AliExpress, cheaper but slower)",6,"For the LM393 and the ULN2803A: no soldering iron on the chips, and easy to swap"
 3. Signal inputs,BAT85 Schottky diode (DO-35),18,pack of 25,DigiKey / Mouser,5,Input clamps
 3. Signal inputs,1N4148 diode,6,pack of 100,"Amazon (or AliExpress, cheaper but slower)",5,
 3. Signal inputs,"Resistor kit, 1/4 W 1 % metal film (600+ pcs), bodies about 6 mm long",≈ 50,kit,"Amazon (or AliExpress, cheaper but slower)",12,"Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"

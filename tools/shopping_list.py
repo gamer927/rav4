@@ -65,6 +65,8 @@ ITEMS = [
     # ---------------------------------------------------------------- 3
     ("3. Signal inputs", "PC817 optocoupler, DIP-4", "6", "pack of 20", AMZ, 6, ""),
     ("3. Signal inputs", "LM393 comparator, DIP-8", "1", "pack of 10", AMZ, 5, ""),
+    ("3. Signal inputs", "DIP sockets, 8-pin and 18-pin (0.3\" wide)", "1 + 1", "assorted pack", AMZ, 6,
+     "For the LM393 and the ULN2803A: no soldering iron on the chips, and easy to swap"),
     ("3. Signal inputs", "BAT85 Schottky diode (DO-35)", "18", "pack of 25", DK, 5, "Input clamps"),
     ("3. Signal inputs", "1N4148 diode", "6", "pack of 100", AMZ, 5, ""),
     ("3. Signal inputs", "Resistor kit, 1/4 W 1 % metal film (600+ pcs), bodies about 6 mm long", "≈ 50", "kit", AMZ, 12,
@@ -228,7 +230,7 @@ def main():
               "tap and inline fuse holders.")
     md.append("2. **ATF cooler hose inside diameter** (usually 5/16\" or 3/8\"): for the barbed tee.")
     md.append("3. **A spot for the TCU box**, ideally under the passenger side of the dash where you "
-              "can reach it: 216 × 192 × 51 mm (244 mm wide with its mounting ears), bolted to metal.")
+              "can reach it: 216 × 212 × 51 mm (244 mm wide with its mounting ears), bolted to metal.")
     md.append("4. **A spot for the dash pod**: 200 × 64 × 64 mm, plus its hinge mount, on the dash top "
               "(driver's side, never over the passenger airbag).")
     md.append("5. **Space on the centre console** beside the gear lever for the shifter base: "

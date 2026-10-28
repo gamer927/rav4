@@ -180,7 +180,9 @@ class Router:
                     cost = 1.0 if (layer == 0) == (dj == 0) else WRONG_WAY
                     steps.append(((layer, ni, nj), cost))
             other = 1 - layer
-            if (self.free(net, other, (i, j), vh, kv) and self.free(net, layer, (i, j), vh, kv)):
+            # the via, and the track that leaves it on the other layer (often the wider of the two)
+            if (self.free(net, other, (i, j), max(vh, h), self.cls[max(vh, h)])
+                    and self.free(net, layer, (i, j), vh, kv)):
                 steps.append(((other, i, j), VIA_COST))
             for nxt, cost in steps:
                 nl, ni, nj = nxt
@@ -258,7 +260,7 @@ class Router:
                 if not self.route_net(net, pads_of[net]):
                     failed.append(net)
             log(f"  routing pass {attempt + 1}: {len(order) - len(failed)} nets routed, {len(failed)} failed"
-                + (": " + " ".join(failed[:12]) if failed else ""))
+                + (": " + " ".join(str(n) for n in failed[:12]) if failed else ""))
             if not failed:
                 return []
             order = failed + [n for n in order if n not in failed]

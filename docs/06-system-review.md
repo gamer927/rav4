@@ -296,7 +296,7 @@ Nothing on this list has a known fix that wouldn't add a new risk of its own.
 
 ## 8. The circuit board
 
-The whole TCU circuit is one 2-layer board, 200 × 150 mm, that plugs onto the Mega's pins
+The whole TCU circuit is one 2-layer board, 200 × 170 mm, that plugs onto the Mega's pins
 (`tools/pcb.py`; the files to order it are in [`hardware/pcb/`](../hardware/pcb/README.md)).
 It reuses the tested circuit in `tools/boards.py` net for net, with the same connectors, so the
 cables, housings and tests carry over. What changed on the way:
@@ -310,6 +310,7 @@ cables, housings and tests carry over. What changed on the way:
 | Tracks sized by current: 1.5 mm for the solenoid supply, 1.0 mm for the solenoid, load and 12 V lines, ground filled on both layers | Each solenoid draws about 1 A; the tracks stay cool |
 | **Found on review:** the ground copper ran under each MOSFET's bolted metal tab (which is its drain, switched +12 V) and under the bolt's nut, with only the thin solder mask between them | Bare board, no copper, under every tab and around every bolt on both sides; a system check keeps it that way |
 | **Found by the part fit check:** the Mega's and the modules' pin holes left 0.09 mm round a square pin; the MOSFETs' 1.1 mm holes left almost nothing round their legs; a 10 mm-wide 100 µF capacitor (some are) would hit the regulator; a long ACS712 module could cover its LINK holes | Pin holes 1.1 mm, MOSFET holes 1.3 mm, regulator moved 1.3 mm, LINK holes 35 mm from the pins; `tools/part_fit.py` checks every part at its largest size on every build |
+| Made easier to solder (rev 2): the board grew from 150 to 170 mm deep and its parts spread out, bigger pads (long ovals on the chips), every part's value printed beside its name, sockets for U1 and U2, no ground pad joined solidly to the ground copper | A first-time builder can read every part off the board and heat every joint; the box grew to 216 × 212 mm. The router's via check was also fixed (it let a wide track leave a via too close to another track; KiCad's check caught it) |
 | **Found on review:** the board's posts were 2.5 mm too short: they left out the plastic strip of the male headers, which sits on top of the Mega's sockets | Posts 18.6 mm; the fit check passes at the new height |
 
 Checks on the design: every chip's pinout was compared by hand with its datasheet (ULN2803,

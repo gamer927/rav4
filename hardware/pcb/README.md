@@ -1,6 +1,6 @@
 # The TCU circuit board
 
-One 2-layer board, 200 × 150 mm, that plugs straight onto the Arduino Mega and carries the
+One 2-layer board, 200 × 170 mm, that plugs straight onto the Arduino Mega and carries the
 whole TCU circuit. You order it bare and solder the parts in yourself
 ([build book](../../docs/05-build-book.md), parts 4–6): every connection between the parts is
 already a copper track, so there's no wiring on the bench.
@@ -16,7 +16,7 @@ of layers from the zip. Pick these options:
 | Option | Choose |
 |---|---|
 | Layers | **2** |
-| Size | 200 × 150 mm (read from the zip) |
+| Size | 200 × 170 mm (read from the zip) |
 | Thickness | **1.6 mm** |
 | Copper weight | **1 oz** |
 | Surface finish | **HASL lead-free** (or ENIG) |
@@ -54,8 +54,11 @@ build book's six soldering steps say which parts go in at each step.
   pad. It needs KiCad 7's Python module (`python3 tools/pcb.py`). Don't edit the board by hand:
   change the script and run it again. `make check` then checks that every pad is on the net the
   circuit says.
-- **Through-hole only**, sized for hand soldering: 1.6–2 mm pads, labels on every part, the
-  Mega's used pins labelled, and every screw terminal labelled with its signal.
+- **Made to be easy to solder:** through-hole only, with big pads (a 0.6 mm copper ring round
+  each hole where there's room, long oval pads on the chips), every part's **name and value**
+  printed next to it (RU11 2.2k, DL1 BAT85…), the Mega's used pins labelled, every screw
+  terminal labelled with its signal, sockets for the two bigger chips, and no ground pad joined
+  solidly to the ground copper (those soak up the iron's heat).
 - **Tracks sized for the current:** 1.5 mm for the solenoid supply, 1.0 mm for the solenoid,
   dummy-load and 12 V lines, 0.8 mm for the relay coils and the 5 V rail, 0.4 mm for signals.
 - **The screw terminals** run along the front edge in the same order as the box's glands:

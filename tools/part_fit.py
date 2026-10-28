@@ -48,8 +48,9 @@ REAL = {
               "100 uF 50 V: 8 x 11.5 (3.5 mm legs) is usual, 10 x 12.5 (5 mm) and 6.3 x 11 (2.5 mm) exist"),
     "C47u": ("47 uF 16 V electrolytic", 0.55, ("round", 6.3, [2.5, 2.0]), 12.5,
              "47 uF 16 V: 5 x 11 (2 mm legs) or 6.3 x 11 (2.5 mm)"),
-    "DIP": ("chip in a DIP package (PC817, LM393, ULN2803A)", 0.61, ("fab", 0.3), 5.5,
-            "DIP: 0.46-0.56 x 0.25 mm legs (diagonal 0.61), 7.62 mm rows, body 6.6 max wide, 5.3 max tall"),
+    "DIP": ("chip in a DIP package (PC817, LM393, ULN2803A)", 0.61, ("fab", 0.3), 9.0,
+            "DIP: 0.46-0.56 x 0.25 mm legs (diagonal 0.61), 7.62 mm rows, body 6.6 max wide, 5.3 max tall; "
+            "+3.5 mm in a socket (U1, U2), socket pins 0.5 mm"),
     "K": ("Omron G2RL-2 relay", 0.94, ("fab", 0.15), 15.7,
           "Omron G2RL: 29 x 12.7 x 15.7 max, terminals 0.8 x 0.5, holes 1.3 +/- 0.1 recommended"),
     "Q": ("IRF4905, TO-220, lying flat and bolted", 1.03, ("fab", 0.3), 8.0,

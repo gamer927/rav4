@@ -118,7 +118,7 @@ repair manual and wiring diagram for your car (search for "1999 RAV4 repair manu
 - [ ] **A spot for the TCU box.** Kneel in the passenger footwell and look up under the dash,
   below the glovebox. You need:
   - a metal spot to bolt to (the dash frame, or somewhere to hang a steel bracket)
-  - room for a box **216 × 192 × 51 mm** (244 mm wide with its mounting ears)
+  - room for a box **216 × 212 × 51 mm** (244 mm wide with its mounting ears)
   - about 10 cm of free space in front of it for the cables
   - nothing in the way of the passenger's knees or the heater ducts
 
@@ -242,7 +242,9 @@ The files are in `hardware/stl/`.
 ![The finished board](pcb-top.png)
 
 **How it goes:** each step's parts are orange in its picture, and the ones you've already fitted
-are grey. Push each part into the holes with its name printed between them, from the top. Turn
+are grey. Every part's **name and value** are printed on the board next to its holes (for
+example **RU11 2.2k** or **DL1 BAT85**), so you can check each one as you go. Push each part into
+its holes from the top. Turn
 the board over, solder, snip, leaving **no more than 1.5 mm** of leg under the board (the Mega
 sits 11 mm below). **Lowest parts first** (resistors and diodes, then the taller ones), so the
 board lies flat on the table while you solder.
@@ -315,7 +317,7 @@ to **GND**.
 - [ ] **ZK**: 1N4733A 5.1 V diode. Stripe to the end with the stripe printed on the board.
 - [ ] **CK**: 100 nF capacitor
 - [ ] **F2**: PTC 0.25 A resettable fuse. Either way round.
-- [ ] **U1**: ULN2803A chip. Notch (or dot) to the notch printed on the board.
+- [ ] **U1**: ULN2803A chip. Solder its 18-pin socket in, notch to the notch printed on the board. Push the chip into the socket at the end of the step, notch to the notch (bend its legs in a little on the table first if they're splayed).
 - [ ] **X4**: DASH screw terminal block. Wire openings towards the front edge of the board.
 - [ ] **K1**: G2RL-2 12 V relay. It only fits one way.
 - [ ] **K2**: G2RL-2 12 V relay. It only fits one way.
@@ -432,7 +434,7 @@ heatsink (it gets warm). 12 V on both 12V terminals and GND, C7–C8 wire in.
 - [ ] **OK4**: PC817 chip. Notch (or dot) to the notch printed on the board.
 - [ ] **OK5**: PC817 chip. Notch (or dot) to the notch printed on the board.
 - [ ] **OK6**: PC817 chip. Notch (or dot) to the notch printed on the board.
-- [ ] **U2**: LM393 chip. Notch (or dot) to the notch printed on the board.
+- [ ] **U2**: LM393 chip. Solder its 8-pin socket in, notch to the notch printed on the board. Push the chip into the socket at the end of the step, notch to the notch (bend its legs in a little on the table first if they're splayed).
 - [ ] **J3**: SIG screw terminal block. Wire openings towards the front edge of the board.
 
 ✅ **CHECK, no shorts** (power off, beep): step 1's pairs again.

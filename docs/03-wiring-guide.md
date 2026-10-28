@@ -206,7 +206,7 @@ each end into its X2 harness wire and seal it.
 
 ## 6. Inside the TCU (Detail B: input and output circuits)
 
-The TCU is **one circuit board**, 200 × 150 mm, that plugs straight onto the Mega's pins (a
+The TCU is **one circuit board**, 200 × 170 mm, that plugs straight onto the Mega's pins (a
 "shield"): every connection below is a copper track on it. The design is in
 [`hardware/pcb/`](../hardware/pcb/README.md); where each part goes, and the order to solder them
 in, is in the [build book](05-build-book.md).
@@ -372,7 +372,7 @@ It doesn't have to hide behind the glovebox. What it needs:
    "location of components" page (§5).
 3. **Bolted rigidly to metal**, because the gyro is inside: four bolts, not Velcro or tape.
 4. **Within 2.5 m of cable of the dash pod**, for the screen.
-5. **Room around it:** 244 × 192 × 51 mm with its mounting ears, plus about 10 cm in front for the
+5. **Room around it:** 244 × 212 × 51 mm with its mounting ears, plus about 10 cm in front for the
    cables to bend out of the glands.
 
 **Best spot: under the passenger side of the dash, below the glovebox**, bolted to the metal dash

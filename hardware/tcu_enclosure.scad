@@ -35,7 +35,7 @@ include <pcb_envelope.scad>
 
 /* [Box] */
 IW = 210;          // inside width  (x)
-ID = 186;          // inside depth  (y)
+ID = 206;          // inside depth  (y)
 IH = 45;           // inside height (z)
 wall = 3;
 floor_t = 3;

@@ -34,10 +34,13 @@ OUT = os.path.join(ROOT, "hardware", "pcb")
 LIB = os.path.join(OUT, "rav4tcu.pretty")
 KLIB = "/usr/share/kicad/footprints"
 
-W, H = 200.0, 150.0      # board size, mm
+# The board was 150 mm deep; GROW mm more spreads the front half out and makes room for the
+# parts' values printed beside their names.
+GROW = 20.0
+W, H = 200.0, 150.0 + GROW      # board size, mm
 X0, Y0 = 50.0, 50.0      # where the board sits on KiCad's page
-NOTCH = (17.78, 95.25)   # back-left cut-out over the Mega's USB and power jacks: x < 17.78, y > 95.25
-MEGA_AT = (2.54, 95.25)  # the Mega's corner (its USB side, front edge) under the board
+NOTCH = (17.78, 95.25 + GROW)   # back-left cut-out over the Mega's USB and power jacks: x < 17.78, y > 95.25
+MEGA_AT = (2.54, 95.25 + GROW)  # the Mega's corner (its USB side, front edge) under the board
 # Floor to the board's underside: 6 mm Mega standoff + 1.6 Mega board + 8.5 Mega socket + 2.5 the
 # plastic strip of the male headers, which sits on top of the sockets and holds this board up.
 STANDOFF_H = 18.6
@@ -194,7 +197,7 @@ def part_footprint(p):
             name = "D_DO-15_P10.16mm_Horizontal"
         return ("Diode_THT", name), {"K": "1", "A": "2"}
     if k == "IC":
-        return ("Package_DIP", f"DIP-{len(p.fp['pins'])}_W7.62mm"), {}
+        return ("Package_DIP", f"DIP-{len(p.fp['pins'])}_W7.62mm_LongPads"), {}
     if k == "K":
         return ("Relay_THT", "Relay_DPDT_Omron_G2RL-2"), {
             "COIL1": "A1", "COIL2": "A2", "COM_A": "11", "NC_A": "12", "NO_A": "14",
@@ -386,14 +389,14 @@ def placement():
                                           ("OK3", "RI3", "DI3", "RU3"))):
         x = 59.69 + 13.97 * i
         P[ri] = (x, 16.51, V)
-        P[di] = (x + 3.81, 16.51, V)
-        P[ru] = (x + 7.62, 16.51, V)
+        P[di] = (x + 5.08, 16.51, V)
+        P[ru] = (x + 10.16, 16.51, V)
         P[ok] = (x, 36.83, 0)
     P["U2"] = (59.69, 62.23, 0)
     for j, r in enumerate(["RC1", "RC2", "Z2", "RC3", "RC6", "RC4", "RC5"]):
         P[r] = (72.39 + 3.81 * j, 46.99, V)
     for j, r in enumerate(["RT1", "RT2", "DT1", "DT2", "DT3", "DT4", "C3", "C4"]):
-        P[r] = (59.69 + 3.81 * j, 72.39, V)
+        P[r] = (59.69 + 5.08 * j, 72.39, V)
 
     # --- power in, behind the PWR terminals
     P["TVS1"] = (102.87, 16.51, V)
@@ -404,7 +407,7 @@ def placement():
     P["C1"] = (114.3, 41.91, 0)
     P["C6"] = (123.19, 41.91, 0)
     for j, r in enumerate(["RB1", "RB2", "C2", "Z1", "C7"]):
-        P[r] = (102.87 + 3.81 * j, 48.26, V)
+        P[r] = (102.87 + 5.08 * j, 48.26, V)
     # ON/OFF power pole: fuse, flyback diode, coil-supply sense
     P["F2"] = (102.87, 64.77, 0)
     P["DF"] = (111.76, 64.77, 0)
@@ -418,20 +421,33 @@ def placement():
         for j, r in enumerate([f"RG{n}", f"RP{n}", f"ZG{n}", f"DF{n}", f"ZF{n}"]):
             P[r] = (x - 3.81 + 3.81 * j, 55.88, V)
         P[f"Q{n}"] = (x, 71.12, 0)             # flat, tab towards the back
-        P[f"CS{n}"] = (x + 3.81, 134.62, 0)    # pins at the back, current links towards the MOSFET
+        P[f"CS{n}"] = (x + 7.62, 134.62, 0)    # pins at the back, current links towards the MOSFET
     # relay driver, right
     P["U1"] = (186.69, 133.35, 0)
     for j, r in enumerate(["RD1", "RD2", "RD3", "RD4"]):
-        P[r] = (184.15, 92.71 + 3.81 * j, 0)
+        P[r] = (185.42, 92.71 + 3.81 * j, 0)
     # ECU sense, back middle (right of the Mega)
     for i, (ok, ri, di, ru) in enumerate((("OK4", "RI4", "DI4", "RU4"), ("OK5", "RI5", "DI5", "RU5"),
                                           ("OK6", "RI6", "DI6", "RU6"))):
         y = 95.25 + 15.24 * i
-        P[ri] = (105.41, y, 0)
-        P[di] = (105.41, y + 3.81, 0)
-        P[ru] = (105.41, y + 7.62, 0)
-        P[ok] = (118.11, y + 2.54, 0)
-    return P
+        P[ri] = (106.68, y, 0)
+        P[di] = (106.68, y + 5.08, 0)
+        P[ru] = (106.68, y + 10.16, 0)
+        P[ok] = (120.65, y + 3.81, 0)
+    return {r: (x, stretch(y) if r not in dict(terminal_x()) and r != "A1" else y, rot)
+            for r, (x, y, rot) in P.items()}
+
+
+def stretch(y, front=13.0, back=90.0):
+    """The 150 mm layout spread over the deeper board: the terminals stay at the front, the
+    Mega's half moves back by GROW, and the front half in between is stretched to fill the gap
+    (on the 1.27 mm grid). Every gap between two parts can only grow."""
+    if y <= front:
+        return y
+    if y >= back:
+        return y + GROW
+    k = (back + GROW - front) / (back - front)
+    return round((front + (y - front) * k) / 1.27) * 1.27
 
 
 # ---------------------------------------------------------------- the board
@@ -441,7 +457,7 @@ def outline():
     return [(0, 0), (W, 0), (W, H), (nx, H), (nx, ny), (0, ny)]
 
 
-MOUNT_HOLES = [(3.5, 18.0), (196.5, 18.0), (196.5, 146.5), (10.0, 88.0), (110.0, 146.5)]
+MOUNT_HOLES = [(3.5, 18.0), (196.5, 18.0), (196.5, 146.5 + GROW), (10.0, 88.0 + GROW), (110.0, 146.5 + GROW)]
 
 
 def load_fp(lib, name):
@@ -451,6 +467,37 @@ def load_fp(lib, name):
     if fp is None:
         raise FileNotFoundError(f"{lib}:{name}")
     return fp
+
+
+def easy_pads(fp):
+    """Bigger pads for easier soldering: the copper ring round each hole grows to 0.6 mm where
+    there's room (the hole + 1.2 mm), keeping 0.7 mm of bare board to the next pad of the part.
+    Pads in a single row (chips, headers, TO-220 legs) grow across the row, as ovals."""
+    import pcbnew
+    pads = [p for p in fp.Pads() if p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH]
+    for p in pads:
+        drill = p.GetDrillSize().x / 1e6
+        want = drill + 1.2
+        sx, sy = p.GetSize().x / 1e6, p.GetSize().y / 1e6
+        pos = p.GetPosition()
+        near = [(q.GetPosition().x - pos.x) / 1e6 for q in pads if q is not p] , \
+               [(q.GetPosition().y - pos.y) / 1e6 for q in pads if q is not p]
+        others = [(dx, dy) for dx, dy in zip(*near) if math.hypot(dx, dy) < 4.0]
+        if not others:
+            nx, ny = max(sx, want), max(sy, want)
+        else:
+            gap_x = min([abs(dx) for dx, dy in others if abs(dy) < 1.0] or [99])
+            gap_y = min([abs(dy) for dx, dy in others if abs(dx) < 1.0] or [99])
+            diag = min([math.hypot(dx, dy) for dx, dy in others if abs(dx) >= 1.0 and abs(dy) >= 1.0] or [99])
+            nx = max(sx, min(want if gap_y < 99 else want + 0.6, gap_x - 0.7))
+            ny = max(sy, min(want if gap_x < 99 else want + 0.6, gap_y - 0.7))
+            if diag < 99:
+                nx, ny = min(nx, max(sx, diag - 0.7)), min(ny, max(sy, diag - 0.7))
+        if abs(nx - ny) > 0.05 and p.GetShape() == pcbnew.PAD_SHAPE_CIRCLE:
+            p.SetShape(pcbnew.PAD_SHAPE_OVAL)
+        if abs(nx - ny) <= 0.05 and p.GetShape() == pcbnew.PAD_SHAPE_OVAL:
+            nx = ny = max(nx, ny)
+        p.SetSize(pcbnew.VECTOR2I(int(nx * 1e6), int(ny * 1e6)))
 
 
 def build_board(c, P):
@@ -464,6 +511,7 @@ def build_board(c, P):
     net_of = c.net_of()
     for ref, part in sorted(c.parts.items()):
         fp = load_fp(part["lib"], part["fp"])
+        easy_pads(fp)   # before it's turned: pad sizes are in the part's own x and y
         fp.SetReference(ref)
         fp.SetValue(part["value"])
         x, y, rot = P[ref]
@@ -524,9 +572,39 @@ def _text(board, text, x, y, size, layer=None, angle=0, bold=False):
     return t
 
 
+def room_beside(fp, others, dx, dy):
+    """Free board (mm) from a part's body outline to the next part's, in direction (dx, dy),
+    board axes (y towards the back)."""
+    x0, y0, x1, y1 = others[fp.GetReference()]
+    best = 6.0
+    for ref, (a0, b0, a1, b1) in others.items():
+        if ref == fp.GetReference():
+            continue
+        if abs(dx) > 0.5 and b0 < y1 and y0 < b1:          # beside, left or right
+            g = (a0 - x1) if dx > 0 else (x0 - a1)
+        elif abs(dy) > 0.5 and a0 < x1 and x0 < a1:        # beside, front or back
+            g = (b0 - y1) if dy > 0 else (y0 - b1)
+        else:
+            continue
+        if g >= 0:
+            best = min(best, g)
+    return best
+
+
+def short_value(v):
+    """A part's value as printed on the board: short enough to fit beside its name."""
+    table = {"1N4733A 5.1 V": "5V1", "1N4744A 15 V": "15V", "1N4749A 24 V": "24V", "1N4148": "4148",
+             "100 nF": "100n", "100 µF 50 V": "100u", "47 µF 16 V": "47u", "PTC 0.25 A": "0.25A",
+             "G2RL-2 12 V": "G2RL-2 12V", "R-78HB5.0-0.5": "R-78HB5.0", "ACS712-05B": "ACS712 5A",
+             "1.5KE27A": "1.5KE27A", "P6KE6.8A": "P6KE6.8A", "100": "100R"}
+    return table.get(v, v)
+
+
 def silkscreen(board):
-    """References in the middle of each part, terminal names, the title."""
+    """Each part's name and value in the middle of it, terminal names, the title."""
     import pcbnew
+    others = {f.GetReference(): fab_box(f) for f in board.GetFootprints()
+              if f.GetReference() != "A1" and not f.GetReference().startswith("H")}
     for fp in board.GetFootprints():
         ref = fp.GetReference()
         fp.Value().SetVisible(False)
@@ -542,16 +620,98 @@ def silkscreen(board):
         x0, y0, x1, y1 = courtyard(fp)
         lib_name = str(fp.GetFPID().GetLibItemName())
         big = (x1 - x0) > 9 and (y1 - y0) > 9 and not lib_name.startswith("CP_Radial")
-        size = 1.2 if big else 0.8
-        r = fp.Reference()
+        pads = [pd for pd in fp.Pads() if pd.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH]
+        r, v = fp.Reference(), fp.Value()
+        val = short_value(fp.GetValue())
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        if big:
+            size, vsize, room, beside = 1.2, 1.0, 99.0, 0.0
+        elif len(pads) == 2:
+            # the two names between the pads, along the body: inside its outline if they fit,
+            # else beside it
+            (ax, ay), (bx2, by2) = [bxy(*pd.GetPosition()) for pd in pads]
+            pad_r = max(max(pd.GetSize().x, pd.GetSize().y) for pd in pads) / 2e6
+            span = math.hypot(bx2 - ax, by2 - ay)
+            room = span - 2 * pad_r - 0.5
+            longest = 0.85 * max(len(ref), len(val))
+            fx0, fy0, fx1, fy1 = fab_box(fp)
+            body_w = (fx1 - fx0) if abs(ax - bx2) < 0.1 else (fy1 - fy0)
+            if longest <= room and body_w >= 2.4:
+                size = vsize = 1.0
+                beside = 0.0
+                if fp.GetReference().startswith(("D", "Z", "TVS")):
+                    # a diode: smaller, and moved off the cathode band towards pin 2
+                    size = vsize = 0.9
+                    cx, cy = cx + (bx2 - ax) / span * 0.6, cy + (by2 - ay) / span * 0.6
+            else:
+                beside = body_w / 2   # the side and the size are worked out below
+            cx, cy = (ax + bx2) / 2, (ay + by2) / 2
+        else:
+            size, vsize, room, beside = 1.0, 1.0, 99.0, 0.0
         if lib_name.startswith("CP_Radial"):
-            cx = bxy(*fp.GetPosition())[0] + (1.75 if "D8.0" in lib_name else 1.25)   # in front of the can
+            # in front of the can, side by side
+            cx = bxy(*fp.GetPosition())[0] + (1.75 if "D8.0" in lib_name else 1.25)
             cy = y0 - 1.0
-        r.SetPosition(pcbnew.VECTOR2I(*kxy(cx, cy)))
+            size = vsize = 0.9
         r.SetTextSize(pcbnew.VECTOR2I(int(size * 1e6), int(size * 1e6)))
         r.SetTextThickness(int(size * 0.15e6))
         r.SetTextAngleDegrees(0)   # relative to the part: along its body
+        v.SetText(val)
+        v.SetLayer(pcbnew.F_SilkS)
+        v.SetVisible(True)
+        v.SetTextSize(pcbnew.VECTOR2I(int(vsize * 1e6), int(vsize * 1e6)))
+        v.SetTextThickness(int(vsize * 0.2e6))
+        v.SetTextAngleDegrees(0)
+        if lib_name.startswith("DIP") and len(pads) > 8:
+            # a long chip: its name and value along it, between its two rows of pins
+            r.SetTextAngleDegrees(90)
+            v.SetTextAngleDegrees(90)
+        # name above, value below, across the text's direction
+        th = math.radians(r.GetDrawRotation().AsDegrees())
+        if len(pads) > 2:
+            # no wider than the body it's printed on
+            fx0, fy0, fx1, fy1 = fab_box(fp)
+            along = (fx1 - fx0) if abs(math.cos(th)) > 0.5 else (fy1 - fy0)
+            for t, sz in ((r, size), (v, vsize)):
+                fit = max(0.8, min(sz, (along - 0.4) / (0.85 * len(t.GetText()))))
+                t.SetTextSize(pcbnew.VECTOR2I(int(fit * 1e6), int(fit * 1e6)))
+                t.SetTextThickness(int(fit * 0.17e6))
+        below = (math.sin(th), math.cos(th))          # KiCad x right, y down
+        half = (size + vsize) / 2 * 0.65
+        kx, ky = kxy(cx, cy)
+        if len(pads) > 2 and not big:
+            # off the row of pins, onto the body
+            px = sum(pd.GetPosition().x for pd in pads) / len(pads)
+            py = sum(pd.GetPosition().y for pd in pads) / len(pads)
+            along_below = (kx - px) * below[0] + (ky - py) * below[1]
+            if abs(along_below) < 2.5e6 and max(abs(pd.GetPosition().x - kx) + abs(pd.GetPosition().y - ky)
+                                                for pd in pads) > 0 and fp.GetReference().startswith("U3"):
+                sign = 1 if along_below >= 0 else -1
+                kx, ky = int(kx + sign * below[0] * 3.0e6), int(ky + sign * below[1] * 3.0e6)
+        if beside:
+            # on the side away from the footprint's own marks (a diode's "K"), as big as the
+            # gap to the next part on that side allows (two lines take 2.3 x the text size)
+            side = 1
+            for g in fp.GraphicalItems():
+                if g.GetLayer() == pcbnew.F_SilkS and "TEXT" in g.GetClass():
+                    gp = g.GetPosition()
+                    if (gp.x - kx) * below[0] + (gp.y - ky) * below[1] > 0:
+                        side = -1
+            gap = room_beside(fp, others, side * below[0], -side * below[1])
+            size = vsize = max(0.8, min(1.0, (gap - 0.5) / 2.3, (span + 0.5) / longest))
+            r.SetTextSize(pcbnew.VECTOR2I(int(size * 1e6), int(size * 1e6)))
+            r.SetTextThickness(int(size * 0.15e6))
+            v.SetTextSize(pcbnew.VECTOR2I(int(vsize * 1e6), int(vsize * 1e6)))
+            v.SetTextThickness(int(vsize * 0.2e6))
+            half = size * 0.65
+            off = beside + 0.25 + 1.15 * size
+            kx, ky = int(kx + side * below[0] * off * 1e6), int(ky + side * below[1] * off * 1e6)
+        if lib_name.startswith("CP_Radial"):
+            r.SetPosition(pcbnew.VECTOR2I(int(kx - 1.6e6), ky))
+            v.SetPosition(pcbnew.VECTOR2I(int(kx + 1.8e6), ky))
+            continue
+        r.SetPosition(pcbnew.VECTOR2I(int(kx - below[0] * half * 1e6), int(ky - below[1] * half * 1e6)))
+        v.SetPosition(pcbnew.VECTOR2I(int(kx + below[0] * half * 1e6), int(ky + below[1] * half * 1e6)))
     # The Mega pins the TCU uses, named next to their holes (the bench checks probe them).
     used = {"5V", "GND", "D2", "D3", "D6", "D8", "D9", "D10", "D20", "D21", "A0", "A1", "A3", "A4", "A5", "A6",
             "A7"} | {f"D{n}" for n in range(22, 35)}
@@ -567,10 +727,10 @@ def silkscreen(board):
             _text(board, n, mx + x, my + y - 2.6, 0.8, angle=90)
         else:                                 # bottom row: labels behind it
             _text(board, n, mx + x, my + y + 2.6, 0.8, angle=90)
-    _text(board, "RAV4 TCU  rev 1", 52.0, 128.0, 3.0, bold=True)
-    _text(board, COPYRIGHT, 52.0, 122.5, 1.2)
-    _text(board, "ARDUINO MEGA UNDERNEATH: TRIM ALL LEADS SHORT IN THIS AREA", 52.0, 118.0, 1.0)
-    _text(board, "RAV4 TCU: BOTTOM", 52.0, 128.0, 2.0, layer=pcbnew.B_SilkS)
+    _text(board, "RAV4 TCU  rev 2", 52.0, 128.0 + GROW, 3.0, bold=True)
+    _text(board, COPYRIGHT, 52.0, 122.5 + GROW, 1.2)
+    _text(board, "ARDUINO MEGA UNDERNEATH: TRIM ALL LEADS TO 1.5 MM IN THIS AREA", 52.0, 118.0 + GROW, 1.0)
+    _text(board, "RAV4 TCU: BOTTOM", 52.0, 128.0 + GROW, 2.0, layer=pcbnew.B_SilkS)
 
 
 def courtyard(fp):
@@ -1015,6 +1175,10 @@ def step_of(ref):
     return None
 
 
+# Chips that go in a socket: no iron on the chip, and easy to swap.
+SOCKETED = {"U1": 18, "U2": 8}
+
+
 def part_line(c, ref):
     """One build-book line for a part: what it is, which way round."""
     p = c.parts[ref]
@@ -1037,6 +1201,10 @@ def part_line(c, ref):
         "TB": "Wire openings towards the front edge of the board.",
         "PTC": "Either way round.",
     }.get(k, "")
+    if ref in SOCKETED:
+        how = (f"Solder its {SOCKETED[ref]}-pin socket in, notch to the notch printed on the board. "
+               "Push the chip into the socket at the end of the step, notch to the notch (bend its legs in "
+               "a little on the table first if they're splayed).")
     if ref.startswith("CS"):
         how = ("Its 3 pins go into the holes marked VCC, OUT, GND: check its own printed labels match. "
                "If its pins point up or sideways instead of down (sellers differ), lay it in the same place, "
@@ -1229,7 +1397,9 @@ if __name__ == "__main__":
         for fp in board.GetFootprints():
             for pd in fp.Pads():
                 if (fp.GetReference(), pd.GetNumber()) in starved:
-                    pd.SetZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+                    # its tracks join it to ground; a solid joint to the ground copper
+                    # would soak up the iron's heat and make it hard to solder
+                    pd.SetZoneConnection(pcbnew.ZONE_CONNECTION_NONE)
         board.Save(pcb_path)
         board = fill_and_reload(pcb_path)
         errs, nu, warns = drc(board, os.path.join(OUT, "drc.txt"))

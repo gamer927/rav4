@@ -40,8 +40,8 @@ and a PLA box will let its standoffs creep.
 | Dash pod mount | Base on the bed, arm up | 70 × 44 × 59 mm |
 | Shifter base | Upside down, top deck on the bed | 150 × 100 × 26 mm |
 | Shifter base bottom plate | Flat | 150 × 100 × 3 mm |
-| TCU box | Floor on the bed | 244 × 192 × 48 mm with ears; **216** × 192 without |
-| TCU lid | Upside down, lettering on the bed, locating lip up | 216 × 192 × 5 mm |
+| TCU box | Floor on the bed | 244 × 212 × 48 mm with ears; **216** × 212 without |
+| TCU lid | Upside down, lettering on the bed, locating lip up | 216 × 212 × 5 mm |
 
 **Bed size:** everything except the TCU box with ears fits a 220 × 220 mm bed (Ender 3 class).
 That box needs a 250 mm bed (Prusa MK3/MK4, Bambu, Voron and similar). On a 220 mm bed, print
@@ -76,6 +76,8 @@ What the check found and fixed:
 - The two hand-wired perfboards and their ribbon cables became **one circuit board** that plugs
   onto the Mega (`tools/pcb.py`). It fits the same box. Each gland now sits right in front of its
   own terminal group, moved in where needed to clear the corner bosses.
+- To make the board easier to solder, it grew 20 mm deeper (200 × 170 mm, with bigger pads and
+  every part's value printed on it), and the box with it: 216 × 212 mm.
 - The gyro's header pins would have hit the floor on its old 5 mm standoffs. It now sits on
   the board.
 - In the dash pod, the pod's back edge hit the mount's arm when tilted: the arm is now slimmer
@@ -207,7 +209,7 @@ travel.
 | Area | Part | Notes |
 |---|---|---|
 | Back left, underneath | **Arduino Mega 2560** on 6 short standoffs (official hole pattern) | USB-B lines up with the cut-out in the left wall, for flashing and the USB log. "MEGA (USB TO THE LEFT)" is engraved under it |
-| Over almost the whole floor | **The TCU circuit board**, 200 × 150 mm, plugged onto the Mega's pins and screwed to 5 tall standoffs | A notch in its back-left corner leaves the Mega's USB and power jacks free. Its screw terminals run along the front edge, each group labelled, in the same order as the glands |
+| Over almost the whole floor | **The TCU circuit board**, 200 × 170 mm, plugged onto the Mega's pins and screwed to 5 tall standoffs | A notch in its back-left corner leaves the Mega's USB and power jacks free. Its screw terminals run along the front edge, each group labelled, in the same order as the glands |
 | Front wall | 8 glands (round holes, not switches), engraved **SHIFT DASH SCREEN ATF · SIG PWR SOL LOAD** | Each sits in front of its own terminal group. Fit the inline connectors (X1–X3, X6) on the cable tails outside the box |
 
 | Gland | Connector / cable | Gland |
@@ -221,7 +223,7 @@ travel.
 | SCREEN | X5: dash pod screen, 4-core shielded | PG7 |
 | ATF | X6: ATF probe, 3-core shielded | PG7 |
 
-The box is 216 × 192 × 48 mm (51 mm with the lid; 244 mm wide with its mounting ears).
+The box is 216 × 212 × 48 mm (51 mm with the lid; 244 mm wide with its mounting ears).
 
 ### The dummy resistors do NOT go in this box
 
