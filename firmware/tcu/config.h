@@ -173,7 +173,13 @@ constexpr float MAX_DOWNSHIFT_RPM = 5800.0f;      // predicted rpm after downshi
 constexpr float FIRST_GEAR_MAX_MPH = 28.0f;       // hard cap, independent of ratios
 constexpr float REV_LIMIT_UPSHIFT_RPM = 6200.0f;
 constexpr uint32_t REV_LIMIT_HOLD_MS = 150;
-constexpr bool MANUAL_REV_LIMIT_UPSHIFT = true;
+// MANUAL: the gear is yours. The TCU never upshifts for you at the redline;
+// from SHIFT_LIGHT_RPM the screen says SHIFT UP!, and above that the engine
+// computer's own fuel cut limits the revs (spec §10: VERIFY). Set this true to
+// have the TCU upshift at REV_LIMIT_UPSHIFT_RPM in MANUAL too (ECO and SPORT
+// always do).
+constexpr bool MANUAL_REV_LIMIT_UPSHIFT = false;
+constexpr float SHIFT_LIGHT_RPM = 6000.0f;
 // MANUAL: forced downshift below these speeds (index = current gear) so the
 // car never stops in 3rd/4th. Set [2] to 0 to allow 2nd-gear (snow) starts.
 constexpr float MANUAL_MIN_MPH[5] = {0.0f, 0.0f, 5.0f, 11.0f, 22.0f};

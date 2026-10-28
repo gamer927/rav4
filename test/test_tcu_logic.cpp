@@ -931,16 +931,46 @@ static void test_supply_and_tps_faults() {
 }
 
 static void test_rev_limit_upshift() {
-  std::printf("MANUAL: forced upshift at the rev limit\n");
+  std::printf("redline: MANUAL warns and leaves the gear to you; ECO/SPORT upshift\n");
+  // MANUAL: the gear is yours, even at the redline. The screen says SHIFT UP.
   Sim s;
   s.armManual();
   CHECK(s.c.outputs().control == CTRL_MANUAL);
   s.in.speedMph = 32.3;
   s.autoRpm = false;
+  s.in.engineRpm = cfg::SHIFT_LIGHT_RPM - 100;
+  s.step(500);
+  CHECK(!(s.c.outputs().warnings & WARN_SHIFT_UP));
   s.in.engineRpm = cfg::REV_LIMIT_UPSHIFT_RPM + 200;
-  s.step(cfg::REV_LIMIT_HOLD_MS + 50);
-  CHECK(s.c.outputs().gear == 2);
-  CHECK(s.c.outputs().event == EV_REV_LIMIT_UPSHIFT);
+  s.step(cfg::REV_LIMIT_HOLD_MS + 1000);
+  CHECK(s.c.outputs().gear == (cfg::MANUAL_REV_LIMIT_UPSHIFT ? 2 : 1));
+  if (!cfg::MANUAL_REV_LIMIT_UPSHIFT) {
+    CHECK(s.c.outputs().event != EV_REV_LIMIT_UPSHIFT);
+    CHECK(s.c.outputs().warnings & WARN_SHIFT_UP);
+    s.tap(s.in.up);  // the driver shifts: 2nd, rpm drops, the warning goes
+    s.in.engineRpm = 4200;
+    s.step(100);
+    CHECK(s.c.outputs().gear == 2);
+    CHECK(!(s.c.outputs().warnings & WARN_SHIFT_UP));
+    // No tach: speed x ratio stands in for the warning.
+    s.in.rpmValid = false;
+    s.in.speedMph = cfg::SHIFT_LIGHT_RPM / cfg::RPM_PER_MPH[2] + 1;
+    s.step(100);
+    CHECK(s.c.outputs().warnings & WARN_SHIFT_UP);
+    CHECK(s.c.outputs().gear == 2);
+  }
+
+  // ECO and SPORT are automatic: they upshift at the rev limit themselves.
+  Sim a;
+  a.arm();
+  CHECK(a.c.outputs().control == CTRL_AUTO);
+  a.autoRpm = false;
+  a.in.speedMph = 10;
+  a.in.engineRpm = cfg::REV_LIMIT_UPSHIFT_RPM + 200;
+  a.step(cfg::REV_LIMIT_HOLD_MS + 50);
+  CHECK(a.c.outputs().gear == 2);
+  CHECK(a.c.outputs().event == EV_REV_LIMIT_UPSHIFT);
+  CHECK(!(a.c.outputs().warnings & WARN_SHIFT_UP));
 }
 
 static void test_mode_switch_fault_and_stuck_button() {

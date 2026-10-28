@@ -529,6 +529,26 @@ void s_build_book_jack_stands() {
   CHECK(screenSays("TOO FAST"));
 }
 
+// MANUAL at the redline: the TCU leaves the gear alone and says SHIFT UP.
+void s_manual_redline() {
+  boot();
+  startEngine();
+  car.eco = false;
+  car.manual = true;
+  armAndDrive();
+  CHECK(tcuInControl());
+  car.tps = 100;
+  rampTo(cfg::SHIFT_LIGHT_RPM / (cfg::RPM_PER_MPH[1] * 1.05f) + 2, 8);  // 1st, past 6,000 rpm
+  run(600);
+  CHECK(controller.outputs().gear == 1);  // still 1st: your call
+  if (!screenSays("SHIFT UP!")) std::printf("    screen: %s\n", screenWords());
+  CHECK(screenSays("SHIFT UP!"));
+  press(pin::UP, 60);
+  run(600);
+  CHECK(controller.outputs().gear == 2);
+  CHECK(!screenSays("SHIFT UP!"));
+}
+
 // Hold TEST and answer the self-test's prompts as they come, like a person.
 void runIbitAnsweringPrompts() {
   car.switchOn = true;
@@ -678,6 +698,7 @@ const Scenario kScenarios[] = {
     {"solenoid wire breaks while driving: ECU back, reported", s_solenoid_wire_breaks},
     {"two mode switches on: ECU after 1 s, back when fixed", s_mode_switch_mistake},
     {"lever out of D: ECU back", s_lever_out_of_d},
+    {"MANUAL at the redline: no automatic upshift, SHIFT UP on the screen", s_manual_redline},
     {"lever-D input stuck on: found at engine start, no take-over", s_lever_input_stuck_on},
     {"speed signal lost at 45 mph: ECU back", s_vss_lost},
     {"tach lost: still in control, warned", s_tach_lost},

@@ -150,6 +150,12 @@ void Controller::updateWarnings(const Inputs& in) {
   }
 
   if (selError_) w |= WARN_MODE_SWITCH;
+  // MANUAL never upshifts by itself (unless MANUAL_REV_LIMIT_UPSHIFT): tell
+  // the driver when it's time. Without a tach, speed x ratio stands in.
+  if (out_.control == CTRL_MANUAL && gear_ >= 1 && gear_ < 4) {
+    const float rpm = in.rpmValid ? in.engineRpm : in.speedMph * cfg::RPM_PER_MPH[gear_];
+    if (rpm >= cfg::SHIFT_LIGHT_RPM) w |= WARN_SHIFT_UP;
+  }
   // Driving with no tach signal: the over-rev guards fall back to speed x
   // ratio and the ratio check pauses. Tell the driver.
   if (tachLost_.update(cfg::TACH_INSTALLED && !in.rpmValid && in.speedMph > cfg::TACH_LOST_MIN_MPH, now_,

@@ -24,8 +24,9 @@ You build three pieces:
 | **TCU box** | Under the passenger side of the dash | The Arduino and two boards you solder yourself |
 
 **What you get:**
-- **Manual mode:** you pick every gear with the lever. It won't let you over-rev the engine with
-  a downshift, and it upshifts for you at the redline.
+- **Manual mode:** you pick every gear with the lever, right up to the redline: it never
+  upshifts for you, it just flashes **SHIFT UP!** on the screen. It won't let you over-rev the
+  engine with a downshift.
 - **Two automatic modes,** ECO and SPORT, with shift points you can tune.
 - **Smarter lockup** of the torque converter: lower rpm and a cooler transmission on the highway.
 - **No surprise shifts mid-corner:** a gyro holds the gear while you're turning.
@@ -64,13 +65,14 @@ no NORMAL mode: with the ON/OFF switch off, you have stock.
 | **ECO** | Calm, economical | Early upshifts; torque-converter lockup as early as the engine can take it (from ~23 mph in 3rd), kept on when you lift for longer fuel cut, released if the engine would labour; pedal stabs ignored (0.8 s throttle smoothing). Flooring it still kicks down instantly. |
 | **Highway (all modes)** | Locked and steady | In 4th above ~51 mph the torque converter stays locked up to 95 % throttle, so a long 90 mph run (~3,550 rpm) or a highway grade doesn't let it slip: lower rpm, less fuel, much less transmission heat. Only flooring it releases lockup (in SPORT, a quick stab does too). |
 | **SPORT** | Sharp | Holds each gear to just under the redline at full throttle (the fastest way through these gears), kicks down from 60 % throttle, holds the gear when you snap off the throttle between corners, downshifts while braking so you're in the right gear for the exit, and releases lockup on a closed throttle or a fast pedal stab. |
-| **MANUAL** | SPORT, you shift | Turn on **MANUAL** (with ECO and SPORT off), then pull or push the sequential shifter lever: one click, one gear. Same lockup and pedal response as SPORT, but the box never shifts for you, except to protect the engine (upshift at 6,200 rpm, downshift when slowing to a stop). In ECO or SPORT the lever does nothing. |
+| **MANUAL** | SPORT, you shift | Turn on **MANUAL** (with ECO and SPORT off), then pull or push the sequential shifter lever: one click, one gear. Same lockup and pedal response as SPORT, but the box never shifts up for you: at 6,000 rpm the screen says **SHIFT UP!** and the rest is your call (the engine computer's own fuel cut is the limit). It only downshifts by itself when you slow to a stop, so you never pull away in 4th. In ECO or SPORT the lever does nothing. |
 | **STOCK** | Factory | ON/OFF off, the lever not in D, a fault, or a mode-switch mistake: the factory computer shifts, exactly as before. |
 | **All automatic modes** | | No automatic shifts mid-corner (gyro), lockup off when braking. |
 
 **Protection, always on:**
-- **No over-rev:** every downshift is checked against engine rpm (refused above 5,800), 1st is
-  never allowed above 28 mph, and the box upshifts automatically at 6,200 rpm.
+- **No over-rev:** every downshift is checked against engine rpm (refused above 5,800), and 1st
+  is never allowed above 28 mph. In ECO and SPORT the box upshifts at 6,200 rpm; in MANUAL it
+  tells you to (SHIFT UP!) and leaves it to you.
 - **No stalling:** lockup releases when you brake and at low speed.
 - **Fluid temperature:** lockup is blocked while the fluid is cold, and engages earlier when it's
   hot (110 °C+). Locking up is what cools the fluid.
@@ -157,7 +159,7 @@ outside on a finned heatsink. Print settings, hardware and assembly:
 ## Status
 
 - **Done:** full design, firmware and documentation.
-  - `make check` runs it all: 1,256 unit-test checks, 25 whole-system scenarios (the real
+  - `make check` runs it all: 1,266 unit-test checks, 26 whole-system scenarios (the real
     firmware in a simulated car, with faults injected, plus the build book's jack-stand test step
     by step), the calibration helper on a simulated drive, and about 500 cross-checks that the
     boards, pin map, firmware, screen text and 3D models agree. All pass

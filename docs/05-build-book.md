@@ -2040,6 +2040,7 @@ the end of this part.
 | **STOP FIRST** | Normal: the TCU only takes over on the move when it's sure of the gear. Stop, and it takes over. |
 | **WAITING** | ON/OFF was already on at key-on. Flip it off, then on. |
 | **NO RPM** | The TAC wire: 12.3's check. It's still safe to drive. |
+| **SHIFT UP!** (in MANUAL) | Not a fault: the engine is at the redline and the TCU leaves the upshift to you. Pull the lever. |
 | Shifts feel too early or too late | Not a fault: the shift points can be adjusted (spec §6.3). Note the speed and gas pedal position. |
 | Anything you're unsure about | ON/OFF off, and fit the BYPASS plug until it's sorted. |
 

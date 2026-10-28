@@ -515,6 +515,8 @@ bool alertMessage(const tcu::Outputs& o, uint32_t now, Message& m) {
   if (switchOn && o.modeSelect == tcu::SEL_NONE)
     return say("PICK MODE", "NO MODE ON.", "TURN ON ONE:", "ECO, SPORT OR", "MANUAL.");
   if (switchOn && !cfg::CALIBRATED) return say("NOT READY", "NOT CALIBRATED", "STOCK SHIFTS", "UNTIL IT IS:", "BUILD BOOK 13");
+  // MANUAL at the redline: the most urgent thing on the screen while driving.
+  if (o.warnings & tcu::WARN_SHIFT_UP) return say("SHIFT UP!", "ENGINE AT", "THE REDLINE.", "PULL THE", "LEVER.");
   if (o.warnings & tcu::WARN_ATF_CRITICAL) {
     Text t;
     t.s("OVER ").n(toDisplayTemp(cfg::ATF_CRITICAL_C)).s(tempUnit()).s("!");

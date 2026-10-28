@@ -437,7 +437,10 @@ earlier on purpose, for quietness and economy, not speed.
   click does nothing except show `FLIP MANUAL ON`.
 - **Forced downshift** when slowing below 22 mph (4th), 11 mph (3rd) or 5 mph (2nd), so the
   car never stops in a high gear. To allow 2nd-gear snow starts, set `MANUAL_MIN_MPH[2] = 0`.
-- **Forced upshift** at 6,200 rpm held for 150 ms (configurable).
+- **No forced upshift:** the gear is the driver's, right up to the redline. From 6,000 rpm
+  (`SHIFT_LIGHT_RPM`) the screen shows **SHIFT UP!** (`WARN_SHIFT_UP`); beyond that the ECM's own
+  fuel cut limits the revs (§10: VERIFY). `MANUAL_REV_LIMIT_UPSHIFT = true` brings back an
+  automatic upshift at 6,200 rpm held for 150 ms, as ECO and SPORT always do.
 - Refused requests show on the display as NO SHIFT with the reason: the engine would
   over-rev, too slow for that gear, or still doing the last shift.
 
@@ -507,6 +510,7 @@ Coast release (SPORT, §6.8) also counts as a release condition.
 | `WARN_BUTTON_STUCK` | A shifter microswitch held closed for 10 s (SHIFTER? on the screen) |
 | `WARN_WDT_RESET` | The last reset was caused by the watchdog |
 | `WARN_TACH` | No engine-rpm signal for 2 s while above 15 mph (NO RPM on the screen). The over-rev guards fall back to speed × gear ratio and the ratio check pauses |
+| `WARN_SHIFT_UP` | MANUAL, 1st–3rd, engine at 6,000 rpm or more (SHIFT UP! on the screen). Speed × gear ratio stands in without a tach |
 
 The screen says all of this in words. The Mega's own LED (D13, inside the box) also shows it,
 for the bench: solid = TCU in control, slow blink = waiting to stop before engaging, fast blink =
@@ -699,7 +703,7 @@ At boot the firmware prints `# cal ...` (the settings it was built with) and
 | VSS pulses/mile | ~4101 (2548/km) | Calibrate (§8) |
 | Tach source | ECU/DLC TAC, 2 pulses/rev | EWD |
 | PNP "D" signal | +12 V in D | EWD |
-| Redline / fuel cut | Guard at 5,800, forced upshift at 6,200 | RM |
+| Redline / fuel cut | Guard at 5,800; ECO/SPORT upshift at 6,200; MANUAL relies on the ECM's fuel cut | RM: confirm the ECM has a fuel-cut rev limiter, and at what rpm |
 | ATF cooler "out" line and hose size | Line from transaxle to radiator | RM; measure the hose ID |
 
 ---

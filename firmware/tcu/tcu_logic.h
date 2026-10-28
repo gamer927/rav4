@@ -35,6 +35,7 @@ enum WarnBits : uint16_t {
   WARN_BUTTON_STUCK = 1u << 4,
   WARN_WDT_RESET = 1u << 5,
   WARN_TACH = 1u << 6,          // no engine-speed signal while driving: speed x ratio used instead
+  WARN_SHIFT_UP = 1u << 7,      // MANUAL at the redline: shift up (the TCU won't do it for you)
 };
 
 enum Event : uint8_t {

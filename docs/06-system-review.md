@@ -139,7 +139,7 @@ it is physics, not software: it happens even if the Mega is dead.
 | Two mode switches on, or none | Exactly-one rule, 1 s grace | ECU until fixed, MODE ERROR / PICK MODE | unit `test_mode_switch_fault_and_stuck_button`; system: *two mode switches on* |
 | Mode switch wire broken | Reads off: none on | ECU, PICK MODE | same |
 | Shifter microswitch stuck | Held 10 s | Warning (SHIFTER?); no repeat shifts | unit `test_mode_switch_fault_and_stuck_button`, `test_no_autorepeat_and_interval` |
-| Dangerous shift asked for | Over-rev check (5,800 rpm), 1st capped at 28 mph, rev-limit upshift at 6,200 rpm | Refused or corrected | unit `test_downshift_overrev_guard`, `test_rev_limit_upshift`, `test_manual_auto_downshift_to_stop` |
+| Dangerous shift asked for | Over-rev check (5,800 rpm), 1st capped at 28 mph; ECO/SPORT upshift at 6,200 rpm, MANUAL shows SHIFT UP! from 6,000 rpm and leaves it to the driver | Downshift refused; upshift done (ECO/SPORT) or asked for (MANUAL) | unit `test_downshift_overrev_guard`, `test_rev_limit_upshift`, `test_manual_auto_downshift_to_stop` |
 | Screen cable cut / screen dead | I²C timeout (3 ms) | Control unaffected, loop never stalls | system: *screen cable cut* |
 
 ### The self-test itself
@@ -192,8 +192,8 @@ All three pass.
 
 | Suite | What | Result |
 |---|---|---|
-| `make test` | Unit tests: every control rule, fault, interlock and self-test step (`test/test_tcu_logic.cpp`, `test/test_self_test.cpp`) | **1,134 + 122 checks, 0 failures** |
-| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that follow coil power, welded contacts, broken wires), one failure per scenario | **25 scenarios, 0 failures** |
+| `make test` | Unit tests: every control rule, fault, interlock and self-test step (`test/test_tcu_logic.cpp`, `test/test_self_test.cpp`) | **1,144 + 122 checks, 0 failures** |
+| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that follow coil power, welded contacts, broken wires), one failure per scenario | **26 scenarios, 0 failures** |
 | `make calibrate-test` | The calibration helper on a simulated parked session and drive, with a speed sensor 6 % off and an engine 5 % off: it must find both, write a `config.h` that compiles, and refuse bad recordings | **29 checks, 0 failures** |
 | `python3 tools/system_check.py` | Cross-checks (§5) | **all pass, 0 problems** |
 | `tools/build_stl.sh` | Fit checks (§5), STLs, renders | **all pass** |
@@ -219,6 +219,7 @@ after any change.
 | two mode switches on | ECU after 1 s, back when fixed |
 | lever out of D | ECU back |
 | lever-D input stuck on | found at engine start, no takeover |
+| MANUAL at the redline | no automatic upshift, SHIFT UP! on the screen |
 | speed signal lost at 45 mph | ECU back |
 | tach lost | still in control, warned |
 | screen cable cut | control unaffected, loop never stalls |
@@ -262,23 +263,27 @@ Nothing on this list has a known fix that wouldn't add a new risk of its own.
    heatsink, checked in build book part 9; the light tells you. Not dangerous.
 2. **Relay contact gap at handover.** Break-before-make takes about 5–10 ms with no drive to the
    solenoid. That's shorter than the hydraulics respond, so no shift happens, but it's not zero.
-3. **The screen going dark doesn't hand back.** By design: the screen is information, not
+3. **MANUAL doesn't upshift for you at the redline** (your choice). The screen says SHIFT UP!
+   from 6,000 rpm; past that, the engine computer's own fuel cut limits the revs. That fuel cut
+   is expected but not yet confirmed for this engine (spec §10). Setting
+   `MANUAL_REV_LIMIT_UPSHIFT = true` brings back the automatic upshift.
+4. **The screen going dark doesn't hand back.** By design: the screen is information, not
    safety. Faults still hand back; ON/OFF still works by feel (the cover).
-4. **A relay that sticks *during* a drive** (rather than at key-on). If it sticks in the TCU
+5. **A relay that sticks *during* a drive** (rather than at key-on). If it sticks in the TCU
    position after you hand back, that solenoid gets no command from either side until it's
    found at the next key-on (RELAY STUCK). The relays switch about 1 A against an 8 A rating,
    so welding is very unlikely. *Recovery:* the bypass plug.
-5. **The solenoid wire itself (outside the box) shorted to +12 V.** The solenoid is on whatever
+6. **The solenoid wire itself (outside the box) shorted to +12 V.** The solenoid is on whatever
    either computer says. This is the same as on a stock car; the ratio check catches the wrong
    gear while the TCU is in charge.
-6. **Brake input dead.** Lockup then releases only on the throttle rules, not on the brake. A
+7. **Brake input dead.** Lockup then releases only on the throttle rules, not on the brake. A
    stall is still prevented by the low-speed lockup release, and the next self-test finds it.
-7. **What the manual valve does in 2, L and R with D-range solenoid commands** (only possible
+8. **What the manual valve does in 2, L and R with D-range solenoid commands** (only possible
    with a stuck lever-D input, which is now caught at engine start). Toyota's hydraulics are
    expected to block it; **VERIFY** in the repair manual.
-8. **Untested on real hardware.** Every number above comes from simulation and the design.
+9. **Untested on real hardware.** Every number above comes from simulation and the design.
    Calibration (spec §8) and the staged test plan (spec §9) are required before driving.
-9. **Zero risk isn't possible.** A double failure (for example a hung Mega *and* a welded
+10. **Zero risk isn't possible.** A double failure (for example a hung Mega *and* a welded
    ON/OFF power pole) defeats two layers at once. The bypass plug, and pulling the TCU's
    fuse, are always there.
 
