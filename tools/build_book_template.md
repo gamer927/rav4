@@ -41,7 +41,7 @@ multimeter and solder, you can build this.
 | **Engine computer (ECM)** | The car's own computer, under the dash. It normally shifts the transmission. It stays in the car, untouched. |
 | **Solenoid** | An electric valve inside the transmission. Three of them (called **S1, S2, SL**) choose the gear. These are the only 3 car wires that get cut. |
 | **Mega** | The Arduino Mega: the little computer inside the TCU box. |
-| **The board** | The TCU's printed circuit board. Every part's name is printed where it goes; the parts push through the holes and get soldered underneath. All the wiring between them is already on the board. |
+| **The board** | The TCU's printed circuit board. Every part's name and value are printed where it goes (like **RU11 2.2k**); the parts push through the holes and get soldered underneath. All the wiring between them is already on the board. |
 | **Screw terminal** | A small block where a wire is held by a screw. Each position's name (like **SOL1** or **ECO**) is printed on the board behind it. |
 | **Ground (GND)** | The minus (−) side of the 12 V. On a meter, the black probe goes on ground. |
 | **12 V / 5 V** | Voltages. 12 V is the car battery. 5 V is what the Mega runs on. |
@@ -49,7 +49,8 @@ multimeter and solder, you can build this.
 | **Resistor** | A small part with coloured stripes. The stripes tell you its value. Each step lists the colours to look for. |
 | **Diode** | A small part that only works one way round. **The end with the stripe matters.** |
 | **Chip** | A black part with legs. It has a **notch or dot at one end**: match it to the picture. |
-| **Module** | A small ready-made board you stick down with foam tape and wire to. |
+| **Module** | A small ready-made board with its own pins. It plugs into the board like a part (the gyro, and the three current sensors). |
+| **Socket** | A holder for a chip. You solder the socket in, then push the chip into it: the chip never gets hot, and it can be swapped. |
 | **Gland** | The round plastic fitting a cable goes through in the box wall. Tighten it and it grips the cable. |
 | **Insert** | A small brass nut you press into the plastic with the hot soldering iron. Screws then go into it. |
 
@@ -163,7 +164,7 @@ these wires being the right ones.
   such as JLCPCB or PCBWay. Choose: **2 layers, 1.6 mm thick, 1 oz copper, lead-free HASL**, any
   colour, quantity **5** (the minimum). About $20–40 for five, with shipping. Details:
   [hardware/pcb/README.md](../hardware/pcb/README.md).
-- [ ] Open the [shopping list](04-shopping-list.md) (about $650 of parts).
+- [ ] Open the [shopping list](04-shopping-list.md) (about $670 of parts).
 - [ ] Pick the brass tee that matches **your hose size**, and the fuse tap that matches **your
   fuse size** (both from part 0).
 - [ ] Order the small electronic parts from **DigiKey or Mouser**.
@@ -219,9 +220,10 @@ The files are in `hardware/stl/`.
 - [ ] **Make your bench power lead:** 12 V adapter → the screw-terminal plug → a **5 A fuse** on
   the + wire. Every test on the table goes through this fuse.
 - [ ] **Look over the bare board** under a bright light. Everything is printed on it: each part's
-  name (like **RU11**) inside its outline, a stripe where a diode's stripe goes, a notch where a
-  chip's notch goes, a **+** for the big capacitors, and the name of every screw terminal and
-  every Mega pin the TCU uses.
+  name and value (like **RU11 2.2k** or **DL1 BAT85**) on or beside its outline, a stripe where a
+  diode's stripe goes, a notch where a chip's notch goes, a **+** for the big capacitors, and the
+  name of every screw terminal and every Mega pin the TCU uses. Check it against the picture at
+  the start of part 4: the outline, the cut-away back-left corner and the 5 mounting holes.
 - [ ] **Sort the parts into bags.** One bag per step. Write the step name on each bag. Then
   every step starts with "open the bag":
 
@@ -253,8 +255,8 @@ solder it.
 **The board's front edge** is the one with the screw terminals. The **back-left corner** is cut
 away: that's where the Mega's USB socket comes up.
 
-**Never solder anything into the two long rows of holes and the double row at the back-left**
-until step 6: those are for the Mega's pins.
+**Never solder anything into the Mega's holes** until step 6: the two long rows across the back
+and the double row at the back, right of the title (their labels say **5V**, **A0**, **D22**…).
 
 After each step there are two checks:
 - **No shorts** (power off, meter on beep): the pairs listed must **not** beep. A short chirp

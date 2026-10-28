@@ -1235,6 +1235,14 @@ def _natural(s):
     return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", s)]
 
 
+# What goes in a bag besides the parts on the board.
+BAG_EXTRAS = {
+    "S3": ["3× M3 × 8 screw and nut (to bolt the transistors' tabs down)",
+           "6× 2 cm of stiff wire for the LINK holes (the cut-off legs of the big S1 diodes are perfect)"],
+    "S6": ["3× male header strip, 40-pin (cut to 8, 8, 8, 10, 8, 8 and two 18s)"],
+}
+
+
 def bags_markdown(c):
     lines = []
     for s, title, refs in STEPS:
@@ -1242,7 +1250,7 @@ def bags_markdown(c):
         for r in refs:
             p = c.parts[r]
             if p["kind"] == "MEGA":
-                key = ("male header strips (40-pin)", "")
+                continue   # in BAG_EXTRAS: it's strips, not one part
             elif p["kind"] == "TB":
                 n = int(re.search(r"1x(\d+)", p["fp"]).group(1))
                 pitch = "3.5 mm" if "3.5" in p["fp"] else "5.08 mm"
@@ -1256,7 +1264,14 @@ def bags_markdown(c):
         for (v, k), n in count.items():
             w = words.get(k, "")
             band = f" ({boards.bands_text(v)})" if k == "R" else ""
-            items.append(f"{n}× {v} {w}{band}".replace("  ", " ").strip())
+            shown = f"{v} Ω" if k == "R" and v[-1].isdigit() else v
+            on_board = short_value(v)
+            label = f", printed **{on_board}**" if k in ("D", "C", "CE") and on_board != v else ""
+            items.append(f"{n}× {shown} {w}{band}{label}".replace("  ", " ").strip())
+        for r in refs:
+            if r in SOCKETED:
+                items.append(f"1× {SOCKETED[r]}-pin chip socket (for {r})")
+        items += BAG_EXTRAS.get(s, [])
         lines.append(f"- [ ] **Bag {s}** ({title}): " + "; ".join(items))
     return "\n".join(lines)
 
