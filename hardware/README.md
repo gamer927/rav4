@@ -10,7 +10,7 @@ the file, so you can measure your parts, change the numbers, and re-export.
 |---|---|---|---|---|
 | 1 | [`dash_pod.scad`](dash_pod.scad) | Dash top, driver's side | **The screen and every switch, in one row:** 2.42" OLED on the left, then ECO, SPORT, MANUAL, TEST and ON/OFF. Two cable glands in the back cover. Sits on a small hinged mount and tilts to face you | `dash_pod_shell.stl`, `dash_pod_back.stl`, `dash_pod_mount.stl`, `dash_pod_panel_test.stl` |
 | 2 | [`shifter_base.scad`](shifter_base.scad) | Centre console, next to the gear lever | The real Beavis Motorsport sequential shifter ([`beavis_shifter/`](beavis_shifter/README.md), by bbeavis, CC BY-NC) bolts on top (4 × M6). Inside, lever connectors join its two switches to a 3-core cable. One gland | `shifter_base_box.stl`, `shifter_base_bottom.stl` |
-| 3 | [`tcu_enclosure.scad`](tcu_enclosure.scad) | Under the passenger side of the dash | The electronics: Arduino Mega + hub shield, power board, logic board (with the **gyro**). No switches: the round things on its front wall are eight labelled cable glands. USB access, screw-on lid | `tcu_enclosure_box.stl` (or `tcu_enclosure_box_no_ears.stl`), `tcu_enclosure_lid.stl` |
+| 3 | [`tcu_enclosure.scad`](tcu_enclosure.scad) | Under the passenger side of the dash | The electronics: Arduino Mega with the TCU circuit board plugged on top (it carries the **gyro**). No switches: the round things on its front wall are eight labelled cable glands. USB access, screw-on lid | `tcu_enclosure_box.stl` (or `tcu_enclosure_box_no_ears.stl`), `tcu_enclosure_lid.stl` |
 
 Regenerate the STLs and the previews with `tools/build_stl.sh` (needs OpenSCAD 2021.01 or later).
 It runs the **fit check** first and stops if anything collides.
@@ -56,7 +56,7 @@ collides. `tools/build_stl.sh` runs it every time.
 
 | Housing | What the check includes |
 |---|---|
-| TCU box | Every part on both boards at its real height (relays 15.7 mm, MOSFETs 19 mm standing, current sensors and buck module on foam tape), 3 mm under each board for solder joints and wires, the Mega + hub shield stack (34 mm), the USB jack and its plug's moulding, every gland's locknut, the lid-screw bosses and the lid's locating lip. **And the wires:** each cable's cores as an 8 mm bundle from its gland to its own terminals (ending in 6 mm of straight wire into them; the SIG wires run back along the channel between the boards), both ribbon cables with their plugs, up and over to the hub, and at least 15 mm of clear working room between the gland nuts and the terminals |
+| TCU box | Every part on the circuit board at its real height and footprint, read from the board design itself (`pcb_envelope.scad`, written by `tools/pcb.py`: relays 16 mm, the regulator 18 mm, MOSFETs lying flat), the trimmed solder joints under it, the Mega underneath with its jacks and standoffs, the USB plug's moulding, every gland's locknut, the lid-screw bosses and the lid's locating lip. **And the wires:** each cable's cores as an 8 mm bundle from its gland to its own terminal group (ending in 6 mm of straight wire into them), and at least 15 mm of clear working room between the gland nuts and the terminals. It also checks that no two glands' nuts touch |
 | Dash pod | Each switch and button body with its terminals and a wire bend (ON/OFF 50 mm deep, mini toggles 32 mm, button 38 mm), the 2.42" OLED module with its wires (14 mm), the glands' locknuts and cables, a row of lever-nut connectors, the ON/OFF switch's flip cover outside, and **the pod tilting on its hinge** in 5° steps from 35° towards you to 5° away without touching the mount |
 | Shifter base | The shifter's M6 bolt tips, the mounting-bolt heads, the gland's locknut and cable, and the lever-nut connectors. Also, using the **real shifter's STL**: its body stands on the deck without overlapping it, its whole footprint is on the deck, and the deck's wire hole opens into the pocket under the body, not into solid plastic |
 
@@ -73,8 +73,11 @@ What the check found and fixed:
   that gap drops under 15 mm.
 - The USB cut-out was too small for a USB-B plug's moulding to reach the jack: now 18 × 15 mm.
 - One lid-screw boss clipped the power board's corner: the box is 2 mm deeper.
+- The two hand-wired perfboards and their ribbon cables became **one circuit board** that plugs
+  onto the Mega (`tools/pcb.py`). It fits the same box. Each gland now sits right in front of its
+  own terminal group, moved in where needed to clear the corner bosses.
 - The gyro's header pins would have hit the floor on its old 5 mm standoffs. It now sits on
-  the logic board.
+  the board.
 - In the dash pod, the pod's back edge hit the mount's arm when tilted: the arm is now slimmer
   and taller.
 - In the shifter base, the gland's locknut hit the underside of the deck: the gland moved down.
@@ -87,17 +90,16 @@ What the check found and fixed:
 | 4 | M3 × 10 countersunk screws | Dash pod back cover |
 | 4 | M3 × 8 countersunk screws | Shifter base bottom plate |
 | 4 | M3 × 10 countersunk screws | TCU lid |
-| 14 | M3 × 6 screws (self-tapping into the 2.6 mm standoff holes) | Mega (6), power board (4), logic board (4) |
+| 11 | M3 × 6 screws (self-tapping into the 2.6 mm standoff holes) | Mega (6), circuit board (5) |
 | 1 | **M5 × 25 bolt + M5 nyloc nut** + washer | Dash pod hinge. The nut sits in the hex pocket of the right-hand lug |
 | 2 | Countersunk wood/plastic screws, about 4 mm, or 3M VHB tape | Dash pod mount to the dash |
 | 4 | M6 bolts + **M6 hex nuts** (length = shifter's base thickness + 6 mm) | Shifter to the shifter base. The nuts drop into the hex traps under the deck |
 | 8 | M5 or M6 bolts, large washers | Shifter base bottom plate to the console (slots), TCU ears or floor holes to a bracket |
 | 4 | **PG9 cable glands** (cable 4–8 mm) | TCU: PWR (X1), SOL (X2), SIG (X3), LOAD (heatsink) |
 | 7 | **PG7 cable glands** (cable 3–6.5 mm) | TCU: SHIFT (X7), DASH (X4), SCREEN (X5), ATF (X6). Dash pod: SWITCHES, SCREEN. Shifter base: TO TCU |
-| 2 | Zip ties | Buck converter in its cradle |
 
 Measure your glands: PG9 needs a 15.2 mm hole and PG7 a 12.5 mm hole, but some brands differ by
-half a millimetre. Fix it with `glands` (TCU, dash pod) or `gland_d` (shifter base).
+half a millimetre. Fix it with `gland_size` (TCU), `glands` (dash pod) or `gland_d` (shifter base).
 
 Heat-set inserts: push each one in with a soldering iron at about 220–240 °C (PETG) or
 250 °C (ASA/ABS) until it sits flush, and keep it square.
@@ -204,14 +206,9 @@ travel.
 
 | Area | Part | Notes |
 |---|---|---|
-| Back left | **Arduino Mega 2560 + hub shield** on 6 standoffs (official hole pattern) | USB-B lines up with the cut-out in the left wall, for flashing and the USB log. "MEGA (USB TO THE LEFT)" is engraved under it |
-| Right | **Power board**, 90 × 150 mm perfboard on 4 standoffs (3 mm in from each corner) | Everything that touches the car's 12 V wiring. Faces the SIG, PWR, SOL and LOAD glands |
-| Front left | **Logic board**, 90 × 70 mm perfboard on 4 standoffs | Shifter, dash, screen and ATF terminals, and the **gyro**, flat on the board. Faces the SHIFT, DASH, SCREEN and ATF glands |
-| Front wall | 8 glands (round holes, not switches), engraved **SHIFT DASH SCREEN ATF · SIG PWR SOL LOAD** | Fit the inline connectors (X1–X3, X6) on the cable tails outside the box |
-
-The board names are engraved on the floor under each board. If your perfboards' corner holes
-aren't 3 mm in from the edges, change `pb_hole_inset` or drill new holes using the 1:1
-templates in [`docs/build/`](../docs/build/).
+| Back left, underneath | **Arduino Mega 2560** on 6 short standoffs (official hole pattern) | USB-B lines up with the cut-out in the left wall, for flashing and the USB log. "MEGA (USB TO THE LEFT)" is engraved under it |
+| Over almost the whole floor | **The TCU circuit board**, 200 × 150 mm, plugged onto the Mega's pins and screwed to 5 tall standoffs | A notch in its back-left corner leaves the Mega's USB and power jacks free. Its screw terminals run along the front edge, each group labelled, in the same order as the glands |
+| Front wall | 8 glands (round holes, not switches), engraved **SHIFT DASH SCREEN ATF · SIG PWR SOL LOAD** | Each sits in front of its own terminal group. Fit the inline connectors (X1–X3, X6) on the cable tails outside the box |
 
 | Gland | Connector / cable | Gland |
 |---|---|---|
@@ -220,7 +217,7 @@ templates in [`docs/build/`](../docs/build/).
 | SIG | X3: D, STP, E1, SPD, TAC, VTA, E2 | PG9 |
 | LOAD | Dummy-load heatsink: 3 feeds + ground, 18 AWG silicone wire | PG9 |
 | SHIFT | X7: shifter base, 3-core shielded | PG7 |
-| DASH | X4 (C1–C6) and J5 on the power board (C7–C8, ON/OFF power pole): 8-core shielded | PG7 |
+| DASH | X4: C1–C6, and C7–C8 for the ON/OFF switch's power pole: 8-core shielded | PG7 |
 | SCREEN | X5: dash pod screen, 4-core shielded | PG7 |
 | ATF | X6: ATF probe, 3-core shielded | PG7 |
 
@@ -243,7 +240,7 @@ box's control, and up to ~28 W in total. That would cook a plastic box. Mount th
 - **Where:** under the passenger side of the dash, below the glovebox, where you can reach it
   from the footwell ([wiring guide §9](../docs/03-wiring-guide.md#where-the-tcu-box-goes) has
   the reasons and the alternatives).
-- **Mount the box flat, on its floor**, so the gyro (on the logic board) lies level. Check with a
+- **Mount the box flat, on its floor**, so the gyro (on the circuit board) lies level. Check with a
   phone's level app: within about 5° is plenty, since a 5° tilt changes the reading by less than
   0.5 %. On its side works too: set `GYRO_AXIS` in `config.h` to the gyro axis that points up.
 - **Bolt it rigidly** to metal: the dash support structure, or a steel bracket screwed to it. Use the ears (M6 slots) or, on the no-ears version, the four M5 floor
@@ -261,10 +258,8 @@ The [build book](../docs/05-build-book.md) has the full sequence (part 11). In s
 
 1. Fit the four heat-set inserts in the corner bosses.
 2. Fit the glands.
-3. Screw down the Mega, the power board and the logic board, and plug the hub shield onto
-   the Mega.
-4. Plug in both ribbon cables, feed each cable through its gland, wire it to its terminals, and
-   tighten the gland nut.
+3. Screw down the Mega, plug the circuit board onto it, and screw the board to its 5 posts.
+4. Feed each cable through its gland, wire it to its terminals, and tighten the gland nut.
 5. Screw the lid on (4 × M3 countersunk).
 
 ---

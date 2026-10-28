@@ -162,8 +162,8 @@ for name, w in zip(["+5V", "GND", "DQ"], ["W17", "W18", "W19"]):
 # ------------------------------------------------------------------ TCU internals
 BX = 8.7
 box(BX, 12.3, 3.9, 2.2, "Power",
-    ["X1-1 -> TVS -> driver +12 V", "X1-2 -> rev. diode -> TVS", "  -> 5 V/3 A buck -> Mega 5V,",
-     "     screen, gyro, probe", "X1-3 -> GND star point", "J5 -> ON/OFF pole 2 -> coils"], line_size=8.5)
+    ["X1-1 -> TVS -> driver +12 V", "X1-2 -> rev. diode -> TVS", "  -> 5 V regulator -> Mega 5V,",
+     "     screen, gyro, probe", "X1-3 -> GND star point", "DASH 7/8: ON/OFF pole 2 -> coils"], line_size=8.5)
 box(BX, 8.15, 3.9, 3.85, "Input conditioning",
     ["D   -> PC817  -> D28", "STP -> PC817  -> D27", "E1  -> signal GND", "SPD -> LM393  -> D2",
      "TAC -> PC817  -> D3", "VTA -> 10k/100nF -> A0", "E2  -> 10k/100nF -> A1", "+12 -> 47k/10k -> A3",
@@ -174,7 +174,7 @@ box(BX, 3.2, 3.9, 4.65, "Solenoid channel x3",
      "(Detail A in the guide)"], line_size=8.5)
 box(BX, 0.6, 3.9, 2.25, "ATF probe input",
     ["DQ -> 100 ohm -> D33", "4.7k pull-up DQ -> 5V", "5.1 V TVS to GND"], line_size=8.5)
-box(13.1, 0.6, 2.7, 2.3, "MPU-6050 gyro", ["GY-521 board,", "on the logic board", "I2C addr 0x68"], line_size=8.5)
+box(13.1, 0.6, 2.7, 2.3, "MPU-6050 gyro", ["GY-521 board,", "on the TCU board", "I2C addr 0x68"], line_size=8.5)
 
 mega_pins = ["D2  VSS (int)", "D3  tach (int)", "D6  relay drv", "D8  S1 drv",
              "D9  S2 drv", "D10 SL drv", "D20 SDA", "D21 SCL", "D22 shift up", "D23 shift dn", "D24 ECO",

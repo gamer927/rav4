@@ -13,7 +13,10 @@ current-sensor modules instead of surface-mount PROFETs (§3.3), a corrected spe
 comparator (wiring guide §6), the TCU split into a power board, a logic board and a hub on the
 Mega, and 3D-printed housings. Rev 3.1 splits the hardware into three pieces (a dash pod with the
 screen and switches, a shifter base on the centre console, and the TCU box), each with its own
-cables, and makes MANUAL a switch of its own instead of tapping a shift button.
+cables, and makes MANUAL a switch of its own instead of tapping a shift button. Rev 3.2 puts the
+whole TCU circuit on **one printed circuit board** that plugs onto the Mega (`tools/pcb.py`,
+`hardware/pcb/`): the builder solders the parts in, the board does the wiring. Its 5 V supply is
+a fixed RECOM R-78HB5.0-0.5 regulator instead of an adjustable buck module.
 
 **Dash pod controls** (left to right, after the screen). There is no NORMAL mode and no status
 light: **exactly one of ECO, SPORT and MANUAL must be on**. With none, or more than one, on for
@@ -107,7 +110,7 @@ Rules that never change:
  sequential lever: UP / DOWN microswitches ─────────────────────────────────┤
                                                                             v
  ┌──────────────────────────── UNDER-DASH TCU ENCLOSURE ───────────────────────────────┐
- │  Fused IG feed → reverse-polarity + TVS → 5 V/3 A automotive buck → Mega 5 V, OLED    │
+ │  Fused IG feed → reverse-polarity + TVS → 5 V switching regulator → Mega 5 V, OLED    │
  │                                                                                       │
  │  Arduino Mega 2560 ── input conditioning (RC + clamps, optos for 12 V signals)        │
  │        │  D8/D9/D10 → 3 × P-MOSFET high-side + ACS712 ──────┐                         │
@@ -140,8 +143,9 @@ on-board linear regulator overheats and has no transient protection.
   logic.
 - Reverse-polarity protection: a P-FET ideal diode or a Schottky.
 - A TVS sized for load dump (for example SMCJ24A) close to the enclosure entry.
-- A 5 V/3 A automotive buck converter with an input rating of 40 V or more and LC input
-  filtering.
+- A 5 V switching regulator rated well above load-dump voltage: the RECOM R-78HB5.0-0.5
+  (9–72 V in, 0.5 A, enough for the Mega, the screen, the gyro and the three current sensors),
+  with 100 µF on its input and 47 µF + 100 nF on its output.
 - Use star grounding. Run a dedicated ground wire from the TCU to the engine/ECU ground point
   (E1), because the TPS is measured against the ECU's sensor ground.
 
@@ -152,7 +156,7 @@ and the ECM commanding a solenoid, you should measure about 12 V between the ECM
 and ground.
 
 - Each channel is a **P-channel MOSFET high-side switch** (IRF4905, TO-220, through-hole, so it
-  can be hand-soldered on perfboard). D8/D9/D10 drive spare channels of the relay driver
+  is easy to hand-solder; it lies flat, bolted to the board). D8/D9/D10 drive spare channels of the relay driver
   (ULN2803), which pulls the gate down through 4.7 kΩ; a 10 kΩ gate–source pull-up keeps it off,
   and a 15 V zener protects the gate during a load dump.
 - A **UF4007 + 24 V zener clamp** from the drain to ground catches the solenoid's inductive kick
@@ -193,8 +197,8 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
   13.8 W continuously at 14.4 V. That's within the solenoid's 11–15 Ω spec (VERIFY), so the ECU
   sees a normal load.
 - **Coils:** all three from D6 through a ULN2803 (10 kΩ pull-down on its input). Their +12 V
-  doesn't come straight from the supply: `+12 DRV → F2 (PTC 0.25 A) → J5a → dash cable C7 →
-  ON/OFF pole 2 → C8 → J5b → coils and ULN2803 COM`. A UF4007 (DF) across that feed takes the
+  doesn't come straight from the supply: `+12 DRV → F2 (PTC 0.25 A) → DASH 7 → dash cable C7 →
+  ON/OFF pole 2 → C8 → DASH 8 → coils and ULN2803 COM`. A UF4007 (DF) across that feed takes the
   coils' flyback when the switch opens, and a 47k/10k divider lets A7 see it (`COIL_ON_V` 8 V).
   So two independent things can drop the relays: the Mega (D6 low) and the driver (ON/OFF OFF).
   Every fault in this path (broken core, blown F2, worn contact) can only remove coil power,
@@ -229,8 +233,8 @@ Dash pod switch cable (W20, 8-core shielded):
 4. TEST button (X4)
 5. ON/OFF switch, pole 1 (X4)
 6. Switch common (ground) (X4)
-7. ON/OFF pole 2, feed from F2 (J5a on the power board)
-8. ON/OFF pole 2, return: relay coil power (J5b)
+7. ON/OFF pole 2, feed from F2 (DASH terminal 7)
+8. ON/OFF pole 2, return: relay coil power (DASH terminal 8)
 
 Shifter cable (X7, 3-core shielded): 1 = upshift microswitch, 2 = downshift microswitch,
 3 = common (ground).
@@ -305,7 +309,7 @@ How the firmware reads it:
 
 ### 3.9 Gyro for corner detection (MPU-6050)
 - A GY-521 (MPU-6050) module on the same I²C bus as the OLED, at address 0x68. Mount it firmly
-  inside the TCU box, on the logic board. One of its axes must be vertical in the car: Z with the
+  inside the TCU box, on the circuit board. One of its axes must be vertical in the car: Z with the
   box bolted flat (the default), or X/Y with the box on its side (set `GYRO_AXIS`). Which way it
   faces around that axis doesn't matter. The 3D-printed TCU enclosure has standoffs for it
   ([`hardware/`](../hardware/README.md)); placement and testing: wiring guide §9.

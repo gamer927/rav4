@@ -21,7 +21,7 @@ You build three pieces:
 |---|---|---|
 | **Sequential shifter** | Centre console | A real sequential lever (the Beavis Motorsport design, 3D-printed) on a printed base |
 | **Dash pod** | Dash top, driver's side | A screen, then ECO, SPORT, MANUAL, TEST and ON/OFF switches |
-| **TCU box** | Under the passenger side of the dash | The Arduino and two boards you solder yourself |
+| **TCU box** | Under the passenger side of the dash | The Arduino and one ready-made circuit board you solder the parts onto |
 
 **What you get:**
 - **Manual mode:** you pick every gear with the lever, right up to the redline: it never
@@ -34,7 +34,7 @@ You build three pieces:
   temperature in °F. If something's wrong, it says what, in words.
 - **An aircraft-style self-test** you run from the dash, and a key-on check every time you start.
 
-**What it takes:** about $650 in parts, a 3D printer, a soldering iron and a multimeter. You
+**What it takes:** about $665 in parts, a 3D printer, a soldering iron and a multimeter. You
 don't need to know electronics: the [build book](docs/05-build-book.md) goes one small step at a
 time, Lego-style, with a meter check after every step, and a calibration helper does the maths.
 
@@ -195,15 +195,15 @@ models with ready-to-print STLs in [`hardware/`](hardware/README.md):
 2. **Shifter base**, on the centre console next to the gear lever: the real
    [Beavis Motorsport sequential shifter](hardware/beavis_shifter/README.md) (by bbeavis,
    CC BY-NC) bolts on top, with its own cable to the box.
-3. **TCU box**, under the passenger side of the dash where you can reach it: the Mega with its
-   hub shield, the power board and the logic board (which carries the gyro). It has no switches:
+3. **TCU box**, under the passenger side of the dash where you can reach it: the Mega with the
+   TCU circuit board plugged on top (it carries the gyro too). It has no switches:
    the round things on its front are eight labelled cable glands, one per cable.
 
 A **fit check** in each model confirms that every part fits: switch bodies, terminals, wire
 bends, board parts at their real heights, glands and bolts. It runs every time the STLs are
 rebuilt.
 
-![Fit check: TCU box with boards](hardware/fit-tcu.png)
+![Fit check: TCU box with the board](hardware/fit-tcu.png)
 
 Print them in **PETG or ASA, not PLA** (PLA softens in a hot car). The dummy-load resistors stay
 outside on a finned heatsink. Print settings, hardware and assembly:
@@ -214,8 +214,8 @@ outside on a finned heatsink. Print settings, hardware and assembly:
 - **Done:** full design, firmware and documentation.
   - `make check` runs it all: 1,266 unit-test checks, 26 whole-system scenarios (the real
     firmware in a simulated car, with faults injected, plus the build book's jack-stand test step
-    by step), the calibration helper on a simulated drive, and about 500 cross-checks that the
-    boards, pin map, firmware, screen text and 3D models agree. All pass
+    by step), the calibration helper on a simulated drive, and about 800 cross-checks that the
+    circuit, the circuit board (pad by pad), pin map, firmware, screen text and 3D models agree. All pass
     ([system review](docs/06-system-review.md)).
   - The firmware compiles for the Arduino Mega 2560 without warnings (15 % flash, 51 % RAM).
   - The screens above come from the real firmware running in a simulator.
@@ -234,16 +234,16 @@ measure on the car first so you order the right sizes once.
 
 | | Estimate (US$, late 2026) |
 |---|---|
-| Brain and power (Mega, hub shield, 5 V supply, fuses) | $66 |
+| Brain and power (Mega, the circuit board, 5 V regulator, fuses) | $97 |
 | Solenoid control (relays, MOSFETs, current sensors, dummy loads + heatsink) | $82 |
 | Signal inputs (optos, comparator, resistors, diodes) | $42 |
-| Boards and inside wiring | $66 |
+| Board connectors and wire (screw terminals, pin headers) | $51 |
 | Car harness and connectors (Deutsch kit with crimper, wire, shielded cable, glands) | $147 |
-| Dash pod controls, OLED, gyro | $61 |
+| Dash pod controls, OLED, gyro | $63 |
 | ATF temperature probe and fittings | $59 |
 | 3D printing (filament, inserts, screws) | $65 |
 | Sequential shifter (Beavis Motorsport DIY) | $59 |
-| **Total parts** | **≈ $650** (±25 %) |
+| **Total parts** | **≈ $665** (±25 %) |
 | Tools, if you own none (your 3D printer and jack stands aren't counted) | ≈ $200 |
 
 Many items are packs and kits, so you'll have spares. The big-ticket items are the connector kit
@@ -251,18 +251,20 @@ with its crimper, the wire and cable, and the filament.
 
 The key parts:
 
-- **Arduino Mega 2560** + a **Mega prototype shield** (the hub the two ribbon cables plug into).
+- **Arduino Mega 2560** + the **TCU circuit board** (ordered from a board maker from the files in
+  [`hardware/pcb/`](hardware/pcb/README.md), about $20–40 for five). It plugs on top of the Mega
+  and does all the wiring: you only solder the parts in.
 - **3 × Omron G2RL-2-DC12 DPDT relays**: the factory/box changeover. Coil off = factory computer.
 - **3 × IRF4905 P-MOSFETs + 3 × ACS712-05B current sensors**: switch +12 V to each solenoid
   and measure its current. (The RAV4's computer switches +12 V, so low-side MOSFET boards
   won't work.)
 - **3 × 15 Ω 50 W resistors on a finned heatsink**: dummy loads, so the factory computer sees a
   "solenoid" while the box is in control. Outside the box: they make ~14 W each.
-- **LM2596HV buck converter** (60 V input), PC817 optos, LM393, ULN2803A.
+- **RECOM R-78HB5.0-0.5** 5 V regulator (72 V input), PC817 optos, LM393, ULN2803A.
 - **Dash pod:** ON/OFF toggle with a flip-up cover, ECO, SPORT and MANUAL mini toggles, TEST
   button, and a **2.42" OLED** (the gear shows 18 mm tall, everything else in plain words).
 - **Shifter base:** the **Beavis sequential shifter** (two V-155-1C25 switches).
-- **MPU-6050 gyro (GY-521)** on the logic board, and a **DS18B20 ATF probe** in a brass tee.
+- **MPU-6050 gyro (GY-521)** on the board, and a **DS18B20 ATF probe** in a brass tee.
 
 ## Tools and equipment
 
@@ -270,8 +272,8 @@ The key parts:
 |---|---|
 | **Factory repair manual + electrical wiring diagram for your VIN** | To find the computer's S1/S2/SL, speed, tach, brake and lever-in-D wires, and to confirm the items in spec §10 |
 | **Multimeter** with continuity beep | Every test in the build book uses it |
-| **Temperature-controlled soldering iron**, solder, flux | Two perfboards and the hub |
-| Wire stripper, heat gun, hot-glue gun | Harness and boards (the Deutsch kit includes its crimper) |
+| **Temperature-controlled soldering iron**, solder, flux, flush cutters | About 130 parts into the circuit board |
+| Wire stripper, heat gun, hot-glue gun | Harness and cables (the Deutsch kit includes its crimper) |
 | **12 V 5 A DC adapter** | Bench power for testing |
 | **Laptop + USB A-B cable** | Flashing the Mega and logging calibration data |
 | **OBD-II scan tool** | Confirm no trouble codes are set with the box installed |
@@ -324,14 +326,16 @@ firmware/tcu/oled.*         screen driver (SSD1309 / SSD1306 / SH1106), never st
 firmware/tcu/ds18b20.*      ATF probe driver + tested decoding
 firmware/tcu/imu.*          gyro (MPU-6050) yaw-rate reader
 test/                       unit tests; test/system/: whole-firmware simulation with fault injection
-tools/system_check.py       cross-checks boards, pins, firmware, screens and 3D models agree
+tools/system_check.py       cross-checks circuit, board, pins, firmware, screens and 3D models agree
 tools/calibrate.py          calibration helper: records the USB log, works out the numbers
 tools/avr_build.sh          compile for the Mega without the Arduino IDE
 tools/wiring_diagram.py     regenerates the wiring diagrams in docs/
 tools/build_stl.sh          fit-checks the housings, exports the STLs and previews in hardware/
-tools/boards.py             board layouts: checks them, draws the build-book pictures and templates
+tools/boards.py             the circuit, part by part (the one source of truth), and its checks
+tools/pcb.py                the circuit board: placement, routing (pcb_router.py), DRC, Gerbers, build-book steps
+hardware/pcb/               the KiCad board, the Gerber zip to order it, the parts list
 tools/shopping_list.py      writes the shopping list and its cost totals
-docs/build/                 build-book pictures and 1:1 board templates (generated)
+docs/build/                 build-book pictures (generated)
 hardware/*.scad             3D-printable dash pod, shifter base and TCU enclosure (OpenSCAD)
 hardware/stl/               ready-to-print STL files
 LICENSE                     CC BY-NC-SA 4.0: free to build, not to sell (see the end of this page)

@@ -4,7 +4,7 @@
 # Check that everything fits, then export the printable parts in
 # hardware/*.scad to hardware/stl/ (binary STL) and render the previews.
 # Needs OpenSCAD 2021.01+; previews also need xvfb-run and python3 with Pillow.
-# Run tools/boards.py first if you changed a board layout.
+# Run tools/pcb.py first if you changed the circuit board (it writes hardware/pcb_envelope.scad).
 set -e
 cd "$(dirname "$0")/.."
 mkdir -p hardware/stl

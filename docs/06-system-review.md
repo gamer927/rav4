@@ -7,8 +7,8 @@ behaviour is tested, and the risks that are left.
 **Verdict:** every failure we can think of ends with the factory computer in charge, and nearly
 all of them are also reported on the screen. All tests pass (§6). There are no known open
 defects. The remaining risks (§7) can't be designed out, or can only be checked on the real car.
-The design is ready to become a circuit board once the bench checks in §8 have been done on the
-hand-built prototype.
+The circuit is laid out as one circuit board (§8) that passes KiCad's design-rule check; the first
+one built still has to pass the bench checks listed there.
 
 ---
 
@@ -18,7 +18,7 @@ hand-built prototype.
 
 | Piece | Where | What it does |
 |---|---|---|
-| **TCU box** | Under the passenger side of the dash | An Arduino Mega with three boards: power board (relays, drivers, inputs), logic board (switch inputs, screen, temperature probe, gyro) and a hub on the Mega. It listens to the engine computer and can take over the transmission's three solenoids. |
+| **TCU box** | Under the passenger side of the dash | An Arduino Mega with one circuit board plugged on top (relays, drivers, inputs, switch filters, screen and probe connections, gyro). It listens to the engine computer and can take over the transmission's three solenoids. |
 | **Dash pod** | Dash top, driver's side | The screen, then ECO, SPORT, MANUAL, TEST and ON/OFF in a row. |
 | **Shifter base** | Centre console | The Beavis sequential lever (two microswitches). |
 | **Car side** | — | 7 listening taps (nothing cut), the 3 solenoid wires (cut and taken through the box), key-on power, the ATF temperature probe, a heatsink with 3 dummy resistors. |
@@ -88,7 +88,7 @@ it is physics, not software: it happens even if the Mega is dead.
 | Battery below 10.5 V or above 16 V for 0.5 s | `FAULT_SUPPLY` | ECU, PROBLEM | unit `test_supply_and_tps_faults`; system: *battery voltage collapses* |
 | Load dump / spikes on 12 V | TVS1/TVS2 (27 V) | Clamped | — (part choice) |
 | Wires reversed at X1 | D1 blocks on the logic feed; TVS1 conducts on the driver feed and blows its 5 A fuse | Logic protected, nothing powered | — (part choice) |
-| 5 V buck fails shorted (12 V on 5 V) | TVS3 clamps, the 2 A fuse blows | Mega off: relays drop, ECU | — (part choice) |
+| 5 V regulator fails shorted (12 V on 5 V) | TVS3 clamps, the 2 A fuse blows | Mega off: relays drop, ECU | — (part choice) |
 | Program hangs | Watchdog (250 ms) | Reset, everything off, ECU | system: *firmware hung with relays on*; IBIT watchdog step |
 | Reset mid-drive (any cause) | Pull-downs + arming rule | Relays drop; **no** automatic re-takeover | unit `test_boot_requires_switch_cycle`, `test_boot_glitch_does_not_arm`; system: *reset at 50 mph* |
 | Mega's outputs stuck ON (crash, damaged pin, shorted ULN2803) | You flip ON/OFF off | Relays drop in hardware | system: *firmware hung with relays on* |
@@ -153,31 +153,35 @@ it is physics, not software: it happens even if the Mega is dead.
 
 ## 5. Integrity: does everything agree?
 
-`tools/system_check.py` checks the things no single test sees, by reading the actual board
-layouts, firmware, housings and documents:
+`tools/system_check.py` checks the things no single test sees, by reading the actual circuit,
+circuit board, firmware, housings and documents:
 
-1. Every Mega pin the firmware uses is wired through the hub to the board signal that means the
-   same thing, and nothing on the hub is unused.
-2. Every net at a ribbon-header pin carries that pin's Mega signal.
+1. Every Mega pin the firmware uses is wired to the signal that means the same thing, and no
+   wired Mega pin is unused.
+2. Every net at a Mega pin carries that pin's signal.
 3. Every output that drives a relay or a solenoid driver has its 10 kΩ pull-down.
 4. Every switch input has its pull-up, series resistor, capacitor and clamps.
-5. The ON/OFF hardware cut: the relay coils are fed **only** through J5 (the switch's power pole),
+5. The ON/OFF hardware cut: the relay coils are fed **only** through the switch's power pole (DASH terminals 7 and 8),
    through the PTC, with the flyback diode, and the sense reaches A7.
-6. The box's glands, the boards' terminal groups and the cable map agree.
+6. The box's glands, the board's terminal groups and the cable map agree, in the same order.
 7. Every screen text fits where it's drawn.
-8. Part counts on the shopping list match the boards.
+8. Part counts on the shopping list match the board.
 9. The spec's pin table lists every pin the firmware uses.
 10. Every link in the documents points at a file that exists.
+11. The circuit board file is the circuit: every pad of every part is on the net the circuit
+    says (read straight from `hardware/pcb/rav4-tcu.kicad_pcb`), and KiCad's design-rule check
+    reports no errors and no unconnected pads.
 
-The checker was itself tested by breaking things on purpose (a wrong hub pin, relay coils fed
+The checker was itself tested by breaking things on purpose (a wrong Mega pin, relay coils fed
 straight from 12 V, an over-long screen line, a missing pull-down): it caught every one.
 
 **Physical fit** (`tools/build_stl.sh`): each housing's fit check intersects every part, wire
 bundle, plug and gland with the housing and with each other, and must come out empty:
 
-- **TCU box:** boards, Mega and hub, both ribbons with their plugs, every cable's wires fanning
-  from its gland to its terminals (including the dash cable's C7/C8 to J5), the lid lip, and at
-  least 15 mm of working room in front of the terminals.
+- **TCU box:** the circuit board with every part at its real size and height (read from the
+  board design), the Mega under it with its jacks, every cable's wires fanning from its gland to
+  its terminal group, the lid lip, at least 15 mm of working room in front of the terminals,
+  and no two glands' nuts touching.
 - **Dash pod:** every switch body with its terminals and a wire bend (ON/OFF modelled as a
   2-pole switch, 18 × 22 × 50 mm), the screen, 8 lever connectors, both glands, the ON/OFF
   cover, and the pod tilting through its whole range on the hinge.
@@ -245,7 +249,8 @@ after any change.
 | A lever-D input stuck on was never noticed | Checked at every engine start, `FAULT_LEVER` |
 | A failed 5 V regulator could put 12 V into the Mega | TVS3 across the 5 V rail |
 | Several screen lines were too long for the display | Shortened; now checked automatically |
-| The dash cable's C7/C8 route to J5 crossed the logic board | Routed along the front gap, then back between the boards; fit check passes |
+| The dash cable's C7/C8 route to J5 crossed the logic board | Routed along the front gap, then back between the boards; fit check passes. Since then C7/C8 are DASH terminals 7 and 8 on the circuit board |
+| Hand-wiring two perfboards and a hub (~175 wires) was the biggest job, and the likeliest place for a mistake | One printed circuit board does all the wiring; its connections are checked pad by pad against the circuit |
 | The ON/OFF switch was modelled as a 1-pole switch; the pod had room for only 5 connectors | Modelled as a larger 2-pole switch with 8 connectors; pod fit check passes |
 | Before calibration the self-test marked CALIBRATED as **BAD**, so the bench test could never say ALL OK, and the main screen said SELF-TEST BAD | "Not calibrated yet" is now a CHECK (a reminder) |
 | On the bench nothing drives the gas pedal input, so the self-test always reported GAS PEDAL BAD | Build book 10.1: a two-resistor gas pedal stand-in for the bench |
@@ -289,22 +294,41 @@ Nothing on this list has a known fix that wouldn't add a new risk of its own.
 
 ---
 
-## 8. Before the custom circuit board
+## 8. The circuit board
 
-The design is complete and consistent. Before the layout is frozen into a PCB, build the
-hand-made perfboard version and confirm on the bench (build book part 10):
+The whole TCU circuit is one 2-layer board, 200 × 150 mm, that plugs onto the Mega's pins
+(`tools/pcb.py`; the files to order it are in [`hardware/pcb/`](../hardware/pcb/README.md)).
+It reuses the tested circuit in `tools/boards.py` net for net, with the same connectors, so the
+cables, housings and tests carry over. What changed on the way:
 
+| Change | Why |
+|---|---|
+| The ribbon cables and the hub are gone: the board's own pins plug into the Mega | Fewer connections to go wrong; nothing to come loose |
+| The adjustable LM2596HV buck module became a fixed RECOM R-78HB5.0-0.5 (9–72 V in) with 47 µF + 100 nF | Nothing to set before first power-up, so the Mega can't get a wrongly set voltage; through-hole, solders straight in |
+| The two pull-up groups were both RU1–RU6; the switch inputs' are now **RU11–RU17** | One board needs unique names |
+| The MOSFETs lie flat with their tabs bolted down; the current-sensor modules plug into 3 holes plus 2 short **LINK** wires | Low and solid in a car that vibrates |
+| Tracks sized by current: 1.5 mm for the solenoid supply, 1.0 mm for the solenoid, load and 12 V lines, ground filled on both layers | Each solenoid draws about 1 A; the tracks stay cool |
+
+Checks on the design: KiCad's design-rule check reports **0 errors and 0 unconnected pads**
+(`hardware/pcb/drc.txt`; the warnings left are text crossing pads, and library notices), the
+system check matches every pad to the circuit, and the box's fit check uses the real board.
+
+Still to do on the **first board** (nothing has been made yet):
+
+- [ ] Look over the board maker's preview of the Gerbers before paying: the outline with its
+      notch, the 5 mounting holes and the labels.
+- [ ] Before soldering anything, push it onto a bare Mega with the header strips in: every pin
+      goes through without force, and the notch clears the USB and power jacks.
+- [ ] Build it step by step with the build book's meter checks (part 4 onwards), then the bench
+      test (part 10): the full self-test passes, including **ON/OFF CUT** and **SAFETY RESET**.
 - [ ] `IS_AMPS_PER_VOLT` calibrated; each solenoid channel reads about 0.8 A into 15 Ω.
-- [ ] The full self-test passes, including **ON/OFF CUT** and **SAFETY RESET** (the watchdog
-      reset comes back up, the bootloader doesn't boot-loop).
-- [ ] J5 jumper out: the relays drop and JA 25 reads 0 V; jumper in: about 2 V.
+- [ ] The 5 V rail reads 4.9–5.1 V and stays there with the engine cranking. The regulator
+      needs about 9 V in; a weak battery that sags lower than that while cranking resets the
+      Mega, which is safe (the relays drop and the engine computer is in charge) but will
+      show as a fresh key-on.
 - [ ] The 2-pole ON/OFF switch you bought fits the pod (18 × 22 mm body or smaller) and its
       cover clears.
-- [ ] Relay coil current measured (for sizing F2 on the PCB; the G2RL-2 is about 33 mA each).
 - [ ] Everything in spec §10 (open items to VERIFY) ticked off.
-
-Then the PCB can reuse the same schematic (the nets in `tools/boards.py`) and keep the same
-connectors, so the cables, housings and tests carry over unchanged.
 
 ---
 

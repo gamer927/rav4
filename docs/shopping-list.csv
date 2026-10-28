@@ -1,17 +1,18 @@
 Section,Item,Need,Buy,Where,Est. US$,Notes
 1. Brain and power,Arduino Mega 2560 R3,1,1 (Elegoo or similar clone with the 16U2 USB chip),"Amazon (or AliExpress, cheaper but slower)",22,Genuine Arduino is ~$48. Comes with a USB cable
-1. Brain and power,"Prototype shield for the Mega (""Mega ProtoShield"")",1,1,"Amazon (or AliExpress, cheaper but slower)",8,The hub: two ribbon sockets wired to the Mega's pins
-1. Brain and power,"LM2596HV buck converter module, 4.5–60 V in",1,pack of 2 (one spare),"Amazon (or AliExpress, cheaper but slower)",8,Must say **HV** (60 V input). Plain LM2596 is only 40 V
+1. Brain and power,The TCU circuit board (upload hardware/pcb/rav4-tcu-gerbers.zip),1,5 (the usual minimum),"Board maker (JLCPCB, PCBWay, ...)",30,"2 layers, 1.6 mm, 1 oz copper, lead-free HASL. Bare board: you solder the parts. See hardware/pcb/README.md"
+1. Brain and power,"RECOM R-78HB5.0-0.5 regulator, 5 V 0.5 A, 9–72 V in",1,1,DigiKey / Mouser,8,The 5 V supply for the Mega. Fixed 5 V: nothing to adjust
+1. Brain and power,"47 µF 16 V electrolytic capacitor (radial, 6.3 mm, 2.5 mm legs)",1,pack of 10,DigiKey / Mouser,3,On the regulator's output
 1. Brain and power,1.5KE27A TVS diode,2,pack of 10,DigiKey / Mouser,4,Littelfuse 1.5KE27A
-1. Brain and power,P6KE6.8A TVS diode,1,pack of 5,DigiKey / Mouser,3,"Across the 5 V rail: if the buck module fails shorted, it blows the 2 A fuse"
+1. Brain and power,P6KE6.8A TVS diode,1,pack of 5,DigiKey / Mouser,3,"Across the 5 V rail: if the regulator fails shorted, it blows the 2 A fuse"
 1. Brain and power,"Resettable fuse (PTC), 0.25 A hold, radial",1,pack of 5,DigiKey / Mouser,3,e.g. Bourns MF-R025. Protects the relay-power wires to the ON/OFF switch
 1. Brain and power,"1N5822 Schottky diode, 3 A",1,pack of 10,DigiKey / Mouser,3,Reverse-polarity protection
 1. Brain and power,100 µF 50 V electrolytic capacitor,1,pack of 10,DigiKey / Mouser,3,
 1. Brain and power,Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses,2 + fuses,kit,Auto-parts store,10,Match your fuse box's blade size (step 0 checks it)
 1. Brain and power,Add-a-circuit fuse tap,1,1,Auto-parts store,8,Same blade size as the fuse box
 2. Solenoid control,"Omron G2RL-2-DC12 relay (DPDT, 12 V)",3,4 (one spare),DigiKey / Mouser,10,The factory/box changeover. Don't substitute a single-pole relay
-2. Solenoid control,"IRF4905 P-channel MOSFET, TO-220",3,pack of 5,DigiKey / Mouser,9,Infineon IRF4905PBF
-2. Solenoid control,ACS712-05B current sensor module (5 A),3,pack of 3–5,"Amazon (or AliExpress, cheaper but slower)",11,Measures each solenoid's current for the self-test
+2. Solenoid control,"IRF4905 P-channel MOSFET, TO-220",3,pack of 5,DigiKey / Mouser,9,"Infineon IRF4905PBF. They lie flat, bolted to the board's copper (M3 × 8 screw and nut each)"
+2. Solenoid control,ACS712-05B current sensor module (5 A),3,pack of 3–5,"Amazon (or AliExpress, cheaper but slower)",11,"Measures each solenoid's current for the self-test. The common blue module with a 2-way screw terminal and 3 pins (VCC, OUT, GND)"
 2. Solenoid control,"ULN2803A driver, DIP-18",1,2 (one spare),DigiKey / Mouser,3,Through-hole DIP: e.g. Toshiba ULN2803APG. Not the SOIC version
 2. Solenoid control,1 W zener diode kit (1N4728A–1N4764A),10,kit,"Amazon (or AliExpress, cheaper but slower)",11,"Uses 1N4733A 5.1 V ×4, 1N4744A 15 V ×3, 1N4749A 24 V ×3"
 2. Solenoid control,UF4007 fast diode,4,pack of 10,DigiKey / Mouser,3,1N4007 also works
@@ -22,15 +23,14 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 3. Signal inputs,"LM393 comparator, DIP-8",1,pack of 10,"Amazon (or AliExpress, cheaper but slower)",5,
 3. Signal inputs,BAT85 Schottky diode (DO-35),18,pack of 25,DigiKey / Mouser,5,Input clamps
 3. Signal inputs,1N4148 diode,6,pack of 100,"Amazon (or AliExpress, cheaper but slower)",5,
-3. Signal inputs,"Resistor kit, 1/4 W 1 % metal film (600+ pcs)",≈ 70,kit,"Amazon (or AliExpress, cheaper but slower)",12,"Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"
+3. Signal inputs,"Resistor kit, 1/4 W 1 % metal film (600+ pcs)",≈ 50,kit,"Amazon (or AliExpress, cheaper but slower)",12,"Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"
 3. Signal inputs,Extra 10 kΩ resistors,20 total,pack of 50,"Amazon (or AliExpress, cheaper but slower)",4,Most kits only have 10–20 of each value
-3. Signal inputs,"100 nF ceramic capacitors, 50 V",11,pack of 50,"Amazon (or AliExpress, cheaper but slower)",5,
-4. Boards and inside wiring,"Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm",1 + 1,assorted pack,"Amazon (or AliExpress, cheaper but slower)",10,"Power board 9 × 15, logic board 7 × 9"
-4. Boards and inside wiring,"Screw terminals, 5.08 mm, 2- and 3-way, interlocking",37 positions,pack of ~40 pieces,"Amazon (or AliExpress, cheaper but slower)",9,KF301 / DG301 type
-4. Boards and inside wiring,"Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~10 cm plug to plug)",1 + 1,headers + 2 cables,"Amazon (or AliExpress, cheaper but slower)",12,Or crimp your own from ribbon and IDC sockets
-4. Boards and inside wiring,"Silicone hook-up wire 22 AWG, 6 colours (the book calls it ""thin wire"")",~5 m,kit,"Amazon (or AliExpress, cheaper but slower)",15,
-4. Boards and inside wiring,"Silicone wire 18 AWG, 6 colours (the book calls it ""thick wire"")",~4 m,kit,"Amazon (or AliExpress, cheaper but slower)",16,Board power paths and the dummy-load cable (heat-proof)
-4. Boards and inside wiring,Double-sided foam mounting tape,1,roll,"Amazon (or AliExpress, cheaper but slower)",6,Holds the current sensors and buck module
+3. Signal inputs,"100 nF ceramic capacitors, 50 V, 5 mm leg spacing",12,pack of 50,"Amazon (or AliExpress, cheaper but slower)",5,
+4. Board connectors and wire,"Screw terminals, 3.5 mm pitch, 2- and 3-way, interlocking (DG350 / KF350 type)",25 positions,pack of ~20 pieces,"Amazon (or AliExpress, cheaper but slower)",8,"SHIFT 3, DASH 8, SCREEN 4, ATF 3, SIG 7: e.g. 8 = 3 + 3 + 2. Or Phoenix PT 1,5/n-3,5-H in one piece"
+4. Board connectors and wire,"Screw terminals, 5.08 mm pitch, 2- and 3-way, interlocking (KF301 / DG301 type)",13 positions,pack of ~20 pieces,"Amazon (or AliExpress, cheaper but slower)",7,"PWR 3, SOL 6, LOAD 4. Or Phoenix MKDS 1,5/n-5,08 in one piece"
+4. Board connectors and wire,"Male pin header strips, 2.54 mm, 40-pin, breakable",3,pack of 10,"Amazon (or AliExpress, cheaper but slower)",5,The Mega's pins through the board (86) and the gyro (8)
+4. Board connectors and wire,"Silicone hook-up wire 22 AWG, 6 colours (the book calls it ""thin wire"")",~2 m,kit,"Amazon (or AliExpress, cheaper but slower)",15,Bench test wires and the dash pod's inside wiring
+4. Board connectors and wire,"Silicone wire 18 AWG, 6 colours (the book calls it ""thick wire"")",~2 m,kit,"Amazon (or AliExpress, cheaper but slower)",16,The dummy-load cable (heat-proof)
 5. Car harness and connectors,"Deutsch DT connector kit, 2–12 way, with crimper",X1–X6 + bypass plug,kit (~200 pcs),"Amazon (or AliExpress, cheaper but slower)",40,"Needs 3-, 4-, 6- and 8-way pairs"
 5. Car harness and connectors,"16 AWG automotive wire, red and black",~4 m,25 ft each,Auto-parts store,15,W1–W3
 5. Car harness and connectors,"18 AWG automotive wire, multi-colour kit",~15 m,kit,"Amazon (or AliExpress, cheaper but slower)",20,Solenoid wires W4–W9 and taps
@@ -54,7 +54,7 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 7. ATF temperature probe,"ATF to top up (Toyota Type T-IV, or as your owner's manual says)",~1 qt,1 qt,Auto-parts store,10,
 8. 3D printing,"PETG filament, 1 kg",~1 kg,2 rolls (don't run out mid-print),"Amazon (or AliExpress, cheaper but slower)",36,Skip if filament comes with the printer. Not PLA
 8. 3D printing,M3 heat-set inserts (~4 mm OD),12,pack of 50,"Amazon (or AliExpress, cheaper but slower)",8,
-8. 3D printing,M3 screw kit with countersunk screws and nuts,~20,kit,"Amazon (or AliExpress, cheaper but slower)",12,"8 and 10 mm countersunk, 6 mm pan head"
+8. 3D printing,M3 screw kit with countersunk screws and nuts,~35,kit,"Amazon (or AliExpress, cheaper but slower)",12,8 and 10 mm countersunk; 6 mm pan head (Mega and board posts); 8 mm pan head + nuts (MOSFET tabs)
 8. 3D printing,M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge),4 + 8 + 1,loose,Hardware store,9,
 9. Sequential shifter (Beavis Motorsport DIY),V-155-1C25 roller-lever microswitch,2,pack of 5,"Amazon (or AliExpress, cheaper but slower)",9,Genuine Omron is $4–6 each
 9. Sequential shifter (Beavis Motorsport DIY),"Pivot: 12 mm OD tube, 64 mm long, 1.6 mm wall; or an M12 × 75 bolt + nyloc nut + 2 washers",1,1,Hardware store,6,The tube needs the printed pivot pin and cap
@@ -67,12 +67,13 @@ Tools,Factory repair manual + wiring diagram for your VIN,,,,25,"Toyota TIS 2-da
 Tools,Multimeter with continuity beep,,,,25,
 Tools,"Temperature-controlled soldering iron, solder, flux",,,,45,e.g. Pinecil kit
 Tools,Wire stripper,,,,12,
+Tools,Flush cutters,,,,8,Trim every leg short under the board
 Tools,Heat gun,,,,20,For heat-shrink; a lighter is a poor substitute
 Tools,12 V 5 A DC power adapter + screw-terminal barrel jack,,,,15,Bench power for testing
 Tools,OBD-II scanner,,,,20,1999 is OBD-II
 Tools,IR thermometer,,,,15,
 Tools,Drain pan + funnel,,,,10,
 Tools,Hot-glue gun,,,,10,
-Tools,Drill + 3 mm and 6.5 mm bits,,,,0,6.5 mm opens the shifter's M6 holes; 3 mm only if your perfboards have no corner holes Usually owned
+Tools,Drill + 3 mm and 6.5 mm bits,,,,0,6.5 mm opens the shifter's M6 holes Usually owned
 Tools,3D printer,,,,0,You have one Owned
 Tools,Four jack stands,,,,0,You have them Owned

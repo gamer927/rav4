@@ -11,10 +11,11 @@ How much wiring that really is:
 |---|---|---|
 | In the car | New wires from the 8 cables to the car, the dash pod, the shifter and the heatsink | 36 wire ends, in 8 cables. Only **3** car wires get cut (S1, S2, SL); 8 more are tapped without cutting (7 at the engine computer, 1 fuse tap) |
 | Inside the box | Screwing each cable's wires into its own row of labelled terminals, right behind its hole | 36 screw terminals |
-| On the bench (build book parts 4–6) | Soldering the two boards and the hub, one small page at a time | ~135 short wires on the boards, ~40 on the hub |
+| On the bench (build book parts 4–6) | Soldering parts into the ready-made circuit board, in 6 steps | About 130 parts and 6 short links. **No wires**: the board does the wiring |
 
-The bench part is the long one, but it's done sitting down, a page at a time, with a check after
-each step. Once the boards are built, the box has two ribbon cables inside and nothing else, and
+The bench part is the long one, but it's done sitting down, a step at a time, with a check after
+each step. Once the board is built, it plugs onto the Mega and the box has no wiring inside but
+the cables to the terminals, and
 the [fit check](../hardware/README.md#does-everything-fit-the-fit-check) models every wire bundle
 in it and the room your hands need to reach the terminals.
 
@@ -95,7 +96,7 @@ Ground every cable shield **at the TCU end only**.
 | Pin | Wire | Signal | Inside the TCU |
 |---|---|---|---|
 | 1 | W1 | +12 V drivers, **5 A fuse** | TVS → current sensors and MOSFET drivers Q1–Q3, relay coils |
-| 2 | W2 | +12 V logic, **2 A fuse** | Reverse-polarity diode → TVS → 5 V buck; battery sense (47k/10k → A3) |
+| 2 | W2 | +12 V logic, **2 A fuse** | Reverse-polarity diode → TVS → 5 V regulator; battery sense (47k/10k → A3) |
 | 3 | W3 | Body ground | Star ground point |
 
 **X2 solenoids** (Detail A)
@@ -122,7 +123,7 @@ Ground every cable shield **at the TCU end only**.
 | 7 | W16 | Throttle ground **E2** | 10k series, 100 nF, clamp → A1 (measured, *not* tied to TCU ground) |
 | 8 | – | spare | |
 
-**X4 dash** (W20, 8-core: cores C1–C6 go to X4 on the logic board, C7–C8 go to J5 on the power board)
+**X4 dash** (W20, 8-core: all eight cores go to the board's DASH terminals, in order)
 
 | Pin | Core | Signal | Mega pin |
 |---|---|---|---|
@@ -132,8 +133,8 @@ Ground every cable shield **at the TCU end only**.
 | 4 | C4 | TEST button | D32 |
 | 5 | C5 | ON/OFF switch | D26 |
 | 6 | C6 | Common ground: the other side of every switch | GND |
-| J5a | C7 | ON/OFF **second pole**, in: +12 V DRV through F2 (PTC, 0.25 A) | (power board) |
-| J5b | C8 | ON/OFF **second pole**, out: +12 V to the relay coils K1–K3 and ULN2803 COM | A7 senses it (47k/10k) |
+| 7 | C7 | ON/OFF **second pole**, in: +12 V DRV through F2 (PTC, 0.25 A) | (none) |
+| 8 | C8 | ON/OFF **second pole**, out: +12 V to the relay coils K1–K3 and ULN2803 COM | A7 senses it (47k/10k) |
 
 Each control switches its core to C6 (ground). Closed means active. A broken wire reads as off:
 ON/OFF falls back to STOCK, and a broken ECO, SPORT or MANUAL wire leaves no mode on, which also
@@ -205,14 +206,18 @@ each end into its X2 harness wire and seal it.
 
 ## 6. Inside the TCU (Detail B: input and output circuits)
 
-The TCU is three boards joined by two ribbon cables. Exact part positions, every wire, and the
-order to build them in are in the [build book](05-build-book.md).
+The TCU is **one circuit board**, 200 × 150 mm, that plugs straight onto the Mega's pins (a
+"shield"): every connection below is a copper track on it. The design is in
+[`hardware/pcb/`](../hardware/pcb/README.md); where each part goes, and the order to solder them
+in, is in the [build book](05-build-book.md).
 
-| Board | What's on it |
+| Area of the board | What's there |
 |---|---|
-| **Power board** (90 × 150 mm perfboard) | Everything that touches the car's 12 V wiring: X1/X2/X3 and LOAD terminals, protection, the 5 V buck converter, relays, drivers, current sensors, optocouplers, speed comparator, throttle taps. Ribbon A (26-way) to the hub |
-| **Logic board** (90 × 70 mm perfboard) | X7 shifter, X4 dash, X5 screen and X6 ATF terminals (left to right, under their glands), seven switch input filters, ATF probe parts, the **gyro**. Ribbon B (16-way) to the hub |
-| **Hub** (Mega prototype shield) | Two ribbon sockets, each pin wired to its Mega pin |
+| Front edge, left to right | Screw terminals, one labelled group per gland: **SHIFT, DASH, SCREEN, ATF, SIG, PWR, SOL, LOAD** |
+| Front left | Seven switch input filters, the ATF probe parts, the **gyro** |
+| Middle | Optocouplers, the speed comparator, the throttle taps, the ULN2803 |
+| Right and back | Protection, the 5 V regulator, the relays, the MOSFET drivers and the current sensors |
+| Back left, underneath | The Arduino Mega (a notch in the board leaves its USB and power jacks free) |
 
 Detail A (the solenoid channel) is in [`wiring-detail-a.svg`](wiring-detail-a.svg). The other
 circuits are below. A 10 kΩ pull-down sits on **every** output that drives something (D6, D8,
@@ -229,7 +234,7 @@ CS1 OUT ── A4 (185 mV/A around ~2.5 V)
 D8 high → the ULN2803 pulls the gate down → the MOSFET switches +12 V to the solenoid. The
 zener clamp lets the solenoid release quickly, like the ECM's own driver.
 
-**Switch input** (×7: shifter D22, D23; dash D24, D25, D26, D32, D34), on the logic board
+**Switch input** (×7: shifter D22, D23; dash D24, D25, D26, D32, D34)
 ```
 +5V ── 2.2k ──┬── 1k ──┬── Mega pin
               │        ├── 100 nF ── GND
@@ -270,7 +275,7 @@ VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
 
 **Relay coils** (D6), powered through the ON/OFF switch's second pole
 ```
-+12 V DRV ── F2 (PTC 0.25 A) ── J5a ── C7 ── ON/OFF pole 2 ── C8 ── J5b = "+12 COIL"
++12 V DRV ── F2 (PTC 0.25 A) ── DASH 7 ── C7 ── ON/OFF pole 2 ── C8 ── DASH 8 = "+12 COIL"
 +12 COIL ── K1/K2/K3 coil (+) ; coil (−) ── ULN2803 OUT1-3 ; IN1-3 ── D6 (10k pull-down)
 +12 COIL ── ULN2803 COM, and UF4007 (DF, cathode on +12 COIL) to GND: flyback when the switch opens
 +12 COIL ── 47k ──┬── A7 ; 10k to GND, 100 nF, 5.1 V zener   (coil power sense)
@@ -349,7 +354,7 @@ centre console next to the factory gear lever and has its own cable (W22) to the
 | Part | Where | Why / how |
 |---|---|---|
 | **TCU box** ([3D-printed](../hardware/README.md#tcu-enclosure)) | Under the passenger side of the dash, below the glovebox, bolted **flat** to metal | See below |
-| **Gyro (MPU-6050)** | **Inside the TCU box**, soldered flat on the logic board | See below |
+| **Gyro (MPU-6050)** | **Inside the TCU box**, soldered flat on the circuit board | See below |
 | **Dummy-load heatsink** | Under the dash on metal, in moving air, ≥ 50 mm from plastic, wiring and the TCU box | ~14 W per resistor. Never inside the box |
 | **Dash pod** (screen and switches) | On top of the dash, driver's side | See below. Within 2.5 m of cable from the box, for the screen's I²C cable |
 | **Shifter base** (sequential lever) | Centre console, next to the factory gear lever, long side front-to-back | §8. Bolted down through its bottom plate |
@@ -402,7 +407,7 @@ nut until the pod holds its angle over bumps.
 
 ### The gyro
 
-- It sits **inside the TCU box**, soldered flat on the logic board. It shares the I²C bus with
+- It sits **inside the TCU box**, soldered flat on the circuit board. It shares the I²C bus with
   the screen, so it needs no extra cable.
 - **Level matters; where doesn't.** The firmware only uses the yaw rate (how fast the car is
   turning), and every point of a rigid car turns at the same rate. Under the dash reads the

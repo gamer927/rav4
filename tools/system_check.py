@@ -1,25 +1,28 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
 # Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
-"""Cross-checks between the firmware, the board layouts, the housings and the
-docs: the things no single test sees. Run: python3 tools/system_check.py
+"""Cross-checks between the firmware, the circuit, the circuit board, the
+housings and the docs: the things no single test sees. Run: python3 tools/system_check.py
 (also part of `make check`). Exits non-zero on any mismatch.
 
-  1. Every Mega pin the firmware uses is wired through the hub to the board
-     signal that means the same thing, and nothing on the hub is unused.
-  2. Every net that reaches a ribbon-header pin carries that pin's Mega signal.
+  1. Every Mega pin the firmware uses is wired (tools/boards.py's Mega pin
+     tables) to the signal that means the same thing, and no wired pin is unused.
+  2. Every net that reaches a Mega pin carries that pin's signal.
   3. Fail-safe pull-downs: every output that drives a relay or a solenoid
      driver has a 10k pull-down to ground (reset = everything off).
   4. Every switch input has its pull-up, series resistor, capacitor and clamps.
-  5. The ON/OFF hardware cut: the relay coils are fed only through J5 (the
-     switch's power pole), protected by the PTC, with a flyback diode, and
+  5. The ON/OFF hardware cut: the relay coils are fed only through the
+     switch's power pole (DASH terminals 7-8), protected by the PTC, with a flyback diode, and
      the coil-supply sense reaches A7. The build book's "no shorts" meter
      checks name pairs that really are on different nets.
-  6. The TCU box's glands, the boards' terminal groups and the cable map agree.
+  6. The TCU box's glands, the board's terminal groups and the cable map agree.
   7. Every screen text fits where it's drawn.
-  8. Part counts on the shopping list match the boards.
+  8. Part counts on the shopping list match the board.
   9. The spec's pin table lists every pin the firmware uses.
  10. Every relative link in the docs points at a file that exists.
+ 11. The circuit board file (hardware/pcb/) is the circuit: every pad on the
+     net the circuit says, and KiCad's design-rule check found no errors and
+     no unconnected pads. Read as text, so KiCad isn't needed here.
 """
 import glob
 import os
@@ -29,6 +32,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 import boards  # noqa: E402
+import pcb  # noqa: E402
 
 problems = []
 passed = []
@@ -66,7 +70,7 @@ for name, mega in fw_pins.items():
     if name in NOT_ON_HUB:
         continue
     if name not in EXPECT:
-        check(False, f"firmware pin {name} ({mega}) has no expected hub signal in system_check.py")
+        check(False, f"firmware pin {name} ({mega}) has no expected signal in system_check.py")
         continue
     hdr, word = EXPECT[name]
     rows = [r for r in hub[hdr] if r[2] == mega]
@@ -75,7 +79,7 @@ for name, mega in fw_pins.items():
 used = set(fw_pins.values()) | {"5V", "GND", "D20 (SDA)", "D21 (SCL)", "not connected"}
 for hdr, rows in hub.items():
     for pin_no, label, mega in rows:
-        check(mega in used, f"hub {hdr}{pin_no} goes to {mega}, which the firmware doesn't use")
+        check(mega in used, f"Mega pin table {hdr}{pin_no} goes to {mega}, which the firmware doesn't use")
 
 # ------------------------------------------------- 2. nets at the headers
 
@@ -139,7 +143,7 @@ check("DF.K" in coil_nodes, "a flyback diode (DF) on the coil supply for when th
 check("JA.25" in {n for w in power.wires if w["net"] == "COILSNS" for n in w["nodes"]},
       "the coil supply sense reaches A7 (JA.25)")
 check("TVS3.K" in {n for w in power.wires if w["net"] == "5V" for n in w["nodes"]},
-      "a TVS across the 5 V rail (a shorted buck module blows the logic fuse)")
+      "a TVS across the 5 V rail (a shorted regulator blows the logic fuse)")
 
 # The build book's "no shorts" pairs: each end is wired, and the two ends are
 # on different nets (else the book would call a correct beep a short).
@@ -150,16 +154,13 @@ for board in (power, logic):
 
 # ------------------------------------------------- 6. glands, terminals, cable map
 scad = read("hardware/tcu_enclosure.scad")
-glands = re.findall(r'\["(\w+)", 1[25]\.\d, [\d.]+\]', scad)
+glands = re.findall(r'\["(\w+)", 1[25]\.\d\]', scad.split("gland_size = [")[1].split(";")[0])
 cable_map = re.findall(r'\("(\w+)", "#', read("tools/cable_map.py"))
 check(glands == cable_map, f"TCU box glands {glands} = cable map {cable_map}")
-wires = re.findall(r'\["(\w+)", "(power|logic)", "(\w+)"', scad)
-for gland, board_name, group in wires:
-    board = power if board_name == "power" else logic
-    check(gland in glands, f"gland_wires names gland {gland}")
-    check(any(p.ref.startswith(group) and p.fp["kind"] == "TB" for p in board.parts),
-          f"gland {gland}'s wires go to terminals {group} on the {board_name} board")
-check(sorted({g for g, _, _ in wires}) == sorted(glands), "every gland's wires are routed in the fit check")
+board_terms = [g for g, _, _, _ in pcb.TERMINALS]
+check(board_terms == glands, f"board terminal groups {board_terms}, left to right, = the box's glands")
+env_terms = re.findall(r'\["(\w+)", [\d.]+, [\d.]+, [\d.]+\]', read("hardware/pcb_envelope.scad").split("pcb_terminals")[1])
+check(env_terms == board_terms, f"hardware/pcb_envelope.scad's terminals {env_terms} are up to date")
 
 # ------------------------------------------------- 7. screen text widths
 for call in re.findall(r'say\(([^;]*)\);', ino):
@@ -185,10 +186,10 @@ for n in names:
 
 # ------------------------------------------------- 8. shopping list counts
 shop = read("tools/shopping_list.py")
+circuit = pcb.Circuit()
 counts = {}
-for b in (power, logic):
-    for p in b.parts:
-        counts[p.value] = counts.get(p.value, 0) + 1
+for p in circuit.parts.values():
+    counts[p["value"]] = counts.get(p["value"], 0) + 1
 
 
 def need(item_words):
@@ -198,12 +199,12 @@ def need(item_words):
     return None
 
 
-check(need("BAT85") == str(counts.get("BAT85")), f"BAT85: list says {need('BAT85')}, boards use {counts.get('BAT85')}")
-check(need("UF4007") == str(counts.get("UF4007")), f"UF4007: list says {need('UF4007')}, boards use {counts.get('UF4007')}")
-check(need("100 nF") == str(counts.get("100 nF")), f"100 nF: list says {need('100 nF')}, boards use {counts.get('100 nF')}")
-check(need("Extra 10 k") == f"{counts.get('10k')} total", f"10k: list says {need('Extra 10 k')}, boards use {counts.get('10k')}")
+check(need("BAT85") == str(counts.get("BAT85")), f"BAT85: list says {need('BAT85')}, board uses {counts.get('BAT85')}")
+check(need("UF4007") == str(counts.get("UF4007")), f"UF4007: list says {need('UF4007')}, board uses {counts.get('UF4007')}")
+check(need("100 nF") == str(counts.get("100 nF")), f"100 nF: list says {need('100 nF')}, board uses {counts.get('100 nF')}")
+check(need("Extra 10 k") == f"{counts.get('10k')} total", f"10k: list says {need('Extra 10 k')}, board uses {counts.get('10k')}")
 zeners = sum(v for k, v in counts.items() if k.startswith("1N47"))
-check(need("zener diode kit") == str(zeners), f"zeners: list says {need('zener diode kit')}, boards use {zeners}")
+check(need("zener diode kit") == str(zeners), f"zeners: list says {need('zener diode kit')}, board uses {zeners}")
 check(need("PTC") == str(counts.get("PTC 0.25 A")), "PTC count")
 check(need("P6KE6.8A") == str(counts.get("P6KE6.8A")), "P6KE6.8A count")
 check("2-pole" in shop, "the ON/OFF switch on the shopping list is 2-pole")
@@ -222,6 +223,39 @@ for f in glob.glob(os.path.join(ROOT, "*.md")) + glob.glob(os.path.join(ROOT, "d
         if t.startswith("http") or "`" in t or t == "tps":
             continue
         check(os.path.exists(os.path.join(d, t)), f"{os.path.relpath(f, ROOT)} links to {t}")
+
+# ------------------------------------------------- 11. the circuit board
+
+
+def board_pads(text):
+    """{(ref, pad): net} from a .kicad_pcb file."""
+    out = {}
+    for fp in text.split("\n  (footprint ")[1:]:
+        ref = re.search(r'\(fp_text reference "([^"]+)"', fp).group(1)
+        for pd in fp.split("(pad ")[1:]:
+            num = re.match(r'"([^"]*)"', pd).group(1)
+            net = re.search(r'\(net \d+ "([^"]*)"\)', pd.split("(pad ")[0])
+            if num:
+                out.setdefault((ref, num), set()).add(net.group(1) if net else None)
+    return out
+
+
+pcb_text = read("hardware/pcb/rav4-tcu.kicad_pcb")
+on_board = board_pads(pcb_text)
+want = {}
+for n in circuit.nets:
+    for r, p in n["pins"]:
+        want[("A1" if r == "MEGA" else r, p)] = n["name"]
+for key, net in sorted(want.items()):
+    check(on_board.get(key) == {net}, f"board pad {key[0]}.{key[1]} is on {net} (file has {on_board.get(key)})")
+extra = [k for k, v in on_board.items() if k not in want and v != {None}]
+check(not extra, f"board pads on a net the circuit doesn't have: {extra[:8]}")
+check(sorted(re.findall(r'\(fp_text reference "([^"]+)"', pcb_text)) == sorted(set(circuit.parts) | {f"H{i + 1}" for i in range(len(pcb.MOUNT_HOLES))}),
+      "the board has exactly the circuit's parts, plus the mounting holes")
+drc_text = read("hardware/pcb/drc.txt")
+check("** Found 0 unconnected pads **" in drc_text, "KiCad DRC: no unconnected pads")
+check("Severity: error" not in drc_text, "KiCad DRC: no errors")
+check(os.path.exists(os.path.join(ROOT, "hardware", "pcb", "rav4-tcu-gerbers.zip")), "the Gerber zip is there to upload")
 
 print(f"system check: {len(passed)} passed, {len(problems)} problems")
 for p in problems:

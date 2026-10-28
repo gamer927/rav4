@@ -18,6 +18,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 DK = "DigiKey / Mouser"
 AMZ = "Amazon (or AliExpress, cheaper but slower)"
 HW = "Hardware store"
+FAB = "Board maker (JLCPCB, PCBWay, ...)"
 AUTO = "Auto-parts store"
 
 # (section, item, need, buy, store, est. US$, notes)
@@ -25,13 +26,16 @@ ITEMS = [
     # ---------------------------------------------------------------- 1
     ("1. Brain and power", "Arduino Mega 2560 R3", "1", "1 (Elegoo or similar clone with the 16U2 USB chip)", AMZ, 22,
      "Genuine Arduino is ~$48. Comes with a USB cable"),
-    ("1. Brain and power", "Prototype shield for the Mega (\"Mega ProtoShield\")", "1", "1", AMZ, 8,
-     "The hub: two ribbon sockets wired to the Mega's pins"),
-    ("1. Brain and power", "LM2596HV buck converter module, 4.5–60 V in", "1", "pack of 2 (one spare)", AMZ, 8,
-     "Must say **HV** (60 V input). Plain LM2596 is only 40 V"),
+    ("1. Brain and power", "The TCU circuit board (upload hardware/pcb/rav4-tcu-gerbers.zip)", "1",
+     "5 (the usual minimum)", FAB, 30,
+     "2 layers, 1.6 mm, 1 oz copper, lead-free HASL. Bare board: you solder the parts. See hardware/pcb/README.md"),
+    ("1. Brain and power", "RECOM R-78HB5.0-0.5 regulator, 5 V 0.5 A, 9–72 V in", "1", "1", DK, 8,
+     "The 5 V supply for the Mega. Fixed 5 V: nothing to adjust"),
+    ("1. Brain and power", "47 µF 16 V electrolytic capacitor (radial, 6.3 mm, 2.5 mm legs)", "1", "pack of 10", DK, 3,
+     "On the regulator's output"),
     ("1. Brain and power", "1.5KE27A TVS diode", "2", "pack of 10", DK, 4, "Littelfuse 1.5KE27A"),
     ("1. Brain and power", "P6KE6.8A TVS diode", "1", "pack of 5", DK, 3,
-     "Across the 5 V rail: if the buck module fails shorted, it blows the 2 A fuse"),
+     "Across the 5 V rail: if the regulator fails shorted, it blows the 2 A fuse"),
     ("1. Brain and power", "Resettable fuse (PTC), 0.25 A hold, radial", "1", "pack of 5", DK, 3,
      "e.g. Bourns MF-R025. Protects the relay-power wires to the ON/OFF switch"),
     ("1. Brain and power", "1N5822 Schottky diode, 3 A", "1", "pack of 10", DK, 3, "Reverse-polarity protection"),
@@ -42,9 +46,11 @@ ITEMS = [
     # ---------------------------------------------------------------- 2
     ("2. Solenoid control", "Omron G2RL-2-DC12 relay (DPDT, 12 V)", "3", "4 (one spare)", DK, 10,
      "The factory/box changeover. Don't substitute a single-pole relay"),
-    ("2. Solenoid control", "IRF4905 P-channel MOSFET, TO-220", "3", "pack of 5", DK, 9, "Infineon IRF4905PBF"),
+    ("2. Solenoid control", "IRF4905 P-channel MOSFET, TO-220", "3", "pack of 5", DK, 9,
+     "Infineon IRF4905PBF. They lie flat, bolted to the board's copper (M3 × 8 screw and nut each)"),
     ("2. Solenoid control", "ACS712-05B current sensor module (5 A)", "3", "pack of 3–5", AMZ, 11,
-     "Measures each solenoid's current for the self-test"),
+     "Measures each solenoid's current for the self-test. The common blue module with a "
+     "2-way screw terminal and 3 pins (VCC, OUT, GND)"),
     ("2. Solenoid control", "ULN2803A driver, DIP-18", "1", "2 (one spare)", DK, 3,
      "Through-hole DIP: e.g. Toshiba ULN2803APG. Not the SOIC version"),
     ("2. Solenoid control", "1 W zener diode kit (1N4728A–1N4764A)", "10", "kit", AMZ, 11,
@@ -60,23 +66,24 @@ ITEMS = [
     ("3. Signal inputs", "LM393 comparator, DIP-8", "1", "pack of 10", AMZ, 5, ""),
     ("3. Signal inputs", "BAT85 Schottky diode (DO-35)", "18", "pack of 25", DK, 5, "Input clamps"),
     ("3. Signal inputs", "1N4148 diode", "6", "pack of 100", AMZ, 5, ""),
-    ("3. Signal inputs", "Resistor kit, 1/4 W 1 % metal film (600+ pcs)", "≈ 70", "kit", AMZ, 12,
+    ("3. Signal inputs", "Resistor kit, 1/4 W 1 % metal film (600+ pcs)", "≈ 50", "kit", AMZ, 12,
      "Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"),
     ("3. Signal inputs", "Extra 10 kΩ resistors", "20 total", "pack of 50", AMZ, 4,
      "Most kits only have 10–20 of each value"),
-    ("3. Signal inputs", "100 nF ceramic capacitors, 50 V", "11", "pack of 50", AMZ, 5, ""),
+    ("3. Signal inputs", "100 nF ceramic capacitors, 50 V, 5 mm leg spacing", "12", "pack of 50", AMZ, 5, ""),
     # ---------------------------------------------------------------- 4
-    ("4. Boards and inside wiring", "Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm", "1 + 1",
-     "assorted pack", AMZ, 10, "Power board 9 × 15, logic board 7 × 9"),
-    ("4. Boards and inside wiring", "Screw terminals, 5.08 mm, 2- and 3-way, interlocking", "37 positions",
-     "pack of ~40 pieces", AMZ, 9, "KF301 / DG301 type"),
-    ("4. Boards and inside wiring", "Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~10 cm plug to plug)",
-     "1 + 1", "headers + 2 cables", AMZ, 12, "Or crimp your own from ribbon and IDC sockets"),
-    ("4. Boards and inside wiring", "Silicone hook-up wire 22 AWG, 6 colours (the book calls it \"thin wire\")", "~5 m", "kit", AMZ, 15, ""),
-    ("4. Boards and inside wiring", "Silicone wire 18 AWG, 6 colours (the book calls it \"thick wire\")", "~4 m", "kit", AMZ, 16,
-     "Board power paths and the dummy-load cable (heat-proof)"),
-    ("4. Boards and inside wiring", "Double-sided foam mounting tape", "1", "roll", AMZ, 6,
-     "Holds the current sensors and buck module"),
+    ("4. Board connectors and wire", "Screw terminals, 3.5 mm pitch, 2- and 3-way, interlocking (DG350 / KF350 type)",
+     "25 positions", "pack of ~20 pieces", AMZ, 8,
+     "SHIFT 3, DASH 8, SCREEN 4, ATF 3, SIG 7: e.g. 8 = 3 + 3 + 2. Or Phoenix PT 1,5/n-3,5-H in one piece"),
+    ("4. Board connectors and wire", "Screw terminals, 5.08 mm pitch, 2- and 3-way, interlocking (KF301 / DG301 type)",
+     "13 positions", "pack of ~20 pieces", AMZ, 7,
+     "PWR 3, SOL 6, LOAD 4. Or Phoenix MKDS 1,5/n-5,08 in one piece"),
+    ("4. Board connectors and wire", "Male pin header strips, 2.54 mm, 40-pin, breakable", "3", "pack of 10", AMZ, 5,
+     "The Mega's pins through the board (86) and the gyro (8)"),
+    ("4. Board connectors and wire", "Silicone hook-up wire 22 AWG, 6 colours (the book calls it \"thin wire\")", "~2 m", "kit", AMZ, 15,
+     "Bench test wires and the dash pod's inside wiring"),
+    ("4. Board connectors and wire", "Silicone wire 18 AWG, 6 colours (the book calls it \"thick wire\")", "~2 m", "kit", AMZ, 16,
+     "The dummy-load cable (heat-proof)"),
     # ---------------------------------------------------------------- 5
     ("5. Car harness and connectors", "Deutsch DT connector kit, 2–12 way, with crimper", "X1–X6 + bypass plug",
      "kit (~200 pcs)", AMZ, 40, "Needs 3-, 4-, 6- and 8-way pairs"),
@@ -119,8 +126,8 @@ ITEMS = [
     ("8. 3D printing", "PETG filament, 1 kg", "~1 kg", "2 rolls (don't run out mid-print)", AMZ, 36,
      "Skip if filament comes with the printer. Not PLA"),
     ("8. 3D printing", "M3 heat-set inserts (~4 mm OD)", "12", "pack of 50", AMZ, 8, ""),
-    ("8. 3D printing", "M3 screw kit with countersunk screws and nuts", "~20", "kit", AMZ, 12,
-     "8 and 10 mm countersunk, 6 mm pan head"),
+    ("8. 3D printing", "M3 screw kit with countersunk screws and nuts", "~35", "kit", AMZ, 12,
+     "8 and 10 mm countersunk; 6 mm pan head (Mega and board posts); 8 mm pan head + nuts (MOSFET tabs)"),
     ("8. 3D printing", "M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge)",
      "4 + 8 + 1", "loose", HW, 9, ""),
     # ---------------------------------------------------------------- 9
@@ -147,13 +154,14 @@ TOOLS = [
     ("Multimeter with continuity beep", "", 25, ""),
     ("Temperature-controlled soldering iron, solder, flux", "e.g. Pinecil kit", 45, ""),
     ("Wire stripper", "", 12, ""),
+    ("Flush cutters", "Trim every leg short under the board", 8, ""),
     ("Heat gun", "", 20, "For heat-shrink; a lighter is a poor substitute"),
     ("12 V 5 A DC power adapter + screw-terminal barrel jack", "Bench power for testing", 15, ""),
     ("OBD-II scanner", "1999 is OBD-II", 20, ""),
     ("IR thermometer", "", 15, ""),
     ("Drain pan + funnel", "", 10, ""),
     ("Hot-glue gun", "", 10, ""),
-    ("Drill + 3 mm and 6.5 mm bits", "6.5 mm opens the shifter's M6 holes; 3 mm only if your perfboards have no corner holes", 0, "Usually owned"),
+    ("Drill + 3 mm and 6.5 mm bits", "6.5 mm opens the shifter's M6 holes", 0, "Usually owned"),
     ("3D printer", "You have one", 0, "Owned"),
     ("Four jack stands", "You have them", 0, "Owned"),
 ]
@@ -187,7 +195,7 @@ def main():
     md.append("<!-- Generated by tools/shopping_list.py: edit the table there, then re-run it. -->")
     md.append("")
     md.append("Everything for the 1999 RAV4 transmission controller, including the 3D-printed housings "
-              "and the sequential shifter. Quantities match the board layouts and the "
+              "and the sequential shifter. Quantities match the circuit board and the "
               "[build book](05-build-book.md). A spreadsheet version is in "
               "[`shopping-list.csv`](shopping-list.csv).")
     md.append("")
@@ -207,7 +215,8 @@ def main():
     md.append(f"| Tools, if you own none of them | {money(tools_total)} |")
     md.append("")
     md.append("Expect roughly **±25 %** depending on where you shop. Many packs leave spares, which is "
-              "useful: you'll want a spare relay, MOSFET and buck module if something goes wrong.")
+              "useful: you'll want a spare relay and MOSFET if something goes wrong. The circuit board "
+              "comes in fives: the spares are there if a first attempt goes badly.")
     md.append("")
     md.append("## Before you buy: measure these on the car first")
     md.append("")
@@ -227,7 +236,7 @@ def main():
     md.append("")
     md.append("## Where to order")
     md.append("")
-    md.append("Batching keeps shipping down: one **DigiKey or Mouser** order for the exact electronic "
+    md.append("Batching keeps shipping down: one **board maker** order for the circuit board (do it first: it takes 1–2 weeks), one **DigiKey or Mouser** order for the exact electronic "
               "parts, one **Amazon/AliExpress** order for modules and kits, then a trip to the "
               "**hardware store** and the **auto-parts store**.")
     md.append("")
@@ -255,7 +264,7 @@ def main():
     md.append("")
     md.append("## By store (for ordering)")
     md.append("")
-    for store in (DK, AMZ, HW, AUTO):
+    for store in (FAB, DK, AMZ, HW, AUTO):
         items = [i for i in ITEMS if i[4] == store]
         md.append(f"**{store}** — {len(items)} items, about {money(sum(i[5] for i in items))}: "
                   + "; ".join(i[1] for i in items) + ".")

@@ -5,7 +5,7 @@ CXXFLAGS ?= -std=c++11 -Wall -Wextra -Werror -O1 -g
 LOGIC := firmware/tcu/tcu_logic.cpp firmware/tcu/self_test.cpp
 HEADERS := $(wildcard firmware/tcu/*.h)
 
-.PHONY: test system screens calibrate-test check avr clean
+.PHONY: test system screens calibrate-test check avr pcb clean
 
 test: build/test_tcu_logic build/test_self_test
 	./build/test_tcu_logic
@@ -42,12 +42,17 @@ calibrate-test: build/system_test
 	python3 test/test_calibrate.py build/cal.log
 
 # Everything: unit tests, system test, calibration helper, and the
-# cross-checks between firmware, boards, housings and docs.
+# cross-checks between firmware, circuit, circuit board, housings and docs.
 check: test system calibrate-test
 	python3 tools/system_check.py
 
 avr:
 	tools/avr_build.sh
+
+# The circuit board: place, route, DRC, Gerbers, build-book steps (needs KiCad 7+).
+# Then tools/build_stl.sh, so the box's fit check sees the new board.
+pcb:
+	python3 tools/pcb.py
 
 clean:
 	rm -rf build
