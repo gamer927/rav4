@@ -34,11 +34,6 @@ You build three pieces:
   temperature in °F. If something's wrong, it says what, in words.
 - **An aircraft-style self-test** you run from the dash, and a key-on check every time you start.
 
-**What it isn't:** it's still a 4-speed automatic with a torque converter, so a shift takes a
-moment rather than the instant bang of a race gearbox, and there's no extra power. It's a fun
-project for your own car. Test it off public roads first (the build book shows how), and check
-your local rules and insurance.
-
 **What it takes:** about $650 in parts, a 3D printer, a soldering iron and a multimeter. You
 don't need to know electronics: the [build book](docs/05-build-book.md) goes one small step at a
 time, Lego-style, with a meter check after every step, and a calibration helper does the maths.
@@ -49,9 +44,67 @@ car then drives exactly as it did from the factory. The ON/OFF switch cuts the r
 **directly, in hardware**, so OFF works even if the Arduino itself has failed. How every failure
 is handled, and how each one is tested, is in the [system review](docs/06-system-review.md).
 
+## What it does and doesn't do (in real life)
+
+**It does:**
+- Let you pick every gear yourself with the lever (MANUAL), or shift for you on its own schedule
+  (ECO or SPORT).
+- Change **when** the transmission shifts, and when the torque converter locks up.
+- Keep the converter locked more of the time: lower rpm, cooler transmission fluid, and slightly
+  better mpg.
+- Hold the gear through corners, and in SPORT downshift as you brake, so you're in the right gear
+  for the exit.
+- Show the gear, the mode and the transmission temperature, and explain any problem in words.
+- Hand back to the stock car instantly (ON/OFF off), or come out completely (the BYPASS plug).
+
+**It doesn't:**
+- **Add power.** The engine, throttle and engine computer are untouched. 0–60 mph changes by a
+  few tenths of a second at most. It feels more responsive, not faster.
+- **Make shifts faster or firmer.** Each shift still takes about half a second, and its firmness
+  is set by the transmission's own hydraulics, as stock. Shifts feel like stock shifts, just at
+  different times.
+- **Give engine braking from 2nd or 1st.** In D this transmission freewheels in those gears; only
+  the 4→3 downshift slows the car. In MANUAL, downshifts are for holding power (corner exits,
+  hills), not for slowing down.
+- **Blip the throttle** on downshifts (see [rev matching](#what-about-rev-matching-on-downshifts)
+  below).
+- **Set off warning lights or trouble codes**, or change emissions or inspections: dummy
+  resistors keep the engine computer happy.
+- **Fit other cars as-is.** It's built for the 1999 RAV4 4WD automatic. Other first-generation
+  RAV4 automatics are close, but check [spec §0](docs/02-revised-spec.md) first.
+- **Come proven.** It hasn't been built or driven yet ([Status](#status)). Test it off public
+  roads first (the build book shows how), and check your local rules and insurance.
+
+### Day to day
+
+You'll probably leave it in **ECO**. It drives like the stock car, only calmer: it upshifts
+earlier and runs at lower rpm, so it's quieter, and the converter locks from about 23 mph, so it
+feels more connected and less "slushy". Small pedal movements are smoothed out, so it doesn't
+shift back and forth. Floor it and it still kicks down instantly. At very low rpm in 3rd you may
+feel a slight hum; that can be tuned. **SPORT** feels sharper, not faster. **MANUAL** is the fun
+one.
+
+### MPG (estimates until it's measured on a real car)
+
+| Driving | Compared with stock | Why |
+|---|---|---|
+| Steady, flat highway | about 0–2 % better | Stock already locks up in 4th at a steady cruise |
+| Hills, headwinds, 70 mph and up | about 2–5 % better | Stock unlocks and slips on grades; this stays locked up to 95 % throttle |
+| Town and mixed driving in ECO | about 2–6 % better | Earlier upshifts, earlier lockup, fewer extra shifts |
+| SPORT or MANUAL, driven hard | worse | High rpm, on purpose |
+
+So expect a few percent better in ECO, mostly from hills and highway speed, not a big jump. Your
+right foot matters more than any mode. To measure yours, run one tank with ON/OFF off and the
+next in ECO, on the same commute. Do it twice, because weather and traffic alone can swing one
+tank by 5 %.
+
+**Transmission life:** more time locked up in ECO and on the highway means less heat, and heat is
+what wears out automatic transmission fluid and clutches. Driving hard in SPORT or MANUAL means
+more wear, as on any car. The screen keeps an eye on the fluid temperature.
+
 ![Dash pod screen](docs/oled-screens.png)
 
-## What it does
+## The modes in detail
 
 All speeds are in **mph**; the screen shows temperatures in **°F**.
 
