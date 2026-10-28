@@ -167,7 +167,7 @@ these wires being the right ones.
   such as JLCPCB or PCBWay. Choose: **2 layers, 1.6 mm thick, 1 oz copper, lead-free HASL**, any
   colour, quantity **5** (the minimum). About $20–40 for five, with shipping. Details:
   [hardware/pcb/README.md](../hardware/pcb/README.md).
-- [ ] Open the [shopping list](04-shopping-list.md) (about $675 of parts).
+- [ ] Open the [shopping list](04-shopping-list.md) (about $625 of parts).
 - [ ] Pick the brass tee that matches **your hose size**, and the fuse tap that matches **your
   fuse size** (both from part 0).
 - [ ] Order the small electronic parts from **DigiKey or Mouser**.
@@ -223,7 +223,7 @@ The files are in `hardware/stl/`.
 - [ ] **Make your bench power lead:** 12 V adapter → the screw-terminal plug → a **5 A fuse** on
   the + wire. Every test on the table goes through this fuse.
 - [ ] **Look over the bare board** under a bright light. Everything is printed on it: each part's
-  name and value (like **RU11 2.2k** or **DL1 BAT85**) on or beside its outline, a stripe where a
+  name and value (like **RU11 2.2k** or **DI1 1N4148**) on or beside its outline, a stripe where a
   diode's stripe goes, a notch where a chip's notch goes, a **+** for the big capacitors, and the
   name of every screw terminal and every Mega pin the TCU uses. Check it against the picture at
   the start of part 4: the outline, the cut-away back-left corner and the 5 mounting holes.
@@ -557,8 +557,8 @@ so the engine computer doesn't notice anything is different.
   **3.2 mm** bit, going through between the fins.
 - [ ] Put a thin layer of heatsink paste under each resistor, then bolt it down: **M3 × 16**
   screws from the resistor side, nuts between the fins (2 per resistor). Firm, not crushing.
-- [ ] Join one end of all three with a black silicone wire: label it **LOAD GND**.
-- [ ] Put a white silicone wire on the other end of each one. Label them **LOAD 1, LOAD 2,
+- [ ] Join one end of all three with a black 18 AWG wire: label it **LOAD GND**.
+- [ ] Put a white 18 AWG wire on the other end of each one. Label them **LOAD 1, LOAD 2,
   LOAD 3**.
 
 ✅ **CHECK:**

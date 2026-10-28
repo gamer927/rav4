@@ -55,8 +55,8 @@ ITEMS = [
      "about 31 × 13 mm (the board fits up to 33 × 15): a 2-way screw terminal and 3 pins (VCC, OUT, GND)"),
     ("2. Solenoid control", "ULN2803A driver, DIP-18", "1", "2 (one spare)", DK, 3,
      "Through-hole DIP: e.g. Toshiba ULN2803APG. Not the SOIC version"),
-    ("2. Solenoid control", "1 W zener diode kit (1N4728A–1N4764A)", "10", "kit", AMZ, 11,
-     "Uses 1N4733A 5.1 V ×4, 1N4744A 15 V ×3, 1N4749A 24 V ×3"),
+    ("2. Solenoid control", "1 W zener diodes (DO-41): 1N4733A 5.1 V, 1N4744A 15 V, 1N4749A 24 V", "4 + 3 + 3",
+     "5 + 4 + 4", DK, 4, "In the same order as the rest: about 30¢ each, cheaper than a kit"),
     ("2. Solenoid control", "UF4007 fast diode", "4", "pack of 10", DK, 3, "1N4007 also works"),
     ("2. Solenoid control", "15 Ω 50 W aluminium-housed resistor", "3", "3", DK, 15,
      "Dummy loads, e.g. TE HSA5015RJ or Arcol HS50 15R"),
@@ -64,17 +64,18 @@ ITEMS = [
      "For the dummy resistors, outside the box"),
     ("2. Solenoid control", "Thermal paste", "1", "small tube", AMZ, 6, "Skip if you have some"),
     # ---------------------------------------------------------------- 3
-    ("3. Signal inputs", "PC817 optocoupler, DIP-4", "6", "pack of 20", AMZ, 6, ""),
-    ("3. Signal inputs", "LM393 comparator, DIP-8", "1", "pack of 10", AMZ, 5, ""),
-    ("3. Signal inputs", "DIP sockets, 8-pin and 18-pin (0.3\" wide)", "1 + 1", "assorted pack", AMZ, 6,
+    ("3. Signal inputs", "PC817 optocoupler, DIP-4", "6", "7 (one spare)", DK, 3,
+     "Lite-On LTV-817 is the same part with the same pins"),
+    ("3. Signal inputs", "LM393 comparator, DIP-8", "1", "2 (one spare)", DK, 1, "e.g. TI LM393P"),
+    ("3. Signal inputs", "DIP sockets, 8-pin and 18-pin (0.3\" wide)", "1 + 1", "1 + 1", DK, 2,
      "For the LM393 and the ULN2803A: no soldering iron on the chips, and easy to swap"),
-    ("3. Signal inputs", "BAT85 Schottky diode (DO-35)", "18", "pack of 25", DK, 5, "Input clamps"),
-    ("3. Signal inputs", "1N4148 diode", "6", "pack of 100", AMZ, 5, ""),
-    ("3. Signal inputs", "Resistor kit, 1/4 W 1 % metal film (600+ pcs), bodies about 6 mm long", "≈ 50", "kit", AMZ, 12,
-     "Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"),
-    ("3. Signal inputs", "Extra 10 kΩ resistors", "23 total", "pack of 50", AMZ, 4,
-     "20 on the board, 1 on the screen, 2 for the bench test. Most kits only have 10–20 of each value"),
-    ("3. Signal inputs", "100 nF ceramic capacitors, 50 V, 5 mm leg spacing", "12", "pack of 50", AMZ, 5, ""),
+    ("3. Signal inputs", "1N4148 diode", "6", "10", DK, 1, ""),
+    ("3. Signal inputs", "Resistors, 1/4 W 1 % metal film, body about 6 mm long",
+     "10k ×26, 2.2k ×10, 4.7k ×4, 3.3k ×3, 47k ×2, 100 ×1, 1.8k ×1, 22k ×1, 1M ×1",
+     "30 of 10k, 10 of 2.2k, 5 of the rest", DK, 7,
+     "e.g. Yageo MFR-25FBF52-10K (the end of the part number is the value: -2K2, -4K7, -100R, -1M). "
+     "10k: 23 on the board, 1 on the screen, 2 for the bench test. They come in bags labelled with the value"),
+    ("3. Signal inputs", "100 nF ceramic capacitors, 50 V, 5 mm leg spacing", "12", "15", DK, 3, "X7R, radial"),
     # ---------------------------------------------------------------- 4
     ("4. Board connectors and wire", "Screw terminals, 3.5 mm pitch, 2- and 3-way, interlocking (DG350 / KF350 type)",
      "25 positions", "pack of ~20 pieces", AMZ, 8,
@@ -86,14 +87,14 @@ ITEMS = [
      "The Mega's pins through the board (86) and the gyro (8)"),
     ("4. Board connectors and wire", "Silicone hook-up wire 22 AWG, 6 colours (the book calls it \"thin wire\")", "~2 m", "kit", AMZ, 15,
      "Bench test wires and the dash pod's inside wiring"),
-    ("4. Board connectors and wire", "Silicone wire 18 AWG, 6 colours (the book calls it \"thick wire\")", "~2 m", "kit", AMZ, 16,
-     "The dummy-load cable (heat-proof)"),
     # ---------------------------------------------------------------- 5
     ("5. Car harness and connectors", "Deutsch DT connector kit, 2–12 way, with crimper", "X1–X6 + bypass plug",
      "kit (~200 pcs)", AMZ, 40, "Needs 3-, 4-, 6- and 8-way pairs"),
     ("5. Car harness and connectors", "16 AWG automotive wire, red and black", "~4 m", "25 ft each", AUTO, 15, "W1–W3"),
-    ("5. Car harness and connectors", "18 AWG automotive wire, multi-colour kit", "~15 m", "kit", AMZ, 20,
-     "Solenoid wires W4–W9 and taps"),
+    ("5. Car harness and connectors", "18 AWG automotive wire, TXL or GXL (cross-linked, 125 °C), multi-colour kit",
+     "~17 m", "kit", AMZ, 25,
+     "Solenoid wires W4–W9, taps, and the dummy-load cable. Cross-linked wire takes the heat near the "
+     "transmission and the dummy resistors, so no separate silicone wire is needed"),
     ("5. Car harness and connectors", "Shielded cable: 8-core 24 AWG, 4-core, 3-core", "3 m + 2.5 m + 4.5 m",
      "5 m of each", AMZ, 26, "Dash pod switches (8-core), screen (4-core, ≤ 2.5 m), ATF probe and shifter (3-core)"),
     ("5. Car harness and connectors", "Heat-shrink assortment incl. adhesive-lined", "1", "kit", AMZ, 12, ""),
@@ -111,8 +112,8 @@ ITEMS = [
      "pack of 5", AMZ, 10, "TEST"),
     ("6. Dash pod controls and screen", "2.42\" OLED module, 128 × 64, SSD1309, I²C-capable", "1", "1", AMZ, 20,
      "e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat"),
-    ("6. Dash pod controls and screen", "1 µF capacitor (ceramic or electrolytic, 16 V+)", "1", "pack", AMZ, 4,
-     "Power-on reset for the screen, with a 10k from the resistor kit"),
+    ("6. Dash pod controls and screen", "1 µF capacitor (ceramic or electrolytic, 16 V+)", "1", "2", DK, 1,
+     "Power-on reset for the screen, with one of the 10k resistors"),
     ("6. Dash pod controls and screen", "Thin double-sided foam tape (about 1 mm)", "1", "roll", AMZ, 5,
      "Holds the screen in its pocket in the dash pod"),
     ("6. Dash pod controls and screen", "GY-521 (MPU-6050) gyro module", "1", "pack of 3", AMZ, 9, ""),
@@ -244,8 +245,9 @@ def main():
     md.append("")
     md.append("## Where to order")
     md.append("")
-    md.append("Batching keeps shipping down: one **board maker** order for the circuit board (do it first: it takes 1–2 weeks), one **DigiKey or Mouser** order for the exact electronic "
-              "parts, one **Amazon/AliExpress** order for modules and kits, then a trip to the "
+    md.append("Batching keeps shipping down: one **board maker** order for the circuit board (do it first: it takes 1–2 weeks), one **DigiKey or Mouser** order for every small "
+              "electronic part (single pieces there cost less than packs and kits elsewhere, and they "
+              "arrive in bags labelled with the part), one **Amazon/AliExpress** order for modules and kits, then a trip to the "
               "**hardware store** and the **auto-parts store**.")
     md.append("")
     for s in sections:

@@ -293,18 +293,17 @@ def power_board():
     b.wire("P2", "VBAT", "Z1.K", "JA.19")
 
     # ---- P3: relay driver and relays
-    A(Part("U1", fp_dip(18), 10, 58, value="ULN2803A", step="P3", note="notch / dot (pin 1) at the back-left"),
-      Part("RD1", fp_r(), 5, 57, value="10k", step="P3", note="pull-down, D6"),
-      Part("RD2", fp_r(), 5, 55, value="10k", step="P3", note="pull-down, D8"),
-      Part("RD3", fp_r(), 5, 53, value="10k", step="P3", note="pull-down, D9"),
-      Part("RD4", fp_r(), 5, 51, value="10k", step="P3", note="pull-down, D10"))
+    # No pull-downs on the ULN2803A's inputs: each input has its own 2.7k + 7.2k
+    # to ground inside the chip, so a Mega pin that goes high-Z (reset, hang
+    # caught by the watchdog, unplugged) leaves every driver and relay off.
+    A(Part("U1", fp_dip(18), 10, 58, value="ULN2803A", step="P3", note="notch / dot (pin 1) at the back-left"))
     for n, c in enumerate(CH, 1):
         A(Part(f"K{n}", fp_g2rl(), c, 17, value="G2RL-2 12 V", step="P3", note="coil end at the back"))
-    b.wire("P3", "RLY (D6)", "JA.7", "RD1.2", "U1.1", "U1.2", "U1.3")
-    b.wire("P3", "DRV1 (D8)", "JA.8", "RD2.2", "U1.4")
-    b.wire("P3", "DRV2 (D9)", "JA.9", "RD3.2", "U1.5")
-    b.wire("P3", "DRV3 (D10)", "JA.10", "RD4.2", "U1.6")
-    b.wire("P3", "GND", "JA.16", "RD1.1", "RD2.1", "RD3.1", "RD4.1", "U1.9")
+    b.wire("P3", "RLY (D6)", "JA.7", "U1.1", "U1.2", "U1.3")
+    b.wire("P3", "DRV1 (D8)", "JA.8", "U1.4")
+    b.wire("P3", "DRV2 (D9)", "JA.9", "U1.5")
+    b.wire("P3", "DRV3 (D10)", "JA.10", "U1.6")
+    b.wire("P3", "GND", "JA.16", "U1.9")
     # The ON/OFF switch's second pole carries the relay coils' power: OFF cuts
     # it in hardware, whatever the Mega is doing. F2 protects the dash cable;
     # DF lets the coils' current die away when the switch opens; RK1/RK2 let
@@ -407,20 +406,18 @@ def power_board():
     b.wire("P7", "GND", "BUCK.OUT-", "U2.4", "U2.5", "RC5.1", "RC2.1", "Z2.A")
 
     # ---- P8: throttle taps (right-hand strip)
+    # No clamp diodes: the 10k series resistor and 100 nF swallow a spike, and
+    # even a VTA wire shorted to 12 V puts only 0.65 mA into the Mega's own
+    # input clamps (within Microchip's 1 mA guideline, app note AN2519).
     A(Part("RT1", fp_r(), 32, 28, rot=90, value="10k", step="P8", note="VTA series"),
       Part("RT2", fp_r(), 33, 28, rot=90, value="10k", step="P8", note="E2 series"),
       Part("C3", fp_c(), 34, 28, rot=90, value="100 nF", step="P8", note="VTA filter"),
-      Part("C4", fp_c(), 30, 34, rot=90, value="100 nF", step="P8", note="E2 filter"),
-      Part("DT1", fp_d35(), 31, 34, rot=90, value="BAT85", step="P8", note="VTA to 5 V; band (K) towards the back"),
-      Part("DT2", fp_d35(), 32, 37, rot=270, value="BAT85", step="P8", note="GND to VTA; band (K) towards the front"),
-      Part("DT3", fp_d35(), 33, 34, rot=90, value="BAT85", step="P8", note="E2 to 5 V; band (K) towards the back"),
-      Part("DT4", fp_d35(), 34, 37, rot=270, value="BAT85", step="P8", note="GND to E2; band (K) towards the front"))
+      Part("C4", fp_c(), 30, 34, rot=90, value="100 nF", step="P8", note="E2 filter"))
     b.wire("P8", "VTA in", "J3f.1", "RT1.1")
     b.wire("P8", "E2 in", "J3g.1", "RT2.1")
-    b.wire("P8", "VTA (A0)", "RT1.2", "C3.1", "DT1.A", "DT2.K", "JA.17")
-    b.wire("P8", "E2 (A1)", "RT2.2", "C4.1", "DT3.A", "DT4.K", "JA.18")
-    b.wire("P8", "5V", "U2.8", "DT1.K", "DT3.K")
-    b.wire("P8", "GND", "U2.4", "C3.2", "C4.2", "DT2.A", "DT4.A")
+    b.wire("P8", "VTA (A0)", "RT1.2", "C3.1", "JA.17")
+    b.wire("P8", "E2 (A1)", "RT2.2", "C4.1", "JA.18")
+    b.wire("P8", "GND", "U2.4", "C3.2", "C4.2")
     b.shorts = [("J1a.1", "J1c.1", "12 V (drivers) to ground"), ("J1b.1", "J1c.1", "12 V to ground"),
                 ("JA.1", "JA.2", "5 V to ground"), ("J1a.1", "JA.1", "12 V to 5 V"),
                 ("J5b.1", "J1c.1", "relay power to ground")]
@@ -452,22 +449,24 @@ def logic_board():
     b.wire("L1", "SDA (D20)", "JB.11", "X5c.1")
     b.wire("L1", "SCL (D21)", "JB.12", "X5d.1")
 
-    # L2: seven switch input filters, each in the column of its terminal.
+    # L2: seven switch input filters, each in the column of its terminal: a
+    # 2.2k pull-up (a good wetting current for the switch contacts), then 10k
+    # + 100 nF into the Mega. The 1 ms filter swallows a spike on the dash
+    # cable, and the 10k keeps even a wire shorted to 12 V to 0.65 mA into the
+    # Mega's own input clamps (within Microchip's 1 mA guideline, AN2519), so
+    # no clamp diodes are needed.
     inputs = [("X7a", 3), ("X7b", 4), ("X4a", 5), ("X4b", 6), ("X4c", 15), ("X4d", 8), ("X4e", 7)]
     for i, (t, jb) in enumerate(inputs):
         c = b.part(t).col
         A(Part(f"RU{i + 1}", fp_r(), c, 4, rot=90, value="2.2k", step="L2", note="pull-up"),
-          Part(f"RS{i + 1}", fp_r(), c + 1, 9, rot=90, value="1k", step="L2", note="series"),
-          Part(f"CF{i + 1}", fp_c(), c, 14, rot=90, value="100 nF", step="L2"),
-          Part(f"DH{i + 1}", fp_d35(), c + 1, 15, rot=90, value="BAT85", step="L2", note="band (K) towards the back"),
-          Part(f"DL{i + 1}", fp_d35(), c, 18, rot=90, value="BAT85", step="L2", note="band (K) towards the back"))
+          Part(f"RS{i + 1}", fp_r(), c + 1, 9, rot=90, value="10k", step="L2", note="series"),
+          Part(f"CF{i + 1}", fp_c(), c, 14, rot=90, value="100 nF", step="L2"))
     for i, (t, jb) in enumerate(inputs):
         b.wire("L2", f"IN{i + 1} ({b.part(t).note.split(' ', 1)[1]})", f"{t}.1", f"RU{i + 1}.1", f"RS{i + 1}.1")
-        b.wire("L2", f"IN{i + 1} (JB.{jb})", f"RS{i + 1}.2", f"DH{i + 1}.A", f"CF{i + 1}.1", f"DL{i + 1}.K",
-               f"JB.{jb}")
+        b.wire("L2", f"IN{i + 1} (JB.{jb})", f"RS{i + 1}.2", f"CF{i + 1}.1", f"JB.{jb}")
     n = len(inputs)
-    b.wire("L2", "5V", "JB.1", *[f"RU{i}.2" for i in range(1, n + 1)], *[f"DH{i}.K" for i in range(n, 0, -1)])
-    b.wire("L2", "GND", "JB.14", *[f"DL{i}.A" for i in range(1, n + 1)], *[f"CF{i}.2" for i in range(n, 0, -1)])
+    b.wire("L2", "5V", "JB.1", *[f"RU{i}.2" for i in range(1, n + 1)])
+    b.wire("L2", "GND", "JB.14", *[f"CF{i}.2" for i in range(n, 0, -1)])
 
     # L3: ATF probe
     A(Part("RA1", fp_r(), 29, 5, rot=90, value="4.7k", step="L3", note="ATF pull-up"),

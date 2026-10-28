@@ -34,7 +34,7 @@ You build three pieces:
   temperature in °F. If something's wrong, it says what, in words.
 - **An aircraft-style self-test** you run from the dash, and a key-on check every time you start.
 
-**What it takes:** about $675 in parts, a 3D printer, a soldering iron and a multimeter. You
+**What it takes:** about $625 in parts, a 3D printer, a soldering iron and a multimeter. You
 don't need to know electronics: the [build book](docs/05-build-book.md) goes one small step at a
 time, Lego-style, with a meter check after every step, and a calibration helper does the maths.
 
@@ -235,19 +235,20 @@ measure on the car first so you order the right sizes once.
 | | Estimate (US$, late 2026) |
 |---|---|
 | Brain and power (Mega, the circuit board, 5 V regulator, fuses) | $97 |
-| Solenoid control (relays, MOSFETs, current sensors, dummy loads + heatsink) | $82 |
-| Signal inputs (optos, comparator, chip sockets, resistors, diodes) | $48 |
-| Board connectors and wire (screw terminals, pin headers) | $51 |
-| Car harness and connectors (Deutsch kit with crimper, wire, shielded cable, glands) | $147 |
-| Dash pod controls, OLED, gyro | $68 |
+| Solenoid control (relays, MOSFETs, current sensors, dummy loads + heatsink) | $75 |
+| Signal inputs (optos, comparator, chip sockets, resistors, diodes) | $17 |
+| Board connectors and wire (screw terminals, pin headers) | $35 |
+| Car harness and connectors (Deutsch kit with crimper, wire, shielded cable, glands) | $152 |
+| Dash pod controls, OLED, gyro | $65 |
 | ATF temperature probe and fittings | $59 |
 | 3D printing (filament, inserts, screws) | $65 |
 | Sequential shifter (Beavis Motorsport DIY) | $59 |
-| **Total parts** | **≈ $675** (±25 %) |
+| **Total parts** | **≈ $625** (±25 %) |
 | Tools, if you own none (your 3D printer and jack stands aren't counted) | ≈ $200 |
 
-Many items are packs and kits, so you'll have spares. The big-ticket items are the connector kit
-with its crimper, the wire and cable, and the filament.
+Many items are packs and kits, so you'll have spares. Every small electronic part comes in one
+DigiKey or Mouser order, as single pieces: cheaper than packs and kits. The big-ticket items are
+the connector kit with its crimper, the wire and cable, and the filament.
 
 The key parts:
 

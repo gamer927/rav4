@@ -56,7 +56,7 @@ build book's six soldering steps say which parts go in at each step.
   circuit says.
 - **Made to be easy to solder:** through-hole only, with big pads (a 0.6 mm copper ring round
   each hole where there's room, long oval pads on the chips), every part's **name and value**
-  printed next to it (RU11 2.2k, DL1 BAT85…), the Mega's used pins labelled, every screw
+  printed next to it (RU11 2.2k, DI1 1N4148…), the Mega's used pins labelled, every screw
   terminal labelled with its signal, sockets for the two bigger chips, and no ground pad joined
   solidly to the ground copper (those soak up the iron's heat).
 - **Tracks sized for the current:** 1.5 mm for the solenoid supply, 1.0 mm for the solenoid,

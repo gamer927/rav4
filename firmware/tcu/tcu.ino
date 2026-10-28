@@ -11,8 +11,9 @@
 
   Fail-safe contract (hardware must honour it too - see docs/02-revised-spec.md):
     * Relay coil de-energised  => factory ECU drives the real solenoids.
-    * MCU reset / hang / power loss => pins go high-Z, pull-downs turn every
-      driver and the relay off => car reverts to factory ECU control.
+    * MCU reset / hang / power loss => pins go high-Z, the ULN2803A's own
+      input pull-downs turn every driver and the relay off => car reverts to
+      factory ECU control.
 */
 #include <Arduino.h>
 #include <avr/interrupt.h>
@@ -910,8 +911,8 @@ void runWatchdogTest() {
 // --------------------------------------------------------------- setup / loop
 void setup() {
   paintStack();
-  // Outputs to the safe state before anything else (external pull-downs hold
-  // them off until this point).
+  // Outputs to the safe state before anything else (the ULN2803A's own input
+  // pull-downs hold them off until this point).
   digitalWrite(pin::RELAY, LOW);
   digitalWrite(pin::S1, LOW);
   digitalWrite(pin::S2, LOW);
@@ -927,9 +928,9 @@ void setup() {
                             pin::LEVER_D, pin::ECU_S1, pin::ECU_S2, pin::ECU_SL, pin::TEST,     pin::MANUAL};
   for (uint8_t p : inputs) pinMode(p, INPUT_PULLUP);
   // Start every switch filter from the real level (after the input RC filters
-  // charge), not from "off": otherwise a switch already ON at power-up would
-  // look like a fresh OFF -> ON flip.
-  delay(10);
+  // charge: 12.2k x 100 nF, 6 ms to settle), not from "off": otherwise a
+  // switch already ON at power-up would look like a fresh OFF -> ON flip.
+  delay(20);
   tcu::Debouncer* const dbs[] = {&dbUp,     &dbDown,   &dbEco,    &dbSport,  &dbManual, &dbMaster,
                                  &dbBrake,  &dbLeverD, &dbEcuS1,  &dbEcuS2,  &dbEcuSL,  &dbTest};
   const uint8_t dbPins[] = {pin::UP,    pin::DOWN,   pin::ECO,    pin::SPORT,  pin::MANUAL, pin::MASTER,

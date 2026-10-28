@@ -115,30 +115,24 @@ for board, hdr, rows in ((power, "JA", boards.HUB_A), (logic, "JB", boards.HUB_B
             check(ok, f"{board.name} {hdr}.{pin_no} ({mega}) carries {nets or 'nothing'}")
 
 # ------------------------------------------------- 3. fail-safe pull-downs
-
-
-def resistor_between(board, net_a_nodes, net_b, value):
-    for p in board.parts:
-        if p.fp["kind"] != "R" or p.value != value:
-            continue
-        ends = [f"{p.ref}.1", f"{p.ref}.2"]
-        nets = [nets_at(board, e) for e in ends]
-        if any(net_a_nodes & n for n in nets) and any(net_b in n for n in nets):
-            return True
-    return False
-
-
+# The ULN2803A's inputs each have 2.7k + 7.2k to ground inside the chip: a
+# high-Z Mega pin (reset, dead Mega) leaves the driver off. So each of these
+# nets must go only to ULN2803A inputs: nothing that could pull it high.
+check(power.part("U1").value == "ULN2803A", "U1 is a ULN2803A (internal input pull-downs)")
 for hdr_pin, what in (("JA.7", "relays (D6)"), ("JA.8", "S1 driver (D8)"), ("JA.9", "S2 driver (D9)"),
                       ("JA.10", "SL driver (D10)")):
-    check(resistor_between(power, nets_at(power, hdr_pin), "GND", "10k"),
-          f"{what}: 10k pull-down to ground, so a reset or a dead Mega means off")
+    nodes = {n for w in power.wires if hdr_pin in w["nodes"] for n in w["nodes"]} - {hdr_pin}
+    check(nodes and all(re.fullmatch(r"U1\.[1-8]", n) for n in nodes),
+          f"{what}: goes only to ULN2803A inputs ({sorted(nodes)}), so a reset or a dead Mega means off")
 
 # ------------------------------------------------- 4. switch inputs
 for i in range(1, 8):
     parts = {p.ref: p for p in logic.parts}
-    ok = all(r in parts for r in (f"RU{i}", f"RS{i}", f"CF{i}", f"DH{i}", f"DL{i}"))
-    ok = ok and parts[f"RU{i}"].value == "2.2k" and parts[f"RS{i}"].value == "1k"
-    check(ok, f"switch input {i}: 2.2k pull-up, 1k series, 100 nF, two BAT85 clamps")
+    ok = all(r in parts for r in (f"RU{i}", f"RS{i}", f"CF{i}"))
+    ok = ok and parts[f"RU{i}"].value == "2.2k" and parts[f"RS{i}"].value == "10k"
+    ok = ok and parts[f"CF{i}"].value == "100 nF"
+    # 10k: a wire shorted to 12 V puts at most (12 - 5.5) / 10k = 0.65 mA into the Mega's clamps
+    check(ok, f"switch input {i}: 2.2k pull-up, 10k series, 100 nF")
 
 # ------------------------------------------------- 5. the ON/OFF hardware cut
 coil_nodes = {w_node for w in power.wires if w["net"] == "+12 COIL" for w_node in w["nodes"]}
@@ -205,20 +199,23 @@ for p in circuit.parts.values():
 
 
 def need(item_words):
-    for row in re.findall(r'\("\d\. [^"]*", "([^"]*)", "([^"]*)"', shop):
+    for row in re.findall(r'\("\d\. [^"]*",\s*"([^"]*)",\s*"([^"]*)"', shop):
         if item_words in row[0]:
             return row[1]
     return None
 
 
-check(need("BAT85") == str(counts.get("BAT85")), f"BAT85: list says {need('BAT85')}, board uses {counts.get('BAT85')}")
 check(need("UF4007") == str(counts.get("UF4007")), f"UF4007: list says {need('UF4007')}, board uses {counts.get('UF4007')}")
 check(need("100 nF") == str(counts.get("100 nF")), f"100 nF: list says {need('100 nF')}, board uses {counts.get('100 nF')}")
-# 10k: the board's, plus the screen's reset pull-up and the bench gas-pedal stand-in's two
-check(need("Extra 10 k") == f"{counts.get('10k') + 3} total",
-      f"10k: list says {need('Extra 10 k')}, board uses {counts.get('10k')} + 3 off the board")
-zeners = sum(v for k, v in counts.items() if k.startswith("1N47"))
-check(need("zener diode kit") == str(zeners), f"zeners: list says {need('zener diode kit')}, board uses {zeners}")
+# Resistors: every value the board uses, with its count; 10k gets 3 more off
+# the board (the screen's reset pull-up and the bench gas-pedal stand-in's two).
+res_need = dict((v, int(k)) for v, k in re.findall(r"([\d.]+[kM]?) ×(\d+)", need("Resistors, 1/4 W") or ""))
+res_board = {v: n for v, n in counts.items() if re.fullmatch(r"[\d.]+[kM]?", v)}
+res_board["10k"] = res_board.get("10k", 0) + 3
+check(res_need == res_board, f"resistors: list says {res_need}, board (+3 10k off it) uses {res_board}")
+zeners = "1N4733A", "1N4744A", "1N4749A"
+z_board = " + ".join(str(next((n for k, n in counts.items() if k.startswith(z)), 0)) for z in zeners)
+check(need("zener diodes") == z_board, f"zeners: list says {need('zener diodes')}, board uses {z_board}")
 check(need("PTC") == str(counts.get("PTC 0.25 A")), "PTC count")
 check(need("P6KE6.8A") == str(counts.get("P6KE6.8A")), "P6KE6.8A count")
 check("2-pole" in shop, "the ON/OFF switch on the shopping list is 2-pole")

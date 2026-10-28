@@ -11,17 +11,17 @@ Everything for the 1999 RAV4 transmission controller, including the 3D-printed h
 | | Estimate |
 |---|---|
 | 1. Brain and power | $97 |
-| 2. Solenoid control | $82 |
-| 3. Signal inputs | $48 |
-| 4. Board connectors and wire | $51 |
-| 5. Car harness and connectors | $147 |
-| 6. Dash pod controls and screen | $68 |
+| 2. Solenoid control | $75 |
+| 3. Signal inputs | $17 |
+| 4. Board connectors and wire | $35 |
+| 5. Car harness and connectors | $152 |
+| 6. Dash pod controls and screen | $65 |
 | 7. ATF temperature probe | $59 |
 | 8. 3D printing | $65 |
 | 9. Sequential shifter (Beavis Motorsport DIY) | $59 |
-| **All parts, including the shifter** | **$676** |
-| Without the shifter (no manual shifting) | $617 |
-| Without filament (if your printer comes with it) | $640 |
+| **All parts, including the shifter** | **$624** |
+| Without the shifter (no manual shifting) | $565 |
+| Without filament (if your printer comes with it) | $588 |
 | Tools, if you own none of them | $205 |
 
 Expect roughly **±25 %** depending on where you shop. Many packs leave spares, which is useful: you'll want a spare relay and MOSFET if something goes wrong. The circuit board comes in fives: the spares are there if a first attempt goes badly.
@@ -38,7 +38,7 @@ Build book **step 0** (one evening, nothing cut) settles these, so you order the
 
 ## Where to order
 
-Batching keeps shipping down: one **board maker** order for the circuit board (do it first: it takes 1–2 weeks), one **DigiKey or Mouser** order for the exact electronic parts, one **Amazon/AliExpress** order for modules and kits, then a trip to the **hardware store** and the **auto-parts store**.
+Batching keeps shipping down: one **board maker** order for the circuit board (do it first: it takes 1–2 weeks), one **DigiKey or Mouser** order for every small electronic part (single pieces there cost less than packs and kits elsewhere, and they arrive in bags labelled with the part), one **Amazon/AliExpress** order for modules and kits, then a trip to the **hardware store** and the **auto-parts store**.
 
 ## 1. Brain and power — $97
 
@@ -56,7 +56,7 @@ Batching keeps shipping down: one **board maker** order for the circuit board (d
 | ☐ | Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses | 3 + fuses | kit | Auto-parts store | $10 | Two in the car (5 A and 2 A), one for the bench power lead (5 A). Match your fuse box's blade size (step 0 checks it) |
 | ☐ | Add-a-circuit fuse tap | 1 | 1 | Auto-parts store | $8 | Same blade size as the fuse box |
 
-## 2. Solenoid control — $82
+## 2. Solenoid control — $75
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
@@ -64,26 +64,24 @@ Batching keeps shipping down: one **board maker** order for the circuit board (d
 | ☐ | IRF4905 P-channel MOSFET, TO-220 | 3 | pack of 5 | DigiKey / Mouser | $9 | Infineon IRF4905PBF. They lie flat, bolted to the board's copper (M3 × 8 screw and nut each) |
 | ☐ | ACS712-05B current sensor module (5 A) | 3 | pack of 3–5 | Amazon (or AliExpress, cheaper but slower) | $11 | Measures each solenoid's current for the self-test. Must be the **5 A** version, about 31 × 13 mm (the board fits up to 33 × 15): a 2-way screw terminal and 3 pins (VCC, OUT, GND) |
 | ☐ | ULN2803A driver, DIP-18 | 1 | 2 (one spare) | DigiKey / Mouser | $3 | Through-hole DIP: e.g. Toshiba ULN2803APG. Not the SOIC version |
-| ☐ | 1 W zener diode kit (1N4728A–1N4764A) | 10 | kit | Amazon (or AliExpress, cheaper but slower) | $11 | Uses 1N4733A 5.1 V ×4, 1N4744A 15 V ×3, 1N4749A 24 V ×3 |
+| ☐ | 1 W zener diodes (DO-41): 1N4733A 5.1 V, 1N4744A 15 V, 1N4749A 24 V | 4 + 3 + 3 | 5 + 4 + 4 | DigiKey / Mouser | $4 | In the same order as the rest: about 30¢ each, cheaper than a kit |
 | ☐ | UF4007 fast diode | 4 | pack of 10 | DigiKey / Mouser | $3 | 1N4007 also works |
 | ☐ | 15 Ω 50 W aluminium-housed resistor | 3 | 3 | DigiKey / Mouser | $15 | Dummy loads, e.g. TE HSA5015RJ or Arcol HS50 15R |
 | ☐ | Finned aluminium heatsink, ≥ 100 × 100 × 25 mm | 1 | 1 | Amazon (or AliExpress, cheaper but slower) | $14 | For the dummy resistors, outside the box |
 | ☐ | Thermal paste | 1 | small tube | Amazon (or AliExpress, cheaper but slower) | $6 | Skip if you have some |
 
-## 3. Signal inputs — $48
+## 3. Signal inputs — $17
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
-| ☐ | PC817 optocoupler, DIP-4 | 6 | pack of 20 | Amazon (or AliExpress, cheaper but slower) | $6 |  |
-| ☐ | LM393 comparator, DIP-8 | 1 | pack of 10 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
-| ☐ | DIP sockets, 8-pin and 18-pin (0.3" wide) | 1 + 1 | assorted pack | Amazon (or AliExpress, cheaper but slower) | $6 | For the LM393 and the ULN2803A: no soldering iron on the chips, and easy to swap |
-| ☐ | BAT85 Schottky diode (DO-35) | 18 | pack of 25 | DigiKey / Mouser | $5 | Input clamps |
-| ☐ | 1N4148 diode | 6 | pack of 100 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
-| ☐ | Resistor kit, 1/4 W 1 % metal film (600+ pcs), bodies about 6 mm long | ≈ 50 | kit | Amazon (or AliExpress, cheaper but slower) | $12 | Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M |
-| ☐ | Extra 10 kΩ resistors | 23 total | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $4 | 20 on the board, 1 on the screen, 2 for the bench test. Most kits only have 10–20 of each value |
-| ☐ | 100 nF ceramic capacitors, 50 V, 5 mm leg spacing | 12 | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
+| ☐ | PC817 optocoupler, DIP-4 | 6 | 7 (one spare) | DigiKey / Mouser | $3 | Lite-On LTV-817 is the same part with the same pins |
+| ☐ | LM393 comparator, DIP-8 | 1 | 2 (one spare) | DigiKey / Mouser | $1 | e.g. TI LM393P |
+| ☐ | DIP sockets, 8-pin and 18-pin (0.3" wide) | 1 + 1 | 1 + 1 | DigiKey / Mouser | $2 | For the LM393 and the ULN2803A: no soldering iron on the chips, and easy to swap |
+| ☐ | 1N4148 diode | 6 | 10 | DigiKey / Mouser | $1 |  |
+| ☐ | Resistors, 1/4 W 1 % metal film, body about 6 mm long | 10k ×26, 2.2k ×10, 4.7k ×4, 3.3k ×3, 47k ×2, 100 ×1, 1.8k ×1, 22k ×1, 1M ×1 | 30 of 10k, 10 of 2.2k, 5 of the rest | DigiKey / Mouser | $7 | e.g. Yageo MFR-25FBF52-10K (the end of the part number is the value: -2K2, -4K7, -100R, -1M). 10k: 23 on the board, 1 on the screen, 2 for the bench test. They come in bags labelled with the value |
+| ☐ | 100 nF ceramic capacitors, 50 V, 5 mm leg spacing | 12 | 15 | DigiKey / Mouser | $3 | X7R, radial |
 
-## 4. Board connectors and wire — $51
+## 4. Board connectors and wire — $35
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
@@ -91,22 +89,21 @@ Batching keeps shipping down: one **board maker** order for the circuit board (d
 | ☐ | Screw terminals, 5.08 mm pitch, 2- and 3-way, interlocking (KF301 / DG301 type) | 13 positions | pack of ~20 pieces | Amazon (or AliExpress, cheaper but slower) | $7 | PWR 3, SOL 6, LOAD 4. Or Phoenix MKDS 1,5/n-5,08 in one piece |
 | ☐ | Male pin header strips, 2.54 mm, 40-pin, breakable | 3 | pack of 10 | Amazon (or AliExpress, cheaper but slower) | $5 | The Mega's pins through the board (86) and the gyro (8) |
 | ☐ | Silicone hook-up wire 22 AWG, 6 colours (the book calls it "thin wire") | ~2 m | kit | Amazon (or AliExpress, cheaper but slower) | $15 | Bench test wires and the dash pod's inside wiring |
-| ☐ | Silicone wire 18 AWG, 6 colours (the book calls it "thick wire") | ~2 m | kit | Amazon (or AliExpress, cheaper but slower) | $16 | The dummy-load cable (heat-proof) |
 
-## 5. Car harness and connectors — $147
+## 5. Car harness and connectors — $152
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
 | ☐ | Deutsch DT connector kit, 2–12 way, with crimper | X1–X6 + bypass plug | kit (~200 pcs) | Amazon (or AliExpress, cheaper but slower) | $40 | Needs 3-, 4-, 6- and 8-way pairs |
 | ☐ | 16 AWG automotive wire, red and black | ~4 m | 25 ft each | Auto-parts store | $15 | W1–W3 |
-| ☐ | 18 AWG automotive wire, multi-colour kit | ~15 m | kit | Amazon (or AliExpress, cheaper but slower) | $20 | Solenoid wires W4–W9 and taps |
+| ☐ | 18 AWG automotive wire, TXL or GXL (cross-linked, 125 °C), multi-colour kit | ~17 m | kit | Amazon (or AliExpress, cheaper but slower) | $25 | Solenoid wires W4–W9, taps, and the dummy-load cable. Cross-linked wire takes the heat near the transmission and the dummy resistors, so no separate silicone wire is needed |
 | ☐ | Shielded cable: 8-core 24 AWG, 4-core, 3-core | 3 m + 2.5 m + 4.5 m | 5 m of each | Amazon (or AliExpress, cheaper but slower) | $26 | Dash pod switches (8-core), screen (4-core, ≤ 2.5 m), ATF probe and shifter (3-core) |
 | ☐ | Heat-shrink assortment incl. adhesive-lined | 1 | kit | Amazon (or AliExpress, cheaper but slower) | $12 |  |
 | ☐ | Split loom + zip ties | 1 | pack | Auto-parts store | $12 |  |
 | ☐ | Wago 221 lever-nut connectors, assorted | 11 | pack | Hardware store | $12 | Joins the cables to the switch wires inside the dash pod and the shifter base |
 | ☐ | Cable glands PG7 + PG9, nylon, with locknuts | 7 + 4 | assortment | Amazon (or AliExpress, cheaper but slower) | $10 | TCU box 4 × PG7 + 4 × PG9; dash pod 2 × PG7; shifter base 1 × PG7 |
 
-## 6. Dash pod controls and screen — $68
+## 6. Dash pod controls and screen — $65
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
@@ -114,7 +111,7 @@ Batching keeps shipping down: one **board maker** order for the circuit board (d
 | ☐ | 6 mm mini toggle switch, MTS-101/102 | 3 | pack of 5 | Amazon (or AliExpress, cheaper but slower) | $8 | ECO, SPORT and MANUAL |
 | ☐ | 12 mm momentary push button, normally open | 1 | pack of 5 | Amazon (or AliExpress, cheaper but slower) | $10 | TEST |
 | ☐ | 2.42" OLED module, 128 × 64, SSD1309, I²C-capable | 1 | 1 | Amazon (or AliExpress, cheaper but slower) | $20 | e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat |
-| ☐ | 1 µF capacitor (ceramic or electrolytic, 16 V+) | 1 | pack | Amazon (or AliExpress, cheaper but slower) | $4 | Power-on reset for the screen, with a 10k from the resistor kit |
+| ☐ | 1 µF capacitor (ceramic or electrolytic, 16 V+) | 1 | 2 | DigiKey / Mouser | $1 | Power-on reset for the screen, with one of the 10k resistors |
 | ☐ | Thin double-sided foam tape (about 1 mm) | 1 | roll | Amazon (or AliExpress, cheaper but slower) | $5 | Holds the screen in its pocket in the dash pod |
 | ☐ | GY-521 (MPU-6050) gyro module | 1 | pack of 3 | Amazon (or AliExpress, cheaper but slower) | $9 |  |
 
@@ -181,9 +178,9 @@ Batching keeps shipping down: one **board maker** order for the circuit board (d
 
 **Board maker (JLCPCB, PCBWay, ...)** — 1 items, about $30: The TCU circuit board (upload hardware/pcb/rav4-tcu-gerbers.zip).
 
-**DigiKey / Mouser** — 13 items, about $72: RECOM R-78HB5.0-0.5 regulator, 5 V 0.5 A, 9–72 V in; 47 µF 16 V electrolytic capacitor (radial, 6.3 mm, 2.5 mm legs); 1.5KE27A TVS diode; P6KE6.8A TVS diode; Resettable fuse (PTC), 0.25 A hold, radial, 5.1 mm leg spacing; 1N5822 Schottky diode, 3 A; 100 µF 50 V electrolytic capacitor, 8 mm wide, 3.5 mm leg spacing; Omron G2RL-2-DC12 relay (DPDT, 12 V); IRF4905 P-channel MOSFET, TO-220; ULN2803A driver, DIP-18; UF4007 fast diode; 15 Ω 50 W aluminium-housed resistor; BAT85 Schottky diode (DO-35).
+**DigiKey / Mouser** — 20 items, about $89: RECOM R-78HB5.0-0.5 regulator, 5 V 0.5 A, 9–72 V in; 47 µF 16 V electrolytic capacitor (radial, 6.3 mm, 2.5 mm legs); 1.5KE27A TVS diode; P6KE6.8A TVS diode; Resettable fuse (PTC), 0.25 A hold, radial, 5.1 mm leg spacing; 1N5822 Schottky diode, 3 A; 100 µF 50 V electrolytic capacitor, 8 mm wide, 3.5 mm leg spacing; Omron G2RL-2-DC12 relay (DPDT, 12 V); IRF4905 P-channel MOSFET, TO-220; ULN2803A driver, DIP-18; 1 W zener diodes (DO-41): 1N4733A 5.1 V, 1N4744A 15 V, 1N4749A 24 V; UF4007 fast diode; 15 Ω 50 W aluminium-housed resistor; PC817 optocoupler, DIP-4; LM393 comparator, DIP-8; DIP sockets, 8-pin and 18-pin (0.3" wide); 1N4148 diode; Resistors, 1/4 W 1 % metal film, body about 6 mm long; 100 nF ceramic capacitors, 50 V, 5 mm leg spacing; 1 µF capacitor (ceramic or electrolytic, 16 V+).
 
-**Amazon (or AliExpress, cheaper but slower)** — 37 items, about $443: Arduino Mega 2560 R3; ACS712-05B current sensor module (5 A); 1 W zener diode kit (1N4728A–1N4764A); Finned aluminium heatsink, ≥ 100 × 100 × 25 mm; Thermal paste; PC817 optocoupler, DIP-4; LM393 comparator, DIP-8; DIP sockets, 8-pin and 18-pin (0.3" wide); 1N4148 diode; Resistor kit, 1/4 W 1 % metal film (600+ pcs), bodies about 6 mm long; Extra 10 kΩ resistors; 100 nF ceramic capacitors, 50 V, 5 mm leg spacing; Screw terminals, 3.5 mm pitch, 2- and 3-way, interlocking (DG350 / KF350 type); Screw terminals, 5.08 mm pitch, 2- and 3-way, interlocking (KF301 / DG301 type); Male pin header strips, 2.54 mm, 40-pin, breakable; Silicone hook-up wire 22 AWG, 6 colours (the book calls it "thin wire"); Silicone wire 18 AWG, 6 colours (the book calls it "thick wire"); Deutsch DT connector kit, 2–12 way, with crimper; 18 AWG automotive wire, multi-colour kit; Shielded cable: 8-core 24 AWG, 4-core, 3-core; Heat-shrink assortment incl. adhesive-lined; Cable glands PG7 + PG9, nylon, with locknuts; 12 mm ON/OFF toggle, **2-pole** (DPDT or DPST), with flip-up safety cover; 6 mm mini toggle switch, MTS-101/102; 12 mm momentary push button, normally open; 2.42" OLED module, 128 × 64, SSD1309, I²C-capable; 1 µF capacitor (ceramic or electrolytic, 16 V+); Thin double-sided foam tape (about 1 mm); GY-521 (MPU-6050) gyro module; DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C); PETG filament, 1 kg; M3 heat-set inserts (~4 mm OD); M3 screw kit with countersunk screws and nuts; V-155-1C25 roller-lever microswitch; M12 × 1.75 spring ball plungers (Kipp K0309 type); Compression springs, 1.8 mm wire, 14 mm OD, 40 mm long; Shift knob, M10 × 1.5 thread.
+**Amazon (or AliExpress, cheaper but slower)** — 27 items, about $374: Arduino Mega 2560 R3; ACS712-05B current sensor module (5 A); Finned aluminium heatsink, ≥ 100 × 100 × 25 mm; Thermal paste; Screw terminals, 3.5 mm pitch, 2- and 3-way, interlocking (DG350 / KF350 type); Screw terminals, 5.08 mm pitch, 2- and 3-way, interlocking (KF301 / DG301 type); Male pin header strips, 2.54 mm, 40-pin, breakable; Silicone hook-up wire 22 AWG, 6 colours (the book calls it "thin wire"); Deutsch DT connector kit, 2–12 way, with crimper; 18 AWG automotive wire, TXL or GXL (cross-linked, 125 °C), multi-colour kit; Shielded cable: 8-core 24 AWG, 4-core, 3-core; Heat-shrink assortment incl. adhesive-lined; Cable glands PG7 + PG9, nylon, with locknuts; 12 mm ON/OFF toggle, **2-pole** (DPDT or DPST), with flip-up safety cover; 6 mm mini toggle switch, MTS-101/102; 12 mm momentary push button, normally open; 2.42" OLED module, 128 × 64, SSD1309, I²C-capable; Thin double-sided foam tape (about 1 mm); GY-521 (MPU-6050) gyro module; DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C); PETG filament, 1 kg; M3 heat-set inserts (~4 mm OD); M3 screw kit with countersunk screws and nuts; V-155-1C25 roller-lever microswitch; M12 × 1.75 spring ball plungers (Kipp K0309 type); Compression springs, 1.8 mm wire, 14 mm OD, 40 mm long; Shift knob, M10 × 1.5 thread.
 
 **Hardware store** — 8 items, about $61: Wago 221 lever-nut connectors, assorted; Brass barbed tee with a 1/8" NPT female side port; 1/8" NPT male × 6 mm compression fitting, brass; ATF-safe thread sealant (PTFE paste); M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge); Pivot: 12 mm OD tube, 64 mm long, 1.6 mm wall; or an M12 × 75 bolt + nyloc nut + 2 washers; M3 × 70 hex-head bolts + washers + nyloc nuts; M10 × 1.5 bolts: 2 × 30–35 mm (travel stops) + 1 × ~65 mm (cut into the knob stud).
 

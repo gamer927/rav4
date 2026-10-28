@@ -168,7 +168,9 @@ and ground.
   sensor's zero is re-learned while the relays are released and that driver is off, when no
   current can flow. `IS_AMPS_PER_VOLT` and `IS_ZERO_V` are in `config.h`; calibrate on the bench
   with a 15 Ω load.
-- A 10 kΩ pull-down on every drive pin keeps the drivers off during reset.
+- The drive pins go straight to the ULN2803A, whose inputs each have 2.7 kΩ + 7.2 kΩ to ground
+  inside the chip: a Mega pin that goes high-Z (reset, hang) leaves every driver off. No
+  external pull-downs are needed.
 - No short-circuit protection is built into a MOSFET (a PROFET has it). The 5 A fuse on X1-1
   protects the wiring, and the firmware hands control back to the ECU if a driven solenoid draws
   more than `SOL_OVER_A` (2.5 A) for 0.3 s.
@@ -196,8 +198,8 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 - **Dummy loads:** 3 × 15 Ω **50 W aluminium-clad** resistors on a heatsink. Each dissipates
   13.8 W continuously at 14.4 V. That's within the solenoid's 11–15 Ω spec (VERIFY), so the ECU
   sees a normal load.
-- **Coils:** all three from D6 through a ULN2803 (10 kΩ pull-down on its input). Their +12 V
-  doesn't come straight from the supply: `+12 DRV → F2 (PTC 0.25 A) → DASH 7 → dash cable C7 →
+- **Coils:** all three from D6 through a ULN2803 (its built-in input pull-down holds them
+  off). Their +12 V doesn't come straight from the supply: `+12 DRV → F2 (PTC 0.25 A) → DASH 7 → dash cable C7 →
   ON/OFF pole 2 → C8 → DASH 8 → coils and ULN2803 COM`. A UF4007 (DF) across that feed takes the
   coils' flyback when the switch opens, and a 47k/10k divider lets A7 see it (`COIL_ON_V` 8 V).
   So two independent things can drop the relays: the Mega (D6 low) and the driver (ON/OFF OFF).
@@ -211,13 +213,13 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 
 | Signal | Source (VERIFY in the EWD) | Conditioning |
 |---|---|---|
-| Switches (shifter UP, DOWN; dash ECO, SPORT, MANUAL, ON/OFF, TEST) | Switch to ground | 2.2 kΩ pull-up to 5 V, 1 kΩ series, 100 nF to ground at the MCU, BAT54S clamp |
+| Switches (shifter UP, DOWN; dash ECO, SPORT, MANUAL, ON/OFF, TEST) | Switch to ground | 2.2 kΩ pull-up to 5 V, 10 kΩ series, 100 nF to ground at the MCU. The 1 ms filter swallows spikes on the dash cable, and the 10 kΩ keeps even a core shorted to 12 V to 0.65 mA into the Mega's own input clamps (Microchip AN2519 allows 1 mA), so no clamp diodes |
 | Brake | Stop-lamp switch STP (+12 V when pressed) | PC817 opto (LED + 2.2 kΩ), output pulls the MCU pin low |
 | Lever in D | PNP switch "D" output (feeds the D indicator) | PC817 opto as above |
 | ECU S1/S2/SL sense | ECU side of each relay (COM-A) | PC817 opto with 3.3 kΩ (about 4 mA load) |
 | VSS | SPD signal to the ECU (meter output, about 4 pulses/rev) | Comparator with hysteresis (LM393) or a 6N137 opto. High-impedance tap; never load the line |
 | Tach | ECU/DLC TAC signal | 10 kΩ series resistor + 5.1 V zener, or an opto. **Never the coil primary** (hundreds of volts) |
-| TPS | ECU VTA and its sensor ground E2 (both tapped) | VTA → 10 kΩ series → A0, and E2 → 10 kΩ series → A1, each with 100 nF and a BAT54S clamp. The firmware reads A0 − A1, so the TCU never ties its ground to E2 (no ground loop that could shift the ECM's throttle reading) |
+| TPS | ECU VTA and its sensor ground E2 (both tapped) | VTA → 10 kΩ series → A0, and E2 → 10 kΩ series → A1, each with 100 nF (the 10 kΩ limits a fault to the Mega's own input clamps, as above). The firmware reads A0 − A1, so the TCU never ties its ground to E2 (no ground loop that could shift the ECM's throttle reading) |
 | ATF temperature | DS18B20 probe in the cooler line (§3.8) | 4.7 kΩ pull-up DQ→5 V at the TCU, 100 Ω series, 5.1 V TVS to ground. (Alternative: analog NTC sender on A2 with a 1 kΩ pull-up; set `ATF_SENSOR = ATF_NTC`) |
 | Battery | IG feed | 47 kΩ / 10 kΩ divider, 100 nF, 5.1 V zener |
 
@@ -325,11 +327,11 @@ How the firmware reads it:
 |---|---|---|---|---|
 | D2 (INT4) | in | VSS pulses | falling edge | Comparator or opto output |
 | D3 (INT5) | in | Tach pulses | falling edge | 2 pulses/rev (4-cyl) |
-| D6 | out | Relay bank driver | HIGH = TCU in control | 10 k pull-down; MOSFET/ULN, never the coil directly |
+| D6 | out | Relay bank driver | HIGH = TCU in control | ULN2803A input (built-in pull-down); never the coil directly |
 | D7 | – | not used (was the dash LED) | – | |
-| D8 | out | S1 high-side IN | HIGH = on | 10 k pull-down |
-| D9 | out | S2 high-side IN | HIGH = on | 10 k pull-down |
-| D10 | out | SL high-side IN | HIGH = on | 10 k pull-down |
+| D8 | out | S1 high-side IN | HIGH = on | ULN2803A input (built-in pull-down) |
+| D9 | out | S2 high-side IN | HIGH = on | ULN2803A input (built-in pull-down) |
+| D10 | out | SL high-side IN | HIGH = on | ULN2803A input (built-in pull-down) |
 | D13 | out | Status LED (on-board, inside the box) | HIGH | Solid = TCU in control; blinks = waiting / fault |
 | D22 | in | Shifter upshift microswitch | LOW | Edge-triggered; `SWAP_SHIFT_INPUTS` swaps D22/D23 |
 | D23 | in | Shifter downshift microswitch | LOW | Edge-triggered |

@@ -217,7 +217,7 @@ travel.
 | PWR | X1: +12 V drive, +12 V logic, ground | PG9 |
 | SOL | X2: S1/S2/SL from the ECM and to the solenoids (6 cores) | PG9 |
 | SIG | X3: D, STP, E1, SPD, TAC, VTA, E2 | PG9 |
-| LOAD | Dummy-load heatsink: 3 feeds + ground, 18 AWG silicone wire | PG9 |
+| LOAD | Dummy-load heatsink: 3 feeds + ground, 18 AWG TXL/GXL wire | PG9 |
 | SHIFT | X7: shifter base, 3-core shielded | PG7 |
 | DASH | X4: C1–C6, and C7–C8 for the ON/OFF switch's power pole: 8-core shielded | PG7 |
 | SCREEN | X5: dash pod screen, 4-core shielded | PG7 |

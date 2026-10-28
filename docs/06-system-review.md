@@ -159,8 +159,9 @@ circuit board, firmware, housings and documents:
 1. Every Mega pin the firmware uses is wired to the signal that means the same thing, and no
    wired Mega pin is unused.
 2. Every net at a Mega pin carries that pin's signal.
-3. Every output that drives a relay or a solenoid driver has its 10 kΩ pull-down.
-4. Every switch input has its pull-up, series resistor, capacitor and clamps.
+3. Every output that drives a relay or a solenoid driver goes only to ULN2803A inputs (each has
+   its own pull-down inside the chip): nothing can hold it on while the Mega resets.
+4. Every switch input has its 2.2k pull-up, 10k series resistor and 100 nF capacitor.
 5. The ON/OFF hardware cut: the relay coils are fed **only** through the switch's power pole (DASH terminals 7 and 8),
    through the PTC, with the flyback diode, and the sense reaches A7.
 6. The box's glands, the board's terminal groups and the cable map agree, in the same order.
@@ -197,11 +198,11 @@ All three pass.
 | Suite | What | Result |
 |---|---|---|
 | `make test` | Unit tests: every control rule, fault, interlock and self-test step (`test/test_tcu_logic.cpp`, `test/test_self_test.cpp`) | **1,144 + 122 checks, 0 failures** |
-| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that follow coil power, welded contacts, broken wires), one failure per scenario | **26 scenarios, 0 failures** |
-| `make calibrate-test` | The calibration helper on a simulated parked session and drive, with a speed sensor 6 % off and an engine 5 % off: it must find both, write a `config.h` that compiles, and refuse bad recordings | **29 checks, 0 failures** |
+| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that follow coil power, welded contacts, broken wires), one failure per scenario | **28 scenarios, 0 failures** |
+| `make calibrate-test` | The calibration helper on a simulated parked session and drive, with a speed sensor 6 % off and an engine 5 % off: it must find both, write a `config.h` that compiles, and refuse bad recordings | **32 checks, 0 failures** |
 | `python3 tools/system_check.py` | Cross-checks (§5) | **all pass, 0 problems** |
 | `tools/build_stl.sh` | Fit checks (§5), STLs, renders | **all pass** |
-| `make avr` | Compile for the Mega 2560, warnings as errors | **OK**: 15 % flash, 51 % RAM |
+| `make avr` | Compile for the Mega 2560, warnings as errors | **OK**: 15 % flash, 47 % RAM (the core linked as the Arduino IDE does it); the self-test's saved results are clear of the bootloader's stack |
 
 `make check` runs the unit tests, system test, calibration test and cross-checks together. Run it
 after any change.
@@ -229,7 +230,9 @@ after any change.
 | screen cable cut | control unaffected, loop never stalls |
 | battery voltage collapses | ECU back |
 | ECU sense dead, takeover on the move | waits for a stop |
-| reset at 50 mph | relays drop, no takeover after the reboot |
+| reset at 50 mph (a hang: the watchdog fires) | relays drop, no takeover after the reboot, TCU RESTARTED |
+| reset button at 30 mph | relays drop, no RESTARTED note (it wasn't a hang) |
+| self-test SAFETY RESET on a real Mega's bootloader | passes after the reboot; pressing reset instead fails it |
 | solenoid wire shorted | over-current, ECU back |
 | ATF probe unplugged | warned, still in control |
 | ATF overheats | warned, lockup held to cool it |
@@ -254,6 +257,9 @@ after any change.
 | The ON/OFF switch was modelled as a 1-pole switch; the pod had room for only 5 connectors | Modelled as a larger 2-pole switch with 8 connectors; pod fit check passes |
 | Before calibration the self-test marked CALIBRATED as **BAD**, so the bench test could never say ALL OK, and the main screen said SELF-TEST BAD | "Not calibrated yet" is now a CHECK (a reminder) |
 | On the bench nothing drives the gas pedal input, so the self-test always reported GAS PEDAL BAD | Build book 10.1: a two-resistor gas pedal stand-in for the bench |
+| **Bug (real hardware only):** the Mega's own bootloader clears the chip's reset-cause register before the program starts, so the program never saw a watchdog reset: the self-test's SAFETY RESET step would always have said BAD, and a hang never showed TCU RESTARTED. The simulator had set the register by hand, so it couldn't see this | The watchdog's timeout now runs a short routine that leaves a mark in memory that survives the reset, then resets. The simulator now models the bootloader, and the new scenarios fail on the old code |
+| Unused Mega pins were left floating (the datasheet advises against it: they pick up noise) | Pulled up at boot; a cross-check makes sure none of them is wired on the board |
+| Nothing showed how close the program runs to its limits | Every 10 s the USB log has a `# health` line: the slowest loop (the watchdog allows 250 ms) and the stack margin. The calibration helper prints both and flags a loop over 100 ms or under 512 bytes of margin |
 
 ---
 
@@ -311,6 +317,7 @@ cables, housings and tests carry over. What changed on the way:
 | **Found on review:** the ground copper ran under each MOSFET's bolted metal tab (which is its drain, switched +12 V) and under the bolt's nut, with only the thin solder mask between them | Bare board, no copper, under every tab and around every bolt on both sides; a system check keeps it that way |
 | **Found by the part fit check:** the Mega's and the modules' pin holes left 0.09 mm round a square pin; the MOSFETs' 1.1 mm holes left almost nothing round their legs; a 10 mm-wide 100 µF capacitor (some are) would hit the regulator; a long ACS712 module could cover its LINK holes | Pin holes 1.1 mm, MOSFET holes 1.3 mm, regulator moved 1.3 mm, LINK holes 35 mm from the pins; `tools/part_fit.py` checks every part at its largest size on every build |
 | Made easier to solder (rev 2): the board grew from 150 to 170 mm deep and its parts spread out, bigger pads (long ovals on the chips), every part's value printed beside its name, sockets for U1 and U2, no ground pad joined solidly to the ground copper | A first-time builder can read every part off the board and heat every joint; the box grew to 216 × 212 mm. The router's via check was also fixed (it let a wide track leave a via too close to another track; KiCad's check caught it) |
+| **Optimised (rev 3):** 22 parts left out. The 4 pull-downs on the ULN2803A's inputs duplicated the chip's own (2.7 kΩ + 7.2 kΩ to ground inside each input). The 18 BAT85 clamp diodes on the switch and throttle inputs: with the switch inputs' series resistor raised from 1 kΩ to 10 kΩ, a core shorted to 12 V puts at most 0.65 mA into the Mega's own input clamps (Microchip AN2519 allows 1 mA), and the 10 kΩ + 100 nF filter swallows a spike | 113 parts instead of 135, 44 fewer joints, one part type less to buy; nothing on the board depends on a part that isn't there any more (cross-checks 3 and 4) |
 | **Found on review:** the board's posts were 2.5 mm too short: they left out the plastic strip of the male headers, which sits on top of the Mega's sockets | Posts 18.6 mm; the fit check passes at the new height |
 
 Checks on the design: every chip's pinout was compared by hand with its datasheet (ULN2803,

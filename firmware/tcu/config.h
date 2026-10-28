@@ -73,7 +73,7 @@ constexpr uint16_t ATF_ADC_SHORT = 8;             // raw ADC at/below = shorted
 constexpr uint16_t ATF_ADC_OPEN = 1018;           // raw ADC at/above = open
 
 // Battery divider 47k / 10k (x5.7): 28.5 V full scale, survives load dump with
-// the input clamp described in the spec.
+// the 5.1 V zener described in the spec.
 constexpr float VBAT_DIVIDER = 5.7f;
 
 // Solenoid current sense on A4/A5/A6: amps = (volts - zero) x IS_AMPS_PER_VOLT.

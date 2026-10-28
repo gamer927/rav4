@@ -119,8 +119,8 @@ Ground every cable shield **at the TCU end only**.
 | 3 | W12 | ECM ground **E1** | TCU signal ground reference |
 | 4 | W13 | Speed **SPD** | LM393 comparator → D2 |
 | 5 | W14 | Tach **TAC** | PC817 opto → D3 |
-| 6 | W15 | Throttle **VTA** | 10k series, 100 nF, clamp → A0 |
-| 7 | W16 | Throttle ground **E2** | 10k series, 100 nF, clamp → A1 (measured, *not* tied to TCU ground) |
+| 6 | W15 | Throttle **VTA** | 10k series, 100 nF → A0 |
+| 7 | W16 | Throttle ground **E2** | 10k series, 100 nF → A1 (measured, *not* tied to TCU ground) |
 | 8 | – | spare | |
 
 **X4 dash** (W20, 8-core: all eight cores go to the board's DASH terminals, in order)
@@ -220,12 +220,12 @@ in, is in the [build book](05-build-book.md).
 | Back left, underneath | The Arduino Mega (a notch in the board leaves its USB and power jacks free) |
 
 Detail A (the solenoid channel) is in [`wiring-detail-a.svg`](wiring-detail-a.svg). The other
-circuits are below. A 10 kΩ pull-down sits on **every** output that drives something (D6, D8,
-D9, D10), so everything is off while the Mega resets.
+circuits are below. Every output that drives something (D6, D8, D9, D10) goes to a ULN2803A
+input, which has its own pull-down inside the chip, so everything is off while the Mega resets.
 
 **Solenoid driver** (×3: D8/D9/D10 → S1/S2/SL)
 ```
-D8 ── ULN2803 IN4 (10k pull-down) ; ULN2803 OUT4 ── 4.7k ── Q1 gate
+D8 ── ULN2803 IN4 (built-in pull-down) ; ULN2803 OUT4 ── 4.7k ── Q1 gate
 +12 V DRV ── CS1 ACS712 (IP+ → IP−) ── Q1 source (IRF4905 P-MOSFET)
 Q1 gate ── 10k ── source (pull-up = off) ; 15 V zener gate–source (cathode on source)
 Q1 drain ── K1 COM-B ; clamp: drain ── UF4007 (cathode on drain) ── 24 V zener ── GND
@@ -236,11 +236,13 @@ zener clamp lets the solenoid release quickly, like the ECM's own driver.
 
 **Switch input** (×7: shifter D22, D23; dash D24, D25, D26, D32, D34)
 ```
-+5V ── 2.2k ──┬── 1k ──┬── Mega pin
-              │        ├── 100 nF ── GND
-              │        └── BAT85 to 5V, BAT85 from GND (clamps)
++5V ── 2.2k ──┬── 10k ──┬── Mega pin
+              │         └── 100 nF ── GND
        X4 / X7 core ── switch ── GND (X4-6 / X7-3)
 ```
+The 10k and 100 nF make a 1 ms filter that swallows spikes picked up on the dash cable, and
+the 10k limits even a core shorted to 12 V to 0.65 mA into the Mega's own input clamps, well
+within what they take (Microchip app note AN2519: 1 mA). So no clamp diodes are needed.
 
 **12 V opto input** (brake D27, lever D28, ECU sense D29–D31, tach D3)
 ```
@@ -264,8 +266,8 @@ divider with a 2.5 V threshold never switched.)
 ```
 VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
            100 nF                  100 nF
-        BAT85 clamps            BAT85 clamps
-(Firmware reads A0 − A1. E2 is never tied to the TCU ground.)
+(Firmware reads A0 − A1. E2 is never tied to the TCU ground. The 10k protects the
+inputs the same way as the switch inputs.)
 ```
 
 **Battery sense** (A3): `X1-2 (+12 V) ── 47k ──┬── A3; 10k to GND, 100 nF, 5.1 V zener`
@@ -276,7 +278,7 @@ VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
 **Relay coils** (D6), powered through the ON/OFF switch's second pole
 ```
 +12 V DRV ── F2 (PTC 0.25 A) ── DASH 7 ── C7 ── ON/OFF pole 2 ── C8 ── DASH 8 = "+12 COIL"
-+12 COIL ── K1/K2/K3 coil (+) ; coil (−) ── ULN2803 OUT1-3 ; IN1-3 ── D6 (10k pull-down)
++12 COIL ── K1/K2/K3 coil (+) ; coil (−) ── ULN2803 OUT1-3 ; IN1-3 ── D6 (built-in pull-down)
 +12 COIL ── ULN2803 COM, and UF4007 (DF, cathode on +12 COIL) to GND: flyback when the switch opens
 +12 COIL ── 47k ──┬── A7 ; 10k to GND, 100 nF, 5.1 V zener   (coil power sense)
 ```

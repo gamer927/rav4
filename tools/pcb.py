@@ -21,6 +21,7 @@ every connection). This script turns it into a real printed circuit board:
   python3 tools/pcb.py --place    # placement and pictures only (no routing)
 """
 import argparse
+import glob
 import math
 import os
 import re
@@ -376,10 +377,8 @@ def placement():
     for i in range(7):
         x = 8.89 + 5.08 * i
         P[f"RU{11 + i}"] = (x, 16.51, V)         # pull-up to 5 V
-        P[f"RS{i + 1}"] = (x + 2.54, 30.48, V)   # series 1k
-        P[f"DH{i + 1}"] = (x, 43.18, V)          # clamp to 5 V
-        P[f"DL{i + 1}"] = (x + 2.54, 53.34, V)   # clamp to ground
-        P[f"CF{i + 1}"] = (x, 63.5, V)           # 100 nF
+        P[f"RS{i + 1}"] = (x + 2.54, 30.48, V)   # series 10k
+        P[f"CF{i + 1}"] = (x, 45.72, V)          # 100 nF
     # ATF probe input
     for j, r in enumerate(["RA1", "RA2", "ZA"]):
         P[r] = (45.72 + 3.81 * j, 16.51, V)
@@ -397,8 +396,8 @@ def placement():
     P["U2"] = (59.69, 62.23, 0)
     for j, r in enumerate(["RC1", "RC2", "Z2", "RC3", "RC6", "RC4", "RC5"]):
         P[r] = (72.39 + 3.81 * j, 46.99, V)
-    for j, r in enumerate(["RT1", "RT2", "DT1", "DT2", "DT3", "DT4", "C3", "C4"]):
-        P[r] = (59.69 + 5.08 * j, 72.39, V)
+    for j, r in enumerate(["RT1", "RT2", "C3", "C4"]):
+        P[r] = (59.69 + 7.62 * j, 72.39, V)
 
     # --- power in, behind the PWR terminals
     P["TVS1"] = (102.87, 16.51, V)
@@ -426,8 +425,6 @@ def placement():
         P[f"CS{n}"] = (x + 7.62, 134.62, 0)    # pins at the back, current links towards the MOSFET
     # relay driver, right
     P["U1"] = (186.69, 133.35, 0)
-    for j, r in enumerate(["RD1", "RD2", "RD3", "RD4"]):
-        P[r] = (185.42, 92.71 + 3.81 * j, 0)
     # ECU sense, back middle (right of the Mega)
     for i, (ok, ri, di, ru) in enumerate((("OK4", "RI4", "DI4", "RU4"), ("OK5", "RI5", "DI5", "RU5"),
                                           ("OK6", "RI6", "DI6", "RU6"))):
@@ -729,7 +726,7 @@ def silkscreen(board):
             _text(board, n, mx + x, my + y - 2.6, 0.8, angle=90)
         else:                                 # bottom row: labels behind it
             _text(board, n, mx + x, my + y + 2.6, 0.8, angle=90)
-    _text(board, "RAV4 TCU  rev 2", 52.0, 128.0 + GROW, 3.0, bold=True)
+    _text(board, "RAV4 TCU  rev 3", 52.0, 128.0 + GROW, 3.0, bold=True)
     _text(board, COPYRIGHT, 52.0, 122.5 + GROW, 1.2)
     _text(board, "ARDUINO MEGA UNDERNEATH: TRIM ALL LEADS TO 1.5 MM IN THIS AREA", 52.0, 118.0 + GROW, 1.0)
     _text(board, "RAV4 TCU: BOTTOM", 52.0, 128.0 + GROW, 2.0, layer=pcbnew.B_SilkS)
@@ -1154,15 +1151,14 @@ def drc(board, path):
 # parts first.
 STEPS = [
     ("S1", "Power in", ["J1", "TVS1", "TVS2", "TVS3", "D1", "C1", "U3", "C6", "C7", "RB1", "RB2", "C2", "Z1"]),
-    ("S2", "Relays and the ON/OFF power pole", ["U1", "RD1", "RD2", "RD3", "RD4", "K1", "K2", "K3", "X4", "F2", "DF",
+    ("S2", "Relays and the ON/OFF power pole", ["U1", "K1", "K2", "K3", "X4", "F2", "DF",
                                                 "RK1", "RK2", "CK", "ZK"]),
     ("S3", "Solenoid drivers and current sensors", ["J2", "J4"] + [f"{k}{n}" for n in (1, 2, 3)
                                                      for k in ("Q", "RG", "RP", "ZG", "DF", "ZF", "CS")]),
-    ("S4", "Car signal inputs", ["J3", "U2", "RC1", "RC2", "RC3", "RC4", "RC5", "RC6", "Z2", "RT1", "RT2", "C3", "C4",
-                                 "DT1", "DT2", "DT3", "DT4"] + [f"{k}{n}" for n in range(1, 7)
-                                                                 for k in ("OK", "RI", "DI", "RU")]),
+    ("S4", "Car signal inputs", ["J3", "U2", "RC1", "RC2", "RC3", "RC4", "RC5", "RC6", "Z2", "RT1", "RT2", "C3", "C4"]
+     + [f"{k}{n}" for n in range(1, 7) for k in ("OK", "RI", "DI", "RU")]),
     ("S5", "Dash, shifter, screen and probe inputs", ["X7", "X5", "X6", "RA1", "RA2", "ZA", "GYRO"]
-     + [f"{k}{n}" for n in range(1, 8) for k in ("RU1", "RS", "CF", "DH", "DL")]),
+     + [f"{k}{n}" for n in range(1, 8) for k in ("RU1", "RS", "CF")]),
     ("S6", "The Mega's pins", ["A1"]),
 ]
 
@@ -1251,6 +1247,8 @@ def substeps(c, board):
             TB_FP[r] = p["fp"]
     out, done = {}, []
     plans = bs.plan(STEPS, c, parts, HEIGHT_ORDER, _natural)
+    for old in glob.glob(os.path.join(ROOT, "docs", "build", "pcb-*-*.png")):
+        os.remove(old)  # a step that has fewer small steps now leaves no stale pictures behind
     for n, (s, title, subs) in enumerate(plans, 1):
         lines = [f"![Step {n}: everything in this step](build/pcb-{s}.png)", "",
                  f"*The whole step: {plural(sum(len(x) for x in subs), 'part')} in "

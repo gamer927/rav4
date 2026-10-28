@@ -10,28 +10,28 @@ Every part on the board, checked at the **largest size it's sold in** (datasheet
 |---|---|---|---|---|
 | male header strip into the Mega ×1 | +0.19 mm (A1.3V3: 1.10 mm hole, 0.91 mm leg) | under the board | 0 mm | 2.54 mm male header: 0.64 mm square pins, diagonal 0.91 |
 | 100 uF 50 V electrolytic ×1 | +0.15 mm (C1.1: 0.80 mm hole, 0.65 mm leg) | 0.2 mm (C1 to C6) | 16 mm | 100 uF 50 V: 8 x 11.5 (3.5 mm legs) is usual, 10 x 12.5 (5 mm) and 6.3 x 11 (2.5 mm) exist |
-| 100 nF ceramic, 5 mm legs ×12 | +0.25 mm (C4.1: 0.80 mm hole, 0.55 mm leg) | 0.7 mm (CK to ZK) | 8 mm | radial MLCC or disc: up to 5.5 wide x 3.5 thick, legs 0.5, 5.0/5.08 or 2.54 apart |
+| 100 nF ceramic, 5 mm legs ×12 | +0.25 mm (CF1.1: 0.80 mm hole, 0.55 mm leg) | 0.7 mm (CK to ZK) | 8 mm | radial MLCC or disc: up to 5.5 wide x 3.5 thick, legs 0.5, 5.0/5.08 or 2.54 apart |
 | 47 uF 16 V electrolytic ×1 | +0.25 mm (C6.1: 0.80 mm hole, 0.55 mm leg) | 0.2 mm (C6 to C1) | 12.5 mm | 47 uF 16 V: 5 x 11 (2 mm legs) or 6.3 x 11 (2.5 mm) |
-| ACS712-05B module (5 A) ×3 | +0.19 mm (CS1.GND: 1.10 mm hole, 0.91 mm leg) | 1.9 mm (CS1 to OK5) | 15 mm | 5 A modules: 31 x 13 mm (27.5 x 11.6 seen too); checked at 33 x 15. 0.64 mm square header pins |
-| diode, DO-201 (1N5822, 1.5KE27A) ×3 | +0.28 mm (D1.1: 1.60 mm hole, 1.32 mm leg) | 1.0 mm (TVS1 to D1) | 5.8 mm | DO-201AD: body 9.5 max x 5.3 max, legs 1.32 max (1N5822; 1.5KE is 1.07) |
-| diode, DO-41 (1N47xxA zener, UF4007) ×14 | +0.24 mm (ZG1.1: 1.10 mm hole, 0.86 mm leg) | 0.7 mm (ZK to CK) | 3.2 mm | DO-41: body 5.2 max x 2.7 max, legs 0.86 max (Vishay 1N47xxA, UF4007) |
-| diode, DO-35 glass (BAT85, 1N4148) ×24 | +0.25 mm (DH7.1: 0.80 mm hole, 0.55 mm leg) | 2.3 mm (DT4 to C3) | 2.5 mm | DO-35: body 4.25 max x 2.0 max, legs 0.55 max (NXP BAT85, Vishay 1N4148) |
+| ACS712-05B module (5 A) ×3 | +0.19 mm (CS3.GND: 1.10 mm hole, 0.91 mm leg) | 1.9 mm (CS1 to OK5) | 15 mm | 5 A modules: 31 x 13 mm (27.5 x 11.6 seen too); checked at 33 x 15. 0.64 mm square header pins |
+| diode, DO-201 (1N5822, 1.5KE27A) ×3 | +0.28 mm (TVS1.1: 1.60 mm hole, 1.32 mm leg) | 1.0 mm (TVS1 to D1) | 5.8 mm | DO-201AD: body 9.5 max x 5.3 max, legs 1.32 max (1N5822; 1.5KE is 1.07) |
+| diode, DO-41 (1N47xxA zener, UF4007) ×14 | +0.24 mm (DF1.1: 1.10 mm hole, 0.86 mm leg) | 0.7 mm (ZK to CK) | 3.2 mm | DO-41: body 5.2 max x 2.7 max, legs 0.86 max (Vishay 1N47xxA, UF4007) |
+| diode, DO-35 glass (BAT85, 1N4148) ×6 | +0.25 mm (DI1.1: 0.80 mm hole, 0.55 mm leg) | 2.8 mm (DI5 to RI5) | 2.5 mm | DO-35: body 4.25 max x 2.0 max, legs 0.55 max (NXP BAT85, Vishay 1N4148) |
 | PTC 0.25 A (Bourns MF-R025) ×1 | +0.45 mm (F2.1: 1.00 mm hole, 0.55 mm leg) | 5.2 mm (F2 to DF) | 13.5 mm | MF-R025: 7.4 max wide, 3.0 max thick, 12.7 max tall, 24 AWG legs 5.1 apart |
-| GY-521 module ×1 | +0.19 mm (GYRO.AD0: 1.10 mm hole, 0.91 mm leg) | 6.2 mm (GYRO to CF5) | 7 mm | GY-521: 20-21.2 x 15.5-16.4 mm, 2.54 mm header, lying flat on its header |
-| screw terminal, 5.08 mm (Phoenix MKDS or KF301/DG301) ×3 | +0.15 mm (J1.1: 1.30 mm hole, 1.15 mm leg) | 0.9 mm (J4 to J2) | 11 mm | 5.08 mm terminals: pins up to 1.15, 7.6-8.1 deep, 10-10.5 tall |
-| screw terminal, 3.5 mm (Phoenix PT or DG350/KF350) ×5 | +0.15 mm (X6.1: 1.20 mm hole, 1.05 mm leg) | 2.9 mm (X5 to X4) | 11 mm | 3.5 mm terminals: pins up to 1.0 x 0.8 or 1.05 round, 7.2-8.0 deep, 8.5-10.5 tall |
-| Omron G2RL-2 relay ×3 | +0.36 mm (K1.11: 1.30 mm hole, 0.94 mm leg) | 0.5 mm (K1 to C6) | 15.7 mm | Omron G2RL: 29 x 12.7 x 15.7 max, terminals 0.8 x 0.5, holes 1.3 +/- 0.1 recommended |
-| chip in a DIP package (PC817, LM393, ULN2803A) ×8 | +0.19 mm (OK3.1: 0.80 mm hole, 0.61 mm leg) | 1.9 mm (OK5 to CS1) | 9 mm | DIP: 0.46-0.56 x 0.25 mm legs (diagonal 0.61), 7.62 mm rows, body 6.6 max wide, 5.3 max tall; +3.5 mm in a socket (U1, U2), socket pins 0.5 mm |
-| IRF4905, TO-220, lying flat and bolted ×3 | +0.27 mm (Q3.1: 1.30 mm hole, 1.03 mm leg) | 8.3 mm (Q2 to Q1) | 8 mm | TO-220: legs up to 0.89 x 0.53 (diagonal 1.03), body 10.4 max wide; 4.7 thick + bolt head |
-| 1/4 W metal film resistor ×50 | +0.20 mm (RU16.1: 0.80 mm hole, 0.60 mm leg) | 1.2 mm (RU3 to TVS1) | 3 mm | 1/4 W metal film: 6.0-6.5 mm long, 2.3-2.5 mm thick, 0.6 mm legs (Yageo MFR-25 type) |
+| GY-521 module ×1 | +0.19 mm (GYRO.AD0: 1.10 mm hole, 0.91 mm leg) | 8.3 mm (GYRO to RT1) | 7 mm | GY-521: 20-21.2 x 15.5-16.4 mm, 2.54 mm header, lying flat on its header |
+| screw terminal, 5.08 mm (Phoenix MKDS or KF301/DG301) ×3 | +0.15 mm (J2.1: 1.30 mm hole, 1.15 mm leg) | 0.9 mm (J4 to J2) | 11 mm | 5.08 mm terminals: pins up to 1.15, 7.6-8.1 deep, 10-10.5 tall |
+| screw terminal, 3.5 mm (Phoenix PT or DG350/KF350) ×5 | +0.15 mm (X4.1: 1.20 mm hole, 1.05 mm leg) | 2.9 mm (X5 to X4) | 11 mm | 3.5 mm terminals: pins up to 1.0 x 0.8 or 1.05 round, 7.2-8.0 deep, 8.5-10.5 tall |
+| Omron G2RL-2 relay ×3 | +0.36 mm (K2.11: 1.30 mm hole, 0.94 mm leg) | 0.5 mm (K1 to C6) | 15.7 mm | Omron G2RL: 29 x 12.7 x 15.7 max, terminals 0.8 x 0.5, holes 1.3 +/- 0.1 recommended |
+| chip in a DIP package (PC817, LM393, ULN2803A) ×8 | +0.19 mm (OK6.1: 0.80 mm hole, 0.61 mm leg) | 1.9 mm (OK5 to CS1) | 9 mm | DIP: 0.46-0.56 x 0.25 mm legs (diagonal 0.61), 7.62 mm rows, body 6.6 max wide, 5.3 max tall; +3.5 mm in a socket (U1, U2), socket pins 0.5 mm |
+| IRF4905, TO-220, lying flat and bolted ×3 | +0.27 mm (Q1.1: 1.30 mm hole, 1.03 mm leg) | 8.3 mm (Q2 to Q1) | 8 mm | TO-220: legs up to 0.89 x 0.53 (diagonal 1.03), body 10.4 max wide; 4.7 thick + bolt head |
+| 1/4 W metal film resistor ×46 | +0.20 mm (RP3.1: 0.80 mm hole, 0.60 mm leg) | 1.2 mm (RU3 to TVS1) | 3 mm | 1/4 W metal film: 6.0-6.5 mm long, 2.3-2.5 mm thick, 0.6 mm legs (Yageo MFR-25 type) |
 | TVS, DO-15 (P6KE6.8A) ×1 | +0.30 mm (TVS3.1: 1.20 mm hole, 0.90 mm leg) | 1.9 mm (TVS3 to TVS2) | 4.1 mm | DO-15: body 7.6 max x 3.6 max, legs 0.9 max (Littelfuse P6KE) |
 | RECOM R-78HB5.0-0.5 ×1 | +0.36 mm (U3.1: 1.00 mm hole, 0.64 mm leg) | 0.8 mm (U3 to C1) | 18 mm | R-78HB-0.5: 11.5 x 8.5 x 17.5, SIP3 on 2.54 mm |
 
 - TVS, DO-15 (P6KE6.8A): 1.28 mm of straight leg each end before the bend (TVS3), needs 1.0 mm.
-- diode, DO-201 (1N5822, 1.5KE27A): 2.87 mm of straight leg each end before the bend (D1), needs 1.0 mm.
-- diode, DO-35 glass (BAT85, 1N4148): 1.68 mm of straight leg each end before the bend (DH7), needs 1.0 mm.
-- diode, DO-41 (1N47xxA zener, UF4007): 2.48 mm of straight leg each end before the bend (ZG1), needs 1.0 mm.
-- 1/4 W metal film resistor: 1.83 mm of straight leg each end before the bend (RU16), needs 1.0 mm.
+- diode, DO-201 (1N5822, 1.5KE27A): 2.87 mm of straight leg each end before the bend (TVS1), needs 1.0 mm.
+- diode, DO-35 glass (BAT85, 1N4148): 1.69 mm of straight leg each end before the bend (DI1), needs 1.0 mm.
+- diode, DO-41 (1N47xxA zener, UF4007): 2.48 mm of straight leg each end before the bend (DF1), needs 1.0 mm.
+- 1/4 W metal film resistor: 1.83 mm of straight leg each end before the bend (RP3), needs 1.0 mm.
 - ACS712 modules: CS2: 1.4 mm between a 33.0 mm module's end and its LINK holes.
 - Under the board: 11.0 mm from the board to the Mega, its tallest parts 8.5 mm, legs trimmed to 1.5 mm: 1.0 mm to spare.
 
