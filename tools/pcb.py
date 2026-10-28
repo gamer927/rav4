@@ -63,8 +63,10 @@ def bxy(kx, ky):
 # UNO R3 lands exactly on KiCad's own Arduino_UNO_R3 footprint.
 def mega_pins():
     pins = []
-    for i, n in enumerate(["IOREF", "RST", "3V3", "5V", "GND", "GND", "VIN"]):
-        pins.append((n, 30.48 + 2.54 * i, 2.54))
+    # The power header is 8 long; its first pin is unused ("NC"), but it gets a hole too, so a
+    # standard 8-pin strip fits.
+    for i, n in enumerate(["NC", "IOREF", "RST", "3V3", "5V", "GND", "GND", "VIN"]):
+        pins.append((n, 27.94 + 2.54 * i, 2.54))
     for i in range(8):
         pins.append((f"A{i}", 50.8 + 2.54 * i, 2.54))
         pins.append((f"A{8 + i}", 73.66 + 2.54 * i, 2.54))
@@ -116,7 +118,7 @@ def write_lib():
     s += fp_text("reference", "A1", 50, -26, "F.Fab", hide=True)
     s += fp_text("value", "Arduino_Mega2560_Shield", 50, -24, "F.Fab", hide=True)
     for n, x, y in mega_pins():
-        s += pad(n, x, -y, shape="rect" if n == "IOREF" else "circle")
+        s += pad(n, x, -y, shape="rect" if n == "NC" else "circle")
     # It sits under the board: its outline is on the bottom courtyard layer.
     s += fp_rect(-0.25, 0.25, 101.85, -53.59, "B.CrtYd", 0.05)
     s += fp_rect(0, 0, 101.6, -53.34, "B.Fab", 0.1)
@@ -1235,6 +1237,10 @@ def set_env():
                tb_words=tb_words)
 
 
+def plural(n, word):
+    return f"{n} {word}{'' if n == 1 else 's'}"
+
+
 def substeps(c, board):
     """The Lego-style sub-steps: markdown per step, and the pictures in docs/build/."""
     import build_steps as bs
@@ -1247,8 +1253,8 @@ def substeps(c, board):
     plans = bs.plan(STEPS, c, parts, HEIGHT_ORDER, _natural)
     for n, (s, title, subs) in enumerate(plans, 1):
         lines = [f"![Step {n}: everything in this step](build/pcb-{s}.png)", "",
-                 f"*The whole step: {sum(len(x) for x in subs)} parts in {len(subs)} small steps. "
-                 "Orange = this step, grey = already in.*", ""]
+                 f"*The whole step: {plural(sum(len(x) for x in subs), 'part')} in "
+                 f"{plural(len(subs), 'small step')}. Orange = this step, grey = already in.*", ""]
         for m, refs in enumerate(subs, 1):
             p = c.parts[refs[0]]
             big, small = bs.find_words(c, refs, ENV)
@@ -1290,14 +1296,14 @@ def _natural(s):
 # What goes in a bag besides the parts on the board.
 BAG_EXTRAS = {
     "S3": ["3× M3 × 8 screw and nut (to bolt the transistors' tabs down)",
-           "6× 2 cm of stiff wire for the LINK holes (the cut-off legs of the big S1 diodes are perfect)"],
+           "6× 2 cm of stiff wire for the LINK holes (the cut-off legs of step 1's three big diodes are perfect)"],
     "S6": ["3× male header strip, 40-pin (cut to 8, 8, 8, 10, 8, 8 and two 18s)"],
 }
 
 
 def bags_markdown(c):
     lines = []
-    for s, title, refs in STEPS:
+    for num, (s, title, refs) in enumerate(STEPS, 1):
         count = {}
         for r in refs:
             p = c.parts[r]
@@ -1324,15 +1330,15 @@ def bags_markdown(c):
             if r in SOCKETED:
                 items.append(f"1× {SOCKETED[r]}-pin chip socket (for {r})")
         items += BAG_EXTRAS.get(s, [])
-        lines.append(f"- [ ] **Bag {s}** ({title}): " + "; ".join(items))
+        lines.append(f"- [ ] **Bag {num}** (step {num}, {title}): " + "; ".join(items))
     return "\n".join(lines)
 
 
 def step_pictures(board):
     os.makedirs(os.path.join(ROOT, "docs", "build"), exist_ok=True)
     done = set()
-    for s, title, refs in STEPS:
-        render(board, os.path.join(ROOT, "docs", "build", f"pcb-{s}.png"), f"Step {s}: {title}",
+    for n, (s, title, refs) in enumerate(STEPS, 1):
+        render(board, os.path.join(ROOT, "docs", "build", f"pcb-{s}.png"), f"Step {n}: {title}",
                highlight=set(refs), done=set(done), routes=False, scale=5.0)
         done |= set(refs)
 

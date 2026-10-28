@@ -54,7 +54,7 @@ multimeter and solder, you can build this.
 | **Gland** | The round plastic fitting a cable goes through in the box wall. Tighten it and it grips the cable. |
 | **Insert** | A small brass nut you press into the plastic with the hot soldering iron. Screws then go into it. |
 
-### Three skills
+### Four skills
 
 **1. The multimeter.** You only need two settings.
 - **Beep** (the setting with a speaker symbol). Touch the two probes to two points. A beep
@@ -70,13 +70,16 @@ multimeter and solder, you can build this.
 5. Take the solder away first, then the iron.
 6. Snip the leg off just above the joint.
 
-**3. Soldering a wire.**
-1. Strip 4 mm of plastic off the end. Twist the strands.
-2. Melt a little solder into the strands.
-3. Hold the wire against the leg on the underside, and touch the iron to both. They join.
+**3. Soldering a wire** (to the screen's pins, the dash pod switches, the car's wires).
+1. Slide a piece of heat-shrink onto the wire first, out of the way.
+2. Strip 4 mm of plastic off the end. Twist the strands.
+3. Melt a little solder into the strands.
+4. Hold the wire against the pin, and touch the iron to both. They join.
+5. Slide the heat-shrink over the joint and warm it with the heat gun until it grips.
 
-A wire that visits several stops: strip a short window of plastic at each stop. Or use
-separate short wires from stop to stop. Both work.
+**4. A screw terminal.** Strip 6 mm off the wire and twist the strands (no solder: it loosens
+under a screw). Open the screw, push the wire in all the way, tighten firmly. **Tug it**: it
+mustn't come out, and no bare copper shows outside the terminal.
 
 ### If a check fails
 
@@ -164,7 +167,7 @@ these wires being the right ones.
   such as JLCPCB or PCBWay. Choose: **2 layers, 1.6 mm thick, 1 oz copper, lead-free HASL**, any
   colour, quantity **5** (the minimum). About $20–40 for five, with shipping. Details:
   [hardware/pcb/README.md](../hardware/pcb/README.md).
-- [ ] Open the [shopping list](04-shopping-list.md) (about $670 of parts).
+- [ ] Open the [shopping list](04-shopping-list.md) (about $675 of parts).
 - [ ] Pick the brass tee that matches **your hose size**, and the fuse tap that matches **your
   fuse size** (both from part 0).
 - [ ] Order the small electronic parts from **DigiKey or Mouser**.
@@ -268,9 +271,11 @@ away: that's where the Mega's USB socket comes up.
 and the double row at the back, right of the title (their labels say **5V**, **A0**, **D22**…).
 
 After each step there are two checks:
-- **No shorts** (power off, meter on beep): the pairs listed must **not** beep. A short chirp
-  that stops straight away is fine (a capacitor filling up); a beep that keeps going is a short:
-  find the solder blob before you go on.
+- **No shorts** (power off, meter on beep): the pairs listed must **not** beep. Put the **red**
+  probe on the first one named (the 12V, 5V or signal side) and the **black** on GND: the other
+  way round, some meters beep through a protection diode. A short chirp that stops straight away
+  is fine (a capacitor filling up); a beep that keeps going is a short: find the solder blob
+  before you go on.
 - **It works** (bench 12 V on): readings taken at the labelled holes.
 
 **Where to probe:** the Mega's holes the TCU uses are labelled on the board (**5V**, **GND**,
@@ -285,7 +290,7 @@ After each step there are two checks:
 
 ✅ **CHECK, it works:** bench 12 V **+** to the **second 12V** terminal (the logic feed) and **−**
 to **GND**.
-- [ ] The Mega holes **5V** to **GND** read **4.9–5.1 V**.
+- [ ] The Mega holes **5V** to **GND** read **4.8–5.2 V**.
 - [ ] Swap the bench wires the wrong way round for one second: **5V** reads **0 V** (the
   wrong-way-round protection works). Put them back.
 
@@ -321,7 +326,9 @@ terminal and **GND**.
 **ECU3** to **SOL3**. (Relays off = the engine computer straight through to the transmission.)
 
 ✅ **CHECK, it works:** clip one big 15 Ω resistor between **SOL1** and **GND**, lying on the
-heatsink (it gets warm). 12 V on both 12V terminals and GND, C7–C8 wire in.
+heatsink. 12 V on both 12V terminals and GND, C7–C8 wire in. While a channel is on, the
+resistor takes about **10 W** and gets hot within a minute: keep each test short, and don't
+touch it.
 - [ ] Hold a wire from **5V** to **D6** (relays on) and another from **5V** to **D8**: **SOL1**
   reads **about 12 V**, and the Mega hole **A4** goes from about **2.50 V** up to about **2.65 V**.
 - [ ] Take the wire off **D8**: SOL1 drops to **0 V**.
@@ -388,9 +395,8 @@ a **GND** terminal: its Mega hole drops to **0 V**.
 ✅ **CHECK** (meter on beep): no two neighbouring Mega pins beep to each other, except where both
 are labelled **5V** or both **GND**.
 
-- [ ] Put a piece of electrical tape on top of the Mega's metal USB socket.
 - [ ] Plug the board onto the Mega. Every pin goes into its socket; the Mega's USB and power
-  sockets come up through the cut-away corner.
+  sockets sit in the cut-away corner, clear of the board.
 
 ---
 
@@ -546,8 +552,11 @@ Leave each switch's **NC** pin empty. Write down which colour is UP, DOWN and GN
 While the TCU is driving the transmission, these 3 big resistors stand in for the solenoids,
 so the engine computer doesn't notice anything is different.
 
-- [ ] Put a thin layer of heatsink paste under each **15 Ω 50 W resistor**, then bolt each one to
-  the heatsink (2 × M3 each).
+- [ ] Lay the three **15 Ω 50 W resistors** on the heatsink's flat side, side by side with a
+  finger's width between them. Mark through their corner holes, and drill each mark with a
+  **3.2 mm** bit, going through between the fins.
+- [ ] Put a thin layer of heatsink paste under each resistor, then bolt it down: **M3 × 16**
+  screws from the resistor side, nuts between the fins (2 per resistor). Firm, not crushing.
 - [ ] Join one end of all three with a black silicone wire: label it **LOAD GND**.
 - [ ] Put a white silicone wire on the other end of each one. Label them **LOAD 1, LOAD 2,
   LOAD 3**.
@@ -570,7 +579,8 @@ same names printed behind them.
 - [ ] Shifter cable → the **SHIFT** terminals **UP**, **DN**, **GND**.
 - [ ] Dash cable: C1–C8 → the **DASH** terminals **ECO**, **SPT**, **MAN**, **TST**, **ON**,
   **GND**, **C7**, **C8**. (Take out the C7–C8 test wire from step 2 first.)
-- [ ] Screen cable → the **SCREEN** terminals **5V**, **GND**, **SDA**, **SCL**.
+- [ ] Screen cable → the **SCREEN** terminals: the screen's **VCC** core to **5V**, **GND** to
+  **GND**, **DIN** to **SDA**, **CLK** to **SCL** (part 7 says which colour is which).
 - [ ] ATF probe → the **ATF** terminals (red = **5V**, black = **GND**, yellow = **DQ**).
 - [ ] Dummy loads: LOAD 1, 2, 3, GND → the **LOAD** terminals **LD1**, **LD2**, **LD3**, **GND**.
 - [ ] **For the bench only**, three short wires: **SOL1 → LD1, SOL2 → LD2, SOL3 → LD3**. Now the
@@ -622,9 +632,9 @@ SHIFTING", and **TRANS** with the room temperature in °F.
 
 **If the screen stays dark:**
 - The message window shows `# TCU boot`? Then the Mega is fine and it's the screen: check the
-  X5 wires, and part 7's checks.
-- Nothing in the message window either? Check the **SCREEN** terminals **5V** to **GND** read 5 V
-  (step 1's check).
+  screen cable in the **SCREEN** terminals (DIN to SDA, CLK to SCL), and part 7's checks.
+- Nothing in the message window either? The Mega isn't running the software: check the USB
+  cable and the port, and upload again (10.2).
 
 ✅ **CHECK:** in the message window, the `# PBIT` list says **OK** on every line, or `--` (not
 tested yet), or **CHECK** for CALIBRATED (that's done in part 13). A line saying **BAD** names
@@ -728,6 +738,7 @@ set the current sensors.
 | ECO / SPORT / MANUAL SWITCH | That switch's core in the dash cable and the DASH terminals, then step 5 |
 | BRAKE | The STP terminal, then step 4 |
 | ON/OFF CUT | C7 and C8 at the DASH terminals 7 and 8, and the ON/OFF switch's second half (part 8) |
+| RESTARTS | The Mega froze and restarted itself since power-on. Power off and on; if it comes back, upload the software again |
 | SAFETY RESET | The Mega didn't come back by itself after restarting. Re-upload; if it keeps happening, see spec §9 (bootloader) |
 
 **If it says STOPPED BECAUSE…**, the next line says why (for example **ON/OFF IS OFF**: it was
@@ -771,7 +782,8 @@ turned off before the last prompt). Fix that and run it again.
 
 ✅ **CHECK each cable as soon as it's done** (meter on beep, nothing plugged in):
 - [ ] **Every wire:** one probe on the plug's pin outside, the other on its terminal inside:
-  beep. Pin 1 goes to the first terminal (a), pin 2 to the second (b), and so on.
+  beep. Pin 1 goes to the first terminal of its group (counting from the left), pin 2 to the
+  second, and so on.
 - [ ] **No crossed wires:** no plug pin beeps to the pin next to it.
 
   These pairs **should** beep, because they're joined inside the box:
@@ -787,9 +799,14 @@ turned off before the last prompt). Fix that and run it again.
 
 ![Box step 4](build/box-4.png)
 
-- [ ] **11.6** Tighten every gland. Screw the lid on (4 × M3).
+- [ ] **11.6** Tighten every gland. Screw the lid on (4 × M3 × 10 countersunk).
 
-✅ **CHECK:** do part 10's self-test again (10.6–10.8), through the plugs. It passes.
+✅ **CHECK, it still works through the plugs** (the full self-test comes again in the car,
+12.4): plug the ATF probe into **X6**, and bench 12 V into the box's half of **X1**: **+** to
+pins 1 and 2, **−** to pin 3.
+- [ ] The screen comes up as in 10.4, with the room temperature.
+- [ ] The SENSORS page (tap TEST): BATTERY reads your bench voltage, SIDE FORCE about 0.00 G.
+- [ ] ON/OFF **on**: **NOT READY / NOT CALIBRATED**. ON/OFF **off**: **TCU IS OFF**.
 
 ---
 
@@ -863,7 +880,10 @@ every join. Don't use the clip-on "Scotch-lock" taps.
 - [ ] Hide all three cables under the trim, running to the box. The dash pod's two cables go
   down behind the dash trim.
 
-✅ **CHECK** (engine off, lever in P, ON/OFF on): hold TEST for 2 seconds. Every prompt passes.
+✅ **CHECK** (engine off, lever in P, ON/OFF on): hold TEST for 2 seconds and do the prompts.
+Every prompt passes. **TEMP PROBE** and the three solenoid lines (**SOLENOID 1**, **SOLENOID 2**,
+**LOCKUP SOL**) say **BAD** for now: that's expected, their wires go in next (12.5, 12.6). The
+self-test runs once more, complete, in 13.3.
 
 ### 12.5 ATF probe (engine cold)
 - [ ] Follow the [ATF probe instructions](03-wiring-guide.md#the-atf-temperature-probe): cut the
@@ -1038,7 +1058,8 @@ the end of this part.
 
 ---
 
-*The board pages are drawn from [`tools/pcb.py`](../tools/pcb.py), the 3D pictures from
+*The board steps and their pictures are drawn from the board design by
+[`tools/pcb.py`](../tools/pcb.py) and [`tools/build_steps.py`](../tools/build_steps.py), the 3D pictures from
 the models in [`hardware/`](../hardware/), and the shopping list from
 [`tools/shopping_list.py`](../tools/shopping_list.py).*
 

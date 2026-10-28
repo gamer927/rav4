@@ -203,7 +203,9 @@ def need(item_words):
 check(need("BAT85") == str(counts.get("BAT85")), f"BAT85: list says {need('BAT85')}, board uses {counts.get('BAT85')}")
 check(need("UF4007") == str(counts.get("UF4007")), f"UF4007: list says {need('UF4007')}, board uses {counts.get('UF4007')}")
 check(need("100 nF") == str(counts.get("100 nF")), f"100 nF: list says {need('100 nF')}, board uses {counts.get('100 nF')}")
-check(need("Extra 10 k") == f"{counts.get('10k')} total", f"10k: list says {need('Extra 10 k')}, board uses {counts.get('10k')}")
+# 10k: the board's, plus the screen's reset pull-up and the bench gas-pedal stand-in's two
+check(need("Extra 10 k") == f"{counts.get('10k') + 3} total",
+      f"10k: list says {need('Extra 10 k')}, board uses {counts.get('10k')} + 3 off the board")
 zeners = sum(v for k, v in counts.items() if k.startswith("1N47"))
 check(need("zener diode kit") == str(zeners), f"zeners: list says {need('zener diode kit')}, board uses {zeners}")
 check(need("PTC") == str(counts.get("PTC 0.25 A")), "PTC count")

@@ -8,7 +8,7 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 1. Brain and power,"Resettable fuse (PTC), 0.25 A hold, radial, 5.1 mm leg spacing",1,pack of 5,DigiKey / Mouser,3,e.g. Bourns MF-R025. Protects the relay-power wires to the ON/OFF switch
 1. Brain and power,"1N5822 Schottky diode, 3 A",1,pack of 10,DigiKey / Mouser,3,Reverse-polarity protection
 1. Brain and power,"100 µF 50 V electrolytic capacitor, 8 mm wide, 3.5 mm leg spacing",1,pack of 10,DigiKey / Mouser,3,e.g. Panasonic EEU-FR1H101. Up to 10 mm wide still fits
-1. Brain and power,Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses,2 + fuses,kit,Auto-parts store,10,Match your fuse box's blade size (step 0 checks it)
+1. Brain and power,Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses,3 + fuses,kit,Auto-parts store,10,"Two in the car (5 A and 2 A), one for the bench power lead (5 A). Match your fuse box's blade size (step 0 checks it)"
 1. Brain and power,Add-a-circuit fuse tap,1,1,Auto-parts store,8,Same blade size as the fuse box
 2. Solenoid control,"Omron G2RL-2-DC12 relay (DPDT, 12 V)",3,4 (one spare),DigiKey / Mouser,10,The factory/box changeover. Don't substitute a single-pole relay
 2. Solenoid control,"IRF4905 P-channel MOSFET, TO-220",3,pack of 5,DigiKey / Mouser,9,"Infineon IRF4905PBF. They lie flat, bolted to the board's copper (M3 × 8 screw and nut each)"
@@ -25,7 +25,7 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 3. Signal inputs,BAT85 Schottky diode (DO-35),18,pack of 25,DigiKey / Mouser,5,Input clamps
 3. Signal inputs,1N4148 diode,6,pack of 100,"Amazon (or AliExpress, cheaper but slower)",5,
 3. Signal inputs,"Resistor kit, 1/4 W 1 % metal film (600+ pcs), bodies about 6 mm long",≈ 50,kit,"Amazon (or AliExpress, cheaper but slower)",12,"Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"
-3. Signal inputs,Extra 10 kΩ resistors,20 total,pack of 50,"Amazon (or AliExpress, cheaper but slower)",4,Most kits only have 10–20 of each value
+3. Signal inputs,Extra 10 kΩ resistors,23 total,pack of 50,"Amazon (or AliExpress, cheaper but slower)",4,"20 on the board, 1 on the screen, 2 for the bench test. Most kits only have 10–20 of each value"
 3. Signal inputs,"100 nF ceramic capacitors, 50 V, 5 mm leg spacing",12,pack of 50,"Amazon (or AliExpress, cheaper but slower)",5,
 4. Board connectors and wire,"Screw terminals, 3.5 mm pitch, 2- and 3-way, interlocking (DG350 / KF350 type)",25 positions,pack of ~20 pieces,"Amazon (or AliExpress, cheaper but slower)",8,"SHIFT 3, DASH 8, SCREEN 4, ATF 3, SIG 7: e.g. 8 = 3 + 3 + 2. Or Phoenix PT 1,5/n-3,5-H in one piece"
 4. Board connectors and wire,"Screw terminals, 5.08 mm pitch, 2- and 3-way, interlocking (KF301 / DG301 type)",13 positions,pack of ~20 pieces,"Amazon (or AliExpress, cheaper but slower)",7,"PWR 3, SOL 6, LOAD 4. Or Phoenix MKDS 1,5/n-5,08 in one piece"
@@ -38,13 +38,14 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 5. Car harness and connectors,"Shielded cable: 8-core 24 AWG, 4-core, 3-core",3 m + 2.5 m + 4.5 m,5 m of each,"Amazon (or AliExpress, cheaper but slower)",26,"Dash pod switches (8-core), screen (4-core, ≤ 2.5 m), ATF probe and shifter (3-core)"
 5. Car harness and connectors,Heat-shrink assortment incl. adhesive-lined,1,kit,"Amazon (or AliExpress, cheaper but slower)",12,
 5. Car harness and connectors,Split loom + zip ties,1,pack,Auto-parts store,12,
-5. Car harness and connectors,"Wago 221 lever-nut connectors, assorted",~9,pack,Hardware store,12,Joins the cables to the switch wires inside the dash pod and the shifter base
+5. Car harness and connectors,"Wago 221 lever-nut connectors, assorted",11,pack,Hardware store,12,Joins the cables to the switch wires inside the dash pod and the shifter base
 5. Car harness and connectors,"Cable glands PG7 + PG9, nylon, with locknuts",7 + 4,assortment,"Amazon (or AliExpress, cheaper but slower)",10,TCU box 4 × PG7 + 4 × PG9; dash pod 2 × PG7; shifter base 1 × PG7
 6. Dash pod controls and screen,"12 mm ON/OFF toggle, **2-pole** (DPDT or DPST), with flip-up safety cover",1,1,"Amazon (or AliExpress, cheaper but slower)",12,"Must be 2-pole: one pole tells the TCU, the other cuts the relays' power in hardware"
 6. Dash pod controls and screen,"6 mm mini toggle switch, MTS-101/102",3,pack of 5,"Amazon (or AliExpress, cheaper but slower)",8,"ECO, SPORT and MANUAL"
 6. Dash pod controls and screen,"12 mm momentary push button, normally open",1,pack of 5,"Amazon (or AliExpress, cheaper but slower)",10,TEST
 6. Dash pod controls and screen,"2.42"" OLED module, 128 × 64, SSD1309, I²C-capable",1,1,"Amazon (or AliExpress, cheaper but slower)",20,"e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat"
 6. Dash pod controls and screen,"1 µF capacitor (ceramic or electrolytic, 16 V+)",1,pack,"Amazon (or AliExpress, cheaper but slower)",4,"Power-on reset for the screen, with a 10k from the resistor kit"
+6. Dash pod controls and screen,Thin double-sided foam tape (about 1 mm),1,roll,"Amazon (or AliExpress, cheaper but slower)",5,Holds the screen in its pocket in the dash pod
 6. Dash pod controls and screen,GY-521 (MPU-6050) gyro module,1,pack of 3,"Amazon (or AliExpress, cheaper but slower)",9,
 7. ATF temperature probe,"DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C)",1,1,"Amazon (or AliExpress, cheaper but slower)",10,Not the PVC-cable kind
 7. ATF temperature probe,"Brass barbed tee with a 1/8"" NPT female side port",1,1,Hardware store,10,Barb size = your cooler hose's inside diameter (step 0 measures it)
@@ -55,7 +56,7 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 7. ATF temperature probe,"ATF to top up (Toyota Type T-IV, or as your owner's manual says)",~1 qt,1 qt,Auto-parts store,10,
 8. 3D printing,"PETG filament, 1 kg",~1 kg,2 rolls (don't run out mid-print),"Amazon (or AliExpress, cheaper but slower)",36,Skip if filament comes with the printer. Not PLA
 8. 3D printing,M3 heat-set inserts (~4 mm OD),12,pack of 50,"Amazon (or AliExpress, cheaper but slower)",8,
-8. 3D printing,M3 screw kit with countersunk screws and nuts,~35,kit,"Amazon (or AliExpress, cheaper but slower)",12,8 and 10 mm countersunk; 6 mm pan head (Mega and board posts); 8 mm pan head + nuts (MOSFET tabs)
+8. 3D printing,M3 screw kit with countersunk screws and nuts,~35,kit,"Amazon (or AliExpress, cheaper but slower)",12,"8 and 10 mm countersunk; 6 mm pan head (Mega and board posts); 8 mm pan head + nuts (MOSFET tabs); 16 mm pan head + nuts (6, the dummy resistors on the heatsink)"
 8. 3D printing,M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge),4 + 8 + 1,loose,Hardware store,9,
 9. Sequential shifter (Beavis Motorsport DIY),V-155-1C25 roller-lever microswitch,2,pack of 5,"Amazon (or AliExpress, cheaper but slower)",9,Genuine Omron is $4–6 each
 9. Sequential shifter (Beavis Motorsport DIY),"Pivot: 12 mm OD tube, 64 mm long, 1.6 mm wall; or an M12 × 75 bolt + nyloc nut + 2 washers",1,1,Hardware store,6,The tube needs the printed pivot pin and cap
@@ -75,6 +76,6 @@ Tools,OBD-II scanner,,,,20,1999 is OBD-II
 Tools,IR thermometer,,,,15,
 Tools,Drain pan + funnel,,,,10,
 Tools,Hot-glue gun,,,,10,
-Tools,Drill + 3 mm and 6.5 mm bits,,,,0,6.5 mm opens the shifter's M6 holes Usually owned
+Tools,Drill + 3.2 mm and 6.5 mm bits,,,,0,3.2 mm for the heatsink's screw holes; 6.5 mm opens the shifter's M6 holes Usually owned
 Tools,3D printer,,,,0,You have one Owned
 Tools,Four jack stands,,,,0,You have them Owned

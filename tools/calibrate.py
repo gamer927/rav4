@@ -131,8 +131,8 @@ def bench_result(log, supply_v, ohms=DUMMY_OHMS):
                        "2 s and let the self-test run to the end while this records.")
     shown = statistics.mean(readings)
     if shown < 0.05:
-        raise CalError("The self-test measured no current at all. Check the J2d-J4a, J2e-J4b, J2f-J4c "
-                       "test wires and the big resistors (build book part 10).")
+        raise CalError("The self-test measured no current at all. Check the SOL1-LD1, SOL2-LD2, SOL3-LD3 "
+                       "bench wires and the big resistors (build book part 10).")
     true_a = supply_v / ohms
     new = old * true_a / shown
     if abs(new / old - 1) > 0.35:
@@ -387,7 +387,7 @@ def cmd_bench(args):
     print("""
 BENCH (build book part 10): sets the solenoid current sensors.
   1. Everything connected on the table as in part 10, bench 12 V on, ON/OFF on, only ECO on.
-  2. Put your meter (volts) across J1a and J1c and note the reading.""")
+  2. Put your meter (volts) across the first 12V terminal and GND, and note the reading.""")
     supply = ask_float("  What does the meter read? (e.g. 12.3) ")
     ohms = ask_float(f"  Meter on ohms across one big resistor: what does it read? [Enter = {DUMMY_OHMS:g}] ",
                      DUMMY_OHMS)

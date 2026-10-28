@@ -41,8 +41,9 @@ ITEMS = [
     ("1. Brain and power", "1N5822 Schottky diode, 3 A", "1", "pack of 10", DK, 3, "Reverse-polarity protection"),
     ("1. Brain and power", "100 µF 50 V electrolytic capacitor, 8 mm wide, 3.5 mm leg spacing", "1", "pack of 10", DK, 3,
      "e.g. Panasonic EEU-FR1H101. Up to 10 mm wide still fits"),
-    ("1. Brain and power", "Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses", "2 + fuses", "kit", AUTO, 10,
-     "Match your fuse box's blade size (step 0 checks it)"),
+    ("1. Brain and power", "Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses", "3 + fuses", "kit", AUTO, 10,
+     "Two in the car (5 A and 2 A), one for the bench power lead (5 A). Match your fuse box's blade size "
+     "(step 0 checks it)"),
     ("1. Brain and power", "Add-a-circuit fuse tap", "1", "1", AUTO, 8, "Same blade size as the fuse box"),
     # ---------------------------------------------------------------- 2
     ("2. Solenoid control", "Omron G2RL-2-DC12 relay (DPDT, 12 V)", "3", "4 (one spare)", DK, 10,
@@ -71,8 +72,8 @@ ITEMS = [
     ("3. Signal inputs", "1N4148 diode", "6", "pack of 100", AMZ, 5, ""),
     ("3. Signal inputs", "Resistor kit, 1/4 W 1 % metal film (600+ pcs), bodies about 6 mm long", "≈ 50", "kit", AMZ, 12,
      "Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"),
-    ("3. Signal inputs", "Extra 10 kΩ resistors", "20 total", "pack of 50", AMZ, 4,
-     "Most kits only have 10–20 of each value"),
+    ("3. Signal inputs", "Extra 10 kΩ resistors", "23 total", "pack of 50", AMZ, 4,
+     "20 on the board, 1 on the screen, 2 for the bench test. Most kits only have 10–20 of each value"),
     ("3. Signal inputs", "100 nF ceramic capacitors, 50 V, 5 mm leg spacing", "12", "pack of 50", AMZ, 5, ""),
     # ---------------------------------------------------------------- 4
     ("4. Board connectors and wire", "Screw terminals, 3.5 mm pitch, 2- and 3-way, interlocking (DG350 / KF350 type)",
@@ -97,7 +98,7 @@ ITEMS = [
      "5 m of each", AMZ, 26, "Dash pod switches (8-core), screen (4-core, ≤ 2.5 m), ATF probe and shifter (3-core)"),
     ("5. Car harness and connectors", "Heat-shrink assortment incl. adhesive-lined", "1", "kit", AMZ, 12, ""),
     ("5. Car harness and connectors", "Split loom + zip ties", "1", "pack", AUTO, 12, ""),
-    ("5. Car harness and connectors", "Wago 221 lever-nut connectors, assorted", "~9", "pack", HW, 12,
+    ("5. Car harness and connectors", "Wago 221 lever-nut connectors, assorted", "11", "pack", HW, 12,
      "Joins the cables to the switch wires inside the dash pod and the shifter base"),
     ("5. Car harness and connectors", "Cable glands PG7 + PG9, nylon, with locknuts", "7 + 4", "assortment", AMZ, 10,
      "TCU box 4 × PG7 + 4 × PG9; dash pod 2 × PG7; shifter base 1 × PG7"),
@@ -112,6 +113,8 @@ ITEMS = [
      "e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat"),
     ("6. Dash pod controls and screen", "1 µF capacitor (ceramic or electrolytic, 16 V+)", "1", "pack", AMZ, 4,
      "Power-on reset for the screen, with a 10k from the resistor kit"),
+    ("6. Dash pod controls and screen", "Thin double-sided foam tape (about 1 mm)", "1", "roll", AMZ, 5,
+     "Holds the screen in its pocket in the dash pod"),
     ("6. Dash pod controls and screen", "GY-521 (MPU-6050) gyro module", "1", "pack of 3", AMZ, 9, ""),
     # ---------------------------------------------------------------- 7
     ("7. ATF temperature probe", "DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C)", "1", "1", AMZ, 10,
@@ -130,7 +133,8 @@ ITEMS = [
      "Skip if filament comes with the printer. Not PLA"),
     ("8. 3D printing", "M3 heat-set inserts (~4 mm OD)", "12", "pack of 50", AMZ, 8, ""),
     ("8. 3D printing", "M3 screw kit with countersunk screws and nuts", "~35", "kit", AMZ, 12,
-     "8 and 10 mm countersunk; 6 mm pan head (Mega and board posts); 8 mm pan head + nuts (MOSFET tabs)"),
+     "8 and 10 mm countersunk; 6 mm pan head (Mega and board posts); 8 mm pan head + nuts (MOSFET "
+     "tabs); 16 mm pan head + nuts (6, the dummy resistors on the heatsink)"),
     ("8. 3D printing", "M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge)",
      "4 + 8 + 1", "loose", HW, 9, ""),
     # ---------------------------------------------------------------- 9
@@ -164,7 +168,8 @@ TOOLS = [
     ("IR thermometer", "", 15, ""),
     ("Drain pan + funnel", "", 10, ""),
     ("Hot-glue gun", "", 10, ""),
-    ("Drill + 3 mm and 6.5 mm bits", "6.5 mm opens the shifter's M6 holes", 0, "Usually owned"),
+    ("Drill + 3.2 mm and 6.5 mm bits", "3.2 mm for the heatsink's screw holes; 6.5 mm opens the shifter's M6 holes", 0,
+     "Usually owned"),
     ("3D printer", "You have one", 0, "Owned"),
     ("Four jack stands", "You have them", 0, "Owned"),
 ]
