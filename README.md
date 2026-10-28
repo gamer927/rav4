@@ -120,9 +120,10 @@ outside on a finned heatsink. Print settings, hardware and assembly:
 ## Status
 
 - **Done:** full design, firmware and documentation.
-  - `make check` runs it all: 1,256 unit-test checks, 24 whole-system scenarios (the real
-    firmware in a simulated car, with faults injected), and nearly 500 cross-checks that the boards,
-    pin map, firmware, screen text and 3D models agree. All pass
+  - `make check` runs it all: 1,256 unit-test checks, 25 whole-system scenarios (the real
+    firmware in a simulated car, with faults injected, plus the build book's jack-stand test step
+    by step), the calibration helper on a simulated drive, and about 500 cross-checks that the
+    boards, pin map, firmware, screen text and 3D models agree. All pass
     ([system review](docs/06-system-review.md)).
   - The firmware compiles for the Arduino Mega 2560 without warnings (15 % flash, 51 % RAM).
   - The screens above come from the real firmware running in a simulator.
@@ -195,14 +196,16 @@ to the first drive, with a picture for each board step. In outline:
    confirmed for the 1999 RAV4) and confirm every **VERIFY** item in §10 against your repair
    manual. In particular, read the transaxle code on its ID plate.
 2. **Bench test.** Build the box, connect 15 Ω resistors in place of the solenoids, and flash the
-   firmware. Hold TEST to run the self-test; every line should pass.
+   firmware. Hold TEST to run the self-test; every line should pass. Build book part 10 walks
+   through it, with a table of what to check for each failed line.
 3. **Install it with the switch OFF.** In OFF, the car runs entirely on the factory computer while
-   the box watches and logs over USB. Drive normally and calibrate the throttle sensor, speed
-   signal and gear ratios (spec §8).
-4. **Unlock it.** Set `CALIBRATED = true` in `firmware/tcu/config.h` and reflash. Until then the
-   ON/OFF switch is ignored and the screen shows `NOT CALIBRATED`.
-5. **Test in stages** (spec §9): self-test in the car, then on a lift with all four wheels up,
-   then a closed lot, then the road.
+   the box watches and logs over USB.
+4. **Calibrate with the helper.** `tools/calibrate.py` does the maths: a 5-minute parked step
+   (gas pedal, battery) and one drive with a passenger at the laptop (speed signal, gear ratios).
+   It writes the numbers into `config.h`, and `calibrate.py unlock` unlocks the box once every
+   step is done. Until then the ON/OFF switch is ignored and the screen shows `NOT CALIBRATED`.
+5. **Test in stages** (build book part 13): jack stands with all four wheels up, then an empty
+   car park, then the road.
 
 ## Documents
 
@@ -230,6 +233,7 @@ firmware/tcu/ds18b20.*      ATF probe driver + tested decoding
 firmware/tcu/imu.*          gyro (MPU-6050) yaw-rate reader
 test/                       unit tests; test/system/: whole-firmware simulation with fault injection
 tools/system_check.py       cross-checks boards, pins, firmware, screens and 3D models agree
+tools/calibrate.py          calibration helper: records the USB log, works out the numbers
 tools/avr_build.sh          compile for the Mega without the Arduino IDE
 tools/wiring_diagram.py     regenerates the wiring diagrams in docs/
 tools/build_stl.sh          fit-checks the housings, exports the STLs and previews in hardware/

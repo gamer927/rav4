@@ -3,7 +3,7 @@ CXXFLAGS ?= -std=c++11 -Wall -Wextra -Werror -O1 -g
 LOGIC := firmware/tcu/tcu_logic.cpp firmware/tcu/self_test.cpp
 HEADERS := $(wildcard firmware/tcu/*.h)
 
-.PHONY: test system screens check avr clean
+.PHONY: test system screens calibrate-test check avr clean
 
 test: build/test_tcu_logic build/test_self_test
 	./build/test_tcu_logic
@@ -34,9 +34,14 @@ screens: build/system_test
 	./build/system_test --screens build/screens
 	python3 tools/render_screens.py build/screens docs/oled-screens.png
 
-# Everything: unit tests, system test, and the cross-checks between firmware,
-# boards, housings and docs.
-check: test system
+# The calibration helper (tools/calibrate.py), on the simulated car's USB log.
+calibrate-test: build/system_test
+	./build/system_test --callog build/cal.log
+	python3 test/test_calibrate.py build/cal.log
+
+# Everything: unit tests, system test, calibration helper, and the
+# cross-checks between firmware, boards, housings and docs.
+check: test system calibrate-test
 	python3 tools/system_check.py
 
 avr:

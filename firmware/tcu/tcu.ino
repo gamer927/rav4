@@ -95,6 +95,7 @@ Oled oled;
 Imu imu;
 Ds18b20Bus atfBus;
 tcu::Inputs lastIn;
+float lastTpsV = 0.0f;  // gas pedal sensor volts, for calibration (tools/calibrate.py)
 bool unexpectedWdtReset = false;
 
 // --------------------------------------------------------------- pulse inputs
@@ -270,6 +271,7 @@ tcu::Inputs readInputs(uint32_t now) {
   // VTA relative to the ECM's sensor ground E2 (differential, no ground loop).
   const float e2V = cfg::TPS_E2_SENSE ? rawToVolts(readRaw(pin::TPS_E2)) : 0.0f;
   const float tpsV = tpsF.update(rawToVolts(readRaw(pin::TPS)) - e2V, 0.4f);
+  lastTpsV = tpsV;
   in.tpsValid = tpsV >= cfg::TPS_VALID_MIN_V && tpsV <= cfg::TPS_VALID_MAX_V;
   float tps = (tpsV - cfg::TPS_CLOSED_V) / (cfg::TPS_WOT_V - cfg::TPS_CLOSED_V) * 100.0f;
   in.tpsPct = tps < 0.0f ? 0.0f : (tps > 100.0f ? 100.0f : tps);
@@ -583,7 +585,7 @@ void serviceUsbLog(uint32_t now) {
   if (Serial.availableForWrite() < 60) return;  // never block on a slow host
   last = now;
   const tcu::Outputs& o = controller.outputs();
-  // ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings
+  // ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
   Serial.print(now);
   Serial.print(',');
   Serial.print(o.control);
@@ -608,7 +610,9 @@ void serviceUsbLog(uint32_t now) {
   Serial.print(',');
   Serial.print(o.faults);
   Serial.print(',');
-  Serial.println(o.warnings);
+  Serial.print(o.warnings);
+  Serial.print(',');
+  Serial.println(lastTpsV, 2);
 }
 
 // -------------------------------------------------------------- dash pod OLED
@@ -883,6 +887,21 @@ void setup() {
   if (USB_LOG_ENABLED) {
     Serial.print(F("# TCU boot, reset flags 0x"));
     Serial.println(resetFlags, HEX);
+    // The settings this firmware was built with, and the log's columns:
+    // tools/calibrate.py reads both.
+    Serial.print(F("# cal VSS_PULSES_PER_MILE="));
+    Serial.print(cfg::VSS_PULSES_PER_MILE, 1);
+    Serial.print(F(" TPS_CLOSED_V="));
+    Serial.print(cfg::TPS_CLOSED_V, 2);
+    Serial.print(F(" TPS_WOT_V="));
+    Serial.print(cfg::TPS_WOT_V, 2);
+    Serial.print(F(" VBAT_DIVIDER="));
+    Serial.print(cfg::VBAT_DIVIDER, 3);
+    Serial.print(F(" IS_AMPS_PER_VOLT="));
+    Serial.print(cfg::IS_AMPS_PER_VOLT, 3);
+    Serial.print(F(" CALIBRATED="));
+    Serial.println(cfg::CALIBRATED ? 1 : 0);
+    Serial.println(F("# cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v"));
   }
   // A hung loop stops kicking the dog; the reset drops the relays.
   wdt_enable(WDTO_250MS);

@@ -157,6 +157,9 @@ class Board:
         self.x0 = (size[0] - (holes[0] - 1) * P) / 2
         self.y0 = (size[1] - (holes[1] - 1) * P) / 2
         self.parts, self.wires, self.steps = [], [], []
+        # (node, node, what): pairs that must NOT beep once both are on the
+        # board: the build book's "no shorts" check after every step.
+        self.shorts = []
 
     def mm(self, c, r):
         return self.x0 + c * P, self.y0 + r * P
@@ -533,6 +536,35 @@ class Board:
                     chain = " → ".join(self.node_text(n) for n in w["nodes"])
                     lines.append(f"- [ ] **{i}** {thickness(w['gauge'])} {name} wire: {chain}")
             lines.append("")
+        check = self.meter_check(step)
+        if check:
+            lines.append(check)
+        return "\n".join(lines)
+
+    def meter_check(self, step):
+        """Beep-test every wire of this step, then the power rails for shorts."""
+        lines = []
+        pages = [(pid, items) for pid, kind, items in self.pages(step) if kind == "wires"]
+        if pages:
+            lines += [f"#### {step} — Meter check (power off)", "",
+                      "**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it "
+                      "there. Touch the other probe to **each** of its other stops: every one must beep. "
+                      "(This finds a stop that didn't get soldered.)", ""]
+            for pid, items in pages:
+                for i, w in enumerate(items, 1):
+                    name, _ = wire_colour(w["net"])
+                    more = len(w["nodes"]) - 1
+                    lines.append(f"- [ ] {pid} wire {i} ({name}): from {self.node_text(w['nodes'][0])}, "
+                                 f"{more} beep{'s' if more > 1 else ''}")
+            lines.append("")
+        placed = {p.ref for p in self.parts if self.steps.index(p.step) <= self.steps.index(step)}
+        shorts = [x for x in self.shorts if x[0].split(".")[0] in placed and x[1].split(".")[0] in placed]
+        if shorts:
+            lines += ["**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away "
+                      "is fine: that's a capacitor filling up. A beep that keeps going is a short: find the "
+                      "solder blob before you go on.)", ""]
+            lines += [f"- [ ] {self.node_text(a)} and {self.node_text(b)}: {what}" for a, b, what in shorts]
+            lines.append("")
         return "\n".join(lines)
 
     def envelopes(self):
@@ -859,6 +891,9 @@ def power_board():
     b.wire("P8", "E2 (A1)", "RT2.2", "C4.1", "DT3.A", "DT4.K", "JA.18")
     b.wire("P8", "5V", "U2.8", "DT1.K", "DT3.K")
     b.wire("P8", "GND", "U2.4", "C3.2", "C4.2", "DT2.A", "DT4.A")
+    b.shorts = [("J1a.1", "J1c.1", "12 V (drivers) to ground"), ("J1b.1", "J1c.1", "12 V to ground"),
+                ("JA.1", "JA.2", "5 V to ground"), ("J1a.1", "JA.1", "12 V to 5 V"),
+                ("J5b.1", "J1c.1", "relay power to ground")]
     return b
 
 
@@ -920,6 +955,7 @@ def logic_board():
     b.wire("L4", "GND", "X5b.1", "GYRO.GND")
     b.wire("L4", "SCL (D21)", "X5d.1", "GYRO.SCL")
     b.wire("L4", "SDA (D20)", "X5c.1", "GYRO.SDA")
+    b.shorts = [("JB.1", "JB.2", "5 V to ground"), ("X5a.1", "X5b.1", "the screen's 5 V to ground")]
     return b
 
 

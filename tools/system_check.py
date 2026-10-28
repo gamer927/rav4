@@ -11,7 +11,8 @@ docs: the things no single test sees. Run: python3 tools/system_check.py
   4. Every switch input has its pull-up, series resistor, capacitor and clamps.
   5. The ON/OFF hardware cut: the relay coils are fed only through J5 (the
      switch's power pole), protected by the PTC, with a flyback diode, and
-     the coil-supply sense reaches A7.
+     the coil-supply sense reaches A7. The build book's "no shorts" meter
+     checks name pairs that really are on different nets.
   6. The TCU box's glands, the boards' terminal groups and the cable map agree.
   7. Every screen text fits where it's drawn.
   8. Part counts on the shopping list match the boards.
@@ -137,6 +138,13 @@ check("JA.25" in {n for w in power.wires if w["net"] == "COILSNS" for n in w["no
       "the coil supply sense reaches A7 (JA.25)")
 check("TVS3.K" in {n for w in power.wires if w["net"] == "5V" for n in w["nodes"]},
       "a TVS across the 5 V rail (a shorted buck module blows the logic fuse)")
+
+# The build book's "no shorts" pairs: each end is wired, and the two ends are
+# on different nets (else the book would call a correct beep a short).
+for board in (power, logic):
+    for a, b, what in board.shorts:
+        na, nb = nets_at(board, a), nets_at(board, b)
+        check(bool(na) and bool(nb) and not (na & nb), f"{board.name} no-short pair {a}/{b} ({what}): {na} vs {nb}")
 
 # ------------------------------------------------- 6. glands, terminals, cable map
 scad = read("hardware/tcu_enclosure.scad")

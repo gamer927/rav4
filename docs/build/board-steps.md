@@ -38,6 +38,22 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **5** thin green wire: **RB1** at col 7, row 17 → **RB2** at col 9, row 13 → **C2** at col 5, row 18 → **Z1** stripe end
 - [ ] **6** thick black wire: **BUCK** IN- → **BUCK** OUT-
 
+#### P1 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P1.3 wire 1 (yellow): from **J1a** (+12 DRV), 1 beep
+- [ ] P1.3 wire 2 (yellow): from **J1b** (+12 LOG), 2 beeps
+- [ ] P1.3 wire 3 (yellow): from **D1** stripe end, 3 beeps
+- [ ] P1.3 wire 4 (black): from **J1c** (GND), 7 beeps
+- [ ] P1.3 wire 5 (green): from **RB1** at col 7, row 17, 3 beeps
+- [ ] P1.3 wire 6 (black): from **BUCK** IN-, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+
 <!-- STEP P2 -->
 #### P2.1 — Place 2 parts
 
@@ -56,6 +72,22 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **2** thick black wire: **TVS3** plain end → **J1c** (GND)
 - [ ] **3** thin black wire: **BUCK** OUT- → **JA** pin 2 → **JA** pin 4 → **JA** pin 16 → **JA** pin 23 → **JA** pin 24
 - [ ] **4** thin green wire: **Z1** stripe end → **JA** pin 19
+
+#### P2 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P2.2 wire 1 (red): from **BUCK** OUT+, 3 beeps
+- [ ] P2.2 wire 2 (black): from **TVS3** plain end, 1 beep
+- [ ] P2.2 wire 3 (black): from **BUCK** OUT-, 5 beeps
+- [ ] P2.2 wire 4 (green): from **Z1** stripe end, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
 
 <!-- STEP P3 -->
 #### P3.1 — Place 6 parts
@@ -123,6 +155,32 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 - [ ] **1** thin green wire: **U1** pin 16 → **K3** at col 28, row 17
 
+#### P3 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P3.4 wire 1 (blue): from **JA** pin 7, 4 beeps
+- [ ] P3.4 wire 2 (blue): from **JA** pin 8, 2 beeps
+- [ ] P3.4 wire 3 (blue): from **JA** pin 9, 2 beeps
+- [ ] P3.4 wire 4 (blue): from **JA** pin 10, 2 beeps
+- [ ] P3.4 wire 5 (black): from **JA** pin 16, 5 beeps
+- [ ] P3.4 wire 6 (yellow): from **TVS1** stripe end, 1 beep
+- [ ] P3.5 wire 1 (blue): from **F2** at col 2, row 30, 1 beep
+- [ ] P3.5 wire 2 (yellow): from **J5b** (FROM ON/OFF), 6 beeps
+- [ ] P3.5 wire 3 (green): from **RK1** at col 31, row 10, 4 beeps
+- [ ] P3.5 wire 4 (black): from **J1c** (GND), 4 beeps
+- [ ] P3.5 wire 5 (green): from **U1** pin 18, 1 beep
+- [ ] P3.5 wire 6 (green): from **U1** pin 17, 1 beep
+- [ ] P3.6 wire 1 (green): from **U1** pin 16, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
+
 <!-- STEP P4 -->
 #### P4.1 — Place 6 parts
 
@@ -167,6 +225,29 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **2** thick white wire: **J2f** (SOL SL) → **K3** at col 25, row 11 → **K3** at col 28, row 7
 - [ ] **3** thick white wire: **J4c** (LOAD 3) → **K3** at col 25, row 7
 - [ ] **4** thick black wire: **J1c** (GND) → **J4d** (LOAD GND)
+
+#### P4 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P4.3 wire 1 (white): from **J2a** (ECU S1), 1 beep
+- [ ] P4.3 wire 2 (white): from **J2d** (SOL S1), 2 beeps
+- [ ] P4.3 wire 3 (white): from **J4a** (LOAD 1), 1 beep
+- [ ] P4.3 wire 4 (white): from **J2b** (ECU S2), 1 beep
+- [ ] P4.3 wire 5 (white): from **J2e** (SOL S2), 2 beeps
+- [ ] P4.3 wire 6 (white): from **J4b** (LOAD 2), 1 beep
+- [ ] P4.4 wire 1 (white): from **J2c** (ECU SL), 1 beep
+- [ ] P4.4 wire 2 (white): from **J2f** (SOL SL), 2 beeps
+- [ ] P4.4 wire 3 (white): from **J4c** (LOAD 3), 1 beep
+- [ ] P4.4 wire 4 (black): from **J1c** (GND), 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
 
 <!-- STEP P5 -->
 #### P5.1 — Place 6 parts
@@ -272,6 +353,49 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **4** thin red wire: **CS2** VCC → **CS3** VCC
 - [ ] **5** thin black wire: **CS2** GND → **CS3** GND
 - [ ] **6** thin blue wire: **CS3** OUT → **JA** pin 22
+
+#### P5 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P5.5 wire 1 (yellow): from **TVS1** stripe end, 1 beep
+- [ ] P5.5 wire 2 (yellow): from **CS1** IP-, 3 beeps
+- [ ] P5.5 wire 3 (green): from **Q1** at col 13, row 21, 3 beeps
+- [ ] P5.5 wire 4 (green): from **RG1** at col 12, row 27, 1 beep
+- [ ] P5.5 wire 5 (yellow): from **Q1** at col 14, row 21, 2 beeps
+- [ ] P5.5 wire 6 (green): from **DF1** plain end, 1 beep
+- [ ] P5.6 wire 1 (black): from **J4d** (LOAD GND), 1 beep
+- [ ] P5.6 wire 2 (red): from **JA** pin 1, 1 beep
+- [ ] P5.6 wire 3 (black): from **JA** pin 2, 1 beep
+- [ ] P5.6 wire 4 (blue): from **CS1** OUT, 1 beep
+- [ ] P5.6 wire 5 (yellow): from **CS1** IP+, 1 beep
+- [ ] P5.6 wire 6 (yellow): from **CS2** IP-, 3 beeps
+- [ ] P5.7 wire 1 (green): from **Q2** at col 19, row 21, 3 beeps
+- [ ] P5.7 wire 2 (green): from **RG2** at col 18, row 27, 1 beep
+- [ ] P5.7 wire 3 (yellow): from **Q2** at col 20, row 21, 2 beeps
+- [ ] P5.7 wire 4 (green): from **DF2** plain end, 1 beep
+- [ ] P5.7 wire 5 (black): from **ZF1** stripe end, 1 beep
+- [ ] P5.7 wire 6 (red): from **CS1** VCC, 1 beep
+- [ ] P5.8 wire 1 (black): from **CS1** GND, 1 beep
+- [ ] P5.8 wire 2 (blue): from **CS2** OUT, 1 beep
+- [ ] P5.8 wire 3 (yellow): from **CS2** IP+, 1 beep
+- [ ] P5.8 wire 4 (yellow): from **CS3** IP-, 3 beeps
+- [ ] P5.8 wire 5 (green): from **Q3** at col 25, row 21, 3 beeps
+- [ ] P5.8 wire 6 (green): from **RG3** at col 24, row 27, 1 beep
+- [ ] P5.9 wire 1 (yellow): from **Q3** at col 26, row 21, 2 beeps
+- [ ] P5.9 wire 2 (green): from **DF3** plain end, 1 beep
+- [ ] P5.9 wire 3 (black): from **ZF2** stripe end, 1 beep
+- [ ] P5.9 wire 4 (red): from **CS2** VCC, 1 beep
+- [ ] P5.9 wire 5 (black): from **CS2** GND, 1 beep
+- [ ] P5.9 wire 6 (blue): from **CS3** OUT, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
 
 <!-- STEP P6 -->
 #### P6.1 — Place 6 parts
@@ -419,6 +543,56 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 - [ ] **1** thick black wire: **J3c** (E1) → **J1c** (GND)
 
+#### P6 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P6.7 wire 1 (blue): from **J3a** (D), 1 beep
+- [ ] P6.7 wire 2 (green): from **RI1** at col 4, row 24, 2 beeps
+- [ ] P6.7 wire 3 (black): from **OK1** pin 2, 2 beeps
+- [ ] P6.7 wire 4 (blue): from **OK1** pin 4, 2 beeps
+- [ ] P6.7 wire 5 (red): from **JA** pin 3, 1 beep
+- [ ] P6.7 wire 6 (black): from **JA** pin 4, 1 beep
+- [ ] P6.8 wire 1 (blue): from **J3b** (STP), 1 beep
+- [ ] P6.8 wire 2 (green): from **RI2** at col 4, row 29, 2 beeps
+- [ ] P6.8 wire 3 (black): from **OK2** pin 2, 2 beeps
+- [ ] P6.8 wire 4 (blue): from **OK2** pin 4, 2 beeps
+- [ ] P6.8 wire 5 (red): from **RU1** at col 11, row 24, 1 beep
+- [ ] P6.8 wire 6 (black): from **OK1** pin 3, 1 beep
+- [ ] P6.9 wire 1 (blue): from **J3e** (TAC), 1 beep
+- [ ] P6.9 wire 2 (green): from **RI3** at col 4, row 34, 2 beeps
+- [ ] P6.9 wire 3 (black): from **OK3** pin 2, 2 beeps
+- [ ] P6.9 wire 4 (blue): from **OK3** pin 4, 2 beeps
+- [ ] P6.9 wire 5 (red): from **RU2** at col 11, row 29, 1 beep
+- [ ] P6.9 wire 6 (black): from **OK2** pin 3, 1 beep
+- [ ] P6.10 wire 1 (white): from **K1** at col 13, row 9, 1 beep
+- [ ] P6.10 wire 2 (green): from **RI4** at col 4, row 39, 2 beeps
+- [ ] P6.10 wire 3 (black): from **OK4** pin 2, 2 beeps
+- [ ] P6.10 wire 4 (blue): from **OK4** pin 4, 2 beeps
+- [ ] P6.10 wire 5 (red): from **RU3** at col 11, row 34, 1 beep
+- [ ] P6.10 wire 6 (black): from **OK3** pin 3, 1 beep
+- [ ] P6.11 wire 1 (white): from **K2** at col 19, row 9, 1 beep
+- [ ] P6.11 wire 2 (green): from **RI5** at col 4, row 44, 2 beeps
+- [ ] P6.11 wire 3 (black): from **OK5** pin 2, 2 beeps
+- [ ] P6.11 wire 4 (blue): from **OK5** pin 4, 2 beeps
+- [ ] P6.11 wire 5 (red): from **RU4** at col 11, row 39, 1 beep
+- [ ] P6.11 wire 6 (black): from **OK4** pin 3, 1 beep
+- [ ] P6.12 wire 1 (white): from **K3** at col 25, row 9, 1 beep
+- [ ] P6.12 wire 2 (green): from **RI6** at col 4, row 49, 2 beeps
+- [ ] P6.12 wire 3 (black): from **OK6** pin 2, 2 beeps
+- [ ] P6.12 wire 4 (blue): from **OK6** pin 4, 2 beeps
+- [ ] P6.12 wire 5 (red): from **RU5** at col 11, row 44, 1 beep
+- [ ] P6.12 wire 6 (black): from **OK5** pin 3, 1 beep
+- [ ] P6.13 wire 1 (black): from **J3c** (E1), 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
+
 <!-- STEP P7 -->
 #### P7.1 — Place 6 parts
 
@@ -453,6 +627,25 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **5** thin red wire: **BUCK** OUT+ → **U2** pin 8 → **U2** pin 6 → **RC4** at col 30, row 32 → **RC6** at col 34, row 22
 - [ ] **6** thin black wire: **BUCK** OUT- → **U2** pin 4 → **U2** pin 5 → **RC5** at col 31, row 28 → **RC2** at col 31, row 22 → **Z2** plain end
 
+#### P7 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P7.3 wire 1 (blue): from **J3d** (SPD), 1 beep
+- [ ] P7.3 wire 2 (green): from **RC1** at col 30, row 26, 4 beeps
+- [ ] P7.3 wire 3 (blue): from **U2** pin 1, 3 beeps
+- [ ] P7.3 wire 4 (green): from **RC4** at col 30, row 28, 2 beeps
+- [ ] P7.3 wire 5 (red): from **BUCK** OUT+, 4 beeps
+- [ ] P7.3 wire 6 (black): from **BUCK** OUT-, 5 beeps
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
+
 <!-- STEP P8 -->
 #### P8.1 — Place 6 parts
 
@@ -486,6 +679,25 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **4** thin blue wire: **RT2** at col 33, row 32 → **C4** at col 30, row 34 → **DT3** plain end → **DT4** stripe end → **JA** pin 18
 - [ ] **5** thin red wire: **U2** pin 8 → **DT1** stripe end → **DT3** stripe end
 - [ ] **6** thin black wire: **U2** pin 4 → **C3** at col 34, row 30 → **C4** at col 30, row 36 → **DT2** plain end → **DT4** plain end
+
+#### P8 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P8.3 wire 1 (blue): from **J3f** (VTA), 1 beep
+- [ ] P8.3 wire 2 (blue): from **J3g** (E2), 1 beep
+- [ ] P8.3 wire 3 (blue): from **RT1** at col 32, row 32, 4 beeps
+- [ ] P8.3 wire 4 (blue): from **RT2** at col 33, row 32, 4 beeps
+- [ ] P8.3 wire 5 (red): from **U2** pin 8, 2 beeps
+- [ ] P8.3 wire 6 (black): from **U2** pin 4, 4 beeps
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
 
 <!-- STEP L1 -->
 #### L1.1 — Place 6 parts
@@ -534,6 +746,20 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **2** thin black wire: **JB** pin 2 → **X7c** (GND) → **X4f** (C6 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
 - [ ] **3** thin blue wire: **JB** pin 11 → **X5c** (SDA)
 - [ ] **4** thin blue wire: **JB** pin 12 → **X5d** (SCL)
+
+#### L1 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] L1.4 wire 1 (red): from **JB** pin 1, 2 beeps
+- [ ] L1.4 wire 2 (black): from **JB** pin 2, 5 beeps
+- [ ] L1.4 wire 3 (blue): from **JB** pin 11, 1 beep
+- [ ] L1.4 wire 4 (blue): from **JB** pin 12, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **JB** pin 1 and **JB** pin 2: 5 V to ground
+- [ ] **X5a** (5V) and **X5b** (GND): the screen's 5 V to ground
 
 <!-- STEP L2 -->
 #### L2.1 — Place 6 parts
@@ -644,6 +870,32 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **3** thin red wire: **JB** pin 1 → **RU1** at col 1, row 8 → **RU2** at col 3, row 8 → **RU3** at col 7, row 8 → **RU4** at col 9, row 8 → **RU5** at col 11, row 8 → **RU6** at col 13, row 8 → **RU7** at col 15, row 8 → **DH7** stripe end → **DH6** stripe end → **DH5** stripe end → **DH4** stripe end → **DH3** stripe end → **DH2** stripe end → **DH1** stripe end
 - [ ] **4** thin black wire: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **DL7** plain end → **CF7** at col 15, row 16 → **CF6** at col 13, row 16 → **CF5** at col 11, row 16 → **CF4** at col 9, row 16 → **CF3** at col 7, row 16 → **CF2** at col 3, row 16 → **CF1** at col 1, row 16
 
+#### L2 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] L2.7 wire 1 (blue): from **X7a** (UP), 2 beeps
+- [ ] L2.7 wire 2 (blue): from **RS1** at col 2, row 13, 4 beeps
+- [ ] L2.7 wire 3 (blue): from **X7b** (DOWN), 2 beeps
+- [ ] L2.7 wire 4 (blue): from **RS2** at col 4, row 13, 4 beeps
+- [ ] L2.7 wire 5 (blue): from **X4a** (C1 ECO), 2 beeps
+- [ ] L2.7 wire 6 (blue): from **RS3** at col 8, row 13, 4 beeps
+- [ ] L2.8 wire 1 (blue): from **X4b** (C2 SPORT), 2 beeps
+- [ ] L2.8 wire 2 (blue): from **RS4** at col 10, row 13, 4 beeps
+- [ ] L2.8 wire 3 (blue): from **X4c** (C3 MANUAL), 2 beeps
+- [ ] L2.8 wire 4 (blue): from **RS5** at col 12, row 13, 4 beeps
+- [ ] L2.8 wire 5 (blue): from **X4d** (C4 TEST), 2 beeps
+- [ ] L2.8 wire 6 (blue): from **RS6** at col 14, row 13, 4 beeps
+- [ ] L2.9 wire 1 (blue): from **X4e** (C5 ON/OFF), 2 beeps
+- [ ] L2.9 wire 2 (blue): from **RS7** at col 16, row 13, 4 beeps
+- [ ] L2.9 wire 3 (red): from **JB** pin 1, 14 beeps
+- [ ] L2.9 wire 4 (black): from **JB** pin 14, 14 beeps
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **JB** pin 1 and **JB** pin 2: 5 V to ground
+- [ ] **X5a** (5V) and **X5b** (GND): the screen's 5 V to ground
+
 <!-- STEP L3 -->
 #### L3.1 — Place 3 parts
 
@@ -664,6 +916,20 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **3** thin red wire: **X6a** (5V) → **RA1** at col 29, row 9
 - [ ] **4** thin black wire: **X6b** (GND) → **ZA** plain end
 
+#### L3 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] L3.2 wire 1 (green): from **X6c** (DQ), 3 beeps
+- [ ] L3.2 wire 2 (blue): from **RA2** at col 31, row 9, 1 beep
+- [ ] L3.2 wire 3 (red): from **X6a** (5V), 1 beep
+- [ ] L3.2 wire 4 (black): from **X6b** (GND), 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **JB** pin 1 and **JB** pin 2: 5 V to ground
+- [ ] **X5a** (5V) and **X5b** (GND): the screen's 5 V to ground
+
 <!-- STEP L4 -->
 #### L4.1 — Place 1 part
 
@@ -681,6 +947,20 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **2** thin black wire: **X5b** (GND) → **GYRO** GND
 - [ ] **3** thin blue wire: **X5d** (SCL) → **GYRO** SCL
 - [ ] **4** thin blue wire: **X5c** (SDA) → **GYRO** SDA
+
+#### L4 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] L4.2 wire 1 (red): from **X5a** (5V), 1 beep
+- [ ] L4.2 wire 2 (black): from **X5b** (GND), 1 beep
+- [ ] L4.2 wire 3 (blue): from **X5d** (SCL), 1 beep
+- [ ] L4.2 wire 4 (blue): from **X5c** (SDA), 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **JB** pin 1 and **JB** pin 2: 5 V to ground
+- [ ] **X5a** (5V) and **X5b** (GND): the screen's 5 V to ground
 
 <!-- STEP HUB -->
 **Header A** (26-way, to the power board):

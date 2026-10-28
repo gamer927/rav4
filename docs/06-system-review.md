@@ -193,12 +193,14 @@ All three pass.
 | Suite | What | Result |
 |---|---|---|
 | `make test` | Unit tests: every control rule, fault, interlock and self-test step (`test/test_tcu_logic.cpp`, `test/test_self_test.cpp`) | **1,134 + 122 checks, 0 failures** |
-| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that follow coil power, welded contacts, broken wires), one failure per scenario | **24 scenarios, 0 failures** |
+| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that follow coil power, welded contacts, broken wires), one failure per scenario | **25 scenarios, 0 failures** |
+| `make calibrate-test` | The calibration helper on a simulated parked session and drive, with a speed sensor 6 % off and an engine 5 % off: it must find both, write a `config.h` that compiles, and refuse bad recordings | **29 checks, 0 failures** |
 | `python3 tools/system_check.py` | Cross-checks (§5) | **all pass, 0 problems** |
 | `tools/build_stl.sh` | Fit checks (§5), STLs, renders | **all pass** |
 | `make avr` | Compile for the Mega 2560, warnings as errors | **OK**: 15 % flash, 51 % RAM |
 
-`make check` runs the first three together. Run it after any change.
+`make check` runs the unit tests, system test, calibration test and cross-checks together. Run it
+after any change.
 
 **System scenarios** (each in its own process, from a cold boot):
 
@@ -228,6 +230,7 @@ All three pass.
 | ATF overheats | warned, lockup held to cool it |
 | self-test (IBIT) | every check passes, including the hardware cut |
 | self-test refused with the engine running | refused |
+| build book 13.4 (jack stands), step by step | the screen says what the book says at each step |
 
 ### What this review found and fixed
 
@@ -243,6 +246,8 @@ All three pass.
 | Several screen lines were too long for the display | Shortened; now checked automatically |
 | The dash cable's C7/C8 route to J5 crossed the logic board | Routed along the front gap, then back between the boards; fit check passes |
 | The ON/OFF switch was modelled as a 1-pole switch; the pod had room for only 5 connectors | Modelled as a larger 2-pole switch with 8 connectors; pod fit check passes |
+| Before calibration the self-test marked CALIBRATED as **BAD**, so the bench test could never say ALL OK, and the main screen said SELF-TEST BAD | "Not calibrated yet" is now a CHECK (a reminder) |
+| On the bench nothing drives the gas pedal input, so the self-test always reported GAS PEDAL BAD | Build book 10.1: a two-resistor gas pedal stand-in for the bench |
 
 ---
 

@@ -64,6 +64,10 @@ struct Car {
   bool solenoidOpen[3] = {false, false, false};
   bool ecuSenseDead = false;
   bool leverStuckD = false;       // the lever-D input shorted: always reads D
+  // Calibration: this car's real speed-sensor pulses per mile vs. the
+  // firmware's setting, and the O/D OFF button (the ECU stops at 3rd).
+  float vssScale = 1.0f;
+  bool odOff = false;
   bool tachLost = false, vssLost = false;
 } car;
 
@@ -71,7 +75,10 @@ bool coilPowered() { return (car.switchOn || car.cutBroken) && !car.coilFuseBlow
 bool relayIn(int i) { return (g_out[6] && coilPowered()) || car.welded[i]; }
 
 // The ECU's own gear: a simple speed schedule.
-uint8_t ecuGear() { return car.mph < 12 ? 1 : car.mph < 24 ? 2 : car.mph < 40 ? 3 : 4; }
+uint8_t ecuGear() {
+  const uint8_t g = car.mph < 12 ? 1 : car.mph < 24 ? 2 : car.mph < 40 ? 3 : 4;
+  return car.odOff && g > 3 ? 3 : g;
+}
 // The gear the transaxle is really in: the solenoids decide, and each
 // solenoid is fed by the TCU's driver if its relay is in, else by the ECU.
 uint8_t engagedGear() {
@@ -128,7 +135,7 @@ void tick() {
   applyCarToPins();
   const float rpm = car.tachLost ? 0 : engineRpm();
   if (car.mph > 0.3f && !car.vssLost) {
-    vss.periodUs = (uint32_t)(1e6f / (car.mph * cfg::VSS_PULSES_PER_MILE / 3600.0f));
+    vss.periodUs = (uint32_t)(1e6f / (car.mph * cfg::VSS_PULSES_PER_MILE * car.vssScale / 3600.0f));
     vss.lastUs = micros();
   } else {
     vss.periodUs = 0;
@@ -453,6 +460,97 @@ void s_ecu_sense_dead_take_over_moving() {
   CHECK(controller.outputs().gear == 1);
 }
 
+// Build book 13.4, step by step: what the book says the screen shows.
+void s_build_book_jack_stands() {
+  boot();
+  car.switchOn = false;
+  startEngine();                       // 1. engine on in P, ON/OFF off
+  CHECK(screenSays("STOCK"));
+  car.brake = true;
+  car.leverInD = true;                 // 2. foot on the brake, lever to D
+  run(500);
+  CHECK(controller.outputs().gear == 1);
+  car.switchOn = true;                 // 3. ON/OFF on
+  run(300);
+  CHECK(tcuInControl());
+  CHECK(screenSays("TCU ON") && screenSays("ECO"));
+  car.brake = false;                   // 4-5. gently up to 25 mph: 1 -> 2 -> 3
+  car.tps = 15;
+  bool saw2 = false;
+  while (car.mph < 25) {
+    rampTo(car.mph + 1, 4);
+    saw2 |= controller.outputs().gear == 2;
+  }
+  run(1500);
+  CHECK(saw2);
+  CHECK(controller.outputs().gear == 3);
+  car.tps = 0;                         // 6. lift off, brake to a stop: back to 1
+  car.brake = true;
+  rampTo(0, 4);
+  run(1000);
+  CHECK(controller.outputs().gear == 1);
+  car.brake = false;                   // 7. at 20 mph ON/OFF off: the ECU carries on
+  car.tps = 15;
+  rampTo(20, 4);
+  car.switchOn = false;
+  run(100);
+  CHECK(!tcuInControl());
+  run(400);  // the screen redraws in chunks
+  if (!screenSays("TCU OFF")) std::printf("    screen: %s\n", screenWords());
+  CHECK(screenSays("TCU OFF"));
+  car.switchOn = true;
+  run(300);
+  car.tps = 0;                         // 8. stop, MANUAL: shift with the lever
+  car.brake = true;
+  rampTo(0, 4);
+  run(500);
+  car.brake = false;
+  car.eco = false;
+  car.manual = true;
+  run(1500);
+  CHECK(tcuInControl());
+  CHECK(screenSays("MANUAL"));
+  car.tps = 15;
+  rampTo(10, 4);
+  press(pin::UP, 60);
+  CHECK(controller.outputs().gear == 2);
+  rampTo(20, 4);
+  press(pin::UP, 60);
+  CHECK(controller.outputs().gear == 3);
+  run(1500);
+  press(pin::DOWN, 60);
+  CHECK(controller.outputs().gear == 2);
+  rampTo(30, 4);                       // 9. 1st at 30 mph: refused
+  run(1500);
+  press(pin::DOWN, 60);
+  CHECK(controller.outputs().gear == 2);
+  CHECK(screenSays("TOO FAST"));
+}
+
+// Hold TEST and answer the self-test's prompts as they come, like a person.
+void runIbitAnsweringPrompts() {
+  car.switchOn = true;
+  run(300);
+  press(pin::TEST, 2100);
+  for (int guard = 0; guard < 60000 && selfTest.active(); guard++) {
+    const tcu::TestPrompt pr = selfTest.prompt();
+    car.eco = pr == tcu::PR_ECO;
+    car.sport = pr == tcu::PR_SPORT;
+    car.manual = pr == tcu::PR_MANUAL;
+    car.brake = pr == tcu::PR_BRAKE;
+    if (pr == tcu::PR_ONOFF_OFF) car.switchOn = false;
+    g_ms++;
+    applyCarToPins();
+    if (pr == tcu::PR_UP) g_pin[pin::UP] = LOW;
+    if (pr == tcu::PR_DOWN) g_pin[pin::DOWN] = LOW;
+    loop();
+    g_pin[pin::UP] = g_pin[pin::DOWN] = HIGH;
+  }
+  car.eco = true;
+  car.brake = false;
+  run(500);
+}
+
 void s_ibit_full() {
   boot();
   // Parked, engine off, lever in P, ON/OFF ON (the relays need its power).
@@ -589,6 +687,7 @@ const Scenario kScenarios[] = {
     {"ATF probe unplugged: warned, still in control", s_atf_probe_unplugged},
     {"ATF overheats: warned, lockup held to cool it", s_atf_overheats},
     {"self-test (IBIT): every check passes, incl. the hardware cut", s_ibit_full},
+    {"build book 13.4 (jack stands), step by step: the screen says what the book says", s_build_book_jack_stands},
     {"self-test refused with the engine running", s_ibit_refused_while_engine_runs},
 };
 
@@ -675,7 +774,54 @@ void captureScreens() {
   snap("11_mode_error");
 }
 
+// --callog FILE: the USB log of a calibration session (tools/calibrate.py's
+// test reads it): parked with the pedal up and down, then a drive with
+// steady 30, 45 (O/D OFF: 3rd, locked) and 60 mph. This car's speed sensor
+// gives 6 % more pulses per mile than the firmware's setting, and its engine
+// turns 5 % more rpm per mph than RPM_PER_MPH (see engineRpm()).
+void captureCalibrationLog(const char* path) {
+  car.vssScale = 1.06f;
+  boot();
+  runIbitAnsweringPrompts();  // the bench step reads its solenoid currents
+  auto mark = [](const char* m) { Serial.put(std::string("#! ") + m + "\n"); };
+  mark("pedal_up begin");
+  run(3000);
+  mark("pedal_up end");
+  car.tps = 100;
+  run(500);
+  mark("pedal_down begin");
+  run(3000);
+  mark("pedal_down end");
+  car.tps = 0;
+  run(500);
+  mark("battery begin");
+  run(3000);
+  mark("battery end");
+  startEngine();
+  car.leverInD = true;
+  run(300);
+  car.tps = 20;
+  rampTo(30, 4);
+  run(25000);
+  car.odOff = true;
+  rampTo(45, 4);
+  run(25000);
+  car.odOff = false;
+  rampTo(60, 4);
+  run(25000);
+  car.tps = 0;
+  rampTo(0, 4);
+  run(1000);
+  FILE* f = fopen(path, "w");
+  fputs(Serial.out.c_str(), f);
+  fclose(f);
+}
+
 int main(int argc, char** argv) {
+  if (argc > 2 && strcmp(argv[1], "--callog") == 0) {
+    captureCalibrationLog(argv[2]);
+    return 0;
+  }
   if (argc > 2 && strcmp(argv[1], "--screens") == 0) {
     g_shotDir = argv[2];
     captureScreens();

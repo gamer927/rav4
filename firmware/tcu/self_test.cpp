@@ -52,7 +52,8 @@ void SelfTest::runPassive(const Inputs& in) {
   set(T_IMU, !cfg::IMU_INSTALLED ? TR_SKIP : in.imuPresent ? TR_PASS : TR_FAIL);
   // A shift button held at boot is stuck.
   set(T_SWITCHES, !in.up && !in.down ? TR_PASS : TR_FAIL);
-  set(T_CALIBRATED, cfg::CALIBRATED ? TR_PASS : TR_FAIL);
+  // Not calibrated yet is expected on the bench: a reminder (CHECK), not a fault.
+  set(T_CALIBRATED, cfg::CALIBRATED ? TR_PASS : TR_CHECK);
 }
 
 void SelfTest::runPowerOn(const Inputs& in, bool unexpectedWdtReset) {

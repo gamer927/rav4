@@ -621,7 +621,18 @@ The full table also prints on the USB log.
 The CSV log on USB (115200 baud) works in STOCK. While the ECU is in control, gear and lockup
 come from the ECU sense inputs, so you can calibrate everything while the factory ECU drives.
 
-Log columns: `ms, ctrl, mode, gear, lockup, mph, rpm, rpm_per_mph, tps, atf, volts, faults, warnings`
+**`tools/calibrate.py` does all of this** (build book parts 10.7 and 13): `bench` (step 0 below),
+`parked` (steps 1 and 5), `drive` (steps 2, 3 and 6), then `unlock`. It records the log, works
+out the numbers, refuses recordings that don't add up (and says why), and writes `config.h`.
+This section is what it does, for reference.
+
+At boot the firmware prints `# cal ...` (the settings it was built with) and
+`# cols ...` (the column names). Log columns:
+`ms, ctrl, mode, gear, lockup, mph, rpm, rpm_per_mph, tps, atf, volts, faults, warnings, tps_v`
+(`tps_v` = the gas pedal sensor's voltage, VTA − E2).
+
+0. **Current sensors (bench):** run IBIT with 15 Ω loads; `IS_AMPS_PER_VOLT` × (supply ÷ 15 Ω) ÷
+   the average measured current.
 
 1. **TPS:** with the engine off and the ignition on, log closed throttle and WOT. Set
    `TPS_CLOSED_V` and `TPS_WOT_V`.
@@ -639,7 +650,8 @@ Log columns: `ms, ctrl, mode, gear, lockup, mph, rpm, rpm_per_mph, tps, atf, vol
    - **The over-rev guard is only as good as these numbers.**
    - When every step is done, set `CALIBRATED = true` in `config.h` and reflash. Until then the
      ON/OFF switch is ignored and the display shows `NOT CALIBRATED`.
-4. **ATF thermistor:** check the reading at ambient and at hot operating temperature against an
+4. **ATF thermistor** (only with `ATF_SENSOR = ATF_NTC`; the default DS18B20 probe is digital
+   and needs no calibration): check the reading at ambient and at hot operating temperature against an
    IR thermometer on the cooler line, then adjust `ATF_R25_OHMS` and `ATF_BETA`.
 5. **Battery:** compare with a multimeter, then trim `VBAT_DIVIDER`.
 6. **Factory shift map (a reference):** with the switch OFF, the log also prints every shift and

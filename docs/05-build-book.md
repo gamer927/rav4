@@ -27,7 +27,7 @@ multimeter and solder, you can build this.
 | [10](#part-10--test-everything-on-the-bench) | Test everything on the table | 1 evening |
 | [11](#part-11--close-the-box) | Put it all in the box | 1 evening |
 | [12](#part-12--put-it-in-the-car) | Put it in the car | 4 evenings, one job each |
-| [13](#part-13--calibrate-and-drive) | Teach it your car, then drive | a week of normal driving |
+| [13](#part-13--calibrate-and-drive) | Teach it your car, then test drive in 4 stages | 2 evenings + a week of normal driving |
 
 ---
 
@@ -298,6 +298,22 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **5** thin green wire: **RB1** at col 7, row 17 → **RB2** at col 9, row 13 → **C2** at col 5, row 18 → **Z1** stripe end
 - [ ] **6** thick black wire: **BUCK** IN- → **BUCK** OUT-
 
+#### P1 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P1.3 wire 1 (yellow): from **J1a** (+12 DRV), 1 beep
+- [ ] P1.3 wire 2 (yellow): from **J1b** (+12 LOG), 2 beeps
+- [ ] P1.3 wire 3 (yellow): from **D1** stripe end, 3 beeps
+- [ ] P1.3 wire 4 (black): from **J1c** (GND), 7 beeps
+- [ ] P1.3 wire 5 (green): from **RB1** at col 7, row 17, 3 beeps
+- [ ] P1.3 wire 6 (black): from **BUCK** IN-, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+
 **Now set the 5 V supply.** The power module comes set to the wrong voltage.
 - [ ] Connect the bench 12 V: **+ to J1b**, **− to J1c**.
 - [ ] Meter on volts, across the power module's **OUT+** and **OUT−**.
@@ -329,6 +345,22 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **2** thick black wire: **TVS3** plain end → **J1c** (GND)
 - [ ] **3** thin black wire: **BUCK** OUT- → **JA** pin 2 → **JA** pin 4 → **JA** pin 16 → **JA** pin 23 → **JA** pin 24
 - [ ] **4** thin green wire: **Z1** stripe end → **JA** pin 19
+
+#### P2 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P2.2 wire 1 (red): from **BUCK** OUT+, 3 beeps
+- [ ] P2.2 wire 2 (black): from **TVS3** plain end, 1 beep
+- [ ] P2.2 wire 3 (black): from **BUCK** OUT-, 5 beeps
+- [ ] P2.2 wire 4 (green): from **Z1** stripe end, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
 
 ✅ **CHECK** (bench 12 V on J1b and J1c, black probe on **JA pin 2**): **JA pin 1** and **JA pin 3**
 both read **5 V**.
@@ -411,6 +443,32 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 - [ ] **1** thin green wire: **U1** pin 16 → **K3** at col 28, row 17
 
+#### P3 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P3.4 wire 1 (blue): from **JA** pin 7, 4 beeps
+- [ ] P3.4 wire 2 (blue): from **JA** pin 8, 2 beeps
+- [ ] P3.4 wire 3 (blue): from **JA** pin 9, 2 beeps
+- [ ] P3.4 wire 4 (blue): from **JA** pin 10, 2 beeps
+- [ ] P3.4 wire 5 (black): from **JA** pin 16, 5 beeps
+- [ ] P3.4 wire 6 (yellow): from **TVS1** stripe end, 1 beep
+- [ ] P3.5 wire 1 (blue): from **F2** at col 2, row 30, 1 beep
+- [ ] P3.5 wire 2 (yellow): from **J5b** (FROM ON/OFF), 6 beeps
+- [ ] P3.5 wire 3 (green): from **RK1** at col 31, row 10, 4 beeps
+- [ ] P3.5 wire 4 (black): from **J1c** (GND), 4 beeps
+- [ ] P3.5 wire 5 (green): from **U1** pin 18, 1 beep
+- [ ] P3.5 wire 6 (green): from **U1** pin 17, 1 beep
+- [ ] P3.6 wire 1 (green): from **U1** pin 16, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
+
 **Why J5a and J5b?** The relays don't get their 12 V directly. It goes out through **J5a** to the
 ON/OFF switch on the dash, and comes back through **J5b**. So switching ON/OFF off cuts the
 relays' power by itself, even if the Mega has frozen. On the table, put a short wire from
@@ -469,6 +527,29 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **2** thick white wire: **J2f** (SOL SL) → **K3** at col 25, row 11 → **K3** at col 28, row 7
 - [ ] **3** thick white wire: **J4c** (LOAD 3) → **K3** at col 25, row 7
 - [ ] **4** thick black wire: **J1c** (GND) → **J4d** (LOAD GND)
+
+#### P4 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P4.3 wire 1 (white): from **J2a** (ECU S1), 1 beep
+- [ ] P4.3 wire 2 (white): from **J2d** (SOL S1), 2 beeps
+- [ ] P4.3 wire 3 (white): from **J4a** (LOAD 1), 1 beep
+- [ ] P4.3 wire 4 (white): from **J2b** (ECU S2), 1 beep
+- [ ] P4.3 wire 5 (white): from **J2e** (SOL S2), 2 beeps
+- [ ] P4.3 wire 6 (white): from **J4b** (LOAD 2), 1 beep
+- [ ] P4.4 wire 1 (white): from **J2c** (ECU SL), 1 beep
+- [ ] P4.4 wire 2 (white): from **J2f** (SOL SL), 2 beeps
+- [ ] P4.4 wire 3 (white): from **J4c** (LOAD 3), 1 beep
+- [ ] P4.4 wire 4 (black): from **J1c** (GND), 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
 
 ✅ **CHECK** (power off, meter on beep):
 - [ ] J2a beeps to J2d. J2b beeps to J2e. J2c beeps to J2f. (Relays off = the engine computer
@@ -581,6 +662,49 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **4** thin red wire: **CS2** VCC → **CS3** VCC
 - [ ] **5** thin black wire: **CS2** GND → **CS3** GND
 - [ ] **6** thin blue wire: **CS3** OUT → **JA** pin 22
+
+#### P5 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P5.5 wire 1 (yellow): from **TVS1** stripe end, 1 beep
+- [ ] P5.5 wire 2 (yellow): from **CS1** IP-, 3 beeps
+- [ ] P5.5 wire 3 (green): from **Q1** at col 13, row 21, 3 beeps
+- [ ] P5.5 wire 4 (green): from **RG1** at col 12, row 27, 1 beep
+- [ ] P5.5 wire 5 (yellow): from **Q1** at col 14, row 21, 2 beeps
+- [ ] P5.5 wire 6 (green): from **DF1** plain end, 1 beep
+- [ ] P5.6 wire 1 (black): from **J4d** (LOAD GND), 1 beep
+- [ ] P5.6 wire 2 (red): from **JA** pin 1, 1 beep
+- [ ] P5.6 wire 3 (black): from **JA** pin 2, 1 beep
+- [ ] P5.6 wire 4 (blue): from **CS1** OUT, 1 beep
+- [ ] P5.6 wire 5 (yellow): from **CS1** IP+, 1 beep
+- [ ] P5.6 wire 6 (yellow): from **CS2** IP-, 3 beeps
+- [ ] P5.7 wire 1 (green): from **Q2** at col 19, row 21, 3 beeps
+- [ ] P5.7 wire 2 (green): from **RG2** at col 18, row 27, 1 beep
+- [ ] P5.7 wire 3 (yellow): from **Q2** at col 20, row 21, 2 beeps
+- [ ] P5.7 wire 4 (green): from **DF2** plain end, 1 beep
+- [ ] P5.7 wire 5 (black): from **ZF1** stripe end, 1 beep
+- [ ] P5.7 wire 6 (red): from **CS1** VCC, 1 beep
+- [ ] P5.8 wire 1 (black): from **CS1** GND, 1 beep
+- [ ] P5.8 wire 2 (blue): from **CS2** OUT, 1 beep
+- [ ] P5.8 wire 3 (yellow): from **CS2** IP+, 1 beep
+- [ ] P5.8 wire 4 (yellow): from **CS3** IP-, 3 beeps
+- [ ] P5.8 wire 5 (green): from **Q3** at col 25, row 21, 3 beeps
+- [ ] P5.8 wire 6 (green): from **RG3** at col 24, row 27, 1 beep
+- [ ] P5.9 wire 1 (yellow): from **Q3** at col 26, row 21, 2 beeps
+- [ ] P5.9 wire 2 (green): from **DF3** plain end, 1 beep
+- [ ] P5.9 wire 3 (black): from **ZF2** stripe end, 1 beep
+- [ ] P5.9 wire 4 (red): from **CS2** VCC, 1 beep
+- [ ] P5.9 wire 5 (black): from **CS2** GND, 1 beep
+- [ ] P5.9 wire 6 (blue): from **CS3** OUT, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
 
 ✅ **CHECK:** clip one of the big 15 Ω resistors between **J2d** and **J1c**, lying on the
 heatsink (it gets warm). Bench 12 V on J1a, J1b and J1c.
@@ -740,6 +864,56 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 - [ ] **1** thick black wire: **J3c** (E1) → **J1c** (GND)
 
+#### P6 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P6.7 wire 1 (blue): from **J3a** (D), 1 beep
+- [ ] P6.7 wire 2 (green): from **RI1** at col 4, row 24, 2 beeps
+- [ ] P6.7 wire 3 (black): from **OK1** pin 2, 2 beeps
+- [ ] P6.7 wire 4 (blue): from **OK1** pin 4, 2 beeps
+- [ ] P6.7 wire 5 (red): from **JA** pin 3, 1 beep
+- [ ] P6.7 wire 6 (black): from **JA** pin 4, 1 beep
+- [ ] P6.8 wire 1 (blue): from **J3b** (STP), 1 beep
+- [ ] P6.8 wire 2 (green): from **RI2** at col 4, row 29, 2 beeps
+- [ ] P6.8 wire 3 (black): from **OK2** pin 2, 2 beeps
+- [ ] P6.8 wire 4 (blue): from **OK2** pin 4, 2 beeps
+- [ ] P6.8 wire 5 (red): from **RU1** at col 11, row 24, 1 beep
+- [ ] P6.8 wire 6 (black): from **OK1** pin 3, 1 beep
+- [ ] P6.9 wire 1 (blue): from **J3e** (TAC), 1 beep
+- [ ] P6.9 wire 2 (green): from **RI3** at col 4, row 34, 2 beeps
+- [ ] P6.9 wire 3 (black): from **OK3** pin 2, 2 beeps
+- [ ] P6.9 wire 4 (blue): from **OK3** pin 4, 2 beeps
+- [ ] P6.9 wire 5 (red): from **RU2** at col 11, row 29, 1 beep
+- [ ] P6.9 wire 6 (black): from **OK2** pin 3, 1 beep
+- [ ] P6.10 wire 1 (white): from **K1** at col 13, row 9, 1 beep
+- [ ] P6.10 wire 2 (green): from **RI4** at col 4, row 39, 2 beeps
+- [ ] P6.10 wire 3 (black): from **OK4** pin 2, 2 beeps
+- [ ] P6.10 wire 4 (blue): from **OK4** pin 4, 2 beeps
+- [ ] P6.10 wire 5 (red): from **RU3** at col 11, row 34, 1 beep
+- [ ] P6.10 wire 6 (black): from **OK3** pin 3, 1 beep
+- [ ] P6.11 wire 1 (white): from **K2** at col 19, row 9, 1 beep
+- [ ] P6.11 wire 2 (green): from **RI5** at col 4, row 44, 2 beeps
+- [ ] P6.11 wire 3 (black): from **OK5** pin 2, 2 beeps
+- [ ] P6.11 wire 4 (blue): from **OK5** pin 4, 2 beeps
+- [ ] P6.11 wire 5 (red): from **RU4** at col 11, row 39, 1 beep
+- [ ] P6.11 wire 6 (black): from **OK4** pin 3, 1 beep
+- [ ] P6.12 wire 1 (white): from **K3** at col 25, row 9, 1 beep
+- [ ] P6.12 wire 2 (green): from **RI6** at col 4, row 49, 2 beeps
+- [ ] P6.12 wire 3 (black): from **OK6** pin 2, 2 beeps
+- [ ] P6.12 wire 4 (blue): from **OK6** pin 4, 2 beeps
+- [ ] P6.12 wire 5 (red): from **RU5** at col 11, row 44, 1 beep
+- [ ] P6.12 wire 6 (black): from **OK5** pin 3, 1 beep
+- [ ] P6.13 wire 1 (black): from **J3c** (E1), 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
+
 ✅ **CHECK** (bench 12 V on): each JA pin below reads **5 V**. Then touch 12 V to its terminal:
 the JA pin drops to **under 0.5 V**.
 - [ ] Terminal J3a → JA pin 12
@@ -786,6 +960,25 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **5** thin red wire: **BUCK** OUT+ → **U2** pin 8 → **U2** pin 6 → **RC4** at col 30, row 32 → **RC6** at col 34, row 22
 - [ ] **6** thin black wire: **BUCK** OUT- → **U2** pin 4 → **U2** pin 5 → **RC5** at col 31, row 28 → **RC2** at col 31, row 22 → **Z2** plain end
 
+#### P7 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P7.3 wire 1 (blue): from **J3d** (SPD), 1 beep
+- [ ] P7.3 wire 2 (green): from **RC1** at col 30, row 26, 4 beeps
+- [ ] P7.3 wire 3 (blue): from **U2** pin 1, 3 beeps
+- [ ] P7.3 wire 4 (green): from **RC4** at col 30, row 28, 2 beeps
+- [ ] P7.3 wire 5 (red): from **BUCK** OUT+, 4 beeps
+- [ ] P7.3 wire 6 (black): from **BUCK** OUT-, 5 beeps
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
+
 ✅ **CHECK:** JA pin 5 reads:
 - [ ] **0 V** with nothing on J3d
 - [ ] **5 V** with 5 V on J3d
@@ -825,6 +1018,25 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **4** thin blue wire: **RT2** at col 33, row 32 → **C4** at col 30, row 34 → **DT3** plain end → **DT4** stripe end → **JA** pin 18
 - [ ] **5** thin red wire: **U2** pin 8 → **DT1** stripe end → **DT3** stripe end
 - [ ] **6** thin black wire: **U2** pin 4 → **C3** at col 34, row 30 → **C4** at col 30, row 36 → **DT2** plain end → **DT4** plain end
+
+#### P8 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] P8.3 wire 1 (blue): from **J3f** (VTA), 1 beep
+- [ ] P8.3 wire 2 (blue): from **J3g** (E2), 1 beep
+- [ ] P8.3 wire 3 (blue): from **RT1** at col 32, row 32, 4 beeps
+- [ ] P8.3 wire 4 (blue): from **RT2** at col 33, row 32, 4 beeps
+- [ ] P8.3 wire 5 (red): from **U2** pin 8, 2 beeps
+- [ ] P8.3 wire 6 (black): from **U2** pin 4, 4 beeps
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **J1a** (+12 DRV) and **J1c** (GND): 12 V (drivers) to ground
+- [ ] **J1b** (+12 LOG) and **J1c** (GND): 12 V to ground
+- [ ] **JA** pin 1 and **JA** pin 2: 5 V to ground
+- [ ] **J1a** (+12 DRV) and **JA** pin 1: 12 V to 5 V
+- [ ] **J5b** (FROM ON/OFF) and **J1c** (GND): relay power to ground
 
 ✅ **CHECK:**
 - [ ] 5 V (from JA pin 1) on J3f: JA pin 17 reads **about 5 V**. J3f to ground: **0 V**.
@@ -893,6 +1105,20 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **2** thin black wire: **JB** pin 2 → **X7c** (GND) → **X4f** (C6 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
 - [ ] **3** thin blue wire: **JB** pin 11 → **X5c** (SDA)
 - [ ] **4** thin blue wire: **JB** pin 12 → **X5d** (SCL)
+
+#### L1 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] L1.4 wire 1 (red): from **JB** pin 1, 2 beeps
+- [ ] L1.4 wire 2 (black): from **JB** pin 2, 5 beeps
+- [ ] L1.4 wire 3 (blue): from **JB** pin 11, 1 beep
+- [ ] L1.4 wire 4 (blue): from **JB** pin 12, 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **JB** pin 1 and **JB** pin 2: 5 V to ground
+- [ ] **X5a** (5V) and **X5b** (GND): the screen's 5 V to ground
 
 ✅ **CHECK** (5 V on): X5a and X6a read **5 V**.
 
@@ -1006,6 +1232,32 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **3** thin red wire: **JB** pin 1 → **RU1** at col 1, row 8 → **RU2** at col 3, row 8 → **RU3** at col 7, row 8 → **RU4** at col 9, row 8 → **RU5** at col 11, row 8 → **RU6** at col 13, row 8 → **RU7** at col 15, row 8 → **DH7** stripe end → **DH6** stripe end → **DH5** stripe end → **DH4** stripe end → **DH3** stripe end → **DH2** stripe end → **DH1** stripe end
 - [ ] **4** thin black wire: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **DL7** plain end → **CF7** at col 15, row 16 → **CF6** at col 13, row 16 → **CF5** at col 11, row 16 → **CF4** at col 9, row 16 → **CF3** at col 7, row 16 → **CF2** at col 3, row 16 → **CF1** at col 1, row 16
 
+#### L2 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] L2.7 wire 1 (blue): from **X7a** (UP), 2 beeps
+- [ ] L2.7 wire 2 (blue): from **RS1** at col 2, row 13, 4 beeps
+- [ ] L2.7 wire 3 (blue): from **X7b** (DOWN), 2 beeps
+- [ ] L2.7 wire 4 (blue): from **RS2** at col 4, row 13, 4 beeps
+- [ ] L2.7 wire 5 (blue): from **X4a** (C1 ECO), 2 beeps
+- [ ] L2.7 wire 6 (blue): from **RS3** at col 8, row 13, 4 beeps
+- [ ] L2.8 wire 1 (blue): from **X4b** (C2 SPORT), 2 beeps
+- [ ] L2.8 wire 2 (blue): from **RS4** at col 10, row 13, 4 beeps
+- [ ] L2.8 wire 3 (blue): from **X4c** (C3 MANUAL), 2 beeps
+- [ ] L2.8 wire 4 (blue): from **RS5** at col 12, row 13, 4 beeps
+- [ ] L2.8 wire 5 (blue): from **X4d** (C4 TEST), 2 beeps
+- [ ] L2.8 wire 6 (blue): from **RS6** at col 14, row 13, 4 beeps
+- [ ] L2.9 wire 1 (blue): from **X4e** (C5 ON/OFF), 2 beeps
+- [ ] L2.9 wire 2 (blue): from **RS7** at col 16, row 13, 4 beeps
+- [ ] L2.9 wire 3 (red): from **JB** pin 1, 14 beeps
+- [ ] L2.9 wire 4 (black): from **JB** pin 14, 14 beeps
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **JB** pin 1 and **JB** pin 2: 5 V to ground
+- [ ] **X5a** (5V) and **X5b** (GND): the screen's 5 V to ground
+
 ✅ **CHECK** (5 V on): terminals **X7a, X7b, and X4a to X4e** each read **5 V**. Then touch each
 one to a ground terminal (X7c or X4f): its JB pin below drops to **0 V**.
 
@@ -1034,6 +1286,20 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **3** thin red wire: **X6a** (5V) → **RA1** at col 29, row 9
 - [ ] **4** thin black wire: **X6b** (GND) → **ZA** plain end
 
+#### L3 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] L3.2 wire 1 (green): from **X6c** (DQ), 3 beeps
+- [ ] L3.2 wire 2 (blue): from **RA2** at col 31, row 9, 1 beep
+- [ ] L3.2 wire 3 (red): from **X6a** (5V), 1 beep
+- [ ] L3.2 wire 4 (black): from **X6b** (GND), 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **JB** pin 1 and **JB** pin 2: 5 V to ground
+- [ ] **X5a** (5V) and **X5b** (GND): the screen's 5 V to ground
+
 ✅ **CHECK** (5 V on): X6c reads **5 V**.
 
 ### Step L4 — Gyro
@@ -1054,6 +1320,20 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **2** thin black wire: **X5b** (GND) → **GYRO** GND
 - [ ] **3** thin blue wire: **X5d** (SCL) → **GYRO** SCL
 - [ ] **4** thin blue wire: **X5c** (SDA) → **GYRO** SDA
+
+#### L4 — Meter check (power off)
+
+**Every wire:** meter on beep. Hold one probe on the wire's **first** stop and keep it there. Touch the other probe to **each** of its other stops: every one must beep. (This finds a stop that didn't get soldered.)
+
+- [ ] L4.2 wire 1 (red): from **X5a** (5V), 1 beep
+- [ ] L4.2 wire 2 (black): from **X5b** (GND), 1 beep
+- [ ] L4.2 wire 3 (blue): from **X5d** (SCL), 1 beep
+- [ ] L4.2 wire 4 (blue): from **X5c** (SDA), 1 beep
+
+**No shorts:** these pairs must **not** beep. (A short chirp that stops straight away is fine: that's a capacitor filling up. A beep that keeps going is a short: find the solder blob before you go on.)
+
+- [ ] **JB** pin 1 and **JB** pin 2: 5 V to ground
+- [ ] **X5a** (5V) and **X5b** (GND): the screen's 5 V to ground
 
 Push the gyro down **flat**, chip side up, before soldering. Then put a dab of hot glue under its
 far edge.
@@ -1141,6 +1421,13 @@ The screen shows the **gear as a big number** with the mode beside it.
 - [ ] Solder a **10k resistor** (brown-black-black-red-brown) from **RES** to **VCC**.
 - [ ] Solder the **1 µF capacitor** from **RES** to **GND**. If it has a stripe, the stripe side
   goes to GND.
+
+✅ **CHECK** (meter on beep):
+- [ ] **DC** beeps to **GND**, and **CS** beeps to **GND**.
+- [ ] **VCC** does **not** beep to **GND**.
+- [ ] Meter on Ω: **RES** to **VCC** reads about **10 kΩ**.
+- [ ] At the **far end** of the cable, each core beeps to the screen pin you soldered it to
+  (VCC, GND, DIN, CLK), and to no other.
 
 Don't put it in the pod yet. It gets tested in part 10 first.
 
@@ -1284,63 +1571,178 @@ so the engine computer doesn't notice anything is different.
 
 ## Part 10 — Test everything on the bench
 
-Everything gets connected together on the table, outside the box.
+The first time everything runs together. Take it slowly: every stage says what you should see,
+and what to do if you don't. Allow an evening.
 
-**Connect it up:**
+### 10.1 Connect everything (power off)
+
 - [ ] Plug the hub onto the Mega.
 - [ ] Plug in **ribbon A** (big board ↔ socket A) and **ribbon B** (small board ↔ socket B). The
   red stripe on the ribbon goes to pin 1.
 - [ ] Shifter cable → **X7a, X7b, X7c** (UP, DOWN, GND).
-- [ ] Dash cable: C1–C6 → **X4a–X4f**. C7 → **J5a**, C8 → **J5b** (take out the J5 test wire
-  from part 4).
+- [ ] Dash cable: C1–C6 → **X4a–X4f**. C7 → **J5a**, C8 → **J5b**. (Take out the J5 test wire from
+  part 4 first.)
 - [ ] Screen cable → **X5** (5V, GND, SDA, SCL).
 - [ ] ATF probe → **X6** (red = 5V, black = GND, yellow = DQ).
 - [ ] Dummy loads: LOAD 1, 2, 3, GND → **J4a, J4b, J4c, J4d**.
-- [ ] **For this test only**, add three short wires: **J2d → J4a, J2e → J4b, J2f → J4c**. Then the
-  big resistors stand in for the solenoids.
+- [ ] **For the bench only**, three short wires: **J2d → J4a, J2e → J4b, J2f → J4c**. Now the big
+  resistors stand in for the solenoids.
+- [ ] **For the bench only, a gas pedal stand-in** (otherwise the self-test reports the
+  disconnected gas pedal as bad): one 10k resistor from **X6a** (5 V) to **J3f**, a second 10k
+  from **J3f** to **J3g**, and a short wire from **J3g** to **J1c** (ground).
+- [ ] Switches: **ON/OFF off**, ECO on, SPORT and MANUAL off.
 
-**Load the software onto the Mega:**
-- [ ] Install the free **Arduino IDE** on a laptop.
-- [ ] Plug the Mega into the laptop with its USB cable.
-- [ ] In the Arduino IDE: **File → Open** → `firmware/tcu/tcu.ino`.
-- [ ] **Tools → Board → Arduino Mega 2560**. **Tools → Port** → the one that appeared when you
-  plugged it in.
-- [ ] Press **Upload** (the arrow button). Wait for "Done uploading".
+✅ **CHECK** (meter on beep, power still off): **J1a** and **J1b** don't keep beeping to **J1c**
+(a short chirp is fine).
 
-**Power on:**
-- [ ] Bench 12 V → **J1a and J1b** (+) and **J1c** (−). The USB cable can stay plugged in.
+### 10.2 Load the software onto the Mega
 
-✅ **CHECKS:**
-- [ ] The screen shows a big **–**, the word **STOCK**, "TCU IS OFF: STOCK SHIFTING", and
-  **TRANS** with the room temperature in °F.
-- [ ] Turn on ECO only, then flip ON/OFF on. The screen says **NOT READY / NOT CALIBRATED**.
-  That's correct for now: it stays locked until part 13.
-- [ ] Turn on SPORT as well (two modes on). After a second the screen says **MODE ERROR**. Turn
-  SPORT off again.
-- [ ] Tap TEST. The **SENSORS** page shows battery about 12 V, the room temperature, gas pedal
-  0 %, speed 0. Tap TEST again until you're back on the main page.
+- [ ] Install the free **Arduino IDE** (arduino.cc → Software) on a laptop.
+- [ ] Plug the Mega into the laptop with its USB cable. Bench power stays off: the USB powers it.
+- [ ] In the Arduino IDE: **File → Open** → `firmware/tcu/tcu.ino` (from this project's folder).
+- [ ] **Tools → Board → Arduino Mega or Mega 2560**.
+- [ ] **Tools → Port** → the port that appeared when you plugged it in.
+- [ ] Press **Upload** (the round arrow button, top left). Wait for **"Done uploading"** at the
+  bottom.
 
-**The self-test** (ON/OFF on, only ECO on):
-- [ ] Hold TEST for 2 seconds. The self-test starts.
-- [ ] When it tests the solenoids, each one should read about **0.8 A**.
-  **If they read under 0.7 A or over 0.9 A:** open `firmware/tcu/config.h`, find
-  `IS_AMPS_PER_VOLT`, and change its number to: *old number × 0.8 ÷ the reading*. Upload again
-  and repeat the test.
-- [ ] Do what the screen asks, one prompt at a time:
-  1. **UPSHIFT THE LEVER** → pull the shifter.
-  2. **DOWNSHIFT THE LEVER** → push it.
-  3. **TURN ON ONLY ECO** → only ECO on.
-  4. **TURN ON ONLY SPORT** → only SPORT on.
-  5. **TURN ON ONLY MANUAL** → only MANUAL on.
-  6. **PRESS THE BRAKE** → touch 12 V to terminal J3b for a moment.
-  7. **TURN ON/OFF OFF** → flip ON/OFF off. This checks that the switch really cuts the relays.
-- [ ] Then the Mega restarts itself on purpose (it's testing its own safety reset) and comes
-  back up.
-- [ ] The result says **ALL OK**. ("SCREEN CHECK" is normal: it's asking you to confirm you saw
-  the screen flash.)
+**If there's no port:** try another USB cable (some only charge). Cheaper "compatible" Megas
+need the **CH340** driver: search "CH340 driver" for your computer, install it, and plug in
+again.
+**If the upload fails:** close every other program that might be using the port (including a
+second Arduino window), unplug, plug back in, and try again.
 
-**If it says BAD:** the line under it says which part. Tap TEST to see the details, then go
-back to that part's step and its check.
+### 10.3 Open the message window
+
+The Mega writes what it's doing to the laptop. That's often the quickest way to see what's wrong.
+
+- [ ] **Tools → Serial Monitor**. In the bottom-right of the new window, pick **115200 baud**.
+- [ ] Press the Mega's small reset button. You should see `# TCU boot`, then a `# PBIT` list of
+  checks, then lines of numbers scrolling (one every 0.1 s).
+
+### 10.4 First power-on
+
+- [ ] Keep a hand near the bench power plug. Switch the bench 12 V **on**.
+- [ ] For 10 seconds, watch and sniff. **Any smoke or a hot smell: power off at once**, and go
+  back over the last board step's checks.
+- [ ] After 30 seconds, power off and carefully touch the parts. The power module may be warm.
+  Nothing should be too hot to keep a finger on. Power back on.
+
+✅ **CHECK:** within a second, the screen shows a big **–**, **STOCK**, "TCU IS OFF: STOCK
+SHIFTING", and **TRANS** with the room temperature in °F.
+
+**If the screen stays dark:**
+- The message window shows `# TCU boot`? Then the Mega is fine and it's the screen: check the
+  X5 wires, and part 7's checks.
+- Nothing in the message window either? Check **JA pin 1** reads 5 V (step P2's check).
+
+✅ **CHECK:** in the message window, the `# PBIT` list says **OK** on every line, or `--` (not
+tested yet), or **CHECK** for CALIBRATED (that's done in part 13). A line saying **BAD** names
+the problem: see the table in 10.8.
+
+### 10.5 The SENSORS page
+
+- [ ] Tap TEST once. The **SENSORS** page shows:
+
+| Line | Should read |
+|---|---|
+| SPEED | 0 MPH |
+| ENGINE | 0 RPM |
+| GAS PEDAL | about 55 % (the stand-in) |
+| TRANS TEMP | room temperature |
+| BATTERY | your bench supply's voltage, ±0.3 V |
+| SIDE FORCE | about 0.00 G (keep the table still) |
+| BRAKE / LEVER | BRAKE OFF, NOT IN D |
+
+- [ ] Touch a wire from **J1b** (12 V) to **J3b**: it says **BRAKE ON**. Take it away: **OFF**.
+- [ ] Touch the wire from **J1b** to **J3a**: it says **LEVER IN D**. Take it away.
+- [ ] Tap TEST twice more to get back to the main page.
+
+**If a line is wrong:** gas pedal → the stand-in resistors and step P8; trans temp → X6 and
+step L3; brake or lever → J3a/J3b and step P6; side force jumping about → step L4.
+
+### 10.6 The switches
+
+- [ ] Flip **ON/OFF on** (only ECO on): the screen says **NOT READY / NOT CALIBRATED**. That's
+  correct: it stays locked until part 13.
+- [ ] Turn **SPORT** on as well: after a second, **MODE ERROR**. Turn SPORT off.
+- [ ] Turn **ECO** off too (no mode on): after a second, **PICK MODE**. Turn ECO back on.
+- [ ] Flip **ON/OFF off**: back to **TCU IS OFF**.
+
+**If a switch does nothing:** check its core in the dash cable (part 8's check) and its
+terminal (step L2's check).
+
+### 10.7 The self-test, with the calibration helper
+
+The self-test checks every part of the system in about a minute, asking you to do things as it
+goes. The **calibration helper** records it at the same time, and uses the solenoid currents to
+set the current sensors.
+
+**Get the helper ready (once):**
+- [ ] Install **Python 3** (python.org → Downloads). On Windows, tick **"Add Python to PATH"**
+  in the installer.
+- [ ] Open a terminal (Windows: Command Prompt; Mac: Terminal) and type:
+  `pip install pyserial`
+- [ ] In the terminal, go to this project's folder (type `cd ` and drag the folder into the
+  window, then press Enter).
+- [ ] **Close the Arduino Serial Monitor.** Only one program can use the USB port at a time.
+
+**Run it:**
+- [ ] Meter on volts across **J1a** and **J1c**. Write down the reading.
+- [ ] In the terminal, type: `python3 tools/calibrate.py bench` (on Windows: `py tools\calibrate.py bench`).
+- [ ] Type the meter reading when it asks. For the resistor question, press Enter (or measure one
+  big resistor on Ω and type that).
+- [ ] **ON/OFF on**, only ECO on. **Hold TEST for 2 seconds.** The screen says **TESTING**.
+- [ ] The screen flashes (that's the screen test), then the relays click and each solenoid
+  channel is tested in turn.
+- [ ] Then it asks you to do things. Do each one when it appears (you have 8 seconds; a quick
+  TEST press skips one):
+
+| The screen says | You do |
+|---|---|
+| UPSHIFT THE LEVER | Pull the shifter lever (upshift) |
+| DOWNSHIFT THE LEVER | Push it (downshift) |
+| TURN ON ONLY ECO | Only ECO on |
+| TURN ON ONLY SPORT | Only SPORT on |
+| TURN ON ONLY MANUAL | Only MANUAL on |
+| PRESS THE BRAKE | Touch a wire from **J1b** to **J3b** for a second |
+| TURN ON/OFF OFF | Flip ON/OFF off. This checks the switch cuts the relays by itself. |
+
+- [ ] The Mega then restarts itself on purpose (it's testing its safety reset). The screen goes
+  blank for a moment and comes back.
+- [ ] The helper shows the current-sensor number, old and new, and asks to write it. Type **y**.
+- [ ] Open the Arduino IDE and press **Upload** again, so the Mega gets the new number.
+
+### 10.8 The result
+
+✅ **CHECK:** the screen says **ALL OK**. Two lines say **CHECK**, which is normal:
+- **SCREEN**: it's asking whether you saw the screen flash. Did you? Then it's fine.
+- **CALIBRATED**: that's done in part 13.
+
+- [ ] Hold TEST for 2 seconds once more and run the whole test again. This time each solenoid
+  reads about **0.8 A** (your bench voltage ÷ 15).
+
+**If a line says BAD** (tap TEST to page through the details):
+
+| BAD line | What to check |
+|---|---|
+| BATTERY | The bench supply: must be 10.5–16 V |
+| GAS PEDAL | The stand-in resistors (10.1), then step P8 |
+| TEMP PROBE | X6 wiring, then step L3 |
+| GYRO | Step L4 |
+| SHIFTER | A shifter switch stuck on: part 8's shifter check |
+| SOLENOID 1 / SOLENOID 2 / LOCKUP SOL | That channel: its bench wire to J4, its big resistor, then step P5 |
+| RELAYS | A relay contact stuck: steps P3 and P4 |
+| SHIFT UP / SHIFT DOWN | The shifter cable and X7, then step L2 |
+| ECO / SPORT / MANUAL SWITCH | That switch's core in the dash cable and X4, then step L2 |
+| BRAKE | J3b, then step P6 |
+| ON/OFF CUT | C7 and C8 at J5a/J5b, and the ON/OFF switch's second half (part 8) |
+| SAFETY RESET | The Mega didn't come back by itself after restarting. Re-upload; if it keeps happening, see spec §9 (bootloader) |
+
+**If it says STOPPED BECAUSE…**, the next line says why (for example **ON/OFF IS OFF**: it was
+turned off before the last prompt). Fix that and run it again.
+
+- [ ] **Bench test passed.** Power off. Take out the three bench wires (J2d/J2e/J2f → J4) and the
+  gas pedal stand-in.
 
 ---
 
@@ -1375,6 +1777,17 @@ back to that part's step and its check.
 | SOL | 6 wires (thick) | J2a–J2f | X2, 6-way |
 | LOAD | the heatsink's 4 wires | J4a–J4d | none (straight to the heatsink) |
 
+✅ **CHECK each cable as soon as it's done** (meter on beep, nothing plugged in):
+- [ ] **Every wire:** one probe on the plug's pin outside, the other on its terminal inside:
+  beep. Pin 1 goes to the first terminal (a), pin 2 to the second (b), and so on.
+- [ ] **No crossed wires:** no plug pin beeps to the pin next to it.
+
+  These pairs **should** beep, because they're joined inside the box:
+  - **X2:** pins 1 and 4, 2 and 5, 3 and 6 (the relays at rest join them).
+  - **X3:** pin 3 (E1) beeps to ground (J1c).
+- [ ] For cables without a plug (SHIFT, DASH, SCREEN, LOAD), repeat the far-end check from
+  part 8, 7 or 9, now through the box's terminals.
+
 - [ ] **11.5** Make the **BYPASS plug**: a 6-way plug that fits the car's half of X2, with three
   short wires inside: **1 to 4, 2 to 5, 3 to 6**. Label it **BYPASS**. Keep it in the glovebox.
   If you ever have a problem, unplug the TCU and plug this in: the car is back to completely
@@ -1384,7 +1797,7 @@ back to that part's step and its check.
 
 - [ ] **11.6** Tighten every gland. Screw the lid on (4 × M3).
 
-✅ **CHECK:** do part 10's self-test again, through the plugs. It passes.
+✅ **CHECK:** do part 10's self-test again (10.6–10.8), through the plugs. It passes.
 
 ---
 
@@ -1408,7 +1821,14 @@ every join. Don't use the clip-on "Scotch-lock" taps.
 - [ ] Fuse tap → **5 A** inline fuse → X1 pin 1.
 - [ ] Fuse tap → **2 A** inline fuse → X1 pin 2.
 - [ ] X1 pin 3 → a body ground bolt (on bare metal).
-- [ ] Battery back on. **ON/OFF off.** Key ON.
+
+✅ **CHECK before plugging X1 into the box** (car-side plug):
+- [ ] Battery still off, meter on beep: **pin 3** beeps to bare metal on the body. Pins 1 and 2
+  do **not** beep to the body.
+- [ ] Battery back on, meter on volts, black probe on pin 3:
+  - key OFF: pins 1 and 2 read **0 V**
+  - key ON: pins 1 and 2 read **about 12 V**
+- [ ] Key OFF. Plug X1 into the box. **ON/OFF off.** Key ON.
 
 ✅ **CHECK:** the screen lights up within a second. Key OFF: it goes dark.
 **If it doesn't light up:** check both fuses, and the ground bolt is on bare metal.
@@ -1417,6 +1837,22 @@ every join. Don't use the clip-on "Scotch-lock" taps.
 - [ ] At the engine computer, join a new wire to each wire in your part 0 table (D, STP, E1, SPD,
   TAC, VTA, E2). **Don't cut these**: strip a small window, wrap, solder, heat-shrink.
 - [ ] Run them to the X3 plug. Twist SPD and TAC together, and VTA and E2 together.
+
+✅ **CHECK before plugging X3 into the box** (car-side plug, battery on):
+- [ ] Meter on beep, battery off: each X3 pin beeps to its engine-computer terminal from your
+  part 0 table, and **not** to the pins next to it. Pin 3 (E1) beeps to body ground.
+- [ ] Battery on, key ON, engine off, meter on volts, black probe on pin 3 (E1):
+
+| X3 pin | Signal | What you should read |
+|---|---|---|
+| 1 | D | 0 V in P. **About 12 V** with the lever in D (foot on the brake). |
+| 2 | STP | 0 V. **About 12 V** with the brake pressed. |
+| 6 | VTA | **0.3–0.8 V** with the pedal up, rising smoothly to **3.2–4.9 V** pressed to the floor. |
+| 7 | E2 | **Under 0.1 V** |
+
+- [ ] Engine running (in P): pin 5 (TAC) reads a few volts (a pulse signal; the exact number
+  depends on your meter).
+- [ ] Key OFF, plug X3 into the box.
 
 ✅ **CHECK** (SENSORS page):
 - [ ] The gas pedal goes from 0 % to about 100 % as you press the pedal.
@@ -1441,6 +1877,8 @@ every join. Don't use the clip-on "Scotch-lock" taps.
 - [ ] Follow the [ATF probe instructions](03-wiring-guide.md#the-atf-temperature-probe): cut the
   **hot** hose, fit the tee, probe pointing sideways, clamps tight.
 - [ ] Run the cable through a rubber grommet in the firewall, to X6.
+- [ ] **Before plugging in:** meter on beep, each X6 pin beeps to its wire at the probe end
+  (red, black, yellow), and none beeps to the body.
 - [ ] Engine on. Shift through every gear. Look for drips. Check the transmission fluid level
   when it's hot, and top up.
 
@@ -1452,6 +1890,14 @@ a drive.
   transmission connector they're pins **B3, B6, B5**).
 - [ ] Cut each of the three wires.
 - [ ] Engine computer side → X2 pins 1, 2, 3. Transmission side → X2 pins 4, 5, 6.
+
+✅ **CHECK before plugging X2 into the box** (car-side plug, battery off, meter on beep):
+- [ ] Pins 1, 2, 3 beep to engine computer terminals **S1, S2, SL** (your part 0 table).
+- [ ] Pins 4, 5, 6 beep to transmission connector pins **B3, B6, B5** (unplug that connector to
+  reach them, then plug it back).
+- [ ] Pins 1–3 do **not** beep to pins 4–6 (the cut is clean), and no pin beeps to the body.
+- [ ] Meter on Ω: pins 4, 5, 6 each read **11–15 Ω** to the body (that's the solenoid).
+
 - [ ] Plug in X2. **ON/OFF stays off.**
 
 ✅ **CHECK:**
@@ -1466,28 +1912,136 @@ further.
 
 ## Part 13 — Calibrate and drive
 
-**1. Teach it your car** (ON/OFF stays **off** the whole time; the factory computer shifts):
-- [ ] Plug the laptop into the USB cable and record the log while you drive normally for a few
+Two halves. First you teach the TCU your car, with the factory computer still shifting (ON/OFF
+off the whole time). Then you test it in four stages, from standing still to the road. **Stop at
+the first problem.**
+
+You need: the laptop with the Arduino IDE and Python (part 10), the USB cable from the box (or
+its extension in the glovebox), and for 13.2 a **passenger** to work the laptop.
+
+### 13.1 Parked: the gas pedal and the battery
+
+About 5 minutes. Car parked, lever in P, **engine OFF**, key **ON**, ON/OFF off.
+
+- [ ] Plug the laptop into the TCU's USB.
+- [ ] In the terminal, in the project folder: `python3 tools/calibrate.py parked`
+- [ ] Follow it. It asks you to:
+  1. keep your foot off the gas pedal for 3 seconds
+  2. press the pedal **all the way down** and hold it for 3 seconds
+  3. put the meter on the battery's two terminals and type the reading
+- [ ] It shows the new numbers next to the old ones. Type **y** to write them.
+- [ ] Arduino IDE: **Upload**.
+
+**If it says PROBLEM:** it says what's wrong in words, usually a wire to check from your
+part 0 table. Fix it and run the step again.
+
+### 13.2 A drive: speed and engine rpm
+
+About 30 minutes. ON/OFF stays **off**: the factory computer shifts as normal. **Your passenger
+works the laptop**; you just drive.
+
+- [ ] Phone on the dash with a GPS speed app (any free "speedometer" app).
+- [ ] Before you set off, your passenger types: `python3 tools/calibrate.py drive`
+- [ ] Somewhere quiet and safe, at any point in the drive:
+  1. Hold a steady **30 mph** on the GPS for **15 seconds**.
+  2. Press the **O/D OFF** button on the gear lever (the O/D OFF light comes on). Hold a steady
+     **45 mph** for **20 seconds**. Press O/D OFF again (light off).
+  3. On a highway, hold a steady **60 mph** on the GPS for **20 seconds**.
+- [ ] Then just drive normally for another 20 minutes or so: some gentle, some normal and some
+  brisk starts. (It records the factory computer's shift points, for reference.)
+- [ ] Parked again, your passenger presses **Ctrl+C**. The helper asks which speeds you held:
+  press Enter for "30 60".
+- [ ] It shows the new numbers. Type **y** to write them. Arduino IDE: **Upload**.
+
+**If it says PROBLEM:** it tells you which part of the drive to do again, for example "hold
+60 mph for longer". The recording is saved in the `calibration` folder.
+
+### 13.3 Unlock
+
+- [ ] In the terminal: `python3 tools/calibrate.py unlock`. It checks all three steps (bench,
+  parked, drive) are done and written, then asks you to type **UNLOCK**.
+- [ ] Arduino IDE: **Upload**.
+
+✅ **CHECK:** key ON, engine off, lever in P, only ECO on. Flip ON/OFF on: the screen says
+**LEVER NOT IN D** instead of NOT CALIBRATED. Run the self-test (hold TEST 2 s): **ALL OK**, and
+CALIBRATED now says **OK**.
+
+### 13.4 Test 1: on jack stands
+
+The TCU drives the transmission for the first time, with the car going nowhere.
+
+**Set up safely:**
+- [ ] Level, solid ground. **All four wheels** on jack stands, clear of the ground. Your RAV4 is
+  full-time 4WD: **never test with only the front or only the rear up.**
+- [ ] Parking brake **off** (it would hold the rear wheels while the front ones turn). Nobody
+  near the wheels.
+- [ ] ON/OFF **off**, ECO on.
+
+**Go:**
+1. [ ] Start the engine in P. The screen shows **STOCK** and the trans temperature.
+2. [ ] Foot on the brake, lever to **D**. The big number shows **1** (the factory computer's gear).
+3. [ ] Flip **ON/OFF on**. The screen says **TCU ON: TCU IS DOING THE SHIFTING**, with **ECO**.
+4. [ ] Release the brake: the wheels creep round slowly.
+5. [ ] Press the gas gently until the wheels are doing about **25 mph** (tap TEST for the SENSORS
+   page to see the speed). Watch the big number go **1 → 2 → 3**. At each shift the engine rpm
+   should drop and the wheels keep turning smoothly.
+6. [ ] Lift off and brake gently to a stop. The number comes back down to **1**.
+7. [ ] Back up to about 20 mph, then flip **ON/OFF off**. The screen says **TCU OFF** and the
+   factory computer carries on. Nothing dramatic should happen. Flip it back **on**.
+8. [ ] Stop. Turn **ECO off** and **MANUAL on**: the screen says **MANUAL**. Now you shift: at about
+   **10 mph** pull the shifter lever: **2**. At about **20 mph** pull again: **3**. Push it: **2**.
+   (Pull too early and it says **NO SHIFT: TOO SLOW**: that's correct.)
+9. [ ] In 2nd, at about **30 mph**, push the lever for 1st: the screen says **NO SHIFT: TOO FAST
+   FOR THAT GEAR**. That's the engine protection working.
+10. [ ] Stop, lever to **P**, ON/OFF **off**, engine off.
+
+**Stop at once (flip ON/OFF off) if** the engine revs up without the wheels speeding up (a
+"flare"), there's a clunk or grinding, or the screen says **PROBLEM**. Then check the table at
+the end of this part.
+
+### 13.5 Test 2: an empty car park
+
+- [ ] Engine on in P, **ON/OFF off**, ECO on. Lever to D, then flip ON/OFF **on**.
+- [ ] **ECO:** drive gently around. Shifts should come early and feel as smooth as stock.
+- [ ] **SPORT** (stop first, ECO off, SPORT on): the same loop a bit more briskly. Shifts come
+  later. Brake firmly from 25 mph: it shifts down as you slow.
+- [ ] **MANUAL** (stop, SPORT off, MANUAL on): shift up and down yourself with the lever, between
+  10 and 30 mph.
+- [ ] At 15 mph, flip **ON/OFF off**: the factory computer takes straight back over.
+- [ ] Stopped, turn **two** mode switches on: after a second, **MODE ERROR**, and the factory
+  computer shifts. Fix it: the TCU takes back over by itself.
+
+### 13.6 Test 3: the road
+
+- [ ] A short, familiar route, at a quiet time. A passenger to watch the screen helps.
+- [ ] Start in **ECO**. Keep a hand near ON/OFF.
+- [ ] Afterwards: the trans temperature stayed sensible (usually 160–200 °F; the screen warns
+  from 230 °F), and an OBD-II scanner shows **no trouble codes**.
+
+### 13.7 Test 4: normal driving
+
+- [ ] Use it day to day, in each mode. For the first week, check for trouble codes every few
   days.
-- [ ] Use a GPS speed app on your phone to check the speed it shows.
-- [ ] Work out the numbers from the log and put them into `firmware/tcu/config.h`. The
-  [spec, section 8](02-revised-spec.md) lists each one and how to get it.
 
-**2. Unlock it:**
-- [ ] In `firmware/tcu/config.h`, change `CALIBRATED = false` to `CALIBRATED = true`.
-- [ ] Upload again.
+✅ **CHECK, at any time:** flip ON/OFF off. The car goes straight back to the factory computer.
 
-**3. Test it step by step.** Stop at the first problem.
-- [ ] In the driveway: hold TEST for the self-test. It passes.
-- [ ] **All four wheels on jack stands** (your RAV4 is full-time 4WD: never just the front),
-  ON/OFF on: go through the gears and watch the screen.
-- [ ] An empty car park. Try **ECO**, then **SPORT**, then **MANUAL**: only one on at a time.
-  In MANUAL, shift with the lever. (In ECO or SPORT the lever does nothing, and the screen says
-  MANUAL OFF.)
-- [ ] The road.
+### If something isn't right
 
-✅ **CHECK:** flip ON/OFF off at any time. The car goes straight back to the factory computer.
-Keep a hand near the switch for the first few drives.
+| What happens | What to do |
+|---|---|
+| Flare (rpm jumps, the car doesn't speed up), clunk or slip | ON/OFF **off** at once. Then check the X2 wiring with 12.6's check. |
+| **PROBLEM: WRONG GEAR** | S1 and S2 are probably swapped. ON/OFF off; recheck 12.6's check (pins 1→S1, 2→S2…). |
+| **PROBLEM: SOLENOID WIRE** | A solenoid wire or plug: 12.6's check, and the X2 plug's pins. |
+| **PROBLEM: NO SPEED SIGNL** | The SPD wire: 12.3's check. |
+| **PROBLEM: PEDAL SENSOR** | The VTA or E2 wire: 12.3's check, then redo 13.1. |
+| **PROBLEM: ON/OFF SWITCH** | C7/C8 in the dash cable, or the switch's second half (part 8's check). |
+| **PROBLEM: RELAY STUCK** | Engine off, P, ON/OFF on, hold TEST: the self-test re-checks the relays. |
+| **PROBLEM: LEVER SENSOR** | The D wire reads D all the time: 12.3's check (pin 1). |
+| **STOP FIRST** | Normal: the TCU only takes over on the move when it's sure of the gear. Stop, and it takes over. |
+| **WAITING** | ON/OFF was already on at key-on. Flip it off, then on. |
+| **NO RPM** | The TAC wire: 12.3's check. It's still safe to drive. |
+| Shifts feel too early or too late | Not a fault: the shift points can be adjusted (spec §6.3). Note the speed and gas pedal position. |
+| Anything you're unsure about | ON/OFF off, and fit the BYPASS plug until it's sorted. |
 
 ---
 

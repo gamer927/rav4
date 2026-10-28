@@ -96,7 +96,7 @@ static void test_pbit() {
   CHECK(b.t.result(T_TPS) == TR_PASS);
   CHECK(b.t.result(T_SWITCHES) == TR_PASS);
   CHECK(b.t.result(T_LAST_RESET) == TR_PASS);
-  CHECK(b.t.result(T_CALIBRATED) == (cfg::CALIBRATED ? TR_PASS : TR_FAIL));
+  CHECK(b.t.result(T_CALIBRATED) == (cfg::CALIBRATED ? TR_PASS : TR_CHECK));
   CHECK(b.t.active());   // the key-on relay-release check runs next...
   CHECK(!b.t.ibitActive());
   CHECK(b.t.outputs().s1 && b.t.outputs().s2 && b.t.outputs().sl && !b.t.outputs().relay);
@@ -188,8 +188,8 @@ static void test_full_ibit_pass() {
   CHECK(after.result(T_WATCHDOG) == TR_PASS);
   CHECK(after.result(T_SOL_S2) == TR_PASS);
   const TestSummary s = after.summary();
-  CHECK(s.fail == (cfg::CALIBRATED ? 0 : 1));  // only "not calibrated" on a fresh build
-  CHECK(s.check == 1);                          // lamps
+  CHECK(s.fail == 0);                              // a healthy build: ALL OK
+  CHECK(s.check == (cfg::CALIBRATED ? 1 : 2));     // the screen flash, and "not calibrated yet"
 }
 
 static void test_one_solenoid_at_a_time() {
