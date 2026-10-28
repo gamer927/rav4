@@ -1175,21 +1175,20 @@ def step_of(ref):
     return None
 
 
+ENV = {}   # what tools/build_steps.py needs from here, filled in at the end
+
 # Chips that go in a socket: no iron on the chip, and easy to swap.
 SOCKETED = {"U1": 18, "U2": 8}
 
 
-def part_line(c, ref):
-    """One build-book line for a part: what it is, which way round."""
-    p = c.parts[ref]
-    k, v = p["kind"], p["value"]
-    words = {"R": "resistor", "D": "diode", "C": "capacitor", "CE": "capacitor", "IC": "chip",
-             "PTC": "resettable fuse", "TB": "screw terminal block", "K": "relay", "Q": "transistor",
-             "REG": "5 V regulator", "MOD": "module", "MEGA": ""}
-    what = words.get(k, "part")
-    extra = ""
-    if k == "R":
-        extra = f" (stripes: {boards.bands_text(v)})"
+WORDS = {"R": "resistor", "D": "diode", "C": "capacitor", "CE": "capacitor", "IC": "chip",
+         "PTC": "resettable fuse", "TB": "screw terminal block", "K": "relay", "Q": "transistor",
+         "REG": "5 V regulator", "MOD": "module", "MEGA": ""}
+
+
+def part_how(c, ref):
+    """Which way round a part goes, in words."""
+    k = c.parts[ref]["kind"]
     how = {
         "D": "Stripe to the end with the stripe printed on the board.",
         "IC": "Notch (or dot) to the notch printed on the board.",
@@ -1213,22 +1212,75 @@ def part_line(c, ref):
     if ref == "GYRO":
         how = "Solder its 8-pin header into the board first, then the gyro onto the header, lying flat, chip side up."
     if ref == "A1":
-        return ("- [ ] **The Mega's pins:** push male header strips into the Mega's sockets, **long ends down** (cut to length: "
-                "8, 8, 8, 10, 8, 8 and an 18 × 2), lay this board on top so every pin pokes through its hole, "
-                "and solder them from the top. They line up perfectly that way.")
-    return f"- [ ] **{ref}**: {v} {what}{extra}. {how}".replace("  ", " ").rstrip(" .") + ("." if how else "")
+        how = ("Push the header strips into the Mega's sockets, **long ends down** (cut to length: 8, 8, 8, 10, "
+               "8, 8 and two 18s side by side), lay this board on top so every pin pokes through its hole, and "
+               "solder them from the top. They line up perfectly that way.")
+    return how
 
 
-def steps_markdown(c, board):
-    out = {}
-    for s, title, refs in STEPS:
-        refs = sorted(refs, key=lambda r: (HEIGHT_ORDER.get(c.parts[r]["kind"], 5), _natural(r)))
-        lines = [f"![Step {s}](build/pcb-{s}.png)", "",
-                 f"*{len(refs)} part{'s' if len(refs) > 1 else ''}, orange in the picture; grey ones are already "
-                 "in. Lowest parts first.*", ""]
-        lines += [part_line(c, r) for r in refs]
+def tb_words(ref):
+    fp = TB_FP[ref]
+    n = int(re.search(r"1x(\d+)", fp).group(1))
+    pitch = "3.5 mm" if "3.5" in fp else "5.08 mm"
+    gland = next(g for g, r, _, _ in TERMINALS if r == ref)
+    return f"{n}-way {pitch} screw terminal: {gland}"
+
+
+TB_FP = {}
+
+
+def set_env():
+    ENV.update(bxy=bxy, courtyard=courtyard, fab_box=fab_box, short_value=short_value, outline=outline, W=W, H=H,
+               holes=MOUNT_HOLES, bands=boards.bands, bands_text=boards.bands_text, what=lambda k: WORDS.get(k, ""),
+               tb_words=tb_words)
+
+
+def substeps(c, board):
+    """The Lego-style sub-steps: markdown per step, and the pictures in docs/build/."""
+    import build_steps as bs
+    parts = {f.GetReference(): bs.Part(f, c.parts[f.GetReference()], ENV)
+             for f in board.GetFootprints() if not f.GetReference().startswith("H")}
+    for r, p in c.parts.items():
+        if p["kind"] == "TB":
+            TB_FP[r] = p["fp"]
+    out, done = {}, []
+    plans = bs.plan(STEPS, c, parts, HEIGHT_ORDER, _natural)
+    for n, (s, title, subs) in enumerate(plans, 1):
+        lines = [f"![Step {n}: everything in this step](build/pcb-{s}.png)", "",
+                 f"*The whole step: {sum(len(x) for x in subs)} parts in {len(subs)} small steps. "
+                 "Orange = this step, grey = already in.*", ""]
+        for m, refs in enumerate(subs, 1):
+            p = c.parts[refs[0]]
+            big, small = bs.find_words(c, refs, ENV)
+            num = f"{n}.{m}"
+            pic = f"pcb-{n}-{m}.png"
+            if p["kind"] == "TB":
+                kind_words, gland = tb_words(refs[0]).split(": ")
+                head = f"The {gland} screw terminal ({kind_words.replace(' screw terminal', '').replace('-way ', '-way, ')})"
+            elif p["kind"] == "MEGA":
+                head = "The Mega's pins"
+            else:
+                shown = f"{p['value']} Ω" if p["kind"] == "R" and p["value"][-1].isdigit() else p["value"]
+                head = f"{len(refs)}× {shown} {WORDS.get(p['kind'], '')}"
+            bs.picture(os.path.join(ROOT, "docs", "build", pic), parts, refs, done, ENV, (big, small),
+                       f"{num}   {head}")
+            done += refs
+            where = ", ".join(f"**{r}**" for r in refs) if p["kind"] != "MEGA" else "the Mega's holes"
+            label = short_value(p["value"])
+            printed = f" (printed **{label}**)" if p["kind"] in ("R", "D", "C", "CE", "PTC") else ""
+            how = part_how(c, refs[0])
+            lines += [f"#### {num}  {head}", "",
+                      f"![{num}](build/{pic})", "",
+                      f"- [ ] **Where:** {where}{printed}, orange in the picture."]
+            if p["kind"] == "R":
+                lines.append(f"- [ ] **Stripes:** {boards.bands_text(p['value'])}.")
+            if how:
+                lines.append(f"- [ ] **Which way:** {how}" if p["kind"] not in ("MEGA", "MOD", "Q") or
+                             refs[0] in SOCKETED else f"- [ ] **How:** {how}")
+            lines += ["- [ ] Solder, then snip the legs to 1.5 mm." if p["kind"] in ("R", "D", "C", "CE", "PTC")
+                      else "- [ ] Solder every leg.", ""]
         out[s] = "\n".join(lines)
-    return out
+    return out, sum(len(subs) for _, _, subs in plans)
 
 
 def _natural(s):
@@ -1364,10 +1416,11 @@ def write_envelope(c, board, heights):
 
 def write_book(c, board):
     tpl = open(os.path.join(ROOT, "tools", "build_book_template.md")).read()
-    md = steps_markdown(c, board)
+    md, count = substeps(c, board)
     for s, text in md.items():
         tpl = tpl.replace("{{PCB STEP %s}}" % s, text)
     tpl = tpl.replace("{{BAGS}}", bags_markdown(c))
+    tpl = tpl.replace("{{SMALL STEPS}}", str(count))
     if "{{" in tpl:
         i = tpl.index("{{")
         sys.exit("build book: unfilled placeholder " + tpl[i:i + 30])
@@ -1377,9 +1430,17 @@ def write_book(c, board):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--place", action="store_true", help="placement and pictures only")
+    ap.add_argument("--book", action="store_true", help="the build book's steps only, from the saved board")
     args = ap.parse_args()
     write_lib()
     c = Circuit()
+    if args.book:
+        import pcbnew
+        board = pcbnew.LoadBoard(os.path.join(OUT, "rav4-tcu.kicad_pcb"))
+        set_env()
+        step_pictures(board)
+        write_book(c, board)
+        sys.exit(0)
     P = placement()
     missing = sorted(set(c.parts) - set(P))
     if missing:
@@ -1434,6 +1495,7 @@ if __name__ == "__main__":
     if fit_probs:
         sys.exit("the real parts don't all fit: see hardware/pcb/part_fit.md")
     write_envelope(c, board, heights)
+    set_env()
     write_book(c, board)
     print("wrote hardware/pcb/ (board, gerbers zip, bom.csv), docs/pcb-*.png, docs/build/pcb-S*.png, "
           "hardware/pcb_envelope.scad, docs/05-build-book.md")

@@ -238,13 +238,22 @@ The files are in `hardware/stl/`.
 
 ![The finished board](pcb-top.png)
 
-**How it goes:** each step's parts are orange in its picture, and the ones you've already fitted
-are grey. Every part's **name and value** are printed on the board next to its holes (for
-example **RU11 2.2k** or **DL1 BAT85**), so you can check each one as you go. Push each part into
-its holes from the top. Turn
-the board over, solder, snip, leaving **no more than 1.5 mm** of leg under the board (the Mega
-sits 11 mm below). **Lowest parts first** (resistors and diodes, then the taller ones), so the
-board lies flat on the table while you solder.
+**How it goes, like a Lego manual:** the board goes together in **{{SMALL STEPS}} small steps**, each one a
+few parts of the same kind. Every small step has a picture:
+
+- **FIND** (left): the part to take out of the bag, drawn as it looks: a resistor with its
+  coloured stripes, a diode with its stripe, a chip with its notch. How many, and what's
+  printed on the board for it.
+- **WHERE** (bottom left): the whole board, with the area of this step boxed.
+- **The close-up** (right): where they go. This step's parts are in colour with an **orange
+  outline** and their name on an orange tag. Parts you've already fitted are faded. Empty places
+  look like the bare board: a white outline with the part's name.
+
+For each small step: push the parts in from the top, matching the picture (and the name and
+value printed on the board, like **RU11 2.2k**). Bend the legs out a little underneath so they
+stay put. Turn the board over, solder, then snip each leg to **no more than 1.5 mm** (the Mega
+sits 11 mm below). Tick the boxes and go on to the next small step. The steps go **lowest
+parts first**, so the board lies flat on the table while you solder.
 
 **Before you solder a step,** push all of its parts in first and look: everything sits in its
 outline without touching its neighbour. Every part on the shopping list has been checked against

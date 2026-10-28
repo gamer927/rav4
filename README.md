@@ -333,6 +333,7 @@ tools/wiring_diagram.py     regenerates the wiring diagrams in docs/
 tools/build_stl.sh          fit-checks the housings, exports the STLs and previews in hardware/
 tools/boards.py             the circuit, part by part (the one source of truth), and its checks
 tools/pcb.py                the circuit board: placement, routing (pcb_router.py), DRC, Gerbers, build-book steps
+tools/build_steps.py        the build book's Lego-style soldering steps and their pictures
 hardware/pcb/               the KiCad board, the Gerber zip to order it, the parts list
 tools/shopping_list.py      writes the shopping list and its cost totals
 docs/build/                 build-book pictures (generated)

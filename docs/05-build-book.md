@@ -243,13 +243,22 @@ The files are in `hardware/stl/`.
 
 ![The finished board](pcb-top.png)
 
-**How it goes:** each step's parts are orange in its picture, and the ones you've already fitted
-are grey. Every part's **name and value** are printed on the board next to its holes (for
-example **RU11 2.2k** or **DL1 BAT85**), so you can check each one as you go. Push each part into
-its holes from the top. Turn
-the board over, solder, snip, leaving **no more than 1.5 mm** of leg under the board (the Mega
-sits 11 mm below). **Lowest parts first** (resistors and diodes, then the taller ones), so the
-board lies flat on the table while you solder.
+**How it goes, like a Lego manual:** the board goes together in **60 small steps**, each one a
+few parts of the same kind. Every small step has a picture:
+
+- **FIND** (left): the part to take out of the bag, drawn as it looks: a resistor with its
+  coloured stripes, a diode with its stripe, a chip with its notch. How many, and what's
+  printed on the board for it.
+- **WHERE** (bottom left): the whole board, with the area of this step boxed.
+- **The close-up** (right): where they go. This step's parts are in colour with an **orange
+  outline** and their name on an orange tag. Parts you've already fitted are faded. Empty places
+  look like the bare board: a white outline with the part's name.
+
+For each small step: push the parts in from the top, matching the picture (and the name and
+value printed on the board, like **RU11 2.2k**). Bend the legs out a little underneath so they
+stay put. Turn the board over, solder, then snip each leg to **no more than 1.5 mm** (the Mega
+sits 11 mm below). Tick the boxes and go on to the next small step. The steps go **lowest
+parts first**, so the board lies flat on the table while you solder.
 
 **Before you solder a step,** push all of its parts in first and look: everything sits in its
 outline without touching its neighbour. Every part on the shopping list has been checked against
@@ -274,23 +283,97 @@ After each step there are two checks:
 
 ### Step 1 — Power in
 
-![Step S1](build/pcb-S1.png)
+![Step 1: everything in this step](build/pcb-S1.png)
 
-*13 parts, orange in the picture; grey ones are already in. Lowest parts first.*
+*The whole step: 13 parts in 11 small steps. Orange = this step, grey = already in.*
 
-- [ ] **RB1**: 47k resistor (stripes: yellow-violet-black-red-brown)
-- [ ] **RB2**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **D1**: 1N5822 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **TVS1**: 1.5KE27A diode. Stripe to the end with the stripe printed on the board.
-- [ ] **TVS2**: 1.5KE27A diode. Stripe to the end with the stripe printed on the board.
-- [ ] **TVS3**: P6KE6.8A diode. Stripe to the end with the stripe printed on the board.
-- [ ] **Z1**: 1N4733A 5.1 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **C2**: 100 nF capacitor
-- [ ] **C7**: 100 nF capacitor
-- [ ] **C1**: 100 µF 50 V capacitor. Long leg (+) into the hole marked +; the stripe on the can is the − side.
-- [ ] **C6**: 47 µF 16 V capacitor. Long leg (+) into the hole marked +; the stripe on the can is the − side.
-- [ ] **U3**: R-78HB5.0-0.5 5 V regulator. The printed side faces the front edge (pin 1, the square pad, on the left).
-- [ ] **J1**: PWR screw terminal block. Wire openings towards the front edge of the board.
+#### 1.1  1× 47k resistor
+
+![1.1](build/pcb-1-1.png)
+
+- [ ] **Where:** **RB1** (printed **47k**), orange in the picture.
+- [ ] **Stripes:** yellow-violet-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 1.2  1× 10k resistor
+
+![1.2](build/pcb-1-2.png)
+
+- [ ] **Where:** **RB2** (printed **10k**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 1.3  2× 1.5KE27A diode
+
+![1.3](build/pcb-1-3.png)
+
+- [ ] **Where:** **TVS1**, **TVS2** (printed **1.5KE27A**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 1.4  1× 1N5822 diode
+
+![1.4](build/pcb-1-4.png)
+
+- [ ] **Where:** **D1** (printed **1N5822**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 1.5  1× 1N4733A 5.1 V diode
+
+![1.5](build/pcb-1-5.png)
+
+- [ ] **Where:** **Z1** (printed **5V1**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 1.6  1× P6KE6.8A diode
+
+![1.6](build/pcb-1-6.png)
+
+- [ ] **Where:** **TVS3** (printed **P6KE6.8A**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 1.7  2× 100 nF capacitor
+
+![1.7](build/pcb-1-7.png)
+
+- [ ] **Where:** **C2**, **C7** (printed **100n**), orange in the picture.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 1.8  1× R-78HB5.0-0.5 5 V regulator
+
+![1.8](build/pcb-1-8.png)
+
+- [ ] **Where:** **U3**, orange in the picture.
+- [ ] **Which way:** The printed side faces the front edge (pin 1, the square pad, on the left).
+- [ ] Solder every leg.
+
+#### 1.9  1× 100 µF 50 V capacitor
+
+![1.9](build/pcb-1-9.png)
+
+- [ ] **Where:** **C1** (printed **100u**), orange in the picture.
+- [ ] **Which way:** Long leg (+) into the hole marked +; the stripe on the can is the − side.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 1.10  1× 47 µF 16 V capacitor
+
+![1.10](build/pcb-1-10.png)
+
+- [ ] **Where:** **C6** (printed **47u**), orange in the picture.
+- [ ] **Which way:** Long leg (+) into the hole marked +; the stripe on the can is the − side.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 1.11  The PWR screw terminal (3-way, 5.08 mm)
+
+![1.11](build/pcb-1-11.png)
+
+- [ ] **Where:** **J1**, orange in the picture.
+- [ ] **Which way:** Wire openings towards the front edge of the board.
+- [ ] Solder every leg.
+
 
 ✅ **CHECK, no shorts** (power off, beep): the first **12V** terminal and **GND**; the second
 **12V** terminal and **GND**; the Mega holes **5V** and **GND**.
@@ -305,25 +388,89 @@ to **GND**.
 
 ### Step 2 — Relays and the ON/OFF power pole
 
-![Step S2](build/pcb-S2.png)
+![Step 2: everything in this step](build/pcb-S2.png)
 
-*15 parts, orange in the picture; grey ones are already in. Lowest parts first.*
+*The whole step: 15 parts in 10 small steps. Orange = this step, grey = already in.*
 
-- [ ] **RD1**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RD2**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RD3**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RD4**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RK1**: 47k resistor (stripes: yellow-violet-black-red-brown)
-- [ ] **RK2**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **DF**: UF4007 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **ZK**: 1N4733A 5.1 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **CK**: 100 nF capacitor
-- [ ] **F2**: PTC 0.25 A resettable fuse. Either way round.
-- [ ] **U1**: ULN2803A chip. Solder its 18-pin socket in, notch to the notch printed on the board. Push the chip into the socket at the end of the step, notch to the notch (bend its legs in a little on the table first if they're splayed).
-- [ ] **X4**: DASH screw terminal block. Wire openings towards the front edge of the board.
-- [ ] **K1**: G2RL-2 12 V relay. It only fits one way.
-- [ ] **K2**: G2RL-2 12 V relay. It only fits one way.
-- [ ] **K3**: G2RL-2 12 V relay. It only fits one way.
+#### 2.1  1× 47k resistor
+
+![2.1](build/pcb-2-1.png)
+
+- [ ] **Where:** **RK1** (printed **47k**), orange in the picture.
+- [ ] **Stripes:** yellow-violet-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 2.2  1× 10k resistor
+
+![2.2](build/pcb-2-2.png)
+
+- [ ] **Where:** **RK2** (printed **10k**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 2.3  4× 10k resistor
+
+![2.3](build/pcb-2-3.png)
+
+- [ ] **Where:** **RD1**, **RD2**, **RD3**, **RD4** (printed **10k**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 2.4  1× 1N4733A 5.1 V diode
+
+![2.4](build/pcb-2-4.png)
+
+- [ ] **Where:** **ZK** (printed **5V1**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 2.5  1× UF4007 diode
+
+![2.5](build/pcb-2-5.png)
+
+- [ ] **Where:** **DF** (printed **UF4007**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 2.6  1× 100 nF capacitor
+
+![2.6](build/pcb-2-6.png)
+
+- [ ] **Where:** **CK** (printed **100n**), orange in the picture.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 2.7  1× PTC 0.25 A resettable fuse
+
+![2.7](build/pcb-2-7.png)
+
+- [ ] **Where:** **F2** (printed **0.25A**), orange in the picture.
+- [ ] **Which way:** Either way round.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 2.8  1× ULN2803A chip
+
+![2.8](build/pcb-2-8.png)
+
+- [ ] **Where:** **U1**, orange in the picture.
+- [ ] **Which way:** Solder its 18-pin socket in, notch to the notch printed on the board. Push the chip into the socket at the end of the step, notch to the notch (bend its legs in a little on the table first if they're splayed).
+- [ ] Solder every leg.
+
+#### 2.9  The DASH screw terminal (8-way, 3.5 mm)
+
+![2.9](build/pcb-2-9.png)
+
+- [ ] **Where:** **X4**, orange in the picture.
+- [ ] **Which way:** Wire openings towards the front edge of the board.
+- [ ] Solder every leg.
+
+#### 2.10  3× G2RL-2 12 V relay
+
+![2.10](build/pcb-2-10.png)
+
+- [ ] **Where:** **K1**, **K2**, **K3**, orange in the picture.
+- [ ] **Which way:** It only fits one way.
+- [ ] Solder every leg.
+
 
 The relays don't get their 12 V directly. It goes out through the **C7** terminal to the
 ON/OFF switch on the dash, and comes back on **C8**. So turning ON/OFF off cuts the relays'
@@ -342,33 +489,82 @@ power by itself, even if the Mega has frozen. On the table, put a short wire fro
 
 ### Step 3 — Solenoid drivers and current sensors
 
-![Step S3](build/pcb-S3.png)
+![Step 3: everything in this step](build/pcb-S3.png)
 
-*23 parts, orange in the picture; grey ones are already in. Lowest parts first.*
+*The whole step: 23 parts in 9 small steps. Orange = this step, grey = already in.*
 
-- [ ] **RG1**: 4.7k resistor (stripes: yellow-violet-black-brown-brown)
-- [ ] **RG2**: 4.7k resistor (stripes: yellow-violet-black-brown-brown)
-- [ ] **RG3**: 4.7k resistor (stripes: yellow-violet-black-brown-brown)
-- [ ] **RP1**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RP2**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RP3**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **DF1**: UF4007 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DF2**: UF4007 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DF3**: UF4007 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **ZF1**: 1N4749A 24 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **ZF2**: 1N4749A 24 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **ZF3**: 1N4749A 24 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **ZG1**: 1N4744A 15 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **ZG2**: 1N4744A 15 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **ZG3**: 1N4744A 15 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **Q1**: IRF4905 transistor. Bend the legs down 90° about 3.5 mm from the body, so it lies flat with the hole in its metal tab over the hole in the board. Bolt the tab down (M3 × 8 screw and nut) before soldering.
-- [ ] **Q2**: IRF4905 transistor. Bend the legs down 90° about 3.5 mm from the body, so it lies flat with the hole in its metal tab over the hole in the board. Bolt the tab down (M3 × 8 screw and nut) before soldering.
-- [ ] **Q3**: IRF4905 transistor. Bend the legs down 90° about 3.5 mm from the body, so it lies flat with the hole in its metal tab over the hole in the board. Bolt the tab down (M3 × 8 screw and nut) before soldering.
-- [ ] **J2**: SOL screw terminal block. Wire openings towards the front edge of the board.
-- [ ] **J4**: LOAD screw terminal block. Wire openings towards the front edge of the board.
-- [ ] **CS1**: ACS712-05B module. Its 3 pins go into the holes marked VCC, OUT, GND: check its own printed labels match. If its pins point up or sideways instead of down (sellers differ), lay it in the same place, the same way round, and join each pin to its hole with a short leg offcut. Then two short pieces of stiff wire from its screw terminal into the two big holes marked LINK.
-- [ ] **CS2**: ACS712-05B module. Its 3 pins go into the holes marked VCC, OUT, GND: check its own printed labels match. If its pins point up or sideways instead of down (sellers differ), lay it in the same place, the same way round, and join each pin to its hole with a short leg offcut. Then two short pieces of stiff wire from its screw terminal into the two big holes marked LINK.
-- [ ] **CS3**: ACS712-05B module. Its 3 pins go into the holes marked VCC, OUT, GND: check its own printed labels match. If its pins point up or sideways instead of down (sellers differ), lay it in the same place, the same way round, and join each pin to its hole with a short leg offcut. Then two short pieces of stiff wire from its screw terminal into the two big holes marked LINK.
+#### 3.1  3× 4.7k resistor
+
+![3.1](build/pcb-3-1.png)
+
+- [ ] **Where:** **RG1**, **RG2**, **RG3** (printed **4.7k**), orange in the picture.
+- [ ] **Stripes:** yellow-violet-black-brown-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 3.2  3× 10k resistor
+
+![3.2](build/pcb-3-2.png)
+
+- [ ] **Where:** **RP1**, **RP2**, **RP3** (printed **10k**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 3.3  3× 1N4744A 15 V diode
+
+![3.3](build/pcb-3-3.png)
+
+- [ ] **Where:** **ZG1**, **ZG2**, **ZG3** (printed **15V**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 3.4  3× UF4007 diode
+
+![3.4](build/pcb-3-4.png)
+
+- [ ] **Where:** **DF1**, **DF2**, **DF3** (printed **UF4007**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 3.5  3× 1N4749A 24 V diode
+
+![3.5](build/pcb-3-5.png)
+
+- [ ] **Where:** **ZF1**, **ZF2**, **ZF3** (printed **24V**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 3.6  3× IRF4905 transistor
+
+![3.6](build/pcb-3-6.png)
+
+- [ ] **Where:** **Q1**, **Q2**, **Q3**, orange in the picture.
+- [ ] **How:** Bend the legs down 90° about 3.5 mm from the body, so it lies flat with the hole in its metal tab over the hole in the board. Bolt the tab down (M3 × 8 screw and nut) before soldering.
+- [ ] Solder every leg.
+
+#### 3.7  The SOL screw terminal (6-way, 5.08 mm)
+
+![3.7](build/pcb-3-7.png)
+
+- [ ] **Where:** **J2**, orange in the picture.
+- [ ] **Which way:** Wire openings towards the front edge of the board.
+- [ ] Solder every leg.
+
+#### 3.8  The LOAD screw terminal (4-way, 5.08 mm)
+
+![3.8](build/pcb-3-8.png)
+
+- [ ] **Where:** **J4**, orange in the picture.
+- [ ] **Which way:** Wire openings towards the front edge of the board.
+- [ ] Solder every leg.
+
+#### 3.9  3× ACS712-05B module
+
+![3.9](build/pcb-3-9.png)
+
+- [ ] **Where:** **CS1**, **CS2**, **CS3**, orange in the picture.
+- [ ] **How:** Its 3 pins go into the holes marked VCC, OUT, GND: check its own printed labels match. If its pins point up or sideways instead of down (sellers differ), lay it in the same place, the same way round, and join each pin to its hole with a short leg offcut. Then two short pieces of stiff wire from its screw terminal into the two big holes marked LINK.
+- [ ] Solder every leg.
+
 
 ✅ **CHECK, no shorts** (power off, beep): each **SOL** terminal and **GND**; each **LD**
 terminal and **GND**.
@@ -393,51 +589,145 @@ heatsink (it gets warm). 12 V on both 12V terminals and GND, C7–C8 wire in.
 
 ### Step 4 — Car signal inputs
 
-![Step S4](build/pcb-S4.png)
+![Step 4: everything in this step](build/pcb-S4.png)
 
-*41 parts, orange in the picture; grey ones are already in. Lowest parts first.*
+*The whole step: 41 parts in 17 small steps. Orange = this step, grey = already in.*
 
-- [ ] **RC1**: 22k resistor (stripes: red-red-black-red-brown)
-- [ ] **RC2**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RC3**: 1M resistor (stripes: brown-black-black-yellow-brown)
-- [ ] **RC4**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RC5**: 1.8k resistor (stripes: brown-grey-black-brown-brown)
-- [ ] **RC6**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RI1**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **RI2**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **RI3**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **RI4**: 3.3k resistor (stripes: orange-orange-black-brown-brown)
-- [ ] **RI5**: 3.3k resistor (stripes: orange-orange-black-brown-brown)
-- [ ] **RI6**: 3.3k resistor (stripes: orange-orange-black-brown-brown)
-- [ ] **RT1**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RT2**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RU1**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RU2**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RU3**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RU4**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RU5**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **RU6**: 10k resistor (stripes: brown-black-black-red-brown)
-- [ ] **DI1**: 1N4148 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DI2**: 1N4148 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DI3**: 1N4148 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DI4**: 1N4148 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DI5**: 1N4148 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DI6**: 1N4148 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DT1**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DT2**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DT3**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DT4**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **Z2**: 1N4733A 5.1 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **C3**: 100 nF capacitor
-- [ ] **C4**: 100 nF capacitor
-- [ ] **OK1**: PC817 chip. Notch (or dot) to the notch printed on the board.
-- [ ] **OK2**: PC817 chip. Notch (or dot) to the notch printed on the board.
-- [ ] **OK3**: PC817 chip. Notch (or dot) to the notch printed on the board.
-- [ ] **OK4**: PC817 chip. Notch (or dot) to the notch printed on the board.
-- [ ] **OK5**: PC817 chip. Notch (or dot) to the notch printed on the board.
-- [ ] **OK6**: PC817 chip. Notch (or dot) to the notch printed on the board.
-- [ ] **U2**: LM393 chip. Solder its 8-pin socket in, notch to the notch printed on the board. Push the chip into the socket at the end of the step, notch to the notch (bend its legs in a little on the table first if they're splayed).
-- [ ] **J3**: SIG screw terminal block. Wire openings towards the front edge of the board.
+#### 4.1  6× 10k resistor
+
+![4.1](build/pcb-4-1.png)
+
+- [ ] **Where:** **RU1**, **RU2**, **RU3**, **RC2**, **RC6**, **RC4** (printed **10k**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.2  3× 10k resistor
+
+![4.2](build/pcb-4-2.png)
+
+- [ ] **Where:** **RT1**, **RT2**, **RU4** (printed **10k**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.3  2× 10k resistor
+
+![4.3](build/pcb-4-3.png)
+
+- [ ] **Where:** **RU5**, **RU6** (printed **10k**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.4  3× 2.2k resistor
+
+![4.4](build/pcb-4-4.png)
+
+- [ ] **Where:** **RI1**, **RI2**, **RI3** (printed **2.2k**), orange in the picture.
+- [ ] **Stripes:** red-red-black-brown-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.5  1× 22k resistor
+
+![4.5](build/pcb-4-5.png)
+
+- [ ] **Where:** **RC1** (printed **22k**), orange in the picture.
+- [ ] **Stripes:** red-red-black-red-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.6  1× 1M resistor
+
+![4.6](build/pcb-4-6.png)
+
+- [ ] **Where:** **RC3** (printed **1M**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-yellow-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.7  1× 1.8k resistor
+
+![4.7](build/pcb-4-7.png)
+
+- [ ] **Where:** **RC5** (printed **1.8k**), orange in the picture.
+- [ ] **Stripes:** brown-grey-black-brown-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.8  3× 3.3k resistor
+
+![4.8](build/pcb-4-8.png)
+
+- [ ] **Where:** **RI4**, **RI5**, **RI6** (printed **3.3k**), orange in the picture.
+- [ ] **Stripes:** orange-orange-black-brown-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.9  3× 1N4148 diode
+
+![4.9](build/pcb-4-9.png)
+
+- [ ] **Where:** **DI1**, **DI2**, **DI3** (printed **4148**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.10  3× 1N4148 diode
+
+![4.10](build/pcb-4-10.png)
+
+- [ ] **Where:** **DI4**, **DI5**, **DI6** (printed **4148**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.11  4× BAT85 diode
+
+![4.11](build/pcb-4-11.png)
+
+- [ ] **Where:** **DT1**, **DT2**, **DT3**, **DT4** (printed **BAT85**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.12  1× 1N4733A 5.1 V diode
+
+![4.12](build/pcb-4-12.png)
+
+- [ ] **Where:** **Z2** (printed **5V1**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.13  2× 100 nF capacitor
+
+![4.13](build/pcb-4-13.png)
+
+- [ ] **Where:** **C3**, **C4** (printed **100n**), orange in the picture.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 4.14  1× LM393 chip
+
+![4.14](build/pcb-4-14.png)
+
+- [ ] **Where:** **U2**, orange in the picture.
+- [ ] **Which way:** Solder its 8-pin socket in, notch to the notch printed on the board. Push the chip into the socket at the end of the step, notch to the notch (bend its legs in a little on the table first if they're splayed).
+- [ ] Solder every leg.
+
+#### 4.15  3× PC817 chip
+
+![4.15](build/pcb-4-15.png)
+
+- [ ] **Where:** **OK1**, **OK2**, **OK3**, orange in the picture.
+- [ ] **Which way:** Notch (or dot) to the notch printed on the board.
+- [ ] Solder every leg.
+
+#### 4.16  3× PC817 chip
+
+![4.16](build/pcb-4-16.png)
+
+- [ ] **Where:** **OK4**, **OK5**, **OK6**, orange in the picture.
+- [ ] **Which way:** Notch (or dot) to the notch printed on the board.
+- [ ] Solder every leg.
+
+#### 4.17  The SIG screw terminal (7-way, 3.5 mm)
+
+![4.17](build/pcb-4-17.png)
+
+- [ ] **Where:** **J3**, orange in the picture.
+- [ ] **Which way:** Wire openings towards the front edge of the board.
+- [ ] Solder every leg.
+
 
 ✅ **CHECK, no shorts** (power off, beep): step 1's pairs again.
 
@@ -462,52 +752,105 @@ wire from a **12V** terminal) to its terminal: the hole drops to **under 0.5 V**
 
 ### Step 5 — Dash, shifter, screen and probe inputs
 
-![Step S5](build/pcb-S5.png)
+![Step 5: everything in this step](build/pcb-S5.png)
 
-*42 parts, orange in the picture; grey ones are already in. Lowest parts first.*
+*The whole step: 42 parts in 12 small steps. Orange = this step, grey = already in.*
 
-- [ ] **RA1**: 4.7k resistor (stripes: yellow-violet-black-brown-brown)
-- [ ] **RA2**: 100 resistor (stripes: brown-black-black-black-brown)
-- [ ] **RS1**: 1k resistor (stripes: brown-black-black-brown-brown)
-- [ ] **RS2**: 1k resistor (stripes: brown-black-black-brown-brown)
-- [ ] **RS3**: 1k resistor (stripes: brown-black-black-brown-brown)
-- [ ] **RS4**: 1k resistor (stripes: brown-black-black-brown-brown)
-- [ ] **RS5**: 1k resistor (stripes: brown-black-black-brown-brown)
-- [ ] **RS6**: 1k resistor (stripes: brown-black-black-brown-brown)
-- [ ] **RS7**: 1k resistor (stripes: brown-black-black-brown-brown)
-- [ ] **RU11**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **RU12**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **RU13**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **RU14**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **RU15**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **RU16**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **RU17**: 2.2k resistor (stripes: red-red-black-brown-brown)
-- [ ] **DH1**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DH2**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DH3**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DH4**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DH5**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DH6**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DH7**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DL1**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DL2**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DL3**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DL4**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DL5**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DL6**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **DL7**: BAT85 diode. Stripe to the end with the stripe printed on the board.
-- [ ] **ZA**: 1N4733A 5.1 V diode. Stripe to the end with the stripe printed on the board.
-- [ ] **CF1**: 100 nF capacitor
-- [ ] **CF2**: 100 nF capacitor
-- [ ] **CF3**: 100 nF capacitor
-- [ ] **CF4**: 100 nF capacitor
-- [ ] **CF5**: 100 nF capacitor
-- [ ] **CF6**: 100 nF capacitor
-- [ ] **CF7**: 100 nF capacitor
-- [ ] **X5**: SCREEN screw terminal block. Wire openings towards the front edge of the board.
-- [ ] **X6**: ATF screw terminal block. Wire openings towards the front edge of the board.
-- [ ] **X7**: SHIFT screw terminal block. Wire openings towards the front edge of the board.
-- [ ] **GYRO**: GY-521 module. Solder its 8-pin header into the board first, then the gyro onto the header, lying flat, chip side up.
+#### 5.1  7× 2.2k resistor
+
+![5.1](build/pcb-5-1.png)
+
+- [ ] **Where:** **RU11**, **RU12**, **RU13**, **RU14**, **RU15**, **RU16**, **RU17** (printed **2.2k**), orange in the picture.
+- [ ] **Stripes:** red-red-black-brown-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 5.2  7× 1k resistor
+
+![5.2](build/pcb-5-2.png)
+
+- [ ] **Where:** **RS1**, **RS2**, **RS3**, **RS4**, **RS5**, **RS6**, **RS7** (printed **1k**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-brown-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 5.3  1× 4.7k resistor
+
+![5.3](build/pcb-5-3.png)
+
+- [ ] **Where:** **RA1** (printed **4.7k**), orange in the picture.
+- [ ] **Stripes:** yellow-violet-black-brown-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 5.4  1× 100 Ω resistor
+
+![5.4](build/pcb-5-4.png)
+
+- [ ] **Where:** **RA2** (printed **100R**), orange in the picture.
+- [ ] **Stripes:** brown-black-black-black-brown.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 5.5  7× BAT85 diode
+
+![5.5](build/pcb-5-5.png)
+
+- [ ] **Where:** **DH1**, **DH2**, **DH3**, **DH4**, **DH5**, **DH6**, **DH7** (printed **BAT85**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 5.6  7× BAT85 diode
+
+![5.6](build/pcb-5-6.png)
+
+- [ ] **Where:** **DL1**, **DL2**, **DL3**, **DL4**, **DL5**, **DL6**, **DL7** (printed **BAT85**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 5.7  1× 1N4733A 5.1 V diode
+
+![5.7](build/pcb-5-7.png)
+
+- [ ] **Where:** **ZA** (printed **5V1**), orange in the picture.
+- [ ] **Which way:** Stripe to the end with the stripe printed on the board.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 5.8  7× 100 nF capacitor
+
+![5.8](build/pcb-5-8.png)
+
+- [ ] **Where:** **CF1**, **CF2**, **CF3**, **CF4**, **CF5**, **CF6**, **CF7** (printed **100n**), orange in the picture.
+- [ ] Solder, then snip the legs to 1.5 mm.
+
+#### 5.9  The SHIFT screw terminal (3-way, 3.5 mm)
+
+![5.9](build/pcb-5-9.png)
+
+- [ ] **Where:** **X7**, orange in the picture.
+- [ ] **Which way:** Wire openings towards the front edge of the board.
+- [ ] Solder every leg.
+
+#### 5.10  The SCREEN screw terminal (4-way, 3.5 mm)
+
+![5.10](build/pcb-5-10.png)
+
+- [ ] **Where:** **X5**, orange in the picture.
+- [ ] **Which way:** Wire openings towards the front edge of the board.
+- [ ] Solder every leg.
+
+#### 5.11  The ATF screw terminal (3-way, 3.5 mm)
+
+![5.11](build/pcb-5-11.png)
+
+- [ ] **Where:** **X6**, orange in the picture.
+- [ ] **Which way:** Wire openings towards the front edge of the board.
+- [ ] Solder every leg.
+
+#### 5.12  1× GY-521 module
+
+![5.12](build/pcb-5-12.png)
+
+- [ ] **Where:** **GYRO**, orange in the picture.
+- [ ] **How:** Solder its 8-pin header into the board first, then the gyro onto the header, lying flat, chip side up.
+- [ ] Solder every leg.
+
 
 ✅ **CHECK, no shorts** (power off, beep): the **SCREEN** terminals **5V** and **GND**; step 1's
 pairs again.
@@ -528,11 +871,18 @@ a **GND** terminal: its Mega hole drops to **0 V**.
 
 ### Step 6 — The Mega's pins
 
-![Step S6](build/pcb-S6.png)
+![Step 6: everything in this step](build/pcb-S6.png)
 
-*1 part, orange in the picture; grey ones are already in. Lowest parts first.*
+*The whole step: 1 parts in 1 small steps. Orange = this step, grey = already in.*
 
-- [ ] **The Mega's pins:** push male header strips into the Mega's sockets, **long ends down** (cut to length: 8, 8, 8, 10, 8, 8 and an 18 × 2), lay this board on top so every pin pokes through its hole, and solder them from the top. They line up perfectly that way.
+#### 6.1  The Mega's pins
+
+![6.1](build/pcb-6-1.png)
+
+- [ ] **Where:** the Mega's holes, orange in the picture.
+- [ ] **How:** Push the header strips into the Mega's sockets, **long ends down** (cut to length: 8, 8, 8, 10, 8, 8 and two 18s side by side), lay this board on top so every pin pokes through its hole, and solder them from the top. They line up perfectly that way.
+- [ ] Solder every leg.
+
 
 ✅ **CHECK** (meter on beep): no two neighbouring Mega pins beep to each other, except where both
 are labelled **5V** or both **GND**.
