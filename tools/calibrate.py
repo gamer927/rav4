@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 """Calibration helper: teaches the TCU your car, step by step.
 
 Plug a laptop into the TCU's USB socket and run one step at a time:

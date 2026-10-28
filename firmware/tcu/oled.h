@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // Minimal text driver for a 128x64 I2C OLED (SSD1306, SH1106 or SSD1309).
 // Eight rows of normal text (21 chars, 3 mm tall on a 2.42" screen). Any
 // pair of rows (0-1, 2-3, 4-5, 6-7) can instead hold one double-size line

@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 # Check that everything fits, then export the printable parts in
 # hardware/*.scad to hardware/stl/ (binary STL) and render the previews.
 # Needs OpenSCAD 2021.01+; previews also need xvfb-run and python3 with Pillow.

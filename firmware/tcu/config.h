@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // Calibration & tuning constants for the 1999 Toyota RAV4 TCU.
 //
 // Everything marked VERIFY or CALIBRATE is a starting estimate, not a known

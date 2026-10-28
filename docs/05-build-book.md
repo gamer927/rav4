@@ -2048,3 +2048,7 @@ the end of this part.
 *The board pages are drawn from [`tools/boards.py`](../tools/boards.py), the 3D pictures from
 the models in [`hardware/`](../hardware/), and the shopping list from
 [`tools/shopping_list.py`](../tools/shopping_list.py).*
+
+---
+
+*RAV4 TCU by gamer927 · [CC BY-NC-SA 4.0](../LICENSE): free to build, not to sell.*

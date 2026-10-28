@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // Mock I2C bus with a simulated SSD1306 (page addressing) and MPU-6050 behind
 // it. unplugged = true makes every transaction fail (a cut screen cable).
 #pragma once

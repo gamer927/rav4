@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 """Renders the screen snapshots from `make screens` (test/system) into one
 picture. Usage: python3 tools/render_screens.py build/screens docs/oled-screens.png
 """

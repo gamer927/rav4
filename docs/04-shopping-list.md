@@ -183,3 +183,8 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 **Hardware store** — 8 items, about $61: Wago 221 lever-nut connectors, assorted; Brass barbed tee with a 1/8" NPT female side port; 1/8" NPT male × 6 mm compression fitting, brass; ATF-safe thread sealant (PTFE paste); M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge); Pivot: 12 mm OD tube, 64 mm long, 1.6 mm wall; or an M12 × 75 bolt + nyloc nut + 2 washers; M3 × 70 hex-head bolts + washers + nyloc nuts; M10 × 1.5 bolts: 2 × 30–35 mm (travel stops) + 1 × ~65 mm (cut into the knob stud).
 
 **Auto-parts store** — 7 items, about $70: Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses; Add-a-circuit fuse tap; 16 AWG automotive wire, red and black; Split loom + zip ties; Fuel-injection hose clamps; Firewall grommet assortment; ATF to top up (Toyota Type T-IV, or as your owner's manual says).
+
+
+---
+
+*RAV4 TCU by gamer927 · [CC BY-NC-SA 4.0](../LICENSE): free to build, not to sell.*

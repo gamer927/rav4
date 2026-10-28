@@ -266,3 +266,7 @@ The [build book](../docs/05-build-book.md) has the full sequence (part 11). In s
 4. Plug in both ribbon cables, feed each cable through its gland, wire it to its terminals, and
    tighten the gland nut.
 5. Screw the lid on (4 × M3 countersunk).
+
+---
+
+*RAV4 TCU by gamer927 · [CC BY-NC-SA 4.0](../LICENSE): free to build, not to sell.*

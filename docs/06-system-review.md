@@ -300,3 +300,7 @@ hand-made perfboard version and confirm on the bench (build book part 10):
 
 Then the PCB can reuse the same schematic (the nets in `tools/boards.py`) and keep the same
 connectors, so the cables, housings and tests carry over unchanged.
+
+---
+
+*RAV4 TCU by gamer927 · [CC BY-NC-SA 4.0](../LICENSE): free to build, not to sell.*

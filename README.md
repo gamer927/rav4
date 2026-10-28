@@ -1,9 +1,46 @@
 # 1999 RAV4 Transmission Controller
 
-A standalone transmission controller for a **1999 Toyota RAV4** (first generation, 4-speed
-automatic, 3S-FE engine). An Arduino Mega takes over the transmission's three solenoids and adds
-drive modes, manual shifting and an aircraft-style self-test, while the engine and its computer
-stay 100 % stock.
+**Ever wished your POS gen 1 RAV4 automatic had a shifter, so you could pretend it's a rally car?
+Now you can, with this transmission mod.**
+
+Pull the lever back: it shifts up. Push it forward: it shifts down. One click, one gear, like a
+rally car's sequential gearbox. Not in the mood to row your own gears? Flip a switch and it shifts
+for you: gently in **ECO**, or holding every gear to the redline in **SPORT**.
+
+## What this is
+
+A do-it-yourself transmission controller (a "TCU") for the **1999 Toyota RAV4 4WD** automatic
+(first generation, 4-speed, 3S-FE engine). A small box under the dash, built around an Arduino
+Mega, takes over the three solenoids that choose the transmission's gears. The engine, the
+throttle and the engine computer stay **100 % stock**: only three wires get cut, and a plug puts
+them straight back.
+
+You build three pieces:
+
+| Piece | Where | What it is |
+|---|---|---|
+| **Sequential shifter** | Centre console | A real sequential lever (the Beavis Motorsport design, 3D-printed) on a printed base |
+| **Dash pod** | Dash top, driver's side | A screen, then ECO, SPORT, MANUAL, TEST and ON/OFF switches |
+| **TCU box** | Under the passenger side of the dash | The Arduino and two boards you solder yourself |
+
+**What you get:**
+- **Manual mode:** you pick every gear with the lever. It won't let you over-rev the engine with
+  a downshift, and it upshifts for you at the redline.
+- **Two automatic modes,** ECO and SPORT, with shift points you can tune.
+- **Smarter lockup** of the torque converter: lower rpm and a cooler transmission on the highway.
+- **No surprise shifts mid-corner:** a gyro holds the gear while you're turning.
+- **A screen in plain English:** the gear in big numbers, the mode, and the transmission
+  temperature in °F. If something's wrong, it says what, in words.
+- **An aircraft-style self-test** you run from the dash, and a key-on check every time you start.
+
+**What it isn't:** it's still a 4-speed automatic with a torque converter, so a shift takes a
+moment rather than the instant bang of a race gearbox, and there's no extra power. It's a fun
+project for your own car. Test it off public roads first (the build book shows how), and check
+your local rules and insurance.
+
+**What it takes:** about $650 in parts, a 3D printer, a soldering iron and a multimeter. You
+don't need to know electronics: the [build book](docs/05-build-book.md) goes one small step at a
+time, Lego-style, with a meter check after every step, and a calibration helper does the maths.
 
 **The factory computer is always the backup.** Flip the ON/OFF switch off, lose power, or let
 anything go wrong, and relays hand the transmission straight back to the factory computer. The
@@ -242,6 +279,7 @@ tools/shopping_list.py      writes the shopping list and its cost totals
 docs/build/                 build-book pictures and 1:1 board templates (generated)
 hardware/*.scad             3D-printable dash pod, shifter base and TCU enclosure (OpenSCAD)
 hardware/stl/               ready-to-print STL files
+LICENSE                     CC BY-NC-SA 4.0: free to build, not to sell (see the end of this page)
 ```
 
 ## Build and flash
@@ -259,3 +297,41 @@ To flash, open `firmware/tcu/tcu.ino` in the Arduino IDE (board: **Arduino Mega 
 
 **Safety:** this controls the transmission of a road car. Do all early testing off public roads,
 keep the ON/OFF switch within reach, and check your local regulations and insurance.
+
+---
+
+## License: free to build, not to sell
+
+Copyright © 2026 gamer927. This project (firmware, tools, board layouts, 3D models, documents and
+pictures) is licensed under **[CC BY-NC-SA 4.0](LICENSE)**
+(Creative Commons Attribution-NonCommercial-ShareAlike). In plain words:
+
+- ✅ **Build it, share it, change it** for your own car, and post your own version.
+- ✅ **Give credit:** say it's "RAV4 TCU by gamer927", link back here and to the license, and
+  say what you changed.
+- ✅ **Keep it open:** anything you share that's built on this must use the same license.
+- ❌ **No selling** without written permission from gamer927: not the design, kits, boards, built
+  boxes, printed parts, paid downloads or paid installs. To ask, open an
+  [issue](https://github.com/gamer927/rav4/issues).
+
+The shifter's own files in [`hardware/beavis_shifter/`](hardware/beavis_shifter/README.md) are by
+**bbeavis (Beavis Motorsport)** under their own Creative Commons Attribution-NonCommercial license:
+credit them, and don't sell them either.
+
+**If someone breaks the license** (sells it, or passes it off as their own): under section 6 of
+the license, their permission to use it ends automatically, and from then on they're simply
+infringing copyright. The copyright holder can then:
+1. **Report it** to the site it's on. GitHub, Etsy, eBay, Amazon, Thingiverse and Printables all
+   have a copyright (DMCA) takedown form, and they remove infringing listings.
+2. **Tell them to stop** in writing.
+3. **Take legal action.** In the US a copyright has to be registered before you can sue
+   (copyright.gov, about $45–65). Registering within 3 months of publishing, or before the copying
+   starts, also makes statutory damages and legal fees available.
+
+**Patents.** A license can't stop someone from filing a patent, but publishing can: this design
+has been public on GitHub since 26 October 2026, and every change is dated in its history. That
+makes it prior art, so nobody can validly patent what's shown here. Copyright protects these
+files (the code, drawings, models and documents), not the general idea: someone could still
+design their own controller from scratch.
+
+*This is a plain-English summary, not legal advice. The [LICENSE](LICENSE) file is what counts.*

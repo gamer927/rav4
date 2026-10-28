@@ -307,3 +307,7 @@ fusing.
 | 1. Downshift safety via VSS | Every downshift is rpm-predicted and checked against 5,800 rpm, with a hard 45 km/h cap for 1st. VSS gets a deceleration and stall plausibility check plus a locked-converter ratio check. In MANUAL, the TCU forces an upshift at 6,200 rpm. |
 | 2. Thermal protection | Corrected physics: cold inhibits lockup; hot widens the lockup window and warns; 125 °C raises a critical warning. Sensor faults fall back to the normal rules. |
 | 3. Debouncing | RC filtering, external pull-ups and clamps in hardware, plus a 25 ms stable-level software debouncer, edge-triggered shifting, a 700 ms shift interval and stuck-button detection. |
+
+---
+
+*RAV4 TCU by gamer927 · [CC BY-NC-SA 4.0](../LICENSE): free to build, not to sell.*

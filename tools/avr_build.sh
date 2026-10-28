@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 # Compile-check the firmware for an Arduino Mega 2560 without the Arduino IDE.
 # Needs avr-gcc + the Arduino AVR core (Debian/Ubuntu: apt install gcc-avr
 # avr-libc arduino-core-avr). For flashing, use the Arduino IDE/CLI or

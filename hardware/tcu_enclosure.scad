@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // TCU enclosure for the 1999 RAV4 transmission controller.
 //
 // Holds, on the floor of the box:

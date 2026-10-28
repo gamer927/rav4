@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // System test: the real firmware (firmware/tcu/tcu.ino, setup() and loop())
 // running against a simulated RAV4 and simulated TCU hardware, one failure at
 // a time. Each scenario checks the car ends up safe: the factory ECU driving

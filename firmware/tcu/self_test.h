@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // Built-in test (BIT), modelled on avionics practice:
 //   PBIT  power-up BIT: passive checks, run once after every boot.
 //   CBIT  continuous BIT: the Controller's faults and warnings (tcu_logic.cpp).

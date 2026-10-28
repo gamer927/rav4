@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 """Tests for tools/calibrate.py, using the USB log of the simulated car
 (build/system_test --callog, run by `make calibrate-test`). That car's speed
 sensor gives 6 % more pulses per mile than the firmware's setting and its

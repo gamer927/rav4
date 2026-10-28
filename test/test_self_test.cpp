@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // Host unit tests for the built-in test (firmware/tcu/self_test.cpp) and the
 // continuous solenoid-current check in the controller. Run: make test
 #include <cstdio>

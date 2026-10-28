@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // Mock watchdog: records when it was last kicked, so the system test can
 // check the loop never goes longer than the 250 ms timeout without a kick.
 #pragma once

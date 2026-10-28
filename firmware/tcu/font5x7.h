@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // 5x7 ASCII font (characters 0x20-0x7E), 5 column bytes per glyph, LSB = top.
 // Extracted from glcdfont.c in the Adafruit GFX Library, used under this licence:
 //

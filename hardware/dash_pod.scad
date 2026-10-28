@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // Dash pod for the 1999 RAV4 transmission controller.
 //
 // A slim box that sits on top of the dashboard, driver's side:

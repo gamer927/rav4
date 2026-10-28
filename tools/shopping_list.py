@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 """Shopping list with cost estimates.
 
 Writes docs/04-shopping-list.md and docs/shopping-list.csv from the table
@@ -258,6 +260,7 @@ def main():
         md.append(f"**{store}** — {len(items)} items, about {money(sum(i[5] for i in items))}: "
                   + "; ".join(i[1] for i in items) + ".")
         md.append("")
+    md += ["", "---", "", "*RAV4 TCU by gamer927 · [CC BY-NC-SA 4.0](../LICENSE): free to build, not to sell.*", ""]
     with open(os.path.join(ROOT, "docs", "04-shopping-list.md"), "w") as f:
         f.write("\n".join(md))
     with open(os.path.join(ROOT, "docs", "shopping-list.csv"), "w", newline="") as f:

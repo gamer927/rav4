@@ -701,3 +701,7 @@ At boot the firmware prints `# cal ...` (the settings it was built with) and
 | PNP "D" signal | +12 V in D | EWD |
 | Redline / fuel cut | Guard at 5,800, forced upshift at 6,200 | RM |
 | ATF cooler "out" line and hose size | Line from transaxle to radiator | RM; measure the hose ID |
+
+---
+
+*RAV4 TCU by gamer927 · [CC BY-NC-SA 4.0](../LICENSE): free to build, not to sell.*

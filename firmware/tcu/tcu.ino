@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 /*
   1999 RAV4 Transmission Controller - hardware layer
   Vehicle: 1999 Toyota RAV4 (SXA10/SXA11), 4-speed ECT automatic, 3S-FE

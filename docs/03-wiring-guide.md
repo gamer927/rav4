@@ -466,3 +466,7 @@ spec §3.8.
   equally on both, which calibration (spec §8) corrects.
 - **Final drive:** the firmware's starting rpm-per-mph table uses ~4.40, the figure listed for
   the 4WD automatic. Calibrate it anyway (spec §8): sources disagree.
+
+---
+
+*RAV4 TCU by gamer927 · [CC BY-NC-SA 4.0](../LICENSE): free to build, not to sell.*

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0
+// Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 // MPU-6050 gyro (GY-521 module) on the shared I2C bus, used only for yaw
 // rate. Lateral g is then yaw rate x road speed, which doesn't care how the
 // module is tilted, only that the axis it reads (cfg::GYRO_AXIS) is roughly

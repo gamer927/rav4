@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 """Cross-checks between the firmware, the board layouts, the housings and the
 docs: the things no single test sees. Run: python3 tools/system_check.py
 (also part of `make check`). Exits non-zero on any mismatch.

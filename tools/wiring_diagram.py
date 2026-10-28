@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: CC-BY-NC-SA-4.0
+# Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 """Generate docs/wiring-diagram.svg and .png (system wiring for the RAV4 TCU).
 
 Every wire carries a W-number that matches the wire list in
