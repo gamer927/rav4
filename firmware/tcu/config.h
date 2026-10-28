@@ -145,6 +145,16 @@ constexpr uint32_t STUCK_BUTTON_MS = 10000;
 // screen) until it's fixed. Short enough to notice, long enough to flip from
 // one switch to another without a handover.
 constexpr uint32_t MODE_SWITCH_GRACE_MS = 1000;
+// Arming needs the ON/OFF switch OFF for at least this long first.
+constexpr uint32_t ARM_OFF_MIN_MS = 100;
+// The ON/OFF switch's second pole switches the relay coils' power; A7 senses
+// it through a 47k/10k divider. Both poles must agree within this time.
+constexpr bool COIL_SENSE_INSTALLED = true;
+constexpr float COIL_ON_V = 8.0f;                 // coil supply above this = powered
+constexpr uint32_t ONOFF_FAULT_MS = 300;
+// No tach while moving faster than this, for this long: WARN_TACH.
+constexpr float TACH_LOST_MIN_MPH = 15.0f;
+constexpr uint32_t TACH_LOST_MS = 2000;
 
 // ------------------------------------------------------------------- safety
 constexpr float STATIONARY_MPH = 2.0f;
@@ -175,6 +185,15 @@ constexpr float VSS_MAX_DROP_MPH_PER_100MS = 5.0f;
 constexpr bool RATIO_CHECK_ENABLED = true;
 constexpr float RATIO_CHECK_MIN_MPH = 19.0f;
 constexpr float RATIO_TOLERANCE = 0.25f;
+// Taking over on the move: engine rpm must fit the gear the ECU is sensed in,
+// from locked (x0.9) up to 25 % converter slip (x1.25). The next gear down
+// turns the engine 1.36-1.55x faster, so a wrong gear never fits. Near idle
+// (sensed gear's locked rpm under ENTRY_MIN_LOCKED_RPM) rpm says nothing
+// about the gear, so no take-over there. Otherwise (or with no tach) the TCU
+// waits until it fits, or for a stop (where it starts in 1st).
+constexpr float ENTRY_RPM_MIN_RATIO = 0.9f;
+constexpr float ENTRY_RPM_MAX_RATIO = 1.25f;
+constexpr float ENTRY_MIN_LOCKED_RPM = 800.0f;
 constexpr uint32_t RATIO_SETTLE_MS = 1500;
 constexpr uint32_t RATIO_FAULT_MS = 1500;
 

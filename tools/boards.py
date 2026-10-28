@@ -59,6 +59,10 @@ def fp_c():
     return dict(pins=[("1", 0, 0), ("2", 2, 0)], body=(-0.4, -0.5, 2.4, 0.5), h=6, kind="C")
 
 
+def fp_ptc():  # radial resettable fuse (PTC), 5.08 mm legs
+    return dict(pins=[("1", 0, 0), ("2", 2, 0)], body=(-0.4, -0.6, 2.4, 0.6), h=11, kind="PTC")
+
+
 def fp_ce8():  # 8 mm electrolytic, legs bent to 2.54 mm
     return dict(pins=[("+", 0, 0), ("-", 1, 0)], body=(-1.1, -1.6, 2.1, 1.6), h=14, kind="CE")
 
@@ -539,7 +543,7 @@ class Board:
 PAGE_PARTS = 6
 PAGE_WIRES = 6
 
-PART_WORDS = {"R": "resistor", "D": "diode", "C": "capacitor", "CE": "capacitor", "IC": "chip",
+PART_WORDS = {"R": "resistor", "D": "diode", "C": "capacitor", "CE": "capacitor", "IC": "chip", "PTC": "resettable fuse",
               "TB": "screw terminal", "K": "relay", "Q": "MOSFET", "MOD": "module", "J": "box header"}
 
 # Suggested insulation colours (a 6-colour silicone wire kit), by net.
@@ -650,7 +654,7 @@ def shrink(path):
     Image.open(path).convert("RGB").quantize(colors=96, method=Image.Quantize.MEDIANCUT).save(path, optimize=True)
 
 
-COLORS = {"R": "#ffe082", "D": "#ef9a9a", "C": "#90caf9", "CE": "#4fc3f7", "IC": "#424242",
+COLORS = {"PTC": "#ffcc80", "R": "#ffe082", "D": "#ef9a9a", "C": "#90caf9", "CE": "#4fc3f7", "IC": "#424242",
           "TB": "#66bb6a", "K": "#ffb74d", "Q": "#9575cd", "MOD": "#80cbc4", "J": "#bcaaa4"}
 NET_COLORS = {"GND": "#212121", "5V": "#d32f2f", "+12": "#ef6c00", "DRV": "#ef6c00", "LOG": "#f9a825",
               "ECU": "#b8860b", "SOL": "#ff8f00", "LOAD": "#8d6e63"}
@@ -690,7 +694,12 @@ def power_board():
     # ---- P2: ribbon header to the Mega; 5 V and ground to it
     A(Part("JA", fp_boxhdr(26), 1, 57, value="26-pin box header", step="P2",
            note="notch facing the left edge; pin 1 (square pad) at the back"))
-    b.wire("P2", "5V", "BUCK.OUT+", "JA.1", "JA.3")
+    # TVS3: if the buck module ever fails shorted (12 V on the 5 V rail), it
+    # clamps and blows the 2 A logic fuse, so the Mega (and the relays) go off
+    # instead of running on 12 V.
+    A(Part("TVS3", fp_d41(), 3, 31, rot=90, value="P6KE6.8A", step="P2", note="band (K) towards the back"))
+    b.wire("P2", "5V", "BUCK.OUT+", "JA.1", "JA.3", "TVS3.K")
+    b.wire("P2", "GND", "TVS3.A", "J1c.1", gauge="20")
     b.wire("P2", "GND", "BUCK.OUT-", "JA.2", "JA.4", "JA.16", "JA.23", "JA.24")
     b.wire("P2", "VBAT", "Z1.K", "JA.19")
 
@@ -707,7 +716,23 @@ def power_board():
     b.wire("P3", "DRV2 (D9)", "JA.9", "RD3.2", "U1.5")
     b.wire("P3", "DRV3 (D10)", "JA.10", "RD4.2", "U1.6")
     b.wire("P3", "GND", "JA.16", "RD1.1", "RD2.1", "RD3.1", "RD4.1", "U1.9")
-    b.wire("P3", "+12 DRV", "TVS1.K", "U1.10", "K1.COIL1", "K2.COIL1", "K3.COIL1", gauge="20")
+    # The ON/OFF switch's second pole carries the relay coils' power: OFF cuts
+    # it in hardware, whatever the Mega is doing. F2 protects the dash cable;
+    # DF lets the coils' current die away when the switch opens; RK1/RK2 let
+    # the Mega see the coil supply (A7) and check both poles agree.
+    A(Part("J5a", fp_tb(), 1, 23, rot=270, value="TO ON/OFF", step="P3", note="X4-7 (C7): out to the ON/OFF switch"),
+      Part("J5b", fp_tb(), 1, 25, rot=270, value="FROM ON/OFF", step="P3", note="X4-8 (C8): back: relay power"),
+      Part("F2", fp_ptc(), 2, 28, rot=90, value="PTC 0.25 A", step="P3", note="resettable fuse, either way round"),
+      Part("DF", fp_d41(), 31, 21, rot=270, value="UF4007", step="P3", note="band (K) towards the front"),
+      Part("RK1", fp_r(), 31, 6, rot=90, value="47k", step="P3", note="coil supply sense, top"),
+      Part("RK2", fp_r(), 33, 6, rot=90, value="10k", step="P3", note="coil supply sense, bottom"),
+      Part("CK", fp_c(), 33, 12, rot=90, value="100 nF", step="P3"),
+      Part("ZK", fp_d41(), 31, 12, rot=90, value="1N4733A 5.1 V", step="P3", note="band (K) towards the back"))
+    b.wire("P3", "+12 DRV", "TVS1.K", "F2.1", gauge="20")
+    b.wire("P3", "SWITCH FEED", "F2.2", "J5a.1", gauge="20")
+    b.wire("P3", "+12 COIL", "J5b.1", "U1.10", "K1.COIL1", "K2.COIL1", "K3.COIL1", "DF.K", "RK1.1", gauge="20")
+    b.wire("P3", "COILSNS", "RK1.2", "RK2.1", "CK.1", "ZK.K", "JA.25")
+    b.wire("P3", "GND", "J1c.1", "DF.A", "RK2.2", "CK.2", "ZK.A", gauge="20")
     b.wire("P3", "COIL K1", "U1.18", "K1.COIL2")
     b.wire("P3", "COIL K2", "U1.17", "K2.COIL2")
     b.wire("P3", "COIL K3", "U1.16", "K3.COIL2")
@@ -879,7 +904,7 @@ HUB_A = [  # ribbon A (power board) pin -> Mega pin
     (14, "ECU2 (ECU S2)", "D30"), (15, "ECU3 (ECU SL)", "D31"), (16, "GND", "GND"),
     (17, "VTA (throttle)", "A0"), (18, "E2 (throttle ground)", "A1"), (19, "VBAT (battery)", "A3"),
     (20, "IS1 (S1 current)", "A4"), (21, "IS2 (S2 current)", "A5"), (22, "IS3 (SL current)", "A6"),
-    (23, "GND", "GND"), (24, "GND", "GND"), (25, "–", "not connected"), (26, "–", "not connected")]
+    (23, "GND", "GND"), (24, "GND", "GND"), (25, "COILSNS (relay power sense)", "A7"), (26, "–", "not connected")]
 HUB_B = [  # ribbon B (logic board) pin -> Mega pin
     (1, "5V", "5V"), (2, "GND", "GND"), (3, "shifter UP", "D22"), (4, "shifter DOWN", "D23"),
     (5, "ECO", "D24"), (6, "SPORT", "D25"), (7, "ON/OFF", "D26"), (8, "TEST", "D32"),
@@ -892,7 +917,7 @@ def hub_markdown():
     lines += [f"- [ ] A{p} → **{m}** ({s})" for p, s, m in HUB_A if m != "not connected"]
     lines += ["", "**Header B** (16-way, to the logic board):", ""]
     lines += [f"- [ ] B{p} → **{m}** ({s})" for p, s, m in HUB_B if m != "not connected"]
-    lines += ["", "Pins A25, A26, B9 and B16 stay empty."]
+    lines += ["", "Pins A26, B9 and B16 stay empty."]
     return "\n".join(lines)
 
 

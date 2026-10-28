@@ -69,7 +69,7 @@ struct Sim {
   // Flip the master switch STOCK -> CUSTOM.
   const Outputs& arm() {
     in.customRequested = false;
-    step(50);
+    step(cfg::ARM_OFF_MIN_MS + 50);
     in.customRequested = true;
     return step(50);
   }
@@ -127,6 +127,18 @@ static void test_boot_requires_switch_cycle() {
   CHECK(s.c.outputs().s1 && !s.c.outputs().s2);
 }
 
+static void test_boot_glitch_does_not_arm() {
+  std::printf("arming: a short OFF glitch (inputs settling at boot) doesn't count as a flip\n");
+  Sim s;
+  s.in.customRequested = false;  // the filters read OFF for 30 ms at power-up...
+  s.step(30);
+  s.in.customRequested = true;   // ...then the real level: ON since key-on
+  s.step(500);
+  CHECK(s.c.outputs().control == CTRL_STOCK);
+  s.arm();                       // a real flip still works
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+}
+
 static void test_watchdog_flag() {
   std::printf("watchdog reset is reported and needs re-arm\n");
   Sim s(true);
@@ -149,7 +161,7 @@ static void test_entry_sync() {
   s2.in.ecuSL = true;
   s2.in.speedMph = 43.5;
   s2.in.customRequested = false;
-  s2.step(50);
+  s2.step(cfg::ARM_OFF_MIN_MS + 50);
   s2.in.customRequested = true;
   const Outputs& o = s2.step(10);
   CHECK(o.control != CTRL_STOCK);
@@ -990,6 +1002,100 @@ static void test_mode_switch_fault_and_stuck_button() {
   CHECK(b.c.outputs().warnings & WARN_BUTTON_STUCK);
 }
 
+static void test_entry_plausibility() {
+  std::printf("take-over on the move: rpm must fit the sensed gear, else wait for a stop\n");
+  // Sense inputs dead: they read "both off" (= 4th) while the ECU holds 2nd.
+  Sim s;
+  s.autoRpm = false;
+  s.in.ecuS1 = false;
+  s.in.ecuS2 = false;
+  s.in.speedMph = 25;
+  s.in.engineRpm = 25 * cfg::RPM_PER_MPH[2] * 1.1f;  // really in 2nd, a little slip
+  s.arm();
+  CHECK(s.c.outputs().control == CTRL_STOCK);
+  CHECK(s.c.outputs().event == EV_NEED_SYNC);
+  // Healthy sense: 2nd, same rpm: takes over in 2nd.
+  Sim h;
+  h.autoRpm = false;
+  h.setEcuGear(2);
+  h.in.speedMph = 25;
+  h.in.engineRpm = 25 * cfg::RPM_PER_MPH[2] * 1.1f;
+  h.arm();
+  CHECK(h.c.outputs().control == CTRL_AUTO);
+  CHECK(h.c.outputs().gear == 2);
+  // No tach on the move: can't cross-check, so wait for a stop.
+  Sim n;
+  n.autoRpm = false;
+  n.setEcuGear(2);
+  n.in.speedMph = 25;
+  n.in.rpmValid = false;
+  n.arm();
+  CHECK(n.c.outputs().control == CTRL_STOCK);
+  n.rampTo(0, 9.0f);  // brake to a stop
+  n.step(100);
+  CHECK(n.c.outputs().control == CTRL_AUTO);
+  CHECK(n.c.outputs().gear == 1);
+}
+
+static void test_onoff_two_poles_and_relay() {
+  std::printf("ON/OFF: both poles must agree; a stuck relay blocks take-over; lost tach warns\n");
+  auto flip = [](Sim& s, bool on, bool coil) {
+    s.in.customRequested = s.in.switchOn = on;
+    s.in.coilPowered = coil;
+  };
+  // Healthy: both poles together.
+  Sim s;
+  s.in.coilSenseValid = true;
+  flip(s, false, false);
+  s.step(100);
+  flip(s, true, true);
+  s.step(100);
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(!s.c.outputs().faults);
+  // Coil power lost while in control (blown fuse, broken wire): back to the ECU.
+  s.in.coilPowered = false;
+  s.step(cfg::ONOFF_FAULT_MS + 50);
+  CHECK(s.c.outputs().control == CTRL_STOCK);
+  CHECK(s.c.outputs().faults & FAULT_ONOFF);
+
+  // The power pole stuck closed: OFF reads OFF but the coils still get power.
+  // Nothing can take over until it's fixed, even after flipping ON again.
+  Sim b;
+  b.in.coilSenseValid = true;
+  flip(b, false, true);
+  b.step(cfg::ONOFF_FAULT_MS + 50);
+  CHECK(b.c.outputs().faults & FAULT_ONOFF);
+  flip(b, true, true);
+  b.step(100);
+  CHECK(b.c.outputs().control == CTRL_AUTO);  // agree again: fine
+  Sim b2;
+  b2.in.coilSenseValid = true;
+  flip(b2, false, false);
+  b2.step(100);
+  flip(b2, true, false);  // read pole ON, power pole not: broken
+  b2.step(cfg::ONOFF_FAULT_MS + 50);
+  CHECK(b2.c.outputs().control == CTRL_STOCK);
+  CHECK(b2.c.outputs().faults & FAULT_ONOFF);
+
+  // A relay found stuck closed at key-on: never take over.
+  Sim r;
+  r.in.relayStuck = true;
+  r.arm();
+  CHECK(r.c.outputs().control == CTRL_STOCK);
+  CHECK(r.c.outputs().faults & FAULT_RELAY);
+
+  // Tach lost while driving: a warning; the over-rev guard still works on speed.
+  Sim t;
+  t.arm();
+  t.cruise(40);
+  CHECK(!(t.c.outputs().warnings & WARN_TACH));
+  t.autoRpm = false;
+  t.in.rpmValid = false;
+  t.step(cfg::TACH_LOST_MS + 100);
+  CHECK(t.c.outputs().warnings & WARN_TACH);
+  CHECK(t.c.outputs().control == CTRL_AUTO);
+}
+
 static void test_debouncer() {
   std::printf("debouncer rejects bounce, accepts stable level\n");
   Debouncer d;
@@ -1068,6 +1174,7 @@ static void test_maps_are_sane() {
 int main() {
   test_solenoid_table();
   test_boot_requires_switch_cycle();
+  test_boot_glitch_does_not_arm();
   test_watchdog_flag();
   test_entry_sync();
   test_lever_out_of_d();
@@ -1094,6 +1201,8 @@ int main() {
   test_supply_and_tps_faults();
   test_rev_limit_upshift();
   test_mode_switch_fault_and_stuck_button();
+  test_entry_plausibility();
+  test_onoff_two_poles_and_relay();
   test_debouncer();
   test_ds18b20_decode();
   test_maps_are_sane();

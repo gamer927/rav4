@@ -318,7 +318,7 @@ How the firmware reads it:
 | D23 | in | Shifter downshift microswitch | LOW | Edge-triggered |
 | D24 | in | Mode ECO | LOW | |
 | D25 | in | Mode SPORT | LOW | |
-| D26 | in | ON/OFF switch | LOW = ON (CUSTOM) | Open = STOCK (fail-safe) |
+| D26 | in | ON/OFF switch, read pole | LOW = ON (CUSTOM) | Open = STOCK (fail-safe). Its power pole cuts the relay coils (A7) |
 | D27 | in | Brake | LOW = pressed | Opto |
 | D28 | in | Lever in D | LOW = in D | Opto; open = "not D" (fail-safe) |
 | D29 | in | ECU S1 sense | LOW = ECU S1 on | Opto |
@@ -326,13 +326,14 @@ How the firmware reads it:
 | D31 | in | ECU SL sense | LOW = ECU SL on | Opto |
 | D32 | in | TEST button | LOW = pressed | Dash cable core 4 |
 | D33 | 1-Wire | ATF probe (DS18B20) DQ | – | 4.7 k pull-up to 5 V |
-| D34 | in | MANUAL switch | LOW = on (shifter shifts) | Open = AUTO (fail-safe) |
+| D34 | in | MANUAL switch | LOW = on (shifter shifts) | Open = not selected (no mode on: STOCK) |
 | D20 / D21 | I²C | OLED (0x3C) and gyro (0x68) SDA / SCL | – | 100 kHz |
 | A0 | an | TPS (VTA) | – | 10 k series tap |
 | A1 | an | TPS ground reference (E2) | – | 10 k series tap; subtracted from A0 |
 | A2 | an | ATF thermistor (only if `ATF_SENSOR = ATF_NTC`) | – | 1 k pull-up |
 | A3 | an | Battery | – | ×5.7 divider |
-| A4 / A5 / A6 | an | S1 / S2 / SL current sense | – | Driver IS pins |
+| A4 / A5 / A6 | an | S1 / S2 / SL current sense | – | ACS712 outputs |
+| A7 | an | Relay coil supply, after the ON/OFF switch's power pole | – | ×5.7 divider. Must agree with D26 (`FAULT_ONOFF`) |
 | USB | – | CSV log, 115200 baud | – | Calibration (§8) |
 
 VSS and tach use the interrupt pins D2/D3. The buttons don't need interrupts; they're polled and

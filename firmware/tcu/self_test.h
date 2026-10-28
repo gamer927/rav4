@@ -1,9 +1,13 @@
 // Built-in test (BIT), modelled on avionics practice:
 //   PBIT  power-up BIT: passive checks, run once after every boot.
 //   CBIT  continuous BIT: the Controller's faults and warnings (tcu_logic.cpp).
-//   IBIT  initiated BIT: hold the TEST button. Exercises lamps, relays,
-//         solenoid circuits, shifter and dash switches and the watchdog. Interlocked
-//         like "weight on wheels": only parked, engine off, master at STOCK.
+//   IBIT  initiated BIT: hold the TEST button. Exercises the screen, relays,
+//         solenoid circuits, the ON/OFF switch's hardware cut, the shifter
+//         and dash switches, and the watchdog. Interlocked like "weight on
+//         wheels": only parked, lever not in D, engine off. It needs ON/OFF
+//         ON (the relays need its power) and ends by asking you to turn it OFF.
+//   PBIT also checks, at every key-on with the lever out of D, that no relay
+//   contact is stuck closed (drivers on for 0.4 s, relays off: no current).
 // Pure logic, no Arduino dependencies; unit-tested in test/test_self_test.cpp.
 #pragma once
 #include <stdint.h>
@@ -33,6 +37,7 @@ enum TestId : uint8_t {
   T_SW_SPORT,
   T_SW_MANUAL,
   T_BRAKE,
+  T_ONOFF_CUT,  // ON/OFF OFF drops the relays in hardware
   T_WATCHDOG,
   T_COUNT
 };
@@ -48,7 +53,8 @@ enum TestResult : uint8_t {
 // Why IBIT may not run (or was aborted).
 enum TestInhibit : uint8_t {
   INH_NONE = 0,
-  INH_MASTER,   // ON/OFF switch is ON
+  INH_MASTER,   // ON/OFF switch is OFF (the relays need its power)
+  INH_NO_COIL,  // ON/OFF is ON but the relays get no power
   INH_LEVER_D,  // lever in D
   INH_MOVING,
   INH_ENGINE,   // engine running (tach, or battery at charging voltage)
@@ -64,11 +70,15 @@ enum TestPhase : uint8_t {
   PH_RELAY_OFF,
   PH_RELEASE_CHECK,
   PH_PROMPT,
+  PH_CUT_ARM,       // relays on, S1 on: current must flow
+  PH_CUT_PROMPT,    // "turn ON/OFF OFF"...
+  PH_CUT_CHECK,     // ...and the current must stop, in hardware
   PH_WATCHDOG,  // HAL must save results and let the watchdog fire
   PH_DONE,
+  PH_PBIT_RELEASE,  // key-on relay check (not part of IBIT)
 };
 
-enum TestPrompt : uint8_t { PR_NONE = 0, PR_UP, PR_DOWN, PR_ECO, PR_SPORT, PR_MANUAL, PR_BRAKE };
+enum TestPrompt : uint8_t { PR_NONE = 0, PR_UP, PR_DOWN, PR_ECO, PR_SPORT, PR_MANUAL, PR_BRAKE, PR_ONOFF_OFF };
 
 struct TestOutputs {
   bool relay = false;
@@ -82,12 +92,15 @@ struct TestSummary {
 };
 
 const char* testName(TestId id);
-// Interlock. `in.customRequested` must be the raw ON/OFF switch position.
-TestInhibit testInhibit(const Inputs& in);
+// Interlock. Uses in.switchOn (the raw ON/OFF position) and the coil sense.
+// switchMayBeOff: the last step, where turning it OFF is the test.
+TestInhibit testInhibit(const Inputs& in, bool switchMayBeOff = false);
 
 class SelfTest {
  public:
   // PBIT. `unexpectedWdtReset`: last reset was a watchdog that IBIT didn't ask for.
+  // Then, if parked with the lever out of D, the relay-release check runs
+  // for 0.4 s (active() is true meanwhile: the HAL applies outputs()).
   void runPowerOn(const Inputs& in, bool unexpectedWdtReset);
   // Start IBIT. Returns false (and sets inhibit()) if the interlock refuses.
   bool start(const Inputs& in);
@@ -97,10 +110,13 @@ class SelfTest {
   void restoreAfterWatchdog(const uint8_t* results, const float* values, bool watchdogWorked);
 
   bool active() const { return phase_ != PH_IDLE && phase_ != PH_DONE; }
+  bool ibitActive() const { return active() && phase_ != PH_PBIT_RELEASE; }
   bool hasRun() const { return phase_ == PH_DONE || pbitDone_; }
   bool ibitDone() const { return phase_ == PH_DONE; }
   TestPhase phase() const { return phase_; }
-  TestPrompt prompt() const { return phase_ == PH_PROMPT ? (TestPrompt)(PR_UP + promptIndex_) : PR_NONE; }
+  TestPrompt prompt() const {
+    return phase_ == PH_PROMPT ? (TestPrompt)(PR_UP + promptIndex_) : phase_ == PH_CUT_PROMPT ? PR_ONOFF_OFF : PR_NONE;
+  }
   uint32_t promptRemainingMs(uint32_t nowMs) const;
   TestInhibit inhibit() const { return inhibit_; }  // start refusal or abort reason
   bool aborted() const { return aborted_; }
@@ -117,6 +133,7 @@ class SelfTest {
   void set(TestId id, TestResult r, float v = 0.0f);
   void enter(TestPhase p, uint32_t nowMs);
   void abort(TestInhibit why);
+  void endCutTest(uint32_t nowMs);
   void finish();
 
   TestPhase phase_ = PH_IDLE;

@@ -19,6 +19,8 @@ enum FaultBits : uint16_t {
   FAULT_TPS = 1u << 2,
   FAULT_RATIO = 1u << 3,
   FAULT_SOLENOID = 1u << 4,  // solenoid current doesn't match the command
+  FAULT_ONOFF = 1u << 5,     // the ON/OFF switch's two poles disagree (wiring or switch)
+  FAULT_RELAY = 1u << 6,     // a relay stayed closed with its coil off (welded contact)
 };
 
 // Warnings are shown on the display; CUSTOM control continues.
@@ -29,6 +31,7 @@ enum WarnBits : uint16_t {
   WARN_MODE_SWITCH = 1u << 3,   // not exactly one mode switch on: factory ECU shifts
   WARN_BUTTON_STUCK = 1u << 4,
   WARN_WDT_RESET = 1u << 5,
+  WARN_TACH = 1u << 6,          // no engine-speed signal while driving: speed x ratio used instead
 };
 
 enum Event : uint8_t {
@@ -55,7 +58,13 @@ struct Inputs {
   // Debounced switch states, true = active.
   bool up = false, down = false, eco = false, sport = false;
   bool manual = false;           // MANUAL switch ON: the shifter lever shifts
-  bool customRequested = false;  // ON/OFF switch ON
+  bool customRequested = false;  // ON/OFF switch ON (and the firmware calibrated)
+  // The ON/OFF switch has two poles: one is read here (switchOn, raw), the
+  // other carries the relay coils' power (coilPowered, sensed on A7). OFF on
+  // the power pole drops the relays in hardware, whatever the firmware does.
+  bool switchOn = false;
+  bool coilSenseValid = false, coilPowered = false;
+  bool relayStuck = false;       // the relay-release self-test found a closed contact
   bool brake = false;
   bool leverInD = false;
   // Factory ECU solenoid commands, sensed upstream of the relays.
@@ -165,6 +174,7 @@ class Controller {
   Outputs out_;
   uint32_t now_ = 0;
   bool prevCustomReq_ = true;  // a switch already in CUSTOM at boot does not arm
+  uint32_t offSinceMs_ = 0;    // when the switch last went OFF
   bool armed_ = false;
   uint16_t latched_ = 0;
   uint16_t active_ = 0;
@@ -208,7 +218,7 @@ class Controller {
   bool upEdge_ = false, downEdge_ = false;
   uint32_t upSince_ = 0, downSince_ = 0;
 
-  Persist supplyBad_, tpsBad_, vssStall_, ratioBad_, overRev_, solBad_[3];
+  Persist supplyBad_, tpsBad_, vssStall_, ratioBad_, overRev_, solBad_[3], onoffBad_, tachLost_;
   float dropRefMph_ = 0.0f;
   uint32_t dropRefMs_ = 0;
 };

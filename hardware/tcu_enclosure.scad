@@ -80,7 +80,10 @@ gland_nut = [[12.5, 17.5], [15.2, 22.5]];   // [hole, locknut across corners]
 // Where each gland's wires go: [gland, board, terminal group, waypoint]. The
 // SIG wires run back along the channel between the two boards to J3 on the
 // power board's left edge; the rest go straight back to the front row.
-gland_wires = [["SHIFT", "logic", "X7"], ["DASH", "logic", "X4"], ["SCREEN", "logic", "X5"],
+// The DASH cable's last two cores (the ON/OFF switch's power pole) go to J5
+// on the power board, along the same channel as SIG.
+gland_wires = [["SHIFT", "logic", "X7"], ["DASH", "logic", "X4"], ["DASH", "power", "J5", [106, 34]],
+               ["SCREEN", "logic", "X5"],
                ["ATF", "logic", "X6"], ["SIG", "power", "J3", [106, 34]], ["PWR", "power", "J1"],
                ["SOL", "power", "J2"], ["LOAD", "power", "J4"]];
 bundle_d = 8;                      // a cable's cores, fanned out: modelled as an 8 mm bundle

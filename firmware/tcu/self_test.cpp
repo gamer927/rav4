@@ -14,7 +14,7 @@ const char* const kNames[T_COUNT] = {
     "BATTERY",    "GAS PEDAL",  "TEMP PROBE", "GYRO",          "SHIFTER",       "CALIBRATED",
     "RESTARTS",   "SCREEN",     "SOLENOID 1", "SOLENOID 2",    "LOCKUP SOL",    "RELAYS",
     "SHIFT UP",   "SHIFT DOWN", "ECO SWITCH", "SPORT SWITCH",  "MANUAL SWITCH", "BRAKE",
-    "SAFETY RESET",
+    "ON/OFF CUT", "SAFETY RESET",
 };
 
 constexpr uint8_t kPromptCount = PR_BRAKE - PR_UP + 1;
@@ -23,8 +23,7 @@ constexpr uint8_t kPromptCount = PR_BRAKE - PR_UP + 1;
 
 const char* testName(TestId id) { return id < T_COUNT ? kNames[id] : "?"; }
 
-TestInhibit testInhibit(const Inputs& in) {
-  if (in.customRequested) return INH_MASTER;
+TestInhibit testInhibit(const Inputs& in, bool switchMayBeOff) {
   if (in.leverInD) return INH_LEVER_D;
   if (in.speedMph > 0.6f) return INH_MOVING;
   // Two independent "engine running" indicators, so a missing tach can't
@@ -33,6 +32,10 @@ TestInhibit testInhibit(const Inputs& in) {
     return INH_ENGINE;
   }
   if (in.batteryV < cfg::TEST_SUPPLY_MIN_V) return INH_SUPPLY;
+  if (!switchMayBeOff) {
+    if (!in.switchOn) return INH_MASTER;
+    if (in.coilSenseValid && !in.coilPowered) return INH_NO_COIL;
+  }
   return INH_NONE;
 }
 
@@ -56,6 +59,19 @@ void SelfTest::runPowerOn(const Inputs& in, bool unexpectedWdtReset) {
   runPassive(in);
   set(T_LAST_RESET, unexpectedWdtReset ? TR_FAIL : TR_PASS);
   pbitDone_ = true;
+  if (phase_ != PH_IDLE) return;  // IBIT results restored after its watchdog step: keep them
+  // The two poles of ON/OFF must agree at key-on, whichever way it's set.
+  set(T_ONOFF_CUT, !in.coilSenseValid ? TR_SKIP : in.switchOn == in.coilPowered ? TR_PASS : TR_FAIL);
+  // Relay-release check: drivers on with the relays off. A closed contact
+  // would let current through. Only parked with the lever out of D; the
+  // solenoids are only reachable through a faulty relay anyway.
+  if (in.solSenseValid && !in.leverInD && in.speedMph <= 0.6f) {
+    out_ = TestOutputs();
+    out_.s1 = out_.s2 = out_.sl = true;
+    enter(PH_PBIT_RELEASE, in.nowMs);
+  } else {
+    set(T_RELAY_RELEASE, TR_SKIP);
+  }
 }
 
 bool SelfTest::start(const Inputs& in) {
@@ -82,6 +98,17 @@ void SelfTest::abort(TestInhibit why) {
   phase_ = PH_DONE;
 }
 
+void SelfTest::endCutTest(uint32_t now) {
+  out_ = TestOutputs();
+  if (cfg::IBIT_WATCHDOG_TEST) {
+    current_ = T_WATCHDOG;
+    enter(PH_WATCHDOG, now);
+  } else {
+    set(T_WATCHDOG, TR_SKIP);
+    finish();
+  }
+}
+
 void SelfTest::finish() {
   out_ = TestOutputs();
   phase_ = PH_DONE;
@@ -89,13 +116,28 @@ void SelfTest::finish() {
 
 void SelfTest::step(const Inputs& in, bool testEdge) {
   if (!active()) return;
-  const TestInhibit why = testInhibit(in);
-  if (why != INH_NONE) {
-    abort(why);  // e.g. engine started or lever moved: stop driving anything
-    return;
-  }
   const uint32_t now = in.nowMs;
   const uint32_t inPhase = now - phaseSince_;
+  if (phase_ == PH_PBIT_RELEASE) {
+    if (in.leverInD || in.speedMph > 0.6f) {  // moved off: drop it, try next key-on
+      out_ = TestOutputs();
+      set(T_RELAY_RELEASE, TR_SKIP);
+      phase_ = PH_IDLE;
+    } else if (inPhase >= cfg::IBIT_SOLENOID_ON_MS) {
+      float maxA = 0.0f;
+      for (uint8_t i = 0; i < 3; i++) maxA = in.solAmps[i] > maxA ? in.solAmps[i] : maxA;
+      set(T_RELAY_RELEASE, maxA <= cfg::SOL_OFF_MAX_A ? TR_PASS : TR_FAIL, maxA);
+      out_ = TestOutputs();
+      phase_ = PH_IDLE;
+    }
+    return;
+  }
+  // From the cut test on, ON/OFF is OFF by design.
+  const TestInhibit why = testInhibit(in, phase_ == PH_CUT_PROMPT || phase_ == PH_CUT_CHECK || phase_ == PH_WATCHDOG);
+  if (why != INH_NONE) {
+    abort(why);  // e.g. engine started, lever moved, ON/OFF turned off: stop driving anything
+    return;
+  }
 
   switch (phase_) {
     case PH_LAMPS:
@@ -191,16 +233,55 @@ void SelfTest::step(const Inputs& in, bool testEdge) {
         set(current_, r);
         if (++promptIndex_ < kPromptCount) {
           enter(PH_PROMPT, now);
-        } else if (cfg::IBIT_WATCHDOG_TEST) {
-          current_ = T_WATCHDOG;
-          enter(PH_WATCHDOG, now);
         } else {
-          set(T_WATCHDOG, TR_SKIP);
-          finish();
+          // Last: the ON/OFF hardware cut. Relays on, S1 on, current flowing...
+          current_ = T_ONOFF_CUT;
+          out_.relay = true;
+          out_.s1 = true;
+          enter(PH_CUT_ARM, now);
         }
       }
       break;
     }
+
+    case PH_CUT_ARM:
+      current_ = T_ONOFF_CUT;
+      if (inPhase >= cfg::IBIT_RELAY_SETTLE_MS + cfg::IBIT_SOLENOID_ON_MS) {
+        if (in.solSenseValid && in.solAmps[0] < cfg::SOL_MIN_A) {
+          set(T_ONOFF_CUT, TR_FAIL, in.solAmps[0]);  // no current to cut: S1 or the relay is bad
+          endCutTest(now);
+        } else {
+          enter(PH_CUT_PROMPT, now);
+        }
+      }
+      break;
+
+    case PH_CUT_PROMPT: {
+      // ...then the operator turns ON/OFF OFF, with the Mega still commanding
+      // the relays ON. The switch's power pole must drop them: no current, no
+      // coil supply.
+      current_ = T_ONOFF_CUT;
+      if (!in.switchOn) {
+        enter(PH_CUT_CHECK, now);  // give the relay time to drop out
+      } else if (testEdge) {
+        set(T_ONOFF_CUT, TR_SKIP);
+        endCutTest(now);
+      } else if (inPhase >= cfg::IBIT_PROMPT_TIMEOUT_MS) {
+        set(T_ONOFF_CUT, TR_FAIL, in.solAmps[0]);
+        endCutTest(now);
+      }
+      break;
+    }
+
+    case PH_CUT_CHECK:
+      current_ = T_ONOFF_CUT;
+      if (inPhase >= cfg::IBIT_RELAY_SETTLE_MS) {
+        const bool noCurrent = !in.solSenseValid || in.solAmps[0] <= cfg::SOL_OFF_MAX_A;
+        const bool noCoil = !in.coilSenseValid || !in.coilPowered;
+        set(T_ONOFF_CUT, noCurrent && noCoil ? TR_PASS : TR_FAIL, in.solAmps[0]);
+        endCutTest(now);
+      }
+      break;
 
     case PH_WATCHDOG:
       // The HAL saves results and stops kicking the watchdog. If the board
@@ -227,7 +308,7 @@ void SelfTest::restoreAfterWatchdog(const uint8_t* results, const float* values,
 }
 
 uint32_t SelfTest::promptRemainingMs(uint32_t nowMs) const {
-  if (phase_ != PH_PROMPT) return 0;
+  if (phase_ != PH_PROMPT && phase_ != PH_CUT_PROMPT) return 0;
   const uint32_t in = nowMs - phaseSince_;
   return in >= cfg::IBIT_PROMPT_TIMEOUT_MS ? 0 : cfg::IBIT_PROMPT_TIMEOUT_MS - in;
 }

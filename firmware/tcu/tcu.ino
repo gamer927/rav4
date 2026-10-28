@@ -54,6 +54,7 @@ constexpr uint8_t VBAT = A3;
 constexpr uint8_t IS_S1 = A4;        // solenoid current sensors (ACS712 outputs)
 constexpr uint8_t IS_S2 = A5;
 constexpr uint8_t IS_SL = A6;
+constexpr uint8_t COIL_SENSE = A7;  // relay coil supply, after the ON/OFF switch's power pole (47k/10k)
 // I2C (SDA = 20, SCL = 21): dash pod OLED (0x3C) and MPU-6050 gyro (0x68).
 }  // namespace pin
 
@@ -135,7 +136,7 @@ struct Ema {
     return y;
   }
 };
-Ema tpsF, atfF, vbatF, speedF, rpmF, solF[3];
+Ema tpsF, atfF, vbatF, coilF, speedF, rpmF, solF[3];
 
 uint16_t readRaw(uint8_t p) {
   uint16_t sum = 0;
@@ -249,7 +250,8 @@ tcu::Inputs readInputs(uint32_t now) {
   in.sport = dbSport.state();
   in.manual = dbManual.state();
   // Until the car is calibrated the ON/OFF switch is ignored (STOCK only).
-  in.customRequested = cfg::CALIBRATED && dbMaster.state();
+  in.switchOn = dbMaster.state();
+  in.customRequested = cfg::CALIBRATED && in.switchOn;
   in.brake = dbBrake.state();
   in.leverInD = dbLeverD.state();
   in.ecuSenseValid = cfg::ECU_SENSE_INSTALLED;
@@ -287,6 +289,11 @@ tcu::Inputs readInputs(uint32_t now) {
   }
 
   in.batteryV = vbatF.update(rawToVolts(readRaw(pin::VBAT)) * cfg::VBAT_DIVIDER, 0.1f);
+  in.coilSenseValid = cfg::COIL_SENSE_INSTALLED;
+  in.coilPowered = coilF.update(rawToVolts(readRaw(pin::COIL_SENSE)) * cfg::VBAT_DIVIDER, 0.3f) > cfg::COIL_ON_V;
+  // A relay contact found stuck closed (key-on check or IBIT) blocks take-over
+  // until a later check passes.
+  in.relayStuck = selfTest.result(tcu::T_RELAY_RELEASE) == tcu::TR_FAIL;
 
   in.imuPresent = imu.present();
   in.latValid = cfg::IMU_INSTALLED && imu.present() && gyro.stillSamples >= 150 && gyro.misses < 5;
@@ -396,7 +403,8 @@ struct Text {
 
 const char* inhibitText(tcu::TestInhibit i) {
   switch (i) {
-    case tcu::INH_MASTER: return "ON/OFF IS ON";
+    case tcu::INH_MASTER: return "ON/OFF IS OFF";
+    case tcu::INH_NO_COIL: return "NO RELAY POWER";
     case tcu::INH_LEVER_D: return "LEVER IS IN D";
     case tcu::INH_MOVING: return "THE CAR IS MOVING";
     case tcu::INH_ENGINE: return "ENGINE IS RUNNING";  // or a charger connected
@@ -425,6 +433,7 @@ const char* promptText(tcu::TestPrompt p) {
     case tcu::PR_SPORT: return "TURN ON ONLY SPORT";
     case tcu::PR_MANUAL: return "TURN ON ONLY MANUAL";
     case tcu::PR_BRAKE: return "PRESS THE BRAKE";
+    case tcu::PR_ONOFF_OFF: return "TURN ON/OFF OFF";
     default: return "";
   }
 }
@@ -437,7 +446,7 @@ Text itemLine(tcu::TestId id) {
   bool hasValue = r != tcu::TR_NONE && r != tcu::TR_SKIP;
   switch (id) {
     case tcu::T_SUPPLY: case tcu::T_TPS: case tcu::T_ATF: break;
-    case tcu::T_SOL_S1: case tcu::T_SOL_S2: case tcu::T_SOL_SL: case tcu::T_RELAY_RELEASE:
+    case tcu::T_SOL_S1: case tcu::T_SOL_S2: case tcu::T_SOL_SL: case tcu::T_RELAY_RELEASE: case tcu::T_ONOFF_CUT:
       hasValue = hasValue && r != tcu::TR_CHECK;
       break;
     default: hasValue = false; break;
@@ -461,6 +470,8 @@ const char* faultWords(uint16_t faults) {
   if (faults & tcu::FAULT_TPS) return "PEDAL SENSOR";
   if (faults & tcu::FAULT_RATIO) return "WRONG GEAR";
   if (faults & tcu::FAULT_SOLENOID) return "SOLENOID WIRE";
+  if (faults & tcu::FAULT_ONOFF) return "ON/OFF SWITCH";
+  if (faults & tcu::FAULT_RELAY) return "RELAY STUCK";
   return "";
 }
 
@@ -490,6 +501,8 @@ bool alertMessage(const tcu::Outputs& o, uint32_t now, Message& m) {
     m.line[3].s(d);
     return true;
   };
+  if (o.faults & tcu::FAULT_RELAY) return say("PROBLEM", "RELAY STUCK", "STOCK SHIFTS.", "HOLD TEST TO", "RE-CHECK.");
+  if (o.faults & tcu::FAULT_ONOFF) return say("PROBLEM", "ON/OFF SWITCH:", "ITS 2 HALVES", "DISAGREE.", "CHECK WIRING.");
   if (o.faults) return say("PROBLEM", faultWords(o.faults), "STOCK SHIFTS.", "ON/OFF OFF+ON", "TO TRY AGAIN.");
   if (switchOn && o.modeSelect == tcu::SEL_SEVERAL)
     return say("MODE ERROR", "TWO MODES ON.", "TURN ON ONLY", "ECO, SPORT OR", "MANUAL.");
@@ -504,7 +517,7 @@ bool alertMessage(const tcu::Outputs& o, uint32_t now, Message& m) {
   if (o.warnings & tcu::WARN_ATF_HOT) {
     Text t;
     t.s("OVER ").n(toDisplayTemp(cfg::ATF_HOT_C)).s(tempUnit()).s(".");
-    return say("TRANS HOT", t.buf, "EASE OFF A BIT.");
+    return say("TRANS HOT", t.buf, "EASE OFF.");
   }
   if ((uint32_t)(now - eventAt) < 4000 || o.event == tcu::EV_NEED_SYNC) {
     switch (o.event) {
@@ -523,7 +536,8 @@ bool alertMessage(const tcu::Outputs& o, uint32_t now, Message& m) {
     }
   }
   if (switchOn && !o.armed) return say("WAITING", "ON/OFF WAS ON", "AT KEY-ON.", "FLIP IT OFF,", "THEN ON.");
-  if (o.warnings & tcu::WARN_ATF_SENSOR) return say("NO TEMP", "TEMP PROBE", "NOT WORKING.", "CHECK ITS PLUG.");
+  if (o.warnings & tcu::WARN_ATF_SENSOR) return say("NO TEMP", "TEMP PROBE", "NOT WORKING.", "CHECK THE PLUG");
+  if (o.warnings & tcu::WARN_TACH) return say("NO RPM", "ENGINE SPEED", "SIGNAL LOST.", "STILL SAFE.", "CHECK TACH.");
   if (o.warnings & tcu::WARN_BUTTON_STUCK) return say("SHIFTER?", "A LEVER SWITCH", "IS STUCK ON.", "CHECK THE", "SHIFTER.");
   return false;
 }
@@ -677,7 +691,7 @@ void renderTest(uint32_t now) {
     line("");
     line("IT NEEDS: PARKED,");
     line("ENGINE OFF, LEVER IN");
-    line("P, ON/OFF OFF");
+    line("P, ON/OFF ON");
     return;
   }
   if (selfTest.active()) {
@@ -768,7 +782,6 @@ void handleTestButton(uint32_t now) {
     longFired = true;
     page = PG_TEST;
     tcu::Inputs tin = lastIn;
-    tin.customRequested = dbMaster.state();  // the raw switch, even when uncalibrated
     if (selfTest.start(tin)) {
       inhibitShownUntil = now;
       if (USB_LOG_ENABLED) Serial.println(F("# IBIT start"));
@@ -827,6 +840,15 @@ void setup() {
   const uint8_t inputs[] = {pin::UP,     pin::DOWN,    pin::ECO,    pin::SPORT,  pin::MASTER, pin::BRAKE,
                             pin::LEVER_D, pin::ECU_S1, pin::ECU_S2, pin::ECU_SL, pin::TEST,     pin::MANUAL};
   for (uint8_t p : inputs) pinMode(p, INPUT_PULLUP);
+  // Start every switch filter from the real level (after the input RC filters
+  // charge), not from "off": otherwise a switch already ON at power-up would
+  // look like a fresh OFF -> ON flip.
+  delay(10);
+  tcu::Debouncer* const dbs[] = {&dbUp,     &dbDown,   &dbEco,    &dbSport,  &dbManual, &dbMaster,
+                                 &dbBrake,  &dbLeverD, &dbEcuS1,  &dbEcuS2,  &dbEcuSL,  &dbTest};
+  const uint8_t dbPins[] = {pin::UP,    pin::DOWN,   pin::ECO,    pin::SPORT,  pin::MANUAL, pin::MASTER,
+                            pin::BRAKE, pin::LEVER_D, pin::ECU_S1, pin::ECU_S2, pin::ECU_SL, pin::TEST};
+  for (uint8_t i = 0; i < sizeof(dbPins); i++) *dbs[i] = tcu::Debouncer(activeLow(dbPins[i]));
   pinMode(pin::VSS, INPUT);
   pinMode(pin::TACH, INPUT);
 
@@ -881,17 +903,21 @@ void loop() {
       selfTest.runPowerOn(lastIn, unexpectedWdtReset);
       logBitTable(selfTest.ibitDone() ? "IBIT done (after watchdog reset)" : "PBIT");
     }
+    static bool ibitWasActive = false;
     if (selfTest.active()) {
-      // IBIT owns the outputs. Its interlock requires the ON/OFF switch to be
-      // OFF, so the controller is not driving anything meanwhile.
-      tcu::Inputs tin = lastIn;
-      tin.customRequested = dbMaster.state();
-      selfTest.step(tin, testEdgePending);
+      // The self-test owns the outputs. Its interlock requires the lever out
+      // of D (and the key-on relay check only runs then too), so the
+      // controller is in STOCK and not driving anything meanwhile.
+      if (selfTest.ibitActive()) ibitWasActive = true;
+      selfTest.step(lastIn, testEdgePending);
       testEdgePending = false;
       if (selfTest.outputs().triggerWatchdog) runWatchdogTest();  // does not return
       applyTestOutputs(selfTest.outputs());
       if (cfg::OLED_INSTALLED) oled.setInvert(selfTest.outputs().lamps);
-      if (!selfTest.active()) logBitTable(selfTest.aborted() ? "IBIT aborted" : "IBIT done");
+      if (!selfTest.active()) {
+        logBitTable(ibitWasActive ? (selfTest.aborted() ? "IBIT aborted" : "IBIT done") : "PBIT relay check");
+        ibitWasActive = false;
+      }
     } else {
       applyOutputs(out);
       updateLeds(out, now);

@@ -29,6 +29,10 @@ struct Bench {
   bool solenoidOpen[3] = {false, false, false};
   bool relayWelded = false;
   bool senseWired = true;
+  // The ON/OFF switch: pole 1 is read (switchOn), pole 2 powers the relay coils.
+  bool switchOn = true;
+  bool coilFuseBlown = false;   // pole 2 open: no coil power even when ON
+  bool cutBroken = false;       // pole 2 shorted: coil power even when OFF
 
   Bench() {
     in.nowMs = 5000;
@@ -39,11 +43,17 @@ struct Bench {
     in.atfC = 20;
     in.batteryV = 12.5f;  // ignition on, engine off: not charging
     in.imuPresent = true;
+    in.switchOn = true;
+    in.coilSenseValid = true;
+    in.coilPowered = true;
+    in.solSenseValid = true;
   }
   void physics() {
     const TestOutputs& o = t.outputs();
     const bool drive[3] = {o.s1, o.s2, o.sl};
-    const bool routed = o.relay || relayWelded;
+    in.switchOn = switchOn;
+    in.coilPowered = (switchOn || cutBroken) && !coilFuseBlown;
+    const bool routed = (o.relay && in.coilPowered) || relayWelded;
     for (int i = 0; i < 3; i++) in.solAmps[i] = (drive[i] && routed && !solenoidOpen[i]) ? 0.95f : 0.0f;
     in.solSenseValid = senseWired;
   }
@@ -69,6 +79,12 @@ struct Bench {
       step(20);
     }
     in.up = in.down = in.eco = in.sport = in.manual = in.brake = false;
+    // Last prompt: turn ON/OFF OFF (the hardware cut), then on again after.
+    while (t.active() && t.phase() == PH_CUT_ARM) step(10);
+    if (t.prompt() == PR_ONOFF_OFF) {
+      switchOn = false;
+      step(cfg::IBIT_RELAY_SETTLE_MS + 50);
+    }
   }
 };
 
@@ -81,7 +97,15 @@ static void test_pbit() {
   CHECK(b.t.result(T_SWITCHES) == TR_PASS);
   CHECK(b.t.result(T_LAST_RESET) == TR_PASS);
   CHECK(b.t.result(T_CALIBRATED) == (cfg::CALIBRATED ? TR_PASS : TR_FAIL));
-  CHECK(!b.t.active());
+  CHECK(b.t.active());   // the key-on relay-release check runs next...
+  CHECK(!b.t.ibitActive());
+  CHECK(b.t.outputs().s1 && b.t.outputs().s2 && b.t.outputs().sl && !b.t.outputs().relay);
+  b.step(cfg::IBIT_SOLENOID_ON_MS + 20);
+  CHECK(!b.t.active());  // ...for 0.4 s, then everything is off again
+  CHECK(!b.t.ibitDone());
+  CHECK(!b.t.outputs().s1 && !b.t.outputs().s2 && !b.t.outputs().sl);
+  CHECK(b.t.result(T_RELAY_RELEASE) == TR_PASS);
+  CHECK(b.t.result(T_ONOFF_CUT) == TR_PASS);
 
   Bench c;
   c.in.up = true;           // button stuck at boot
@@ -90,13 +114,34 @@ static void test_pbit() {
   CHECK(c.t.result(T_SWITCHES) == TR_FAIL);
   CHECK(c.t.result(T_ATF) == TR_FAIL);
   CHECK(c.t.result(T_LAST_RESET) == TR_FAIL);
+
+  // A welded relay is found at every key-on, not only by IBIT.
+  Bench w;
+  w.relayWelded = true;
+  w.t.runPowerOn(w.in, false);
+  w.step(cfg::IBIT_SOLENOID_ON_MS + 20);
+  CHECK(w.t.result(T_RELAY_RELEASE) == TR_FAIL);
+  // Lever in D at key-on: the relay check waits for another day.
+  Bench d;
+  d.in.leverInD = true;
+  d.t.runPowerOn(d.in, false);
+  CHECK(!d.t.active());
+  CHECK(d.t.result(T_RELAY_RELEASE) == TR_SKIP);
+  // The ON/OFF switch's two poles disagree at key-on.
+  Bench s;
+  s.switchOn = false;
+  s.cutBroken = true;
+  s.physics();
+  s.t.runPowerOn(s.in, false);
+  CHECK(s.t.result(T_ONOFF_CUT) == TR_FAIL);
 }
 
 static void test_interlocks() {
   std::printf("IBIT interlocks (weight-on-wheels style)\n");
   struct Case { const char* what; void (*apply)(Inputs&); TestInhibit expect; };
   const Case cases[] = {
-      {"master at CUSTOM", [](Inputs& i) { i.customRequested = true; }, INH_MASTER},
+      {"ON/OFF off (no relay power)", [](Inputs& i) { i.switchOn = false; i.coilPowered = false; }, INH_MASTER},
+      {"ON/OFF on, coil power missing", [](Inputs& i) { i.coilPowered = false; }, INH_NO_COIL},
       {"lever in D", [](Inputs& i) { i.leverInD = true; }, INH_LEVER_D},
       {"moving", [](Inputs& i) { i.speedMph = 5; }, INH_MOVING},
       {"engine rpm", [](Inputs& i) { i.engineRpm = 750; }, INH_ENGINE},
@@ -116,6 +161,8 @@ static void test_full_ibit_pass() {
   std::printf("IBIT: healthy harness passes every check\n");
   Bench b;
   b.t.runPowerOn(b.in, false);
+  CHECK(!b.t.start(b.in));  // not while the key-on relay check is still running
+  b.step(cfg::IBIT_SOLENOID_ON_MS + 20);
   CHECK(b.t.start(b.in));
   CHECK(b.t.outputs().lamps || b.t.phase() == PH_LAMPS);
   b.step(20);
@@ -131,6 +178,7 @@ static void test_full_ibit_pass() {
   CHECK(b.t.result(T_RELAY_RELEASE) == TR_PASS);
   CHECK(b.t.result(T_LAMPS) == TR_CHECK);
   for (uint8_t i = T_BTN_UP; i <= T_BRAKE; i++) CHECK(b.t.result((TestId)i) == TR_PASS);
+  CHECK(b.t.result(T_ONOFF_CUT) == TR_PASS);
 
   // Board resets via the watchdog; HAL restores the saved table.
   SelfTest after;
@@ -180,6 +228,24 @@ static void test_detects_faults() {
   n.runAll();
   CHECK(n.t.result(T_SOL_SL) == TR_CHECK);
   CHECK(n.t.result(T_RELAY_RELEASE) == TR_SKIP);
+
+  // The hardware cut: ON/OFF's power pole shorted, so OFF doesn't drop the relays.
+  Bench c;
+  c.cutBroken = true;
+  c.runAll();
+  CHECK(c.t.result(T_ONOFF_CUT) == TR_FAIL);
+  CHECK(c.t.value(T_ONOFF_CUT) > 0.9f);  // the solenoid kept drawing current
+  CHECK(!c.t.outputs().relay && !c.t.outputs().s1);
+
+  // ON/OFF turned OFF in the middle of the solenoid tests: abort, all off.
+  Bench o;
+  CHECK(o.t.start(o.in));
+  while (o.t.phase() != PH_SOL_ON) o.step(10);
+  o.switchOn = false;
+  o.step(20);
+  CHECK(o.t.aborted());
+  CHECK(o.t.inhibit() == INH_MASTER);
+  CHECK(!o.t.outputs().relay && !o.t.outputs().s1 && !o.t.outputs().s2 && !o.t.outputs().sl);
 
 }
 
@@ -258,7 +324,7 @@ static void test_cbit_solenoid_fault() {
       c.step(in);
     }
   };
-  step(50);
+  step(cfg::ARM_OFF_MIN_MS + 50);
   in.customRequested = true;
   step(1000);
   CHECK(c.outputs().control == CTRL_AUTO);
@@ -298,7 +364,7 @@ static void test_cbit_solenoid_short() {
       c.step(in);
     }
   };
-  step(50);
+  step(cfg::ARM_OFF_MIN_MS + 50);
   in.customRequested = true;
   step(1000);
   CHECK(c.outputs().control == CTRL_AUTO);

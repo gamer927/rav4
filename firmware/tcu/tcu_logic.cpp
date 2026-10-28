@@ -65,6 +65,7 @@ void Controller::begin(uint32_t nowMs, bool watchdogReset) {
   wdtReset_ = watchdogReset;
   upSince_ = downSince_ = nowMs;
   selBadSince_ = nowMs;
+  offSinceMs_ = nowMs;
   dropRefMs_ = nowMs;
   decelRefMs_ = nowMs;
   lastStepMs_ = tpsRefMs_ = nowMs;
@@ -147,6 +148,12 @@ void Controller::updateWarnings(const Inputs& in) {
   }
 
   if (selError_) w |= WARN_MODE_SWITCH;
+  // Driving with no tach signal: the over-rev guards fall back to speed x
+  // ratio and the ratio check pauses. Tell the driver.
+  if (tachLost_.update(cfg::TACH_INSTALLED && !in.rpmValid && in.speedMph > cfg::TACH_LOST_MIN_MPH, now_,
+                       cfg::TACH_LOST_MS)) {
+    w |= WARN_TACH;
+  }
   if ((in.up && elapsed(now_, upSince_, cfg::STUCK_BUTTON_MS)) ||
       (in.down && elapsed(now_, downSince_, cfg::STUCK_BUTTON_MS))) {
     w |= WARN_BUTTON_STUCK;
@@ -204,6 +211,16 @@ uint16_t Controller::evaluateFaults(const Inputs& in) {
                      (cmd[i] ? (a < cfg::SOL_MIN_A || a > cfg::SOL_OVER_A) : a > cfg::SOL_OFF_MAX_A);
     if (solBad_[i].update(bad, now_, cfg::SOL_FAULT_MS)) f |= FAULT_SOLENOID;
   }
+
+  // The ON/OFF switch's two poles must agree: the one the Mega reads, and the
+  // one carrying the relay coils' power. ON with no coil power = a broken
+  // wire or blown fuse; OFF with coil power = the hardware cut isn't working
+  // (or the read wire is broken). Either way, no CUSTOM until it's fixed.
+  const bool split = in.coilSenseValid && in.switchOn != in.coilPowered;
+  if (onoffBad_.update(split, now_, cfg::ONOFF_FAULT_MS)) f |= FAULT_ONOFF;
+  // A relay found closed with its coil off would mix the ECU's and the TCU's
+  // solenoid feeds; never take over with one.
+  if (in.relayStuck) f |= FAULT_RELAY;
   return f;
 }
 
@@ -212,9 +229,11 @@ void Controller::updateArming(const Inputs& in) {
     // STOCK position: disarm and acknowledge any latched faults.
     armed_ = false;
     latched_ = 0;
-  } else if (!prevCustomReq_) {
-    // Only a fresh STOCK -> CUSTOM flip arms the TCU. A reset mid-drive (or a
-    // switch left in CUSTOM at key-on) therefore stays on the factory ECU.
+    if (prevCustomReq_) offSinceMs_ = now_;
+  } else if (!prevCustomReq_ && elapsed(now_, offSinceMs_, cfg::ARM_OFF_MIN_MS)) {
+    // Only a fresh STOCK -> CUSTOM flip arms the TCU, after a real OFF of at
+    // least ARM_OFF_MIN_MS: a reset mid-drive, a switch left ON at key-on, or
+    // a glitch while the inputs settle after boot never arms it.
     armed_ = true;
   }
   prevCustomReq_ = in.customRequested;
@@ -228,6 +247,17 @@ void Controller::tryEnterCustom(const Inputs& in) {
     // Bumpless handover: start in the gear the ECU is holding right now.
     g = gearFromSolenoids(in.ecuS1, in.ecuS2);
     if (in.speedMph * cfg::RPM_PER_MPH[g] > cfg::MAX_DOWNSHIFT_RPM) g = 0;
+    // Cross-check the sensed gear with the engine: rpm must sit between the
+    // locked figure for that gear and what converter slip can add. A dead
+    // sense input (reads "both off" = 4th) or a mis-wired one fails this, so
+    // the TCU waits for a stop instead of taking over in the wrong gear.
+    if (g) {
+      const float locked = in.speedMph * cfg::RPM_PER_MPH[g];
+      const bool fits = in.rpmValid && locked >= cfg::ENTRY_MIN_LOCKED_RPM &&
+                        in.engineRpm >= locked * cfg::ENTRY_RPM_MIN_RATIO &&
+                        in.engineRpm <= locked * cfg::ENTRY_RPM_MAX_RATIO;
+      if (!fits) g = 0;
+    }
   }
   if (!g) {
     raise(EV_NEED_SYNC, false);

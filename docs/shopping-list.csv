@@ -3,6 +3,8 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 1. Brain and power,"Prototype shield for the Mega (""Mega ProtoShield"")",1,1,"Amazon (or AliExpress, cheaper but slower)",8,The hub: two ribbon sockets wired to the Mega's pins
 1. Brain and power,"LM2596HV buck converter module, 4.5–60 V in",1,pack of 2 (one spare),"Amazon (or AliExpress, cheaper but slower)",8,Must say **HV** (60 V input). Plain LM2596 is only 40 V
 1. Brain and power,1.5KE27A TVS diode,2,pack of 10,DigiKey / Mouser,4,Littelfuse 1.5KE27A
+1. Brain and power,P6KE6.8A TVS diode,1,pack of 5,DigiKey / Mouser,3,"Across the 5 V rail: if the buck module fails shorted, it blows the 2 A fuse"
+1. Brain and power,"Resettable fuse (PTC), 0.25 A hold, radial",1,pack of 5,DigiKey / Mouser,3,e.g. Bourns MF-R025. Protects the relay-power wires to the ON/OFF switch
 1. Brain and power,"1N5822 Schottky diode, 3 A",1,pack of 10,DigiKey / Mouser,3,Reverse-polarity protection
 1. Brain and power,100 µF 50 V electrolytic capacitor,1,pack of 10,DigiKey / Mouser,3,
 1. Brain and power,Inline blade-fuse holders (16 AWG) + 5 A and 2 A fuses,2 + fuses,kit,Auto-parts store,10,Match your fuse box's blade size (step 0 checks it)
@@ -11,8 +13,8 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 2. Solenoid control,"IRF4905 P-channel MOSFET, TO-220",3,pack of 5,DigiKey / Mouser,9,Infineon IRF4905PBF
 2. Solenoid control,ACS712-05B current sensor module (5 A),3,pack of 3–5,"Amazon (or AliExpress, cheaper but slower)",11,Measures each solenoid's current for the self-test
 2. Solenoid control,"ULN2803A driver, DIP-18",1,2 (one spare),DigiKey / Mouser,3,Through-hole DIP: e.g. Toshiba ULN2803APG. Not the SOIC version
-2. Solenoid control,1 W zener diode kit (1N4728A–1N4764A),9,kit,"Amazon (or AliExpress, cheaper but slower)",11,"Uses 1N4733A 5.1 V ×3, 1N4744A 15 V ×3, 1N4749A 24 V ×3"
-2. Solenoid control,UF4007 fast diode,3,pack of 10,DigiKey / Mouser,3,1N4007 also works
+2. Solenoid control,1 W zener diode kit (1N4728A–1N4764A),10,kit,"Amazon (or AliExpress, cheaper but slower)",11,"Uses 1N4733A 5.1 V ×4, 1N4744A 15 V ×3, 1N4749A 24 V ×3"
+2. Solenoid control,UF4007 fast diode,4,pack of 10,DigiKey / Mouser,3,1N4007 also works
 2. Solenoid control,15 Ω 50 W aluminium-housed resistor,3,3,DigiKey / Mouser,15,"Dummy loads, e.g. TE HSA5015RJ or Arcol HS50 15R"
 2. Solenoid control,"Finned aluminium heatsink, ≥ 100 × 100 × 25 mm",1,1,"Amazon (or AliExpress, cheaper but slower)",14,"For the dummy resistors, outside the box"
 2. Solenoid control,Thermal paste,1,small tube,"Amazon (or AliExpress, cheaper but slower)",6,Skip if you have some
@@ -21,8 +23,8 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 3. Signal inputs,BAT85 Schottky diode (DO-35),18,pack of 25,DigiKey / Mouser,5,Input clamps
 3. Signal inputs,1N4148 diode,6,pack of 100,"Amazon (or AliExpress, cheaper but slower)",5,
 3. Signal inputs,"Resistor kit, 1/4 W 1 % metal film (600+ pcs)",≈ 70,kit,"Amazon (or AliExpress, cheaper but slower)",12,"Needs 100, 1k, 1.8k, 2.2k, 3.3k, 4.7k, 10k, 22k, 47k and 1M"
-3. Signal inputs,Extra 10 kΩ resistors,19 total,pack of 50,"Amazon (or AliExpress, cheaper but slower)",4,Most kits only have 10–20 of each value
-3. Signal inputs,"100 nF ceramic capacitors, 50 V",10,pack of 50,"Amazon (or AliExpress, cheaper but slower)",5,
+3. Signal inputs,Extra 10 kΩ resistors,20 total,pack of 50,"Amazon (or AliExpress, cheaper but slower)",4,Most kits only have 10–20 of each value
+3. Signal inputs,"100 nF ceramic capacitors, 50 V",11,pack of 50,"Amazon (or AliExpress, cheaper but slower)",5,
 4. Boards and inside wiring,"Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm",1 + 1,assorted pack,"Amazon (or AliExpress, cheaper but slower)",10,"Power board 9 × 15, logic board 7 × 9"
 4. Boards and inside wiring,"Screw terminals, 5.08 mm, 2- and 3-way, interlocking",37 positions,pack of ~40 pieces,"Amazon (or AliExpress, cheaper but slower)",9,KF301 / DG301 type
 4. Boards and inside wiring,"Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~10 cm plug to plug)",1 + 1,headers + 2 cables,"Amazon (or AliExpress, cheaper but slower)",12,Or crimp your own from ribbon and IDC sockets
@@ -37,7 +39,7 @@ Section,Item,Need,Buy,Where,Est. US$,Notes
 5. Car harness and connectors,Split loom + zip ties,1,pack,Auto-parts store,12,
 5. Car harness and connectors,"Wago 221 lever-nut connectors, assorted",~9,pack,Hardware store,12,Joins the cables to the switch wires inside the dash pod and the shifter base
 5. Car harness and connectors,"Cable glands PG7 + PG9, nylon, with locknuts",7 + 4,assortment,"Amazon (or AliExpress, cheaper but slower)",10,TCU box 4 × PG7 + 4 × PG9; dash pod 2 × PG7; shifter base 1 × PG7
-6. Dash pod controls and screen,12 mm ON/OFF toggle with flip-up safety cover,1,1,"Amazon (or AliExpress, cheaper but slower)",10,
+6. Dash pod controls and screen,"12 mm ON/OFF toggle, **2-pole** (DPDT or DPST), with flip-up safety cover",1,1,"Amazon (or AliExpress, cheaper but slower)",12,"Must be 2-pole: one pole tells the TCU, the other cuts the relays' power in hardware"
 6. Dash pod controls and screen,"6 mm mini toggle switch, MTS-101/102",3,pack of 5,"Amazon (or AliExpress, cheaper but slower)",8,"ECO, SPORT and MANUAL"
 6. Dash pod controls and screen,"12 mm momentary push button, normally open",1,pack of 5,"Amazon (or AliExpress, cheaper but slower)",10,TEST
 6. Dash pod controls and screen,"2.42"" OLED module, 128 × 64, SSD1309, I²C-capable",1,1,"Amazon (or AliExpress, cheaper but slower)",20,"e.g. Waveshare 2.42inch OLED Module. 55 × 27.5 mm screen, readable from the driver's seat"
