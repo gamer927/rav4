@@ -22,7 +22,8 @@ housings and the docs: the things no single test sees. Run: python3 tools/system
  10. Every relative link in the docs points at a file that exists.
  11. The circuit board file (hardware/pcb/) is the circuit: every pad on the
      net the circuit says, KiCad's design-rule check found no errors and
-     no unconnected pads, and no copper lies under a bolted MOSFET tab. Read as text, so KiCad isn't needed here.
+     no unconnected pads, no copper lies under a bolted MOSFET tab, and
+     every real part fits at its largest size (tools/part_fit.py). Read as text, so KiCad isn't needed here.
 """
 import glob
 import os
@@ -259,6 +260,9 @@ check(os.path.exists(os.path.join(ROOT, "hardware", "pcb", "rav4-tcu-gerbers.zip
 mosfets = len([r for r in circuit.parts if r.startswith("Q")])
 check(pcb_text.count("(copperpour not_allowed)") >= 2 * mosfets,
       "no copper under each MOSFET's bolted tab (top) or its bolt (both sides)")
+fit_report = read("hardware/pcb/part_fit.md")
+check("**Result: 0 problems.**" in fit_report, "every real part fits the board at its largest size (hardware/pcb/part_fit.md)")
+check(all(r in fit_report for r in ("ACS712", "G2RL", "TO-220", "DO-201", "R-78HB")), "the part fit report covers every part type")
 check("pcb_standoff_h = 18.6;" in read("hardware/pcb_envelope.scad"),
       "the board's posts allow for the header strips' plastic on top of the Mega's sockets")
 

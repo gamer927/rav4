@@ -309,11 +309,14 @@ cables, housings and tests carry over. What changed on the way:
 | The MOSFETs lie flat with their tabs bolted down; the current-sensor modules plug into 3 holes plus 2 short **LINK** wires | Low and solid in a car that vibrates |
 | Tracks sized by current: 1.5 mm for the solenoid supply, 1.0 mm for the solenoid, load and 12 V lines, ground filled on both layers | Each solenoid draws about 1 A; the tracks stay cool |
 | **Found on review:** the ground copper ran under each MOSFET's bolted metal tab (which is its drain, switched +12 V) and under the bolt's nut, with only the thin solder mask between them | Bare board, no copper, under every tab and around every bolt on both sides; a system check keeps it that way |
+| **Found by the part fit check:** the Mega's and the modules' pin holes left 0.09 mm round a square pin; the MOSFETs' 1.1 mm holes left almost nothing round their legs; a 10 mm-wide 100 µF capacitor (some are) would hit the regulator; a long ACS712 module could cover its LINK holes | Pin holes 1.1 mm, MOSFET holes 1.3 mm, regulator moved 1.3 mm, LINK holes 35 mm from the pins; `tools/part_fit.py` checks every part at its largest size on every build |
 | **Found on review:** the board's posts were 2.5 mm too short: they left out the plastic strip of the male headers, which sits on top of the Mega's sockets | Posts 18.6 mm; the fit check passes at the new height |
 
 Checks on the design: every chip's pinout was compared by hand with its datasheet (ULN2803,
-LM393, PC817, IRF4905, R-78HB, the G2RL-2 relay's contacts, the sensor and gyro modules), and every
-hole size with its part's leg. KiCad's design-rule check reports **0 errors and 0 unconnected pads**
+LM393, PC817, IRF4905, R-78HB, the G2RL-2 relay's contacts, the sensor and gyro modules), and
+`tools/part_fit.py` checks every real part at the largest size it's sold in against its holes,
+its neighbours, the screw heads and the Mega underneath
+([report](../hardware/pcb/part_fit.md)). KiCad's design-rule check reports **0 errors and 0 unconnected pads**
 (`hardware/pcb/drc.txt`; the warnings left are text crossing pads, and library notices), the
 system check matches every pad to the circuit, and the box's fit check uses the real board.
 

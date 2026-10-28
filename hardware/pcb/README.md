@@ -39,6 +39,7 @@ corner and 5 mounting holes.
 | `rav4tcu.pretty/` | The board's own footprints: the Mega's pins, the current-sensor module, the gyro module |
 | `bom.csv` | Every part on the board with its reference, value and footprint |
 | `drc.txt` | KiCad's design-rule check report: 0 errors and 0 unconnected pads |
+| `part_fit.md` | **Will the real parts fit?** Every part checked at the largest size it's sold in: legs vs holes, bodies vs neighbours, heights. 0 problems |
 | `placement.png`, `routed.png` | Pictures of where every part goes, and of every track |
 
 The [shopping list](../../docs/04-shopping-list.md) has every part with where to buy it. The

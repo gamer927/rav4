@@ -238,8 +238,15 @@ The files are in `hardware/stl/`.
 
 **How it goes:** each step's parts are orange in its picture, and the ones you've already fitted
 are grey. Push each part into the holes with its name printed between them, from the top. Turn
-the board over, solder, snip. **Lowest parts first** (resistors and diodes, then the taller
-ones), so the board lies flat on the table while you solder.
+the board over, solder, snip, leaving **no more than 1.5 mm** of leg under the board (the Mega
+sits 11 mm below). **Lowest parts first** (resistors and diodes, then the taller ones), so the
+board lies flat on the table while you solder.
+
+**Before you solder a step,** push all of its parts in first and look: everything sits in its
+outline without touching its neighbour. Every part on the shopping list has been checked against
+the board at the largest size it's sold in ([part fit report](../hardware/pcb/part_fit.md)), so
+if something doesn't fit, it's a different part from the one on the list: check it before you
+solder it.
 
 **The board's front edge** is the one with the screw terminals. The **back-left corner** is cut
 away: that's where the Mega's USB socket comes up.
