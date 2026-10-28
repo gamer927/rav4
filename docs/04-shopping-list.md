@@ -13,15 +13,15 @@ Everything for the 1999 RAV4 transmission controller, including the 3D-printed h
 | 1. Brain and power | $72 |
 | 2. Solenoid control | $82 |
 | 3. Signal inputs | $42 |
-| 4. Boards and inside wiring | $66 |
+| 4. Boards and inside wiring | $68 |
 | 5. Car harness and connectors | $147 |
 | 6. Dash pod controls and screen | $63 |
 | 7. ATF temperature probe | $59 |
 | 8. 3D printing | $65 |
 | 9. Sequential shifter (Beavis Motorsport DIY) | $59 |
-| **All parts, including the shifter** | **$655** |
-| Without the shifter (no manual shifting) | $596 |
-| Without filament (if your printer comes with it) | $619 |
+| **All parts, including the shifter** | **$657** |
+| Without the shifter (no manual shifting) | $598 |
+| Without filament (if your printer comes with it) | $621 |
 | Tools, if you own none of them | $197 |
 
 Expect roughly **±25 %** depending on where you shop. Many packs leave spares, which is useful: you'll want a spare relay, MOSFET and buck module if something goes wrong.
@@ -81,15 +81,15 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 | ☐ | Extra 10 kΩ resistors | 20 total | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $4 | Most kits only have 10–20 of each value |
 | ☐ | 100 nF ceramic capacitors, 50 V | 11 | pack of 50 | Amazon (or AliExpress, cheaper but slower) | $5 |  |
 
-## 4. Boards and inside wiring — $66
+## 4. Boards and inside wiring — $68
 
 | ✓ | Item | Need | Buy | Where | Est. | Notes |
 |---|---|---|---|---|---|---|
 | ☐ | Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm | 1 + 1 | assorted pack | Amazon (or AliExpress, cheaper but slower) | $10 | Power board 9 × 15, logic board 7 × 9 |
 | ☐ | Screw terminals, 5.08 mm, 2- and 3-way, interlocking | 37 positions | pack of ~40 pieces | Amazon (or AliExpress, cheaper but slower) | $9 | KF301 / DG301 type |
 | ☐ | Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~10 cm plug to plug) | 1 + 1 | headers + 2 cables | Amazon (or AliExpress, cheaper but slower) | $12 | Or crimp your own from ribbon and IDC sockets |
-| ☐ | Silicone hook-up wire 22 AWG, 6 colours | ~5 m | kit | Amazon (or AliExpress, cheaper but slower) | $15 |  |
-| ☐ | Silicone wire 18 AWG, red/black/yellow | ~3 m | kit | Amazon (or AliExpress, cheaper but slower) | $14 | Board power paths and the dummy-load cable (heat-proof) |
+| ☐ | Silicone hook-up wire 22 AWG, 6 colours (the book calls it "thin wire") | ~5 m | kit | Amazon (or AliExpress, cheaper but slower) | $15 |  |
+| ☐ | Silicone wire 18 AWG, 6 colours (the book calls it "thick wire") | ~4 m | kit | Amazon (or AliExpress, cheaper but slower) | $16 | Board power paths and the dummy-load cable (heat-proof) |
 | ☐ | Double-sided foam mounting tape | 1 | roll | Amazon (or AliExpress, cheaper but slower) | $6 | Holds the current sensors and buck module |
 
 ## 5. Car harness and connectors — $147
@@ -178,7 +178,7 @@ Batching keeps shipping down: one **DigiKey or Mouser** order for the exact elec
 
 **DigiKey / Mouser** — 11 items, about $61: 1.5KE27A TVS diode; P6KE6.8A TVS diode; Resettable fuse (PTC), 0.25 A hold, radial; 1N5822 Schottky diode, 3 A; 100 µF 50 V electrolytic capacitor; Omron G2RL-2-DC12 relay (DPDT, 12 V); IRF4905 P-channel MOSFET, TO-220; ULN2803A driver, DIP-18; UF4007 fast diode; 15 Ω 50 W aluminium-housed resistor; BAT85 Schottky diode (DO-35).
 
-**Amazon (or AliExpress, cheaper but slower)** — 38 items, about $463: Arduino Mega 2560 R3; Prototype shield for the Mega ("Mega ProtoShield"); LM2596HV buck converter module, 4.5–60 V in; ACS712-05B current sensor module (5 A); 1 W zener diode kit (1N4728A–1N4764A); Finned aluminium heatsink, ≥ 100 × 100 × 25 mm; Thermal paste; PC817 optocoupler, DIP-4; LM393 comparator, DIP-8; 1N4148 diode; Resistor kit, 1/4 W 1 % metal film (600+ pcs); Extra 10 kΩ resistors; 100 nF ceramic capacitors, 50 V; Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm; Screw terminals, 5.08 mm, 2- and 3-way, interlocking; Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~10 cm plug to plug); Silicone hook-up wire 22 AWG, 6 colours; Silicone wire 18 AWG, red/black/yellow; Double-sided foam mounting tape; Deutsch DT connector kit, 2–12 way, with crimper; 18 AWG automotive wire, multi-colour kit; Shielded cable: 8-core 24 AWG, 4-core, 3-core; Heat-shrink assortment incl. adhesive-lined; Cable glands PG7 + PG9, nylon, with locknuts; 12 mm ON/OFF toggle, **2-pole** (DPDT or DPST), with flip-up safety cover; 6 mm mini toggle switch, MTS-101/102; 12 mm momentary push button, normally open; 2.42" OLED module, 128 × 64, SSD1309, I²C-capable; 1 µF capacitor (ceramic or electrolytic, 16 V+); GY-521 (MPU-6050) gyro module; DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C); PETG filament, 1 kg; M3 heat-set inserts (~4 mm OD); M3 screw kit with countersunk screws and nuts; V-155-1C25 roller-lever microswitch; M12 × 1.75 spring ball plungers (Kipp K0309 type); Compression springs, 1.8 mm wire, 14 mm OD, 40 mm long; Shift knob, M10 × 1.5 thread.
+**Amazon (or AliExpress, cheaper but slower)** — 38 items, about $465: Arduino Mega 2560 R3; Prototype shield for the Mega ("Mega ProtoShield"); LM2596HV buck converter module, 4.5–60 V in; ACS712-05B current sensor module (5 A); 1 W zener diode kit (1N4728A–1N4764A); Finned aluminium heatsink, ≥ 100 × 100 × 25 mm; Thermal paste; PC817 optocoupler, DIP-4; LM393 comparator, DIP-8; 1N4148 diode; Resistor kit, 1/4 W 1 % metal film (600+ pcs); Extra 10 kΩ resistors; 100 nF ceramic capacitors, 50 V; Perfboard, double-sided plated: 9 × 15 cm and 7 × 9 cm; Screw terminals, 5.08 mm, 2- and 3-way, interlocking; Box headers 2 × 13 and 2 × 8 + IDC ribbon cables (26 and 16 way, ~10 cm plug to plug); Silicone hook-up wire 22 AWG, 6 colours (the book calls it "thin wire"); Silicone wire 18 AWG, 6 colours (the book calls it "thick wire"); Double-sided foam mounting tape; Deutsch DT connector kit, 2–12 way, with crimper; 18 AWG automotive wire, multi-colour kit; Shielded cable: 8-core 24 AWG, 4-core, 3-core; Heat-shrink assortment incl. adhesive-lined; Cable glands PG7 + PG9, nylon, with locknuts; 12 mm ON/OFF toggle, **2-pole** (DPDT or DPST), with flip-up safety cover; 6 mm mini toggle switch, MTS-101/102; 12 mm momentary push button, normally open; 2.42" OLED module, 128 × 64, SSD1309, I²C-capable; 1 µF capacitor (ceramic or electrolytic, 16 V+); GY-521 (MPU-6050) gyro module; DS18B20 stainless probe, 6 mm, PTFE or silicone cable (125 °C); PETG filament, 1 kg; M3 heat-set inserts (~4 mm OD); M3 screw kit with countersunk screws and nuts; V-155-1C25 roller-lever microswitch; M12 × 1.75 spring ball plungers (Kipp K0309 type); Compression springs, 1.8 mm wire, 14 mm OD, 40 mm long; Shift knob, M10 × 1.5 thread.
 
 **Hardware store** — 8 items, about $61: Wago 221 lever-nut connectors, assorted; Brass barbed tee with a 1/8" NPT female side port; 1/8" NPT male × 6 mm compression fitting, brass; ATF-safe thread sealant (PTFE paste); M6 bolts + nuts (shifter); M5 bolts + large washers (mounting); M5 × 25 bolt + nyloc nut (pod hinge); Pivot: 12 mm OD tube, 64 mm long, 1.6 mm wall; or an M12 × 75 bolt + nyloc nut + 2 washers; M3 × 70 hex-head bolts + washers + nyloc nuts; M10 × 1.5 bolts: 2 × 30–35 mm (travel stops) + 1 × ~65 mm (cut into the knob stud).
 

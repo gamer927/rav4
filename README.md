@@ -121,7 +121,7 @@ outside on a finned heatsink. Print settings, hardware and assembly:
 
 - **Done:** full design, firmware and documentation.
   - `make check` runs it all: 1,256 unit-test checks, 24 whole-system scenarios (the real
-    firmware in a simulated car, with faults injected), and 497 cross-checks that the boards,
+    firmware in a simulated car, with faults injected), and nearly 500 cross-checks that the boards,
     pin map, firmware, screen text and 3D models agree. All pass
     ([system review](docs/06-system-review.md)).
   - The firmware compiles for the Arduino Mega 2560 without warnings (15 % flash, 51 % RAM).

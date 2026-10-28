@@ -5,12 +5,12 @@
 
 ![P1.1](build/power-P1-1.png)
 
-- [ ] **J1a**: +12 DRV screw terminal → col 3, row 2. X1-1 (5 A fuse)
-- [ ] **J1b**: +12 LOG screw terminal → col 5, row 2. X1-2 (2 A fuse)
-- [ ] **J1c**: GND screw terminal → col 7, row 2. X1-3 (body ground)
-- [ ] **TVS1**: 1.5KE27A diode → col 4, row 5 and col 4, row 11. Band (K) towards the back
-- [ ] **D1**: 1N5822 diode → col 7, row 5 and col 7, row 11. Band (K) towards the back
-- [ ] **TVS2**: 1.5KE27A diode → col 10, row 5 and col 10, row 11. Band (K) towards the back
+- [ ] **J1a**: +12 DRV screw terminal → col 3, row 2
+- [ ] **J1b**: +12 LOG screw terminal → col 5, row 2
+- [ ] **J1c**: GND screw terminal → col 7, row 2
+- [ ] **TVS1**: 1.5KE27A diode → col 4, row 5 and col 4, row 11. Stripe towards the back
+- [ ] **D1**: 1N5822 diode → col 7, row 5 and col 7, row 11. Stripe towards the back
+- [ ] **TVS2**: 1.5KE27A diode → col 10, row 5 and col 10, row 11. Stripe towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -18,12 +18,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P1.2](build/power-P1-2.png)
 
-- [ ] **C1**: 100 µF 50 V capacitor → col 4, row 15 and col 5, row 15. Long leg (+) left, stripe (−) right
-- [ ] **RB1**: 47k resistor (bands: yellow-violet-black-red-brown) → col 7, row 13 and col 7, row 17. Battery sense, top
-- [ ] **RB2**: 10k resistor (bands: brown-black-black-red-brown) → col 9, row 13 and col 9, row 17. Battery sense, bottom
+- [ ] **C1**: 100 µF 50 V capacitor → col 4, row 15 and col 5, row 15. Long leg left, striped side right
+- [ ] **RB1**: 47k resistor (bands: yellow-violet-black-red-brown) → col 7, row 13 and col 7, row 17
+- [ ] **RB2**: 10k resistor (bands: brown-black-black-red-brown) → col 9, row 13 and col 9, row 17
 - [ ] **C2**: 100 nF capacitor → col 5, row 18 and col 7, row 18
-- [ ] **Z1**: 1N4733A 5.1 V diode → col 11, row 19 and col 7, row 19. Band (K) left
-- [ ] **BUCK**: LM2596HV module module → stick it down with foam tape where shown. Foam tape; set to 5.0 V before wiring 5 V anywhere
+- [ ] **Z1**: 1N4733A 5.1 V diode → col 11, row 19 and col 7, row 19. Stripe left
+- [ ] **BUCK**: LM2596HV module → stick it down with foam tape where shown. Set to 5.0 V before wiring 5 V anywhere
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -31,20 +31,20 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P1.3](build/power-P1-3.png)
 
-- [ ] **1** yellow 18 AWG: **J1a** (+12 DRV) → **TVS1** band end
-- [ ] **2** yellow 20 AWG: **J1b** (+12 LOG) → **D1** plain end → **RB1** at col 7, row 13
-- [ ] **3** yellow 20 AWG: **D1** band end → **TVS2** band end → **C1** + leg → **BUCK** IN+
-- [ ] **4** black 18 AWG: **J1c** (GND) → **TVS1** plain end → **TVS2** plain end → **C1** − leg → **RB2** at col 9, row 17 → **C2** at col 7, row 18 → **Z1** plain end → **BUCK** IN-
-- [ ] **5** green 22 AWG: **RB1** at col 7, row 17 → **RB2** at col 9, row 13 → **C2** at col 5, row 18 → **Z1** band end
-- [ ] **6** black 20 AWG: **BUCK** IN- → **BUCK** OUT-
+- [ ] **1** thick yellow wire: **J1a** (+12 DRV) → **TVS1** stripe end
+- [ ] **2** thick yellow wire: **J1b** (+12 LOG) → **D1** plain end → **RB1** at col 7, row 13
+- [ ] **3** thick yellow wire: **D1** stripe end → **TVS2** stripe end → **C1** long leg → **BUCK** IN+
+- [ ] **4** thick black wire: **J1c** (GND) → **TVS1** plain end → **TVS2** plain end → **C1** short leg → **RB2** at col 9, row 17 → **C2** at col 7, row 18 → **Z1** plain end → **BUCK** IN-
+- [ ] **5** thin green wire: **RB1** at col 7, row 17 → **RB2** at col 9, row 13 → **C2** at col 5, row 18 → **Z1** stripe end
+- [ ] **6** thick black wire: **BUCK** IN- → **BUCK** OUT-
 
 <!-- STEP P2 -->
 #### P2.1 — Place 2 parts
 
 ![P2.1](build/power-P2-1.png)
 
-- [ ] **JA**: 26-pin box header box header → pin 1 in col 1, row 57. Notch facing the left edge; pin 1 (square pad) at the back
-- [ ] **TVS3**: P6KE6.8A diode → col 3, row 31 and col 3, row 35. Band (K) towards the back
+- [ ] **JA**: 26-pin box header (ribbon socket) → pin 1 in col 1, row 57. Notch facing the left edge; the square pad (pin 1) at the back
+- [ ] **TVS3**: P6KE6.8A diode → col 3, row 31 and col 3, row 35. Stripe towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -52,22 +52,22 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P2.2](build/power-P2-2.png)
 
-- [ ] **1** red 22 AWG: **BUCK** OUT+ → **JA** pin 1 → **JA** pin 3 → **TVS3** band end
-- [ ] **2** black 20 AWG: **TVS3** plain end → **J1c** (GND)
-- [ ] **3** black 22 AWG: **BUCK** OUT- → **JA** pin 2 → **JA** pin 4 → **JA** pin 16 → **JA** pin 23 → **JA** pin 24
-- [ ] **4** green 22 AWG: **Z1** band end → **JA** pin 19
+- [ ] **1** thin red wire: **BUCK** OUT+ → **JA** pin 1 → **JA** pin 3 → **TVS3** stripe end
+- [ ] **2** thick black wire: **TVS3** plain end → **J1c** (GND)
+- [ ] **3** thin black wire: **BUCK** OUT- → **JA** pin 2 → **JA** pin 4 → **JA** pin 16 → **JA** pin 23 → **JA** pin 24
+- [ ] **4** thin green wire: **Z1** stripe end → **JA** pin 19
 
 <!-- STEP P3 -->
 #### P3.1 — Place 6 parts
 
 ![P3.1](build/power-P3-1.png)
 
-- [ ] **U1**: ULN2803A chip → pin 1 in col 10, row 58. Notch / dot (pin 1) at the back-left
-- [ ] **RD1**: 10k resistor (bands: brown-black-black-red-brown) → col 5, row 57 and col 9, row 57. Pull-down, D6
-- [ ] **RD2**: 10k resistor (bands: brown-black-black-red-brown) → col 5, row 55 and col 9, row 55. Pull-down, D8
-- [ ] **RD3**: 10k resistor (bands: brown-black-black-red-brown) → col 5, row 53 and col 9, row 53. Pull-down, D9
-- [ ] **RD4**: 10k resistor (bands: brown-black-black-red-brown) → col 5, row 51 and col 9, row 51. Pull-down, D10
-- [ ] **K1**: G2RL-2 12 V relay → COIL1 in col 13, row 17. Coil end at the back
+- [ ] **U1**: ULN2803A chip → pin 1 in col 10, row 58. Notch or dot at the back-left
+- [ ] **RD1**: 10k resistor (bands: brown-black-black-red-brown) → col 5, row 57 and col 9, row 57
+- [ ] **RD2**: 10k resistor (bands: brown-black-black-red-brown) → col 5, row 55 and col 9, row 55
+- [ ] **RD3**: 10k resistor (bands: brown-black-black-red-brown) → col 5, row 53 and col 9, row 53
+- [ ] **RD4**: 10k resistor (bands: brown-black-black-red-brown) → col 5, row 51 and col 9, row 51
+- [ ] **K1**: G2RL-2 12 V relay → one coil pin in col 13, row 17. End with 2 pins at the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -75,12 +75,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P3.2](build/power-P3-2.png)
 
-- [ ] **K2**: G2RL-2 12 V relay → COIL1 in col 19, row 17. Coil end at the back
-- [ ] **K3**: G2RL-2 12 V relay → COIL1 in col 25, row 17. Coil end at the back
-- [ ] **J5a**: TO ON/OFF screw terminal → col 1, row 23. X4-7 (C7): out to the ON/OFF switch
-- [ ] **J5b**: FROM ON/OFF screw terminal → col 1, row 25. X4-8 (C8): back: relay power
-- [ ] **F2**: PTC 0.25 A resettable fuse → col 2, row 28 and col 2, row 30. Resettable fuse, either way round
-- [ ] **DF**: UF4007 diode → col 31, row 21 and col 31, row 17. Band (K) towards the front
+- [ ] **K2**: G2RL-2 12 V relay → one coil pin in col 19, row 17. End with 2 pins at the back
+- [ ] **K3**: G2RL-2 12 V relay → one coil pin in col 25, row 17. End with 2 pins at the back
+- [ ] **J5a**: TO ON/OFF screw terminal → col 1, row 23
+- [ ] **J5b**: FROM ON/OFF screw terminal → col 1, row 25
+- [ ] **F2**: PTC 0.25 A resettable fuse → col 2, row 28 and col 2, row 30. Either way round
+- [ ] **DF**: UF4007 diode → col 31, row 21 and col 31, row 17. Stripe towards the front
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -88,10 +88,10 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P3.3](build/power-P3-3.png)
 
-- [ ] **RK1**: 47k resistor (bands: yellow-violet-black-red-brown) → col 31, row 6 and col 31, row 10. Coil supply sense, top
-- [ ] **RK2**: 10k resistor (bands: brown-black-black-red-brown) → col 33, row 6 and col 33, row 10. Coil supply sense, bottom
+- [ ] **RK1**: 47k resistor (bands: yellow-violet-black-red-brown) → col 31, row 6 and col 31, row 10
+- [ ] **RK2**: 10k resistor (bands: brown-black-black-red-brown) → col 33, row 6 and col 33, row 10
 - [ ] **CK**: 100 nF capacitor → col 33, row 12 and col 33, row 14
-- [ ] **ZK**: 1N4733A 5.1 V diode → col 31, row 12 and col 31, row 16. Band (K) towards the back
+- [ ] **ZK**: 1N4733A 5.1 V diode → col 31, row 12 and col 31, row 16. Stripe towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -99,41 +99,41 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P3.4](build/power-P3-4.png)
 
-- [ ] **1** blue 22 AWG: **JA** pin 7 → **RD1** at col 9, row 57 → **U1** pin 1 → **U1** pin 2 → **U1** pin 3
-- [ ] **2** blue 22 AWG: **JA** pin 8 → **RD2** at col 9, row 55 → **U1** pin 4
-- [ ] **3** blue 22 AWG: **JA** pin 9 → **RD3** at col 9, row 53 → **U1** pin 5
-- [ ] **4** blue 22 AWG: **JA** pin 10 → **RD4** at col 9, row 51 → **U1** pin 6
-- [ ] **5** black 22 AWG: **JA** pin 16 → **RD1** at col 5, row 57 → **RD2** at col 5, row 55 → **RD3** at col 5, row 53 → **RD4** at col 5, row 51 → **U1** pin 9
-- [ ] **6** yellow 20 AWG: **TVS1** band end → **F2** 1
+- [ ] **1** thin blue wire: **JA** pin 7 → **RD1** at col 9, row 57 → **U1** pin 1 → **U1** pin 2 → **U1** pin 3
+- [ ] **2** thin blue wire: **JA** pin 8 → **RD2** at col 9, row 55 → **U1** pin 4
+- [ ] **3** thin blue wire: **JA** pin 9 → **RD3** at col 9, row 53 → **U1** pin 5
+- [ ] **4** thin blue wire: **JA** pin 10 → **RD4** at col 9, row 51 → **U1** pin 6
+- [ ] **5** thin black wire: **JA** pin 16 → **RD1** at col 5, row 57 → **RD2** at col 5, row 55 → **RD3** at col 5, row 53 → **RD4** at col 5, row 51 → **U1** pin 9
+- [ ] **6** thick yellow wire: **TVS1** stripe end → **F2** at col 2, row 28
 
 #### P3.5 — Solder 6 wires (bottom side)
 
 ![P3.5](build/power-P3-5.png)
 
-- [ ] **1** blue 20 AWG: **F2** 2 → **J5a** (TO ON/OFF)
-- [ ] **2** yellow 20 AWG: **J5b** (FROM ON/OFF) → **U1** pin 10 → **K1** COIL1 → **K2** COIL1 → **K3** COIL1 → **DF** band end → **RK1** at col 31, row 6
-- [ ] **3** green 22 AWG: **RK1** at col 31, row 10 → **RK2** at col 33, row 6 → **CK** at col 33, row 12 → **ZK** band end → **JA** pin 25
-- [ ] **4** black 20 AWG: **J1c** (GND) → **DF** plain end → **RK2** at col 33, row 10 → **CK** at col 33, row 14 → **ZK** plain end
-- [ ] **5** green 22 AWG: **U1** pin 18 → **K1** COIL2
-- [ ] **6** green 22 AWG: **U1** pin 17 → **K2** COIL2
+- [ ] **1** thick blue wire: **F2** at col 2, row 30 → **J5a** (TO ON/OFF)
+- [ ] **2** thick yellow wire: **J5b** (FROM ON/OFF) → **U1** pin 10 → **K1** at col 13, row 17 → **K2** at col 19, row 17 → **K3** at col 25, row 17 → **DF** stripe end → **RK1** at col 31, row 6
+- [ ] **3** thin green wire: **RK1** at col 31, row 10 → **RK2** at col 33, row 6 → **CK** at col 33, row 12 → **ZK** stripe end → **JA** pin 25
+- [ ] **4** thick black wire: **J1c** (GND) → **DF** plain end → **RK2** at col 33, row 10 → **CK** at col 33, row 14 → **ZK** plain end
+- [ ] **5** thin green wire: **U1** pin 18 → **K1** at col 16, row 17
+- [ ] **6** thin green wire: **U1** pin 17 → **K2** at col 22, row 17
 
 #### P3.6 — Solder 1 wire (bottom side)
 
 ![P3.6](build/power-P3-6.png)
 
-- [ ] **1** green 22 AWG: **U1** pin 16 → **K3** COIL2
+- [ ] **1** thin green wire: **U1** pin 16 → **K3** at col 28, row 17
 
 <!-- STEP P4 -->
 #### P4.1 — Place 6 parts
 
 ![P4.1](build/power-P4-1.png)
 
-- [ ] **J2a**: ECU S1 screw terminal → col 11, row 2. X2-1
-- [ ] **J2b**: ECU S2 screw terminal → col 13, row 2. X2-2
-- [ ] **J2c**: ECU SL screw terminal → col 15, row 2. X2-3
-- [ ] **J2d**: SOL S1 screw terminal → col 17, row 2. X2-4
-- [ ] **J2e**: SOL S2 screw terminal → col 19, row 2. X2-5
-- [ ] **J2f**: SOL SL screw terminal → col 21, row 2. X2-6
+- [ ] **J2a**: ECU S1 screw terminal → col 11, row 2
+- [ ] **J2b**: ECU S2 screw terminal → col 13, row 2
+- [ ] **J2c**: ECU SL screw terminal → col 15, row 2
+- [ ] **J2d**: SOL S1 screw terminal → col 17, row 2
+- [ ] **J2e**: SOL S2 screw terminal → col 19, row 2
+- [ ] **J2f**: SOL SL screw terminal → col 21, row 2
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -141,10 +141,10 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P4.2](build/power-P4-2.png)
 
-- [ ] **J4a**: LOAD 1 screw terminal → col 25, row 2. To dummy resistor 1
-- [ ] **J4b**: LOAD 2 screw terminal → col 27, row 2. To 2
-- [ ] **J4c**: LOAD 3 screw terminal → col 29, row 2. To 3
-- [ ] **J4d**: LOAD GND screw terminal → col 31, row 2. Resistors' common
+- [ ] **J4a**: LOAD 1 screw terminal → col 25, row 2
+- [ ] **J4b**: LOAD 2 screw terminal → col 27, row 2
+- [ ] **J4c**: LOAD 3 screw terminal → col 29, row 2
+- [ ] **J4d**: LOAD GND screw terminal → col 31, row 2
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -152,33 +152,33 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P4.3](build/power-P4-3.png)
 
-- [ ] **1** white 20 AWG: **J2a** (ECU S1) → **K1** COM-A
-- [ ] **2** white 20 AWG: **J2d** (SOL S1) → **K1** NC-A → **K1** NO-B
-- [ ] **3** white 20 AWG: **J4a** (LOAD 1) → **K1** NO-A
-- [ ] **4** white 20 AWG: **J2b** (ECU S2) → **K2** COM-A
-- [ ] **5** white 20 AWG: **J2e** (SOL S2) → **K2** NC-A → **K2** NO-B
-- [ ] **6** white 20 AWG: **J4b** (LOAD 2) → **K2** NO-A
+- [ ] **1** thick white wire: **J2a** (ECU S1) → **K1** at col 13, row 9
+- [ ] **2** thick white wire: **J2d** (SOL S1) → **K1** at col 13, row 11 → **K1** at col 16, row 7
+- [ ] **3** thick white wire: **J4a** (LOAD 1) → **K1** at col 13, row 7
+- [ ] **4** thick white wire: **J2b** (ECU S2) → **K2** at col 19, row 9
+- [ ] **5** thick white wire: **J2e** (SOL S2) → **K2** at col 19, row 11 → **K2** at col 22, row 7
+- [ ] **6** thick white wire: **J4b** (LOAD 2) → **K2** at col 19, row 7
 
 #### P4.4 — Solder 4 wires (bottom side)
 
 ![P4.4](build/power-P4-4.png)
 
-- [ ] **1** white 20 AWG: **J2c** (ECU SL) → **K3** COM-A
-- [ ] **2** white 20 AWG: **J2f** (SOL SL) → **K3** NC-A → **K3** NO-B
-- [ ] **3** white 20 AWG: **J4c** (LOAD 3) → **K3** NO-A
-- [ ] **4** black 18 AWG: **J1c** (GND) → **J4d** (LOAD GND)
+- [ ] **1** thick white wire: **J2c** (ECU SL) → **K3** at col 25, row 9
+- [ ] **2** thick white wire: **J2f** (SOL SL) → **K3** at col 25, row 11 → **K3** at col 28, row 7
+- [ ] **3** thick white wire: **J4c** (LOAD 3) → **K3** at col 25, row 7
+- [ ] **4** thick black wire: **J1c** (GND) → **J4d** (LOAD GND)
 
 <!-- STEP P5 -->
 #### P5.1 — Place 6 parts
 
 ![P5.1](build/power-P5-1.png)
 
-- [ ] **Q1**: IRF4905 MOSFET → G in col 13, row 21. Metal tab towards the back
-- [ ] **RG1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 12, row 23 and col 12, row 27. Gate drive
-- [ ] **RP1**: 10k resistor (bands: brown-black-black-red-brown) → col 14, row 23 and col 14, row 27. Gate pull-up (= off)
-- [ ] **ZG1**: 1N4744A 15 V diode → col 16, row 23 and col 16, row 27. Band (K) towards the back
-- [ ] **DF1**: UF4007 diode → col 12, row 29 and col 16, row 29. Band (K) right
-- [ ] **ZF1**: 1N4749A 24 V diode → col 16, row 31 and col 12, row 31. Band (K) left
+- [ ] **Q1**: IRF4905 transistor → left leg in col 13, row 21. Metal tab towards the back
+- [ ] **RG1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 12, row 23 and col 12, row 27
+- [ ] **RP1**: 10k resistor (bands: brown-black-black-red-brown) → col 14, row 23 and col 14, row 27
+- [ ] **ZG1**: 1N4744A 15 V diode → col 16, row 23 and col 16, row 27. Stripe towards the back
+- [ ] **DF1**: UF4007 diode → col 12, row 29 and col 16, row 29. Stripe right
+- [ ] **ZF1**: 1N4749A 24 V diode → col 16, row 31 and col 12, row 31. Stripe left
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -186,12 +186,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P5.2](build/power-P5-2.png)
 
-- [ ] **CS1**: ACS712-05B module → stick it down with foam tape where shown. Foam tape; screw terminals towards the front
-- [ ] **Q2**: IRF4905 MOSFET → G in col 19, row 21. Metal tab towards the back
-- [ ] **RG2**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 18, row 23 and col 18, row 27. Gate drive
-- [ ] **RP2**: 10k resistor (bands: brown-black-black-red-brown) → col 20, row 23 and col 20, row 27. Gate pull-up (= off)
-- [ ] **ZG2**: 1N4744A 15 V diode → col 22, row 23 and col 22, row 27. Band (K) towards the back
-- [ ] **DF2**: UF4007 diode → col 18, row 29 and col 22, row 29. Band (K) right
+- [ ] **CS1**: ACS712-05B module → stick it down with foam tape where shown. Screw terminals towards the front
+- [ ] **Q2**: IRF4905 transistor → left leg in col 19, row 21. Metal tab towards the back
+- [ ] **RG2**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 18, row 23 and col 18, row 27
+- [ ] **RP2**: 10k resistor (bands: brown-black-black-red-brown) → col 20, row 23 and col 20, row 27
+- [ ] **ZG2**: 1N4744A 15 V diode → col 22, row 23 and col 22, row 27. Stripe towards the back
+- [ ] **DF2**: UF4007 diode → col 18, row 29 and col 22, row 29. Stripe right
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -199,12 +199,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P5.3](build/power-P5-3.png)
 
-- [ ] **ZF2**: 1N4749A 24 V diode → col 22, row 31 and col 18, row 31. Band (K) left
-- [ ] **CS2**: ACS712-05B module → stick it down with foam tape where shown. Foam tape; screw terminals towards the front
-- [ ] **Q3**: IRF4905 MOSFET → G in col 25, row 21. Metal tab towards the back
-- [ ] **RG3**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 24, row 23 and col 24, row 27. Gate drive
-- [ ] **RP3**: 10k resistor (bands: brown-black-black-red-brown) → col 26, row 23 and col 26, row 27. Gate pull-up (= off)
-- [ ] **ZG3**: 1N4744A 15 V diode → col 28, row 23 and col 28, row 27. Band (K) towards the back
+- [ ] **ZF2**: 1N4749A 24 V diode → col 22, row 31 and col 18, row 31. Stripe left
+- [ ] **CS2**: ACS712-05B module → stick it down with foam tape where shown. Screw terminals towards the front
+- [ ] **Q3**: IRF4905 transistor → left leg in col 25, row 21. Metal tab towards the back
+- [ ] **RG3**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 24, row 23 and col 24, row 27
+- [ ] **RP3**: 10k resistor (bands: brown-black-black-red-brown) → col 26, row 23 and col 26, row 27
+- [ ] **ZG3**: 1N4744A 15 V diode → col 28, row 23 and col 28, row 27. Stripe towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -212,9 +212,9 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P5.4](build/power-P5-4.png)
 
-- [ ] **DF3**: UF4007 diode → col 24, row 29 and col 28, row 29. Band (K) right
-- [ ] **ZF3**: 1N4749A 24 V diode → col 28, row 31 and col 24, row 31. Band (K) left
-- [ ] **CS3**: ACS712-05B module → stick it down with foam tape where shown. Foam tape; screw terminals towards the front
+- [ ] **DF3**: UF4007 diode → col 24, row 29 and col 28, row 29. Stripe right
+- [ ] **ZF3**: 1N4749A 24 V diode → col 28, row 31 and col 24, row 31. Stripe left
+- [ ] **CS3**: ACS712-05B module → stick it down with foam tape where shown. Screw terminals towards the front
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -222,68 +222,68 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P5.5](build/power-P5-5.png)
 
-- [ ] **1** yellow 20 AWG: **TVS1** band end → **CS1** IP+
-- [ ] **2** yellow 20 AWG: **CS1** IP- → **Q1** S → **RP1** at col 14, row 27 → **ZG1** band end
-- [ ] **3** green 22 AWG: **Q1** G → **RP1** at col 14, row 23 → **ZG1** plain end → **RG1** at col 12, row 23
-- [ ] **4** green 22 AWG: **RG1** at col 12, row 27 → **U1** pin 15
-- [ ] **5** yellow 20 AWG: **Q1** D → **DF1** band end → **K1** COM-B
-- [ ] **6** green 22 AWG: **DF1** plain end → **ZF1** plain end
+- [ ] **1** thick yellow wire: **TVS1** stripe end → **CS1** IP+
+- [ ] **2** thick yellow wire: **CS1** IP- → **Q1** at col 15, row 21 → **RP1** at col 14, row 27 → **ZG1** stripe end
+- [ ] **3** thin green wire: **Q1** at col 13, row 21 → **RP1** at col 14, row 23 → **ZG1** plain end → **RG1** at col 12, row 23
+- [ ] **4** thin green wire: **RG1** at col 12, row 27 → **U1** pin 15
+- [ ] **5** thick yellow wire: **Q1** at col 14, row 21 → **DF1** stripe end → **K1** at col 16, row 9
+- [ ] **6** thin green wire: **DF1** plain end → **ZF1** plain end
 
 #### P5.6 — Solder 6 wires (bottom side)
 
 ![P5.6](build/power-P5-6.png)
 
-- [ ] **1** black 22 AWG: **J4d** (LOAD GND) → **ZF1** band end
-- [ ] **2** red 22 AWG: **JA** pin 1 → **CS1** VCC
-- [ ] **3** black 22 AWG: **JA** pin 2 → **CS1** GND
-- [ ] **4** blue 22 AWG: **CS1** OUT → **JA** pin 20
-- [ ] **5** yellow 20 AWG: **CS1** IP+ → **CS2** IP+
-- [ ] **6** yellow 20 AWG: **CS2** IP- → **Q2** S → **RP2** at col 20, row 27 → **ZG2** band end
+- [ ] **1** thin black wire: **J4d** (LOAD GND) → **ZF1** stripe end
+- [ ] **2** thin red wire: **JA** pin 1 → **CS1** VCC
+- [ ] **3** thin black wire: **JA** pin 2 → **CS1** GND
+- [ ] **4** thin blue wire: **CS1** OUT → **JA** pin 20
+- [ ] **5** thick yellow wire: **CS1** IP+ → **CS2** IP+
+- [ ] **6** thick yellow wire: **CS2** IP- → **Q2** at col 21, row 21 → **RP2** at col 20, row 27 → **ZG2** stripe end
 
 #### P5.7 — Solder 6 wires (bottom side)
 
 ![P5.7](build/power-P5-7.png)
 
-- [ ] **1** green 22 AWG: **Q2** G → **RP2** at col 20, row 23 → **ZG2** plain end → **RG2** at col 18, row 23
-- [ ] **2** green 22 AWG: **RG2** at col 18, row 27 → **U1** pin 14
-- [ ] **3** yellow 20 AWG: **Q2** D → **DF2** band end → **K2** COM-B
-- [ ] **4** green 22 AWG: **DF2** plain end → **ZF2** plain end
-- [ ] **5** black 22 AWG: **ZF1** band end → **ZF2** band end
-- [ ] **6** red 22 AWG: **CS1** VCC → **CS2** VCC
+- [ ] **1** thin green wire: **Q2** at col 19, row 21 → **RP2** at col 20, row 23 → **ZG2** plain end → **RG2** at col 18, row 23
+- [ ] **2** thin green wire: **RG2** at col 18, row 27 → **U1** pin 14
+- [ ] **3** thick yellow wire: **Q2** at col 20, row 21 → **DF2** stripe end → **K2** at col 22, row 9
+- [ ] **4** thin green wire: **DF2** plain end → **ZF2** plain end
+- [ ] **5** thin black wire: **ZF1** stripe end → **ZF2** stripe end
+- [ ] **6** thin red wire: **CS1** VCC → **CS2** VCC
 
 #### P5.8 — Solder 6 wires (bottom side)
 
 ![P5.8](build/power-P5-8.png)
 
-- [ ] **1** black 22 AWG: **CS1** GND → **CS2** GND
-- [ ] **2** blue 22 AWG: **CS2** OUT → **JA** pin 21
-- [ ] **3** yellow 20 AWG: **CS2** IP+ → **CS3** IP+
-- [ ] **4** yellow 20 AWG: **CS3** IP- → **Q3** S → **RP3** at col 26, row 27 → **ZG3** band end
-- [ ] **5** green 22 AWG: **Q3** G → **RP3** at col 26, row 23 → **ZG3** plain end → **RG3** at col 24, row 23
-- [ ] **6** green 22 AWG: **RG3** at col 24, row 27 → **U1** pin 13
+- [ ] **1** thin black wire: **CS1** GND → **CS2** GND
+- [ ] **2** thin blue wire: **CS2** OUT → **JA** pin 21
+- [ ] **3** thick yellow wire: **CS2** IP+ → **CS3** IP+
+- [ ] **4** thick yellow wire: **CS3** IP- → **Q3** at col 27, row 21 → **RP3** at col 26, row 27 → **ZG3** stripe end
+- [ ] **5** thin green wire: **Q3** at col 25, row 21 → **RP3** at col 26, row 23 → **ZG3** plain end → **RG3** at col 24, row 23
+- [ ] **6** thin green wire: **RG3** at col 24, row 27 → **U1** pin 13
 
 #### P5.9 — Solder 6 wires (bottom side)
 
 ![P5.9](build/power-P5-9.png)
 
-- [ ] **1** yellow 20 AWG: **Q3** D → **DF3** band end → **K3** COM-B
-- [ ] **2** green 22 AWG: **DF3** plain end → **ZF3** plain end
-- [ ] **3** black 22 AWG: **ZF2** band end → **ZF3** band end
-- [ ] **4** red 22 AWG: **CS2** VCC → **CS3** VCC
-- [ ] **5** black 22 AWG: **CS2** GND → **CS3** GND
-- [ ] **6** blue 22 AWG: **CS3** OUT → **JA** pin 22
+- [ ] **1** thick yellow wire: **Q3** at col 26, row 21 → **DF3** stripe end → **K3** at col 28, row 9
+- [ ] **2** thin green wire: **DF3** plain end → **ZF3** plain end
+- [ ] **3** thin black wire: **ZF2** stripe end → **ZF3** stripe end
+- [ ] **4** thin red wire: **CS2** VCC → **CS3** VCC
+- [ ] **5** thin black wire: **CS2** GND → **CS3** GND
+- [ ] **6** thin blue wire: **CS3** OUT → **JA** pin 22
 
 <!-- STEP P6 -->
 #### P6.1 — Place 6 parts
 
 ![P6.1](build/power-P6-1.png)
 
-- [ ] **J3a**: D screw terminal → col 1, row 20. X3-1 lever in D
-- [ ] **J3b**: STP screw terminal → col 1, row 18. X3-2 brake
-- [ ] **J3c**: E1 screw terminal → col 1, row 16. X3-3 ECM ground
-- [ ] **J3d**: SPD screw terminal → col 1, row 14. X3-4 speed
-- [ ] **J3e**: TAC screw terminal → col 1, row 12. X3-5 tach
-- [ ] **J3f**: VTA screw terminal → col 1, row 10. X3-6 throttle
+- [ ] **J3a**: D screw terminal → col 1, row 20
+- [ ] **J3b**: STP screw terminal → col 1, row 18
+- [ ] **J3c**: E1 screw terminal → col 1, row 16
+- [ ] **J3d**: SPD screw terminal → col 1, row 14
+- [ ] **J3e**: TAC screw terminal → col 1, row 12
+- [ ] **J3f**: VTA screw terminal → col 1, row 10
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -291,12 +291,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P6.2](build/power-P6-2.png)
 
-- [ ] **J3g**: E2 screw terminal → col 1, row 8. X3-7 throttle ground
-- [ ] **OK1**: PC817 chip → pin 1 in col 6, row 22. Dot (pin 1) top-left
-- [ ] **RI1**: 2.2k resistor (bands: red-red-black-brown-brown) → col 4, row 20 and col 4, row 24. Input
-- [ ] **DI1**: 1N4148 diode → col 5, row 23 and col 5, row 20. Band (K) towards the front
-- [ ] **RU1**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 20 and col 11, row 24. Output pull-up
-- [ ] **OK2**: PC817 chip → pin 1 in col 6, row 27. Dot (pin 1) top-left
+- [ ] **J3g**: E2 screw terminal → col 1, row 8
+- [ ] **OK1**: PC817 chip → pin 1 in col 6, row 22. Dot top-left
+- [ ] **RI1**: 2.2k resistor (bands: red-red-black-brown-brown) → col 4, row 20 and col 4, row 24
+- [ ] **DI1**: 1N4148 diode → col 5, row 23 and col 5, row 20. Stripe towards the front
+- [ ] **RU1**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 20 and col 11, row 24
+- [ ] **OK2**: PC817 chip → pin 1 in col 6, row 27. Dot top-left
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -304,12 +304,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P6.3](build/power-P6-3.png)
 
-- [ ] **RI2**: 2.2k resistor (bands: red-red-black-brown-brown) → col 4, row 25 and col 4, row 29. Input
-- [ ] **DI2**: 1N4148 diode → col 5, row 28 and col 5, row 25. Band (K) towards the front
-- [ ] **RU2**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 25 and col 11, row 29. Output pull-up
-- [ ] **OK3**: PC817 chip → pin 1 in col 6, row 32. Dot (pin 1) top-left
-- [ ] **RI3**: 2.2k resistor (bands: red-red-black-brown-brown) → col 4, row 30 and col 4, row 34. Input
-- [ ] **DI3**: 1N4148 diode → col 5, row 33 and col 5, row 30. Band (K) towards the front
+- [ ] **RI2**: 2.2k resistor (bands: red-red-black-brown-brown) → col 4, row 25 and col 4, row 29
+- [ ] **DI2**: 1N4148 diode → col 5, row 28 and col 5, row 25. Stripe towards the front
+- [ ] **RU2**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 25 and col 11, row 29
+- [ ] **OK3**: PC817 chip → pin 1 in col 6, row 32. Dot top-left
+- [ ] **RI3**: 2.2k resistor (bands: red-red-black-brown-brown) → col 4, row 30 and col 4, row 34
+- [ ] **DI3**: 1N4148 diode → col 5, row 33 and col 5, row 30. Stripe towards the front
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -317,12 +317,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P6.4](build/power-P6-4.png)
 
-- [ ] **RU3**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 30 and col 11, row 34. Output pull-up
-- [ ] **OK4**: PC817 chip → pin 1 in col 6, row 37. Dot (pin 1) top-left
-- [ ] **RI4**: 3.3k resistor (bands: orange-orange-black-brown-brown) → col 4, row 35 and col 4, row 39. Input
-- [ ] **DI4**: 1N4148 diode → col 5, row 38 and col 5, row 35. Band (K) towards the front
-- [ ] **RU4**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 35 and col 11, row 39. Output pull-up
-- [ ] **OK5**: PC817 chip → pin 1 in col 6, row 42. Dot (pin 1) top-left
+- [ ] **RU3**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 30 and col 11, row 34
+- [ ] **OK4**: PC817 chip → pin 1 in col 6, row 37. Dot top-left
+- [ ] **RI4**: 3.3k resistor (bands: orange-orange-black-brown-brown) → col 4, row 35 and col 4, row 39
+- [ ] **DI4**: 1N4148 diode → col 5, row 38 and col 5, row 35. Stripe towards the front
+- [ ] **RU4**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 35 and col 11, row 39
+- [ ] **OK5**: PC817 chip → pin 1 in col 6, row 42. Dot top-left
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -330,12 +330,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P6.5](build/power-P6-5.png)
 
-- [ ] **RI5**: 3.3k resistor (bands: orange-orange-black-brown-brown) → col 4, row 40 and col 4, row 44. Input
-- [ ] **DI5**: 1N4148 diode → col 5, row 43 and col 5, row 40. Band (K) towards the front
-- [ ] **RU5**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 40 and col 11, row 44. Output pull-up
-- [ ] **OK6**: PC817 chip → pin 1 in col 6, row 47. Dot (pin 1) top-left
-- [ ] **RI6**: 3.3k resistor (bands: orange-orange-black-brown-brown) → col 4, row 45 and col 4, row 49. Input
-- [ ] **DI6**: 1N4148 diode → col 5, row 48 and col 5, row 45. Band (K) towards the front
+- [ ] **RI5**: 3.3k resistor (bands: orange-orange-black-brown-brown) → col 4, row 40 and col 4, row 44
+- [ ] **DI5**: 1N4148 diode → col 5, row 43 and col 5, row 40. Stripe towards the front
+- [ ] **RU5**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 40 and col 11, row 44
+- [ ] **OK6**: PC817 chip → pin 1 in col 6, row 47. Dot top-left
+- [ ] **RI6**: 3.3k resistor (bands: orange-orange-black-brown-brown) → col 4, row 45 and col 4, row 49
+- [ ] **DI6**: 1N4148 diode → col 5, row 48 and col 5, row 45. Stripe towards the front
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -343,7 +343,7 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P6.6](build/power-P6-6.png)
 
-- [ ] **RU6**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 45 and col 11, row 49. Output pull-up
+- [ ] **RU6**: 10k resistor (bands: brown-black-black-red-brown) → col 11, row 45 and col 11, row 49
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -351,85 +351,85 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P6.7](build/power-P6-7.png)
 
-- [ ] **1** blue 22 AWG: **J3a** (D) → **RI1** at col 4, row 20
-- [ ] **2** green 22 AWG: **RI1** at col 4, row 24 → **OK1** pin 1 → **DI1** band end
-- [ ] **3** black 22 AWG: **OK1** pin 2 → **DI1** plain end → **OK1** pin 3
-- [ ] **4** blue 22 AWG: **OK1** pin 4 → **RU1** at col 11, row 20 → **JA** pin 12
-- [ ] **5** red 22 AWG: **JA** pin 3 → **RU1** at col 11, row 24
-- [ ] **6** black 22 AWG: **JA** pin 4 → **OK1** pin 3
+- [ ] **1** thin blue wire: **J3a** (D) → **RI1** at col 4, row 20
+- [ ] **2** thin green wire: **RI1** at col 4, row 24 → **OK1** pin 1 → **DI1** stripe end
+- [ ] **3** thin black wire: **OK1** pin 2 → **DI1** plain end → **OK1** pin 3
+- [ ] **4** thin blue wire: **OK1** pin 4 → **RU1** at col 11, row 20 → **JA** pin 12
+- [ ] **5** thin red wire: **JA** pin 3 → **RU1** at col 11, row 24
+- [ ] **6** thin black wire: **JA** pin 4 → **OK1** pin 3
 
 #### P6.8 — Solder 6 wires (bottom side)
 
 ![P6.8](build/power-P6-8.png)
 
-- [ ] **1** blue 22 AWG: **J3b** (STP) → **RI2** at col 4, row 25
-- [ ] **2** green 22 AWG: **RI2** at col 4, row 29 → **OK2** pin 1 → **DI2** band end
-- [ ] **3** black 22 AWG: **OK2** pin 2 → **DI2** plain end → **OK2** pin 3
-- [ ] **4** blue 22 AWG: **OK2** pin 4 → **RU2** at col 11, row 25 → **JA** pin 11
-- [ ] **5** red 22 AWG: **RU1** at col 11, row 24 → **RU2** at col 11, row 29
-- [ ] **6** black 22 AWG: **OK1** pin 3 → **OK2** pin 3
+- [ ] **1** thin blue wire: **J3b** (STP) → **RI2** at col 4, row 25
+- [ ] **2** thin green wire: **RI2** at col 4, row 29 → **OK2** pin 1 → **DI2** stripe end
+- [ ] **3** thin black wire: **OK2** pin 2 → **DI2** plain end → **OK2** pin 3
+- [ ] **4** thin blue wire: **OK2** pin 4 → **RU2** at col 11, row 25 → **JA** pin 11
+- [ ] **5** thin red wire: **RU1** at col 11, row 24 → **RU2** at col 11, row 29
+- [ ] **6** thin black wire: **OK1** pin 3 → **OK2** pin 3
 
 #### P6.9 — Solder 6 wires (bottom side)
 
 ![P6.9](build/power-P6-9.png)
 
-- [ ] **1** blue 22 AWG: **J3e** (TAC) → **RI3** at col 4, row 30
-- [ ] **2** green 22 AWG: **RI3** at col 4, row 34 → **OK3** pin 1 → **DI3** band end
-- [ ] **3** black 22 AWG: **OK3** pin 2 → **DI3** plain end → **OK3** pin 3
-- [ ] **4** blue 22 AWG: **OK3** pin 4 → **RU3** at col 11, row 30 → **JA** pin 6
-- [ ] **5** red 22 AWG: **RU2** at col 11, row 29 → **RU3** at col 11, row 34
-- [ ] **6** black 22 AWG: **OK2** pin 3 → **OK3** pin 3
+- [ ] **1** thin blue wire: **J3e** (TAC) → **RI3** at col 4, row 30
+- [ ] **2** thin green wire: **RI3** at col 4, row 34 → **OK3** pin 1 → **DI3** stripe end
+- [ ] **3** thin black wire: **OK3** pin 2 → **DI3** plain end → **OK3** pin 3
+- [ ] **4** thin blue wire: **OK3** pin 4 → **RU3** at col 11, row 30 → **JA** pin 6
+- [ ] **5** thin red wire: **RU2** at col 11, row 29 → **RU3** at col 11, row 34
+- [ ] **6** thin black wire: **OK2** pin 3 → **OK3** pin 3
 
 #### P6.10 — Solder 6 wires (bottom side)
 
 ![P6.10](build/power-P6-10.png)
 
-- [ ] **1** white 22 AWG: **K1** COM-A → **RI4** at col 4, row 35
-- [ ] **2** green 22 AWG: **RI4** at col 4, row 39 → **OK4** pin 1 → **DI4** band end
-- [ ] **3** black 22 AWG: **OK4** pin 2 → **DI4** plain end → **OK4** pin 3
-- [ ] **4** blue 22 AWG: **OK4** pin 4 → **RU4** at col 11, row 35 → **JA** pin 13
-- [ ] **5** red 22 AWG: **RU3** at col 11, row 34 → **RU4** at col 11, row 39
-- [ ] **6** black 22 AWG: **OK3** pin 3 → **OK4** pin 3
+- [ ] **1** thin white wire: **K1** at col 13, row 9 → **RI4** at col 4, row 35
+- [ ] **2** thin green wire: **RI4** at col 4, row 39 → **OK4** pin 1 → **DI4** stripe end
+- [ ] **3** thin black wire: **OK4** pin 2 → **DI4** plain end → **OK4** pin 3
+- [ ] **4** thin blue wire: **OK4** pin 4 → **RU4** at col 11, row 35 → **JA** pin 13
+- [ ] **5** thin red wire: **RU3** at col 11, row 34 → **RU4** at col 11, row 39
+- [ ] **6** thin black wire: **OK3** pin 3 → **OK4** pin 3
 
 #### P6.11 — Solder 6 wires (bottom side)
 
 ![P6.11](build/power-P6-11.png)
 
-- [ ] **1** white 22 AWG: **K2** COM-A → **RI5** at col 4, row 40
-- [ ] **2** green 22 AWG: **RI5** at col 4, row 44 → **OK5** pin 1 → **DI5** band end
-- [ ] **3** black 22 AWG: **OK5** pin 2 → **DI5** plain end → **OK5** pin 3
-- [ ] **4** blue 22 AWG: **OK5** pin 4 → **RU5** at col 11, row 40 → **JA** pin 14
-- [ ] **5** red 22 AWG: **RU4** at col 11, row 39 → **RU5** at col 11, row 44
-- [ ] **6** black 22 AWG: **OK4** pin 3 → **OK5** pin 3
+- [ ] **1** thin white wire: **K2** at col 19, row 9 → **RI5** at col 4, row 40
+- [ ] **2** thin green wire: **RI5** at col 4, row 44 → **OK5** pin 1 → **DI5** stripe end
+- [ ] **3** thin black wire: **OK5** pin 2 → **DI5** plain end → **OK5** pin 3
+- [ ] **4** thin blue wire: **OK5** pin 4 → **RU5** at col 11, row 40 → **JA** pin 14
+- [ ] **5** thin red wire: **RU4** at col 11, row 39 → **RU5** at col 11, row 44
+- [ ] **6** thin black wire: **OK4** pin 3 → **OK5** pin 3
 
 #### P6.12 — Solder 6 wires (bottom side)
 
 ![P6.12](build/power-P6-12.png)
 
-- [ ] **1** white 22 AWG: **K3** COM-A → **RI6** at col 4, row 45
-- [ ] **2** green 22 AWG: **RI6** at col 4, row 49 → **OK6** pin 1 → **DI6** band end
-- [ ] **3** black 22 AWG: **OK6** pin 2 → **DI6** plain end → **OK6** pin 3
-- [ ] **4** blue 22 AWG: **OK6** pin 4 → **RU6** at col 11, row 45 → **JA** pin 15
-- [ ] **5** red 22 AWG: **RU5** at col 11, row 44 → **RU6** at col 11, row 49
-- [ ] **6** black 22 AWG: **OK5** pin 3 → **OK6** pin 3
+- [ ] **1** thin white wire: **K3** at col 25, row 9 → **RI6** at col 4, row 45
+- [ ] **2** thin green wire: **RI6** at col 4, row 49 → **OK6** pin 1 → **DI6** stripe end
+- [ ] **3** thin black wire: **OK6** pin 2 → **DI6** plain end → **OK6** pin 3
+- [ ] **4** thin blue wire: **OK6** pin 4 → **RU6** at col 11, row 45 → **JA** pin 15
+- [ ] **5** thin red wire: **RU5** at col 11, row 44 → **RU6** at col 11, row 49
+- [ ] **6** thin black wire: **OK5** pin 3 → **OK6** pin 3
 
 #### P6.13 — Solder 1 wire (bottom side)
 
 ![P6.13](build/power-P6-13.png)
 
-- [ ] **1** black 20 AWG: **J3c** (E1) → **J1c** (GND)
+- [ ] **1** thick black wire: **J3c** (E1) → **J1c** (GND)
 
 <!-- STEP P7 -->
 #### P7.1 — Place 6 parts
 
 ![P7.1](build/power-P7-1.png)
 
-- [ ] **U2**: LM393 chip → pin 1 in col 30, row 45. Notch / dot (pin 1) top-left
-- [ ] **RC1**: 22k resistor (bands: red-red-black-red-brown) → col 30, row 22 and col 30, row 26. SPD in
-- [ ] **RC2**: 10k resistor (bands: brown-black-black-red-brown) → col 31, row 22 and col 31, row 26. SPD to ground
-- [ ] **Z2**: 1N4733A 5.1 V diode → col 32, row 22 and col 32, row 26. Band (K) towards the back
-- [ ] **RC3**: 1M resistor (bands: brown-black-black-yellow-brown) → col 33, row 22 and col 33, row 26. Hysteresis
-- [ ] **RC6**: 10k resistor (bands: brown-black-black-red-brown) → col 34, row 22 and col 34, row 26. Output pull-up
+- [ ] **U2**: LM393 chip → pin 1 in col 30, row 45. Notch or dot top-left
+- [ ] **RC1**: 22k resistor (bands: red-red-black-red-brown) → col 30, row 22 and col 30, row 26
+- [ ] **RC2**: 10k resistor (bands: brown-black-black-red-brown) → col 31, row 22 and col 31, row 26
+- [ ] **Z2**: 1N4733A 5.1 V diode → col 32, row 22 and col 32, row 26. Stripe towards the back
+- [ ] **RC3**: 1M resistor (bands: brown-black-black-yellow-brown) → col 33, row 22 and col 33, row 26
+- [ ] **RC6**: 10k resistor (bands: brown-black-black-red-brown) → col 34, row 22 and col 34, row 26
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -437,8 +437,8 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P7.2](build/power-P7-2.png)
 
-- [ ] **RC4**: 10k resistor (bands: brown-black-black-red-brown) → col 30, row 28 and col 30, row 32. Threshold, top
-- [ ] **RC5**: 1.8k resistor (bands: brown-grey-black-brown-brown) → col 31, row 28 and col 31, row 32. Threshold, bottom (0.76 V)
+- [ ] **RC4**: 10k resistor (bands: brown-black-black-red-brown) → col 30, row 28 and col 30, row 32
+- [ ] **RC5**: 1.8k resistor (bands: brown-grey-black-brown-brown) → col 31, row 28 and col 31, row 32
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -446,24 +446,24 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P7.3](build/power-P7-3.png)
 
-- [ ] **1** blue 22 AWG: **J3d** (SPD) → **RC1** at col 30, row 22
-- [ ] **2** green 22 AWG: **RC1** at col 30, row 26 → **RC2** at col 31, row 26 → **Z2** band end → **RC3** at col 33, row 26 → **U2** pin 3
-- [ ] **3** blue 22 AWG: **U2** pin 1 → **RC3** at col 33, row 22 → **RC6** at col 34, row 26 → **JA** pin 5
-- [ ] **4** green 22 AWG: **RC4** at col 30, row 28 → **RC5** at col 31, row 32 → **U2** pin 2
-- [ ] **5** red 22 AWG: **BUCK** OUT+ → **U2** pin 8 → **U2** pin 6 → **RC4** at col 30, row 32 → **RC6** at col 34, row 22
-- [ ] **6** black 22 AWG: **BUCK** OUT- → **U2** pin 4 → **U2** pin 5 → **RC5** at col 31, row 28 → **RC2** at col 31, row 22 → **Z2** plain end
+- [ ] **1** thin blue wire: **J3d** (SPD) → **RC1** at col 30, row 22
+- [ ] **2** thin green wire: **RC1** at col 30, row 26 → **RC2** at col 31, row 26 → **Z2** stripe end → **RC3** at col 33, row 26 → **U2** pin 3
+- [ ] **3** thin blue wire: **U2** pin 1 → **RC3** at col 33, row 22 → **RC6** at col 34, row 26 → **JA** pin 5
+- [ ] **4** thin green wire: **RC4** at col 30, row 28 → **RC5** at col 31, row 32 → **U2** pin 2
+- [ ] **5** thin red wire: **BUCK** OUT+ → **U2** pin 8 → **U2** pin 6 → **RC4** at col 30, row 32 → **RC6** at col 34, row 22
+- [ ] **6** thin black wire: **BUCK** OUT- → **U2** pin 4 → **U2** pin 5 → **RC5** at col 31, row 28 → **RC2** at col 31, row 22 → **Z2** plain end
 
 <!-- STEP P8 -->
 #### P8.1 — Place 6 parts
 
 ![P8.1](build/power-P8-1.png)
 
-- [ ] **RT1**: 10k resistor (bands: brown-black-black-red-brown) → col 32, row 28 and col 32, row 32. VTA series
-- [ ] **RT2**: 10k resistor (bands: brown-black-black-red-brown) → col 33, row 28 and col 33, row 32. E2 series
-- [ ] **C3**: 100 nF capacitor → col 34, row 28 and col 34, row 30. VTA filter
-- [ ] **C4**: 100 nF capacitor → col 30, row 34 and col 30, row 36. E2 filter
-- [ ] **DT1**: BAT85 diode → col 31, row 34 and col 31, row 37. VTA to 5 V; band (K) towards the back
-- [ ] **DT2**: BAT85 diode → col 32, row 37 and col 32, row 34. GND to VTA; band (K) towards the front
+- [ ] **RT1**: 10k resistor (bands: brown-black-black-red-brown) → col 32, row 28 and col 32, row 32
+- [ ] **RT2**: 10k resistor (bands: brown-black-black-red-brown) → col 33, row 28 and col 33, row 32
+- [ ] **C3**: 100 nF capacitor → col 34, row 28 and col 34, row 30
+- [ ] **C4**: 100 nF capacitor → col 30, row 34 and col 30, row 36
+- [ ] **DT1**: BAT85 diode → col 31, row 34 and col 31, row 37. Stripe towards the back
+- [ ] **DT2**: BAT85 diode → col 32, row 37 and col 32, row 34. Stripe towards the front
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -471,8 +471,8 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P8.2](build/power-P8-2.png)
 
-- [ ] **DT3**: BAT85 diode → col 33, row 34 and col 33, row 37. E2 to 5 V; band (K) towards the back
-- [ ] **DT4**: BAT85 diode → col 34, row 37 and col 34, row 34. GND to E2; band (K) towards the front
+- [ ] **DT3**: BAT85 diode → col 33, row 34 and col 33, row 37. Stripe towards the back
+- [ ] **DT4**: BAT85 diode → col 34, row 37 and col 34, row 34. Stripe towards the front
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -480,24 +480,24 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![P8.3](build/power-P8-3.png)
 
-- [ ] **1** blue 22 AWG: **J3f** (VTA) → **RT1** at col 32, row 28
-- [ ] **2** blue 22 AWG: **J3g** (E2) → **RT2** at col 33, row 28
-- [ ] **3** blue 22 AWG: **RT1** at col 32, row 32 → **C3** at col 34, row 28 → **DT1** plain end → **DT2** band end → **JA** pin 17
-- [ ] **4** blue 22 AWG: **RT2** at col 33, row 32 → **C4** at col 30, row 34 → **DT3** plain end → **DT4** band end → **JA** pin 18
-- [ ] **5** red 22 AWG: **U2** pin 8 → **DT1** band end → **DT3** band end
-- [ ] **6** black 22 AWG: **U2** pin 4 → **C3** at col 34, row 30 → **C4** at col 30, row 36 → **DT2** plain end → **DT4** plain end
+- [ ] **1** thin blue wire: **J3f** (VTA) → **RT1** at col 32, row 28
+- [ ] **2** thin blue wire: **J3g** (E2) → **RT2** at col 33, row 28
+- [ ] **3** thin blue wire: **RT1** at col 32, row 32 → **C3** at col 34, row 28 → **DT1** plain end → **DT2** stripe end → **JA** pin 17
+- [ ] **4** thin blue wire: **RT2** at col 33, row 32 → **C4** at col 30, row 34 → **DT3** plain end → **DT4** stripe end → **JA** pin 18
+- [ ] **5** thin red wire: **U2** pin 8 → **DT1** stripe end → **DT3** stripe end
+- [ ] **6** thin black wire: **U2** pin 4 → **C3** at col 34, row 30 → **C4** at col 30, row 36 → **DT2** plain end → **DT4** plain end
 
 <!-- STEP L1 -->
 #### L1.1 — Place 6 parts
 
 ![L1.1](build/logic-L1-1.png)
 
-- [ ] **X7a**: UP screw terminal → col 1, row 1. X7-1 shifter UP
-- [ ] **X7b**: DOWN screw terminal → col 3, row 1. X7-2 shifter DOWN
-- [ ] **X7c**: GND screw terminal → col 5, row 1. X7-3 shifter GND
-- [ ] **X4a**: C1 ECO screw terminal → col 7, row 1. X4-1: C1 ECO
-- [ ] **X4b**: C2 SPORT screw terminal → col 9, row 1. X4-2: C2 SPORT
-- [ ] **X4c**: C3 MANUAL screw terminal → col 11, row 1. X4-3: C3 MANUAL
+- [ ] **X7a**: UP screw terminal → col 1, row 1
+- [ ] **X7b**: DOWN screw terminal → col 3, row 1
+- [ ] **X7c**: GND screw terminal → col 5, row 1
+- [ ] **X4a**: C1 ECO screw terminal → col 7, row 1
+- [ ] **X4b**: C2 SPORT screw terminal → col 9, row 1
+- [ ] **X4c**: C3 MANUAL screw terminal → col 11, row 1
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -505,12 +505,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L1.2](build/logic-L1-2.png)
 
-- [ ] **X4d**: C4 TEST screw terminal → col 13, row 1. X4-4: C4 TEST
-- [ ] **X4e**: C5 ON/OFF screw terminal → col 15, row 1. X4-5: C5 ON/OFF
-- [ ] **X4f**: C6 GND screw terminal → col 17, row 1. X4-6: C6 GND
-- [ ] **X5a**: 5V screw terminal → col 21, row 1. X5-1 screen
-- [ ] **X5b**: GND screw terminal → col 23, row 1. X5-2 screen
-- [ ] **X5c**: SDA screw terminal → col 25, row 1. X5-3 screen
+- [ ] **X4d**: C4 TEST screw terminal → col 13, row 1
+- [ ] **X4e**: C5 ON/OFF screw terminal → col 15, row 1
+- [ ] **X4f**: C6 GND screw terminal → col 17, row 1
+- [ ] **X5a**: 5V screw terminal → col 21, row 1
+- [ ] **X5b**: GND screw terminal → col 23, row 1
+- [ ] **X5c**: SDA screw terminal → col 25, row 1
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -518,11 +518,11 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L1.3](build/logic-L1-3.png)
 
-- [ ] **X5d**: SCL screw terminal → col 27, row 1. X5-4 screen
-- [ ] **X6a**: 5V screw terminal → col 29, row 1. X6-1 ATF probe
-- [ ] **X6b**: GND screw terminal → col 31, row 1. X6-2 ATF probe
-- [ ] **X6c**: DQ screw terminal → col 33, row 1. X6-3 ATF probe
-- [ ] **JB**: 16-pin box header box header → pin 1 in col 9, row 24. Notch facing the back edge; pin 1 (square pad) at the right-hand end, back row
+- [ ] **X5d**: SCL screw terminal → col 27, row 1
+- [ ] **X6a**: 5V screw terminal → col 29, row 1
+- [ ] **X6b**: GND screw terminal → col 31, row 1
+- [ ] **X6c**: DQ screw terminal → col 33, row 1
+- [ ] **JB**: 16-pin box header (ribbon socket) → pin 1 in col 9, row 24. Notch facing the back edge; the square pad (pin 1) at the right-hand end, back row
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -530,22 +530,22 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L1.4](build/logic-L1-4.png)
 
-- [ ] **1** red 22 AWG: **JB** pin 1 → **X5a** (5V) → **X6a** (5V)
-- [ ] **2** black 22 AWG: **JB** pin 2 → **X7c** (GND) → **X4f** (C6 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
-- [ ] **3** blue 22 AWG: **JB** pin 11 → **X5c** (SDA)
-- [ ] **4** blue 22 AWG: **JB** pin 12 → **X5d** (SCL)
+- [ ] **1** thin red wire: **JB** pin 1 → **X5a** (5V) → **X6a** (5V)
+- [ ] **2** thin black wire: **JB** pin 2 → **X7c** (GND) → **X4f** (C6 GND) → **X5b** (GND) → **X6b** (GND) → **JB** pin 13
+- [ ] **3** thin blue wire: **JB** pin 11 → **X5c** (SDA)
+- [ ] **4** thin blue wire: **JB** pin 12 → **X5d** (SCL)
 
 <!-- STEP L2 -->
 #### L2.1 — Place 6 parts
 
 ![L2.1](build/logic-L2-1.png)
 
-- [ ] **RU1**: 2.2k resistor (bands: red-red-black-brown-brown) → col 1, row 4 and col 1, row 8. Pull-up
-- [ ] **RS1**: 1k resistor (bands: brown-black-black-brown-brown) → col 2, row 9 and col 2, row 13. Series
+- [ ] **RU1**: 2.2k resistor (bands: red-red-black-brown-brown) → col 1, row 4 and col 1, row 8
+- [ ] **RS1**: 1k resistor (bands: brown-black-black-brown-brown) → col 2, row 9 and col 2, row 13
 - [ ] **CF1**: 100 nF capacitor → col 1, row 14 and col 1, row 16
-- [ ] **DH1**: BAT85 diode → col 2, row 15 and col 2, row 18. Band (K) towards the back
-- [ ] **DL1**: BAT85 diode → col 1, row 18 and col 1, row 21. Band (K) towards the back
-- [ ] **RU2**: 2.2k resistor (bands: red-red-black-brown-brown) → col 3, row 4 and col 3, row 8. Pull-up
+- [ ] **DH1**: BAT85 diode → col 2, row 15 and col 2, row 18. Stripe towards the back
+- [ ] **DL1**: BAT85 diode → col 1, row 18 and col 1, row 21. Stripe towards the back
+- [ ] **RU2**: 2.2k resistor (bands: red-red-black-brown-brown) → col 3, row 4 and col 3, row 8
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -553,12 +553,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.2](build/logic-L2-2.png)
 
-- [ ] **RS2**: 1k resistor (bands: brown-black-black-brown-brown) → col 4, row 9 and col 4, row 13. Series
+- [ ] **RS2**: 1k resistor (bands: brown-black-black-brown-brown) → col 4, row 9 and col 4, row 13
 - [ ] **CF2**: 100 nF capacitor → col 3, row 14 and col 3, row 16
-- [ ] **DH2**: BAT85 diode → col 4, row 15 and col 4, row 18. Band (K) towards the back
-- [ ] **DL2**: BAT85 diode → col 3, row 18 and col 3, row 21. Band (K) towards the back
-- [ ] **RU3**: 2.2k resistor (bands: red-red-black-brown-brown) → col 7, row 4 and col 7, row 8. Pull-up
-- [ ] **RS3**: 1k resistor (bands: brown-black-black-brown-brown) → col 8, row 9 and col 8, row 13. Series
+- [ ] **DH2**: BAT85 diode → col 4, row 15 and col 4, row 18. Stripe towards the back
+- [ ] **DL2**: BAT85 diode → col 3, row 18 and col 3, row 21. Stripe towards the back
+- [ ] **RU3**: 2.2k resistor (bands: red-red-black-brown-brown) → col 7, row 4 and col 7, row 8
+- [ ] **RS3**: 1k resistor (bands: brown-black-black-brown-brown) → col 8, row 9 and col 8, row 13
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -567,10 +567,10 @@ Push the legs through, bend them out a little underneath, solder, snip.
 ![L2.3](build/logic-L2-3.png)
 
 - [ ] **CF3**: 100 nF capacitor → col 7, row 14 and col 7, row 16
-- [ ] **DH3**: BAT85 diode → col 8, row 15 and col 8, row 18. Band (K) towards the back
-- [ ] **DL3**: BAT85 diode → col 7, row 18 and col 7, row 21. Band (K) towards the back
-- [ ] **RU4**: 2.2k resistor (bands: red-red-black-brown-brown) → col 9, row 4 and col 9, row 8. Pull-up
-- [ ] **RS4**: 1k resistor (bands: brown-black-black-brown-brown) → col 10, row 9 and col 10, row 13. Series
+- [ ] **DH3**: BAT85 diode → col 8, row 15 and col 8, row 18. Stripe towards the back
+- [ ] **DL3**: BAT85 diode → col 7, row 18 and col 7, row 21. Stripe towards the back
+- [ ] **RU4**: 2.2k resistor (bands: red-red-black-brown-brown) → col 9, row 4 and col 9, row 8
+- [ ] **RS4**: 1k resistor (bands: brown-black-black-brown-brown) → col 10, row 9 and col 10, row 13
 - [ ] **CF4**: 100 nF capacitor → col 9, row 14 and col 9, row 16
 
 Push the legs through, bend them out a little underneath, solder, snip.
@@ -579,12 +579,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.4](build/logic-L2-4.png)
 
-- [ ] **DH4**: BAT85 diode → col 10, row 15 and col 10, row 18. Band (K) towards the back
-- [ ] **DL4**: BAT85 diode → col 9, row 18 and col 9, row 21. Band (K) towards the back
-- [ ] **RU5**: 2.2k resistor (bands: red-red-black-brown-brown) → col 11, row 4 and col 11, row 8. Pull-up
-- [ ] **RS5**: 1k resistor (bands: brown-black-black-brown-brown) → col 12, row 9 and col 12, row 13. Series
+- [ ] **DH4**: BAT85 diode → col 10, row 15 and col 10, row 18. Stripe towards the back
+- [ ] **DL4**: BAT85 diode → col 9, row 18 and col 9, row 21. Stripe towards the back
+- [ ] **RU5**: 2.2k resistor (bands: red-red-black-brown-brown) → col 11, row 4 and col 11, row 8
+- [ ] **RS5**: 1k resistor (bands: brown-black-black-brown-brown) → col 12, row 9 and col 12, row 13
 - [ ] **CF5**: 100 nF capacitor → col 11, row 14 and col 11, row 16
-- [ ] **DH5**: BAT85 diode → col 12, row 15 and col 12, row 18. Band (K) towards the back
+- [ ] **DH5**: BAT85 diode → col 12, row 15 and col 12, row 18. Stripe towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -592,12 +592,12 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.5](build/logic-L2-5.png)
 
-- [ ] **DL5**: BAT85 diode → col 11, row 18 and col 11, row 21. Band (K) towards the back
-- [ ] **RU6**: 2.2k resistor (bands: red-red-black-brown-brown) → col 13, row 4 and col 13, row 8. Pull-up
-- [ ] **RS6**: 1k resistor (bands: brown-black-black-brown-brown) → col 14, row 9 and col 14, row 13. Series
+- [ ] **DL5**: BAT85 diode → col 11, row 18 and col 11, row 21. Stripe towards the back
+- [ ] **RU6**: 2.2k resistor (bands: red-red-black-brown-brown) → col 13, row 4 and col 13, row 8
+- [ ] **RS6**: 1k resistor (bands: brown-black-black-brown-brown) → col 14, row 9 and col 14, row 13
 - [ ] **CF6**: 100 nF capacitor → col 13, row 14 and col 13, row 16
-- [ ] **DH6**: BAT85 diode → col 14, row 15 and col 14, row 18. Band (K) towards the back
-- [ ] **DL6**: BAT85 diode → col 13, row 18 and col 13, row 21. Band (K) towards the back
+- [ ] **DH6**: BAT85 diode → col 14, row 15 and col 14, row 18. Stripe towards the back
+- [ ] **DL6**: BAT85 diode → col 13, row 18 and col 13, row 21. Stripe towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -605,11 +605,11 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.6](build/logic-L2-6.png)
 
-- [ ] **RU7**: 2.2k resistor (bands: red-red-black-brown-brown) → col 15, row 4 and col 15, row 8. Pull-up
-- [ ] **RS7**: 1k resistor (bands: brown-black-black-brown-brown) → col 16, row 9 and col 16, row 13. Series
+- [ ] **RU7**: 2.2k resistor (bands: red-red-black-brown-brown) → col 15, row 4 and col 15, row 8
+- [ ] **RS7**: 1k resistor (bands: brown-black-black-brown-brown) → col 16, row 9 and col 16, row 13
 - [ ] **CF7**: 100 nF capacitor → col 15, row 14 and col 15, row 16
-- [ ] **DH7**: BAT85 diode → col 16, row 15 and col 16, row 18. Band (K) towards the back
-- [ ] **DL7**: BAT85 diode → col 15, row 18 and col 15, row 21. Band (K) towards the back
+- [ ] **DH7**: BAT85 diode → col 16, row 15 and col 16, row 18. Stripe towards the back
+- [ ] **DL7**: BAT85 diode → col 15, row 18 and col 15, row 21. Stripe towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -617,41 +617,41 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L2.7](build/logic-L2-7.png)
 
-- [ ] **1** blue 22 AWG: **X7a** (UP) → **RU1** at col 1, row 4 → **RS1** at col 2, row 9
-- [ ] **2** blue 22 AWG: **RS1** at col 2, row 13 → **DH1** plain end → **CF1** at col 1, row 14 → **DL1** band end → **JB** pin 3
-- [ ] **3** blue 22 AWG: **X7b** (DOWN) → **RU2** at col 3, row 4 → **RS2** at col 4, row 9
-- [ ] **4** blue 22 AWG: **RS2** at col 4, row 13 → **DH2** plain end → **CF2** at col 3, row 14 → **DL2** band end → **JB** pin 4
-- [ ] **5** blue 22 AWG: **X4a** (C1 ECO) → **RU3** at col 7, row 4 → **RS3** at col 8, row 9
-- [ ] **6** blue 22 AWG: **RS3** at col 8, row 13 → **DH3** plain end → **CF3** at col 7, row 14 → **DL3** band end → **JB** pin 5
+- [ ] **1** thin blue wire: **X7a** (UP) → **RU1** at col 1, row 4 → **RS1** at col 2, row 9
+- [ ] **2** thin blue wire: **RS1** at col 2, row 13 → **DH1** plain end → **CF1** at col 1, row 14 → **DL1** stripe end → **JB** pin 3
+- [ ] **3** thin blue wire: **X7b** (DOWN) → **RU2** at col 3, row 4 → **RS2** at col 4, row 9
+- [ ] **4** thin blue wire: **RS2** at col 4, row 13 → **DH2** plain end → **CF2** at col 3, row 14 → **DL2** stripe end → **JB** pin 4
+- [ ] **5** thin blue wire: **X4a** (C1 ECO) → **RU3** at col 7, row 4 → **RS3** at col 8, row 9
+- [ ] **6** thin blue wire: **RS3** at col 8, row 13 → **DH3** plain end → **CF3** at col 7, row 14 → **DL3** stripe end → **JB** pin 5
 
 #### L2.8 — Solder 6 wires (bottom side)
 
 ![L2.8](build/logic-L2-8.png)
 
-- [ ] **1** blue 22 AWG: **X4b** (C2 SPORT) → **RU4** at col 9, row 4 → **RS4** at col 10, row 9
-- [ ] **2** blue 22 AWG: **RS4** at col 10, row 13 → **DH4** plain end → **CF4** at col 9, row 14 → **DL4** band end → **JB** pin 6
-- [ ] **3** blue 22 AWG: **X4c** (C3 MANUAL) → **RU5** at col 11, row 4 → **RS5** at col 12, row 9
-- [ ] **4** blue 22 AWG: **RS5** at col 12, row 13 → **DH5** plain end → **CF5** at col 11, row 14 → **DL5** band end → **JB** pin 15
-- [ ] **5** blue 22 AWG: **X4d** (C4 TEST) → **RU6** at col 13, row 4 → **RS6** at col 14, row 9
-- [ ] **6** blue 22 AWG: **RS6** at col 14, row 13 → **DH6** plain end → **CF6** at col 13, row 14 → **DL6** band end → **JB** pin 8
+- [ ] **1** thin blue wire: **X4b** (C2 SPORT) → **RU4** at col 9, row 4 → **RS4** at col 10, row 9
+- [ ] **2** thin blue wire: **RS4** at col 10, row 13 → **DH4** plain end → **CF4** at col 9, row 14 → **DL4** stripe end → **JB** pin 6
+- [ ] **3** thin blue wire: **X4c** (C3 MANUAL) → **RU5** at col 11, row 4 → **RS5** at col 12, row 9
+- [ ] **4** thin blue wire: **RS5** at col 12, row 13 → **DH5** plain end → **CF5** at col 11, row 14 → **DL5** stripe end → **JB** pin 15
+- [ ] **5** thin blue wire: **X4d** (C4 TEST) → **RU6** at col 13, row 4 → **RS6** at col 14, row 9
+- [ ] **6** thin blue wire: **RS6** at col 14, row 13 → **DH6** plain end → **CF6** at col 13, row 14 → **DL6** stripe end → **JB** pin 8
 
 #### L2.9 — Solder 4 wires (bottom side)
 
 ![L2.9](build/logic-L2-9.png)
 
-- [ ] **1** blue 22 AWG: **X4e** (C5 ON/OFF) → **RU7** at col 15, row 4 → **RS7** at col 16, row 9
-- [ ] **2** blue 22 AWG: **RS7** at col 16, row 13 → **DH7** plain end → **CF7** at col 15, row 14 → **DL7** band end → **JB** pin 7
-- [ ] **3** red 22 AWG: **JB** pin 1 → **RU1** at col 1, row 8 → **RU2** at col 3, row 8 → **RU3** at col 7, row 8 → **RU4** at col 9, row 8 → **RU5** at col 11, row 8 → **RU6** at col 13, row 8 → **RU7** at col 15, row 8 → **DH7** band end → **DH6** band end → **DH5** band end → **DH4** band end → **DH3** band end → **DH2** band end → **DH1** band end
-- [ ] **4** black 22 AWG: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **DL7** plain end → **CF7** at col 15, row 16 → **CF6** at col 13, row 16 → **CF5** at col 11, row 16 → **CF4** at col 9, row 16 → **CF3** at col 7, row 16 → **CF2** at col 3, row 16 → **CF1** at col 1, row 16
+- [ ] **1** thin blue wire: **X4e** (C5 ON/OFF) → **RU7** at col 15, row 4 → **RS7** at col 16, row 9
+- [ ] **2** thin blue wire: **RS7** at col 16, row 13 → **DH7** plain end → **CF7** at col 15, row 14 → **DL7** stripe end → **JB** pin 7
+- [ ] **3** thin red wire: **JB** pin 1 → **RU1** at col 1, row 8 → **RU2** at col 3, row 8 → **RU3** at col 7, row 8 → **RU4** at col 9, row 8 → **RU5** at col 11, row 8 → **RU6** at col 13, row 8 → **RU7** at col 15, row 8 → **DH7** stripe end → **DH6** stripe end → **DH5** stripe end → **DH4** stripe end → **DH3** stripe end → **DH2** stripe end → **DH1** stripe end
+- [ ] **4** thin black wire: **JB** pin 14 → **DL1** plain end → **DL2** plain end → **DL3** plain end → **DL4** plain end → **DL5** plain end → **DL6** plain end → **DL7** plain end → **CF7** at col 15, row 16 → **CF6** at col 13, row 16 → **CF5** at col 11, row 16 → **CF4** at col 9, row 16 → **CF3** at col 7, row 16 → **CF2** at col 3, row 16 → **CF1** at col 1, row 16
 
 <!-- STEP L3 -->
 #### L3.1 — Place 3 parts
 
 ![L3.1](build/logic-L3-1.png)
 
-- [ ] **RA1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 29, row 5 and col 29, row 9. ATF pull-up
-- [ ] **RA2**: 100 resistor (bands: brown-black-black-black-brown) → col 31, row 5 and col 31, row 9. ATF series
-- [ ] **ZA**: 1N4733A 5.1 V diode → col 33, row 5 and col 33, row 9. Band (K) towards the back
+- [ ] **RA1**: 4.7k resistor (bands: yellow-violet-black-brown-brown) → col 29, row 5 and col 29, row 9
+- [ ] **RA2**: 100 resistor (bands: brown-black-black-black-brown) → col 31, row 5 and col 31, row 9
+- [ ] **ZA**: 1N4733A 5.1 V diode → col 33, row 5 and col 33, row 9. Stripe towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
@@ -659,10 +659,10 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L3.2](build/logic-L3-2.png)
 
-- [ ] **1** green 22 AWG: **X6c** (DQ) → **RA1** at col 29, row 5 → **RA2** at col 31, row 5 → **ZA** band end
-- [ ] **2** blue 22 AWG: **RA2** at col 31, row 9 → **JB** pin 10
-- [ ] **3** red 22 AWG: **X6a** (5V) → **RA1** at col 29, row 9
-- [ ] **4** black 22 AWG: **X6b** (GND) → **ZA** plain end
+- [ ] **1** thin green wire: **X6c** (DQ) → **RA1** at col 29, row 5 → **RA2** at col 31, row 5 → **ZA** stripe end
+- [ ] **2** thin blue wire: **RA2** at col 31, row 9 → **JB** pin 10
+- [ ] **3** thin red wire: **X6a** (5V) → **RA1** at col 29, row 9
+- [ ] **4** thin black wire: **X6b** (GND) → **ZA** plain end
 
 <!-- STEP L4 -->
 #### L4.1 — Place 1 part
@@ -677,10 +677,10 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 ![L4.2](build/logic-L4-2.png)
 
-- [ ] **1** red 22 AWG: **X5a** (5V) → **GYRO** VCC
-- [ ] **2** black 22 AWG: **X5b** (GND) → **GYRO** GND
-- [ ] **3** blue 22 AWG: **X5d** (SCL) → **GYRO** SCL
-- [ ] **4** blue 22 AWG: **X5c** (SDA) → **GYRO** SDA
+- [ ] **1** thin red wire: **X5a** (5V) → **GYRO** VCC
+- [ ] **2** thin black wire: **X5b** (GND) → **GYRO** GND
+- [ ] **3** thin blue wire: **X5d** (SCL) → **GYRO** SCL
+- [ ] **4** thin blue wire: **X5c** (SDA) → **GYRO** SDA
 
 <!-- STEP HUB -->
 **Header A** (26-way, to the power board):

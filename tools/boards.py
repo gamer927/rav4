@@ -425,10 +425,9 @@ class Board:
                 ax.text(8, y, str(i + 1), ha="center", va="center", fontsize=9, fontweight="bold",
                         bbox=dict(boxstyle="circle,pad=0.3", fc="white", ec="#222", lw=1.0))
                 ax.add_patch(Rectangle((14, y - 1.2), 12, 2.4, fc=rgb, ec="#222", lw=0.6))
-                ax.text(30, y + row_h * 0.15, f"{name} wire, {it['gauge']} AWG", fontsize=8.5, fontweight="bold",
-                        va="center")
-                ax.text(30, y - row_h * 0.2, f"{len(it['nodes'])} stops: {it['net']}", fontsize=7, va="center",
-                        color="#333")
+                ax.text(30, y + row_h * 0.15, f"{thickness(it['gauge'])} {name} wire", fontsize=8.5,
+                        fontweight="bold", va="center")
+                ax.text(30, y - row_h * 0.2, f"{len(it['nodes'])} stops", fontsize=7, va="center", color="#333")
 
     def render(self):
         os.makedirs(OUT, exist_ok=True)
@@ -482,12 +481,13 @@ class Board:
         k = p.fp["kind"]
         if k == "TB":
             return f"**{ref}** ({p.value})"
-        if k in ("R", "C"):
+        if k in ("R", "C", "PTC", "K", "Q"):
+            # no markings on the part to go by: name the hole instead
             return f"**{ref}** at {self.hole(p.pins()[pin])}"
         if k == "D":
-            return f"**{ref}** {'band end' if pin == 'K' else 'plain end'}"
+            return f"**{ref}** {'stripe end' if pin == 'K' else 'plain end'}"
         if k == "CE":
-            return f"**{ref}** {'+ leg' if pin == '+' else '− leg'}"
+            return f"**{ref}** {'long leg' if pin == '+' else 'short leg'}"
         if k in ("IC", "J"):
             return f"**{ref}** pin {pin}"
         return f"**{ref}** {pin.replace('_', '-')}"
@@ -509,12 +509,18 @@ class Board:
                         where = " and ".join(self.hole(v) for v in pins.values())
                     else:
                         first = list(pins.items())[0]
-                        name = f"pin {first[0]}" if p.fp["kind"] in ("IC", "J") else first[0].replace("_", "-")
+                        name = {"IC": "pin 1", "J": "pin 1", "K": "one coil pin", "Q": "left leg"}.get(
+                            p.fp["kind"], first[0])
                         where = f"{name} in {self.hole(first[1])}"
                     what = PART_WORDS.get(p.fp["kind"], "part")
+                    if p.value.lower().endswith(what):
+                        what = ""
+                    elif p.fp["kind"] == "J":
+                        what = f"({what})"
                     band = f" (bands: {bands_text(p.value)})" if p.fp["kind"] == "R" else ""
-                    note = f". {p.note[0].upper() + p.note[1:]}" if p.note else ""
-                    lines.append(f"- [ ] **{p.ref}**: {p.value} {what}{band} → {where}{note}")
+                    note = plain_note(p.note)
+                    note = f". {note[0].upper() + note[1:]}" if note else ""
+                    lines.append(f"- [ ] **{p.ref}**: {p.value} {what}{band} → {where}{note}".replace("  ", " "))
                 lines.append("")
                 lines.append("Push the legs through, bend them out a little underneath, solder, snip.")
             else:
@@ -525,7 +531,7 @@ class Board:
                 for i, w in enumerate(items, 1):
                     name, _ = wire_colour(w["net"])
                     chain = " → ".join(self.node_text(n) for n in w["nodes"])
-                    lines.append(f"- [ ] **{i}** {name} {w['gauge']} AWG: {chain}")
+                    lines.append(f"- [ ] **{i}** {thickness(w['gauge'])} {name} wire: {chain}")
             lines.append("")
         return "\n".join(lines)
 
@@ -543,8 +549,29 @@ class Board:
 PAGE_PARTS = 6
 PAGE_WIRES = 6
 
+def thickness(gauge):
+    """22 AWG is the thin hook-up wire; anything heavier uses the thick (18 AWG) wire."""
+    return "thin" if gauge == "22" else "thick"
+
+
+# Only the "which way round" part of a note goes in the build book; the rest
+# (what the part is for) is for the designer, not the builder.
+ORIENTATION = ("band", "notch", "dot", "tab", "leg", "stripe", "coil end", "either way", "chip side", "set to", "terminals towards", "square pad")
+
+
+def plain_note(note):
+    keep = [n.strip() for n in note.split(";") if any(w in n for w in ORIENTATION)]
+    text = "; ".join(keep)
+    for a, b in (("band (K)", "stripe"), ("notch / dot (pin 1)", "notch or dot"), ("dot (pin 1)", "dot"),
+                 ("pin 1 (square pad)", "the square pad (pin 1)"), ("long leg (+) left, stripe (−) right",
+                 "long leg left, striped side right"), ("coil end at the back", "end with 2 pins at the back"),
+                 ("resettable fuse, either way round", "either way round")):
+        text = text.replace(a, b)
+    return text
+
+
 PART_WORDS = {"R": "resistor", "D": "diode", "C": "capacitor", "CE": "capacitor", "IC": "chip", "PTC": "resettable fuse",
-              "TB": "screw terminal", "K": "relay", "Q": "MOSFET", "MOD": "module", "J": "box header"}
+              "TB": "screw terminal", "K": "relay", "Q": "transistor", "MOD": "module", "J": "ribbon socket"}
 
 # Suggested insulation colours (a 6-colour silicone wire kit), by net.
 def wire_colour(net):
