@@ -21,6 +21,7 @@ enum FaultBits : uint16_t {
   FAULT_SOLENOID = 1u << 4,  // solenoid current doesn't match the command
   FAULT_ONOFF = 1u << 5,     // the ON/OFF switch's two poles disagree (wiring or switch)
   FAULT_RELAY = 1u << 6,     // a relay stayed closed with its coil off (welded contact)
+  FAULT_LEVER = 1u << 7,     // the engine started with the lever reading D: that input is stuck on
 };
 
 // Warnings are shown on the display; CUSTOM control continues.
@@ -219,6 +220,10 @@ class Controller {
   uint32_t upSince_ = 0, downSince_ = 0;
 
   Persist supplyBad_, tpsBad_, vssStall_, ratioBad_, overRev_, solBad_[3], onoffBad_, tachLost_;
+  Persist engineOff_;
+  bool engineWasOff_ = false;  // stopped, waiting for the next start
+  bool crankDip_ = false;      // ...and the starter has pulled the battery down
+  bool leverStuck_ = false;    // kept until the next power-up
   float dropRefMph_ = 0.0f;
   uint32_t dropRefMs_ = 0;
 };

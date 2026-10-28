@@ -155,6 +155,15 @@ constexpr uint32_t ONOFF_FAULT_MS = 300;
 // No tach while moving faster than this, for this long: WARN_TACH.
 constexpr float TACH_LOST_MIN_MPH = 15.0f;
 constexpr uint32_t TACH_LOST_MS = 2000;
+// The starter only turns with the lever in P or N, so an engine start seen
+// with the lever input reading D means that input is stuck on (FAULT_LEVER).
+// A start: stopped (under ENGINE_OFF_RPM for ENGINE_OFF_MS), the battery
+// dipping under CRANK_DIP_V (the starter), then over ENGINE_STARTED_RPM. The
+// dip keeps a tach dropout at idle (battery charging) from looking like one.
+constexpr float ENGINE_OFF_RPM = 100.0f;
+constexpr uint32_t ENGINE_OFF_MS = 1000;
+constexpr float CRANK_DIP_V = 11.5f;
+constexpr float ENGINE_STARTED_RPM = 400.0f;
 
 // ------------------------------------------------------------------- safety
 constexpr float STATIONARY_MPH = 2.0f;

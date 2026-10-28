@@ -214,8 +214,15 @@ second: the buck output must read **0 V** (the protection works). Put them back.
 
 {{STEP P3}}
 
-✅ **CHECK** (12 V on J1a **and** J1b, − on J1c): touch a wire from JA pin 1 to **JA pin 7**.
-All three relays **click**. Take it away: they click off.
+The relays' power doesn't come straight from the 12 V: it goes out through **J5a** to the dash
+pod's ON/OFF switch (its second half) and comes back on **J5b**. So turning ON/OFF off cuts the
+relays off by itself, even if the Mega has crashed. On the bench, stand in for the switch with a
+short wire from **J5a to J5b**.
+
+✅ **CHECK** (12 V on J1a **and** J1b, − on J1c, J5a–J5b jumper in): touch a wire from JA pin 1 to
+**JA pin 7**. All three relays **click**. Take it away: they click off. Now hold JA 1–7 together and
+pull the J5 jumper out: they click off too. **JA pin 25** reads about **2 V** with the jumper in and
+**0 V** with it out.
 
 ### Step P4 — Solenoid terminals
 
@@ -357,6 +364,10 @@ switch) and the **shifter base** (the lever). Neither needs the box yet.
 beep and the lever **up**, find the outer pin that beeps to the middle one. Use those two pins:
 **lever up = on**. For the ON/OFF switch, closing its red cover pushes the lever down (off).
 
+**The ON/OFF switch has two halves** (6 pins: two rows of 3, or 4 pins on a DPST). Each half is
+its own switch, and both flip together. Beep-test each half the same way: lever up, find the
+outer pin that beeps to its middle pin.
+
 ### The dash pod
 
 **8.1 Inserts.** Heat-set the 4 brass inserts into the ends of the corner posts, at the open back
@@ -374,7 +385,7 @@ Tighten the nuts from inside. The names are engraved under each hole.
 
 **8.3 Cables.** Fit the 2 glands in the back cover: **SWITCHES** and **SCREEN**. Push the **8-core
 cable** through SWITCHES and the screen's **4-core cable** (from part 7) through SCREEN. Cut the
-8-core's eighth core short and tape it. Join each core with a lever connector:
+Join each core with a lever connector:
 
 ![Dash pod step 3](build/pod-3.png)
 
@@ -385,7 +396,12 @@ cable** through SWITCHES and the screen's **4-core cable** (from part 7) through
 | C3 | MANUAL switch |
 | C4 | TEST button |
 | C5 | ON/OFF switch |
-| C6 (ground) | the other pin of **every** switch and the button. Easiest: one black wire soldered from switch to switch, ECO → SPORT → MANUAL → TEST → ON/OFF, with C6 joined to its end |
+| C6 (ground) | the other pin of **every** switch and the button. Easiest: one black wire soldered from switch to switch, ECO → SPORT → MANUAL → TEST → ON/OFF (first half), with C6 joined to its end |
+| C7 | ON/OFF **second half**, middle pin |
+| C8 | ON/OFF **second half**, the outer pin that is on with the lever up |
+
+C5/C6 use the ON/OFF switch's first half, C7/C8 its second half. **Never join the two halves**:
+C7 and C8 carry the relays' 12 V, the rest carry 5 V.
 
 **8.4 Back cover.** Screw the back cover on (4 × M3 × 10 countersunk). The two hinge lugs stick
 out of the back.
@@ -397,7 +413,8 @@ out of the back.
 ![Dash pod step 5](build/pod-5.png)
 
 ✅ **CHECK** (meter on beep, at the 8-core's far end): C1 ↔ C6 beeps only with ECO on; C2 with
-SPORT; C3 with MANUAL; C4 with TEST pressed; C5 with ON/OFF on.
+SPORT; C3 with MANUAL; C4 with TEST pressed; C5 with ON/OFF on. **C7 ↔ C8 beeps only with
+ON/OFF on**, and C7 and C8 never beep to C1–C6.
 
 ### The shifter base
 
@@ -447,7 +464,7 @@ Everything is connected on the table, outside the box.
 
 - [ ] Plug the hub onto the Mega. Plug **ribbon A** (power board ↔ socket A) and **ribbon B**
   (logic board ↔ socket B). The red stripe is pin 1.
-- [ ] Shifter cable → **X7a/X7b/X7c** (UP, DOWN, GND). Dash cable C1–C6 → **X4a–X4f**. Screen
+- [ ] Shifter cable → **X7a/X7b/X7c** (UP, DOWN, GND). Dash cable C1–C6 → **X4a–X4f**, C7 → **J5a**, C8 → **J5b** (take the bench jumper out). Screen
   cable → **X5** (5V, GND, SDA, SCL). ATF probe → **X6** (red 5V, black GND, yellow DQ).
 - [ ] Dummy loads: LOAD 1/2/3/GND → **J4a/J4b/J4c/J4d**. For this test only, add three jumpers
   **J2d → J4a, J2e → J4b, J2f → J4c** (the resistors stand in for the solenoids).
@@ -462,12 +479,13 @@ Everything is connected on the table, outside the box.
   ECO and SPORT both on: after a second it says **MODE ERROR**. ON/OFF back off.
 - [ ] Tap TEST: the **SENSORS** page shows battery about 12 V, trans temp at room temperature,
   gas pedal 0 %, speed 0.
-- [ ] With ON/OFF **off**, hold TEST for 2 seconds: the self-test runs. When it tests the
+- [ ] With ON/OFF **on** (and only ECO on), hold TEST for 2 seconds: the self-test runs. When it tests the
   solenoids, each should read about **0.8 A** (12 V ÷ 15 Ω). If they're more than 10 % out,
   change `IS_AMPS_PER_VOLT` in `firmware/tcu/config.h`, upload again, retest.
 - [ ] Follow the prompts on the screen: **UPSHIFT THE LEVER**, **DOWNSHIFT THE LEVER**, **TURN ON
   ONLY ECO**, **TURN ON ONLY SPORT**, **TURN ON ONLY MANUAL**, then **PRESS THE BRAKE** (touch
-  12 V to J3b).
+  12 V to J3b), and last **TURN ON/OFF OFF**: it checks that the switch really cuts the relays.
+  Then the Mega resets itself on purpose (the safety-reset check) and comes back up.
 - [ ] The result says **ALL OK** ("SCREEN CHECK" is normal: it's asking you to confirm the
   screen flashed).
 
@@ -495,7 +513,7 @@ Everything is connected on the table, outside the box.
 | Gland | Cable | Inside, to | Plug outside |
 |---|---|---|---|
 | SHIFT | 3-core from the shifter base | X7a–X7c | (straight to the shifter base) |
-| DASH | 8-core from the dash pod | X4a–X4f (cut the 2 spare cores) | (straight to the dash pod) |
+| DASH | 8-core from the dash pod | C1–C6 → X4a–X4f; C7, C8 → J5a, J5b (along the gap at the front, then back between the boards) | (straight to the dash pod) |
 | SCREEN | 4-core from the dash pod | X5a–X5d | (straight to the dash pod) |
 | ATF | 3-core | X6a–X6c | X6, 3-way |
 | SIG | 7 thin wires: D, STP, E1, SPD, TAC, VTA, E2 | J3a–J3g | X3, 8-way |
@@ -553,7 +571,7 @@ over until the very last job, and only when its ON/OFF switch is on.
 - [ ] Hide all three cables under the trim, to the box. The dash pod's two cables go down behind
   the dash trim.
 
-✅ **CHECK:** hold TEST 2 s: every shifter and switch prompt passes.
+✅ **CHECK** (engine off, lever in P, ON/OFF on): hold TEST 2 s: every prompt passes.
 
 ### 12.5 ATF probe (cold engine)
 - [ ] Follow [wiring guide §9](03-wiring-guide.md#the-atf-temperature-probe): cut the **hot** hose,

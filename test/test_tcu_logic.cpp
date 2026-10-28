@@ -431,6 +431,20 @@ static void test_corner_hold() {
   t.step(2500);
   CHECK(t.c.outputs().gear >= 3);  // shifting resumed (ECO may go straight to 4th)
 
+  // Gyro dead (or its bias not learned): the reading is ignored, no corner
+  // hold, the shift map works as normal.
+  Sim g;
+  g.arm();
+  g.in.tpsPct = 20;
+  g.cruise(24.9);
+  g.in.latValid = false;
+  g.in.latG = 0.5f;  // garbage from a dead sensor
+  g.step(50);
+  CHECK(!g.c.outputs().cornerHold);
+  g.cruise(37.3);
+  g.step(1000);
+  CHECK(g.c.outputs().gear >= 3);
+
   // The driver's own shift is always honoured.
   Sim u;
   u.arm();
@@ -1096,6 +1110,65 @@ static void test_onoff_two_poles_and_relay() {
   CHECK(t.c.outputs().control == CTRL_AUTO);
 }
 
+static void test_lever_stuck_at_start() {
+  std::printf("engine started with the lever reading D: lever input stuck\n");
+  // Key on, engine off, then the starter: battery dips, rpm rises.
+  auto start = [](Sim& s, bool leverReadsD) {
+    s.autoRpm = false;
+    s.in.leverInD = leverReadsD;
+    s.in.engineRpm = 0;
+    s.in.batteryV = 12.4f;
+    s.step(cfg::ENGINE_OFF_MS + 500);
+    s.in.engineRpm = 250;
+    s.in.batteryV = 10.2f;
+    s.step(600);
+    s.in.engineRpm = 1100;
+    s.in.batteryV = 14.2f;
+    s.step(500);
+    s.in.engineRpm = 750;
+  };
+  // Started in P (lever not D), then into D: normal.
+  Sim ok;
+  start(ok, false);
+  ok.in.leverInD = true;
+  ok.arm();
+  CHECK(!(ok.c.outputs().faults & FAULT_LEVER));
+  CHECK(ok.c.outputs().control == CTRL_AUTO);
+
+  // Started while the lever input says D: impossible, so it's stuck.
+  Sim bad;
+  start(bad, true);
+  CHECK(bad.c.outputs().faults & FAULT_LEVER);
+  bad.arm();
+  CHECK(bad.c.outputs().control == CTRL_STOCK);
+  bad.arm();  // flipping ON/OFF again doesn't clear it: only a new key cycle
+  CHECK(bad.c.outputs().control == CTRL_STOCK);
+  CHECK(bad.c.outputs().faults & FAULT_LEVER);
+
+  // Tach drops out for 2 s while idling in D: the battery is charging, no
+  // starter dip, so it's not taken for a start.
+  Sim idle;
+  idle.arm();
+  idle.autoRpm = false;
+  idle.in.engineRpm = 0;
+  idle.in.batteryV = 13.9f;
+  idle.step(2000);
+  idle.in.engineRpm = 750;
+  idle.step(500);
+  CHECK(!(idle.c.outputs().faults & FAULT_LEVER));
+
+  // No stop seen first (the TCU came on mid-crank): no verdict either way.
+  Sim late;
+  late.autoRpm = false;
+  late.in.engineRpm = 250;
+  late.in.batteryV = 10.2f;
+  late.step(300);
+  late.in.engineRpm = 1100;
+  late.in.batteryV = 14.2f;
+  late.step(300);
+  CHECK(!(late.c.outputs().faults & FAULT_LEVER));
+}
+
 static void test_debouncer() {
   std::printf("debouncer rejects bounce, accepts stable level\n");
   Debouncer d;
@@ -1203,6 +1276,7 @@ int main() {
   test_mode_switch_fault_and_stuck_button();
   test_entry_plausibility();
   test_onoff_two_poles_and_relay();
+  test_lever_stuck_at_start();
   test_debouncer();
   test_ds18b20_decode();
   test_maps_are_sane();

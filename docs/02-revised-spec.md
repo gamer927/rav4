@@ -76,14 +76,20 @@ What this means:
 
 Rules that never change:
 1. **De-energised = factory.** Power loss, reset, watchdog, firmware hang or a broken ON/OFF
-   switch wire all leave the factory ECU in control.
-2. **CUSTOM must be armed by a fresh OFF→ON flip** after every boot. Leaving the switch ON
-   doesn't arm it at key-on, and a reset mid-drive doesn't re-engage.
+   switch wire all leave the factory ECU in control. The ON/OFF switch has **two poles**: one
+   tells the Mega, the other carries the relay coils' power, so OFF drops the relays **in
+   hardware** even if the Mega or a coil driver has failed (§3.4). The Mega checks the two poles
+   agree (`FAULT_ONOFF`).
+2. **CUSTOM must be armed by a fresh OFF→ON flip** after every boot, with the switch seen OFF for
+   at least 100 ms (`ARM_OFF_MIN_MS`). Leaving the switch ON doesn't arm it at key-on, a reset
+   mid-drive doesn't re-engage, and a contact bounce or a glitch at boot can't arm it.
 3. **The lever must be in D.** Outside D, the ECU handles P/R/N/2/L. Returning to D re-enters
    CUSTOM, synced to the ECU's current gear.
 4. **Bumpless handover.** CUSTOM starts in the gear and lockup state the ECU is commanding at
-   that moment, sensed from the ECU outputs. If it can't sense them, it only engages at a
-   standstill, in 1st.
+   that moment, sensed from the ECU outputs. The sensed gear must agree with the engine: rpm
+   between 0.9× and 1.25× of the locked-up rpm for that gear at this speed, and that locked rpm at
+   least 800 (`ENTRY_RPM_*`). If it can't sense the ECU, or the check fails (a dead or mis-wired
+   sense input), it only engages at a standstill, in 1st (the screen says STOP FIRST).
 5. **Faults latch.** A critical fault hands control back to the ECU until the ON/OFF switch is
    turned OFF, which acknowledges the fault.
 6. **One mode at a time.** Exactly one of ECO, SPORT and MANUAL must be on. If none, or more
@@ -186,8 +192,13 @@ Coil ON : ECU → dummy (no DTC), TCU → solenoid
 - **Dummy loads:** 3 × 15 Ω **50 W aluminium-clad** resistors on a heatsink. Each dissipates
   13.8 W continuously at 14.4 V. That's within the solenoid's 11–15 Ω spec (VERIFY), so the ECU
   sees a normal load.
-- **Coils:** drive all three from D6 through one logic-level MOSFET or a ULN2803, with a
-  flyback diode and a 10 kΩ pull-down on the gate.
+- **Coils:** all three from D6 through a ULN2803 (10 kΩ pull-down on its input). Their +12 V
+  doesn't come straight from the supply: `+12 DRV → F2 (PTC 0.25 A) → J5a → dash cable C7 →
+  ON/OFF pole 2 → C8 → J5b → coils and ULN2803 COM`. A UF4007 (DF) across that feed takes the
+  coils' flyback when the switch opens, and a 47k/10k divider lets A7 see it (`COIL_ON_V` 8 V).
+  So two independent things can drop the relays: the Mega (D6 low) and the driver (ON/OFF OFF).
+  Every fault in this path (broken core, blown F2, worn contact) can only remove coil power,
+  i.e. fail to STOCK, and the A7 vs D26 comparison makes it visible.
 - **Handover:** the firmware sets the driver outputs to the ECU's current state *before*
   energising the relays, so the only disturbance is the contacts' break-before-make gap
   (about 5–10 ms). That's shorter than the hydraulic response.
@@ -211,13 +222,15 @@ Step-by-step wiring, connector pin-outs and the full wire list are in
 [`03-wiring-guide.md`](03-wiring-guide.md), with diagrams
 [`wiring-diagram.svg`](wiring-diagram.svg) and [`wiring-detail-a.svg`](wiring-detail-a.svg).
 
-Dash pod switch cable (X4, 8-core shielded, two cores spare):
-1. ECO switch
-2. SPORT switch
-3. MANUAL switch
-4. TEST button
-5. ON/OFF switch
-6. Switch common (ground)
+Dash pod switch cable (W20, 8-core shielded):
+1. ECO switch (X4)
+2. SPORT switch (X4)
+3. MANUAL switch (X4)
+4. TEST button (X4)
+5. ON/OFF switch, pole 1 (X4)
+6. Switch common (ground) (X4)
+7. ON/OFF pole 2, feed from F2 (J5a on the power board)
+8. ON/OFF pole 2, return: relay coil power (J5b)
 
 Shifter cable (X7, 3-core shielded): 1 = upshift microswitch, 2 = downshift microswitch,
 3 = common (ground).
@@ -482,6 +495,9 @@ Coast release (SPORT, §6.8) also counts as a release condition.
 | `FAULT_VSS` | Speed drops more than 5 mph in 100 ms from 9 mph or above (signal loss), **or** more than 2,500 rpm and 15 % TPS in a gear of 2nd or higher, brake off, at 0 mph for 3 s |
 | `FAULT_RATIO` | Lockup applied for 1.5 s, 19 mph or more, and rpm differs from `mph × RPM_PER_MPH[gear]` by more than 25 % for 1.5 s (wrong gear engaged, swapped S1/S2 wiring, bad VSS or tach) |
 | `FAULT_SOLENOID` | For 300 ms, a solenoid commanded on draws less than 0.6 A, or one commanded off draws more than 0.2 A (broken wire, relay didn't switch, shorted driver). Needs the current-sense wiring |
+| `FAULT_ONOFF` | The ON/OFF switch's two poles disagree for 300 ms: D26 says ON but A7 sees no coil power, or the other way round (broken C7/C8 core, blown F2, a worn or welded contact) |
+| `FAULT_RELAY` | The relay-release check (at key-on, or in IBIT) saw current with the relays off: a welded or stuck relay. Clears only when a later check passes |
+| `FAULT_LEVER` | The engine started while the lever-D input read D. The starter only turns in P or N, so the input is stuck on (shorted opto or wire) and the TCU would keep driving in 2, L or R. A start = rpm under 100 for 1 s, the battery dipping under 11.5 V (the starter), then over 400 rpm; the dip keeps a tach dropout at idle from counting. Kept until the next key-on |
 
 | Warning | Condition |
 |---|---|
@@ -490,6 +506,7 @@ Coast release (SPORT, §6.8) also counts as a release condition.
 | `WARN_MODE_SWITCH` | Not exactly one of ECO, SPORT and MANUAL on for 1 s: the ECU shifts until it's fixed (rule 6) |
 | `WARN_BUTTON_STUCK` | A shifter microswitch held closed for 10 s (SHIFTER? on the screen) |
 | `WARN_WDT_RESET` | The last reset was caused by the watchdog |
+| `WARN_TACH` | No engine-rpm signal for 2 s while above 15 mph (NO RPM on the screen). The over-rev guards fall back to speed × gear ratio and the ratio check pauses |
 
 The screen says all of this in words. The Mega's own LED (D13, inside the box) also shows it,
 for the bench: solid = TCU in control, slow blink = waiting to stop before engaging, fast blink =
@@ -554,13 +571,15 @@ The system tests itself in three ways, modelled on aircraft built-in test (BIT):
 
 | Level | When | What it checks | Moves anything? |
 |---|---|---|---|
-| **PBIT** (power-up) | Automatically, 1.5 s after every boot | Battery, TPS and ATF probe reading, gyro answering, no shift button stuck, calibration done, last reset wasn't a crash | No |
+| **PBIT** (power-up) | Automatically, 1.5 s after every boot | Battery, TPS and ATF probe reading, gyro answering, no shift button stuck, calibration done, last reset wasn't a crash, the ON/OFF switch's two poles agree; then, if the lever isn't in D and the car is stopped, the **relay-release check** (relays off, drivers on for 0.4 s: no current allowed) | Only the drivers, into open relay contacts |
 | **CBIT** (continuous) | Always, while running | Every fault and warning in §6.7, including solenoid current | Hands back to the ECU on a fault |
 | **IBIT** (press-to-test) | Hold TEST for 2 s | Everything below | Yes, so it's interlocked |
 
 **IBIT interlock** (the equivalent of an aircraft's weight-on-wheels check). The test refuses
 to start, and aborts immediately if any condition changes mid-test, unless all of these hold:
-- The ON/OFF switch is OFF.
+- The ON/OFF switch is **ON** and the relay coils have power (A7). The test needs the coil
+  power that only the switch can give; the TCU still can't take over, because the lever isn't
+  in D, and the test ends with the switch OFF, so CUSTOM needs a fresh flip afterwards.
 - The lever is not in D.
 - Speed is 0.
 - The engine is off: tach below 100 rpm **and** battery below 13.4 V (the alternator isn't
@@ -579,7 +598,8 @@ On an abort, every output switches off at once.
 | 3 | Relays on; pulse S1, then S2, then SL for 0.4 s each, one at a time | 0.6–1.6 A on the pulsed solenoid. Engine off means no line pressure, so the valves only click |
 | 4 | Relays off; all drivers on for 0.4 s | ≤ 0.2 A. Current here means a welded or stuck relay |
 | 5 | Prompts: SHIFTER UP, SHIFTER DOWN, ONLY ECO ON, ONLY SPORT ON, ONLY MANUAL ON, PRESS BRAKE | Detected within 8 s. "Only" means the other two mode switches off, which also catches two switches wired to one core. TEST skips a prompt (SKIP); a timeout is a FAIL. Covers the whole shifter and dash cables |
-| 6 | Watchdog: the board deliberately stops servicing the watchdog | It must reboot within 0.25 s; the results survive the reset and the test records PASS. If the screen freezes on `WATCHDOG TEST`, it failed |
+| 6 | ON/OFF cut: relays and S1 driven **on** (S1 must draw current), then the prompt TURN ON/OFF OFF | The Mega keeps commanding both on. 150 ms after the switch goes OFF, S1 must draw ≤ 0.2 A and A7 must see no coil power. Proves the hardware cut works on its own, without the Mega's help. No switch within 8 s = FAIL. Recorded as ON/OFF CUT |
+| 7 | Watchdog: the board deliberately stops servicing the watchdog | It must reboot within 0.25 s; the results survive the reset and the test records PASS. If the screen freezes on `WATCHDOG TEST`, it failed |
 
 Results show as OK, BAD, CHECK (needs a human: the screen flash, or solenoids without current sense) or SKIP.
 The full table also prints on the USB log.

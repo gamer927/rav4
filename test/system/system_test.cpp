@@ -52,7 +52,7 @@ static int g_checks = 0;
 // ------------------------------------------------------------------ the car
 struct Car {
   float mph = 0, tps = 0, atfC = 70, battV = 12.6f;
-  bool engineRunning = false;
+  bool engineRunning = false, cranking = false;
   bool leverInD = false, brake = false;
   bool switchOn = false;          // the ON/OFF switch (both poles)
   bool eco = true, sport = false, manual = false;
@@ -63,6 +63,7 @@ struct Car {
   bool welded[3] = {false, false, false};
   bool solenoidOpen[3] = {false, false, false};
   bool ecuSenseDead = false;
+  bool leverStuckD = false;       // the lever-D input shorted: always reads D
   bool tachLost = false, vssLost = false;
 } car;
 
@@ -81,6 +82,7 @@ uint8_t engagedGear() {
   return tcu::gearFromSolenoids(s1, s2);
 }
 float engineRpm() {
+  if (car.cranking) return 250;
   if (!car.engineRunning) return 0;
   const float rpm = car.mph * cfg::RPM_PER_MPH[engagedGear()] * 1.05f;  // a little converter slip
   return rpm < 750 ? 750 : rpm;
@@ -111,7 +113,7 @@ void applyCarToPins() {
   g_pin[pin::ECO] = lowIf(car.eco);
   g_pin[pin::SPORT] = lowIf(car.sport);
   g_pin[pin::MANUAL] = lowIf(car.manual);
-  g_pin[pin::LEVER_D] = lowIf(car.leverInD);
+  g_pin[pin::LEVER_D] = lowIf(car.leverInD || car.leverStuckD);
   g_pin[pin::BRAKE] = lowIf(car.brake);
   bool s1, s2;
   tcu::solenoidsForGear(ecuGear(), s1, s2);
@@ -163,7 +165,16 @@ void boot() {
   setup();
   run(2500);  // PBIT at 1.5 s, then the key-on relay check
 }
-void startEngine() { car.engineRunning = true; car.battV = 14.2f; run(500); }
+// The starter pulls the battery down for a moment, then the alternator charges.
+void startEngine() {
+  car.cranking = true;
+  car.battV = 10.8f;
+  run(600);
+  car.cranking = false;
+  car.engineRunning = true;
+  car.battV = 14.2f;
+  run(500);
+}
 void armAndDrive() {
   car.switchOn = false;
   run(200);
@@ -204,9 +215,9 @@ void s_boot_parked() {
 
 void s_switch_on_at_key_on_does_not_arm() {
   car.switchOn = true;
-  car.leverInD = true;
   boot();
-  startEngine();
+  startEngine();  // in P: the starter won't turn in D
+  car.leverInD = true;
   run(1000);
   CHECK(!tcuInControl());
   CHECK(screenSays("WAITING"));
@@ -314,6 +325,19 @@ void s_welded_relay_at_key_on() {
   CHECK(!g_out[pin::RELAY]);
   CHECK(controller.outputs().faults & tcu::FAULT_RELAY);
   CHECK(screenSays("RELAY STUCK"));
+}
+
+void s_lever_input_stuck_on() {
+  car.leverStuckD = true;  // reads D even in P
+  boot();
+  CHECK(selfTest.result(tcu::T_RELAY_RELEASE) == tcu::TR_SKIP);  // "lever in D": not run
+  startEngine();  // the starter only turns in P or N...
+  CHECK(controller.outputs().faults & tcu::FAULT_LEVER);  // ...so the input is lying
+  armAndDrive();
+  rampTo(20, 6);
+  CHECK(!g_out[pin::RELAY]);
+  CHECK(factorySafe());
+  CHECK(screenSays("LEVER SENSOR"));
 }
 
 void s_solenoid_wire_breaks() {
@@ -554,6 +578,7 @@ const Scenario kScenarios[] = {
     {"solenoid wire breaks while driving: ECU back, reported", s_solenoid_wire_breaks},
     {"two mode switches on: ECU after 1 s, back when fixed", s_mode_switch_mistake},
     {"lever out of D: ECU back", s_lever_out_of_d},
+    {"lever-D input stuck on: found at engine start, no take-over", s_lever_input_stuck_on},
     {"speed signal lost at 45 mph: ECU back", s_vss_lost},
     {"tach lost: still in control, warned", s_tach_lost},
     {"screen cable cut: control unaffected, loop never stalls", s_screen_unplugged},
@@ -622,11 +647,16 @@ void captureScreens() {
     g_pin[pin::UP] = g_pin[pin::DOWN] = HIGH;
   }
   snap("7_ibit_done_with_fault");
-  // Drive in SPORT, then a corner, then two mode switches on.
+  // Drive in SPORT, then a corner, then two mode switches on: the wire
+  // repaired and a new key cycle (RAM starts fresh, as in the car).
   car.solenoidOpen[1] = false;
   car.eco = false;
   car.sport = true;
   car.brake = false;
+  car.switchOn = false;
+  selfTest = tcu::SelfTest();
+  controller = tcu::Controller();
+  boot();
   startEngine();
   armAndDrive();
   press(pin::TEST, 200);  // TEST page -> MAIN

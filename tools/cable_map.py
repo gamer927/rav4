@@ -17,7 +17,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # [gland, colour, destination card, what's in the cable]
 CABLES = [
     ("SHIFT", "#2ca02c", 0, "3 wires: up, down, ground"),
-    ("DASH", "#2ca02c", 1, "6 wires: the 5 switches + ground"),
+    ("DASH", "#2ca02c", 1, "8 wires: 5 switches, ground, relay-power pair"),
     ("SCREEN", "#9467bd", 1, "4 wires: power, ground, 2 data"),
     ("ATF", "#8c564b", 2, "3 wires: power, ground, data"),
     ("SIG", "#1f77b4", 3, "7 thin wires: listening taps"),

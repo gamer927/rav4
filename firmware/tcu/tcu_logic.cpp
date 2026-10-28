@@ -221,6 +221,21 @@ uint16_t Controller::evaluateFaults(const Inputs& in) {
   // A relay found closed with its coil off would mix the ECU's and the TCU's
   // solenoid feeds; never take over with one.
   if (in.relayStuck) f |= FAULT_RELAY;
+
+  // The starter only turns in P or N. An engine start with the lever input
+  // reading D means that input is stuck on, and the TCU would keep driving in
+  // 2, L or R: don't trust it again until the next power-up.
+  if (engineOff_.update(in.rpmValid && in.engineRpm < cfg::ENGINE_OFF_RPM && in.speedMph < cfg::STATIONARY_MPH, now_,
+                        cfg::ENGINE_OFF_MS)) {
+    if (!engineWasOff_) crankDip_ = false;
+    engineWasOff_ = true;
+  }
+  if (engineWasOff_ && in.batteryV < cfg::CRANK_DIP_V) crankDip_ = true;
+  if (engineWasOff_ && in.rpmValid && in.engineRpm > cfg::ENGINE_STARTED_RPM) {
+    if (crankDip_ && in.leverInD) leverStuck_ = true;
+    engineWasOff_ = false;
+  }
+  if (leverStuck_) f |= FAULT_LEVER;
   return f;
 }
 

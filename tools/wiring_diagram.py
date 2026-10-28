@@ -161,13 +161,13 @@ for name, w in zip(["+5V", "GND", "DQ"], ["W17", "W18", "W19"]):
 BX = 8.7
 box(BX, 12.3, 3.9, 2.2, "Power",
     ["X1-1 -> TVS -> driver +12 V", "X1-2 -> rev. diode -> TVS", "  -> 5 V/3 A buck -> Mega 5V,",
-     "     screen, gyro, probe", "X1-3 -> GND star point"], line_size=8.5)
+     "     screen, gyro, probe", "X1-3 -> GND star point", "J5 -> ON/OFF pole 2 -> coils"], line_size=8.5)
 box(BX, 8.15, 3.9, 3.85, "Input conditioning",
     ["D   -> PC817  -> D28", "STP -> PC817  -> D27", "E1  -> signal GND", "SPD -> LM393  -> D2",
      "TAC -> PC817  -> D3", "VTA -> 10k/100nF -> A0", "E2  -> 10k/100nF -> A1", "+12 -> 47k/10k -> A3",
      "ECU S1/S2/SL -> PC817", "            -> D29-31"], line_size=8.5)
 box(BX, 3.2, 3.9, 4.65, "Solenoid channel x3",
-    ["K1-K3  DPDT relay, 12 V", "Q1-Q3  P-MOSFET drivers", "R1-R3  15 ohm 50 W dummy", "ULN2803 drives coils",
+    ["K1-K3  DPDT relay, 12 V", "Q1-Q3  P-MOSFET drivers", "R1-R3  15 ohm 50 W dummy", "ULN2803 drives coils;", "coil +12 via ON/OFF pole 2",
      "", "coil OFF: ECU -> solenoid", "coil ON : ECU -> dummy,", "          U -> solenoid", "",
      "(Detail A in the guide)"], line_size=8.5)
 box(BX, 0.6, 3.9, 2.25, "ATF probe input",
@@ -178,7 +178,7 @@ mega_pins = ["D2  VSS (int)", "D3  tach (int)", "D6  relay drv", "D8  S1 drv",
              "D9  S2 drv", "D10 SL drv", "D20 SDA", "D21 SCL", "D22 shift up", "D23 shift dn", "D24 ECO",
              "D25 SPORT", "D26 ON/OFF", "D27 brake", "D28 lever D", "D29 ECU S1", "D30 ECU S2",
              "D31 ECU SL", "D32 TEST", "D33 ATF DQ", "D34 MANUAL", "A0  TPS (VTA)", "A1  TPS ref (E2)", "A3  battery", "A4  S1 amps",
-             "A5  S2 amps", "A6  SL amps", "5V / GND", "USB -> laptop"]
+             "A5  S2 amps", "A6  SL amps", "A7  coil power on?", "5V / GND", "USB -> laptop"]
 box(13.1, 3.3, 4.2, 11.2, "Arduino Mega 2560", mega_pins, fc="#fdfde8", line_size=9.5)
 
 # connector stubs into the blocks
@@ -192,7 +192,7 @@ for anchors, color_of in [(X1, lambda p: C["ground"] if p == "GND" else C["power
 # block -> Mega links
 for y, text, color in [(13.4, "5 V", C["power"]), (10.0, "D2 D3 D27 D28 A0 A1 A3", C["sig"]),
                        (9.0, "D29-31", C["internal"]), (6.6, "D6, D8-10", C["internal"]),
-                       (5.6, "A4-A6", C["internal"])]:
+                       (5.6, "A4-A7", C["internal"])]:
     wire([(BX + 3.9, y), (13.1, y)], color, lw=2)
     label(12.85, y, text, color)
 wire([(BX + 3.9, 1.7), (12.85, 1.7), (12.85, 3.6), (13.1, 3.6)], C["probe"], lw=2)
@@ -212,14 +212,14 @@ label(17.65, 5.02, "D20 D21", C["i2c"])
 
 box(19.7, 9.85, 3.9, 4.4, "Dash pod: switches",
     ["ECO     toggle (SPST)", "SPORT   toggle (SPST)", "MANUAL  toggle (SPST)", "TEST    push button",
-     "ON/OFF  toggle + cover", "exactly one of ECO,", "SPORT, MANUAL on", "all switch to GND"],
+     "ON/OFF  2-pole toggle", "  + cover: pole 1 -> D26,", "  pole 2 -> relay coils", "exactly one of ECO,", "SPORT, MANUAL on", "all switch to GND"],
     line_size=9)
 for i, n in enumerate(["ECO", "SPORT", "MANUAL", "TEST", "ON/OFF", "GND"]):
     _, y, rx = X4[n]
     color = C["ground"] if n == "GND" else C["console"]
     wire([(rx, y), (19.7, y)], color, lw=1.8)
     label(19.15, y, "C%d %s" % (i + 1, n), color)
-ax.text(18.85, 11.15, "W20: 8-core shielded\n(2 spare cores)", fontsize=8.5,
+ax.text(18.85, 11.15, "W20: 8-core shielded\n(C7, C8: ON/OFF pole 2\n to J5, relay power)", fontsize=8.5,
         color=C["console"], ha="center", va="top", fontweight="bold")
 
 box(19.7, 6.85, 3.9, 1.75, "Shifter base", ["sequential lever,", "two microswitches (NO)", "COM -> GND"],
@@ -375,15 +375,15 @@ def detail_a():
 
     # coils / ULN2803
     blk(10.3, 7.0, 4.6, 2.6, "Relay coils (all 3 together)",
-        ["+12 V DRV -> K1/K2/K3 coils", "  -> ULN2803 OUT1-3", "ULN2803 IN1-3 <- D6", "  (10k pull-down to GND)",
-         "ULN2803 COM -> +12 V", "  (built-in flyback diodes)"])
+        ["+12 DRV -> F2 -> J5a -> ON/OFF", "  pole 2 -> J5b -> K1-K3 coils", "  -> ULN2803 OUT1-3 (IN <- D6,",
+         "  10k pull-down); COM + DF", "  = flyback. 47k/10k -> A7:", "  coil power seen by the Mega"])
 
     # bypass plug & fail-safe
     blk(15.4, 7.0, 4.3, 2.6, "X2 bypass plug",
         ["A mating plug with jumpers", "1-4, 2-5, 3-6.", "Unplug the TCU, plug this in:", "ECM -> solenoids directly,",
          "the car is 100 % stock."], fc="#fff7e6")
     blk(15.4, 2.6, 4.3, 3.9, "Fail-safe",
-        ["Power loss / reset / hang:", "D6 low -> coils off ->", "ECM drives the solenoid,", "Q1 is disconnected.",
+        ["Power loss / reset / hang,", "or ON/OFF switched off:", "coils off -> ECM drives the", "solenoid, Q1 is disconnected.",
          "", "Coil on: ECM sees R1 (no", "trouble code), Q1 drives", "the solenoid, A4 checks", "its current."],
         fc="#eef8ee")
     blk(10.3, 0.4, 9.4, 1.8, "Wire sizes",

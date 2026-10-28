@@ -39,21 +39,23 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] **6** black 20 AWG: **BUCK** IN- → **BUCK** OUT-
 
 <!-- STEP P2 -->
-#### P2.1 — Place 1 part
+#### P2.1 — Place 2 parts
 
 ![P2.1](build/power-P2-1.png)
 
 - [ ] **JA**: 26-pin box header box header → pin 1 in col 1, row 57. Notch facing the left edge; pin 1 (square pad) at the back
+- [ ] **TVS3**: P6KE6.8A diode → col 3, row 31 and col 3, row 35. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### P2.2 — Solder 3 wires (bottom side)
+#### P2.2 — Solder 4 wires (bottom side)
 
 ![P2.2](build/power-P2-2.png)
 
-- [ ] **1** red 22 AWG: **BUCK** OUT+ → **JA** pin 1 → **JA** pin 3
-- [ ] **2** black 22 AWG: **BUCK** OUT- → **JA** pin 2 → **JA** pin 4 → **JA** pin 16 → **JA** pin 23 → **JA** pin 24
-- [ ] **3** green 22 AWG: **Z1** band end → **JA** pin 19
+- [ ] **1** red 22 AWG: **BUCK** OUT+ → **JA** pin 1 → **JA** pin 3 → **TVS3** band end
+- [ ] **2** black 20 AWG: **TVS3** plain end → **J1c** (GND)
+- [ ] **3** black 22 AWG: **BUCK** OUT- → **JA** pin 2 → **JA** pin 4 → **JA** pin 16 → **JA** pin 23 → **JA** pin 24
+- [ ] **4** green 22 AWG: **Z1** band end → **JA** pin 19
 
 <!-- STEP P3 -->
 #### P3.1 — Place 6 parts
@@ -69,33 +71,57 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### P3.2 — Place 2 parts
+#### P3.2 — Place 6 parts
 
 ![P3.2](build/power-P3-2.png)
 
 - [ ] **K2**: G2RL-2 12 V relay → COIL1 in col 19, row 17. Coil end at the back
 - [ ] **K3**: G2RL-2 12 V relay → COIL1 in col 25, row 17. Coil end at the back
+- [ ] **J5a**: TO ON/OFF screw terminal → col 1, row 23. X4-7 (C7): out to the ON/OFF switch
+- [ ] **J5b**: FROM ON/OFF screw terminal → col 1, row 25. X4-8 (C8): back: relay power
+- [ ] **F2**: PTC 0.25 A resettable fuse → col 2, row 28 and col 2, row 30. Resettable fuse, either way round
+- [ ] **DF**: UF4007 diode → col 31, row 21 and col 31, row 17. Band (K) towards the front
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### P3.3 — Solder 6 wires (bottom side)
+#### P3.3 — Place 4 parts
 
 ![P3.3](build/power-P3-3.png)
+
+- [ ] **RK1**: 47k resistor (bands: yellow-violet-black-red-brown) → col 31, row 6 and col 31, row 10. Coil supply sense, top
+- [ ] **RK2**: 10k resistor (bands: brown-black-black-red-brown) → col 33, row 6 and col 33, row 10. Coil supply sense, bottom
+- [ ] **CK**: 100 nF capacitor → col 33, row 12 and col 33, row 14
+- [ ] **ZK**: 1N4733A 5.1 V diode → col 31, row 12 and col 31, row 16. Band (K) towards the back
+
+Push the legs through, bend them out a little underneath, solder, snip.
+
+#### P3.4 — Solder 6 wires (bottom side)
+
+![P3.4](build/power-P3-4.png)
 
 - [ ] **1** blue 22 AWG: **JA** pin 7 → **RD1** at col 9, row 57 → **U1** pin 1 → **U1** pin 2 → **U1** pin 3
 - [ ] **2** blue 22 AWG: **JA** pin 8 → **RD2** at col 9, row 55 → **U1** pin 4
 - [ ] **3** blue 22 AWG: **JA** pin 9 → **RD3** at col 9, row 53 → **U1** pin 5
 - [ ] **4** blue 22 AWG: **JA** pin 10 → **RD4** at col 9, row 51 → **U1** pin 6
 - [ ] **5** black 22 AWG: **JA** pin 16 → **RD1** at col 5, row 57 → **RD2** at col 5, row 55 → **RD3** at col 5, row 53 → **RD4** at col 5, row 51 → **U1** pin 9
-- [ ] **6** yellow 20 AWG: **TVS1** band end → **U1** pin 10 → **K1** COIL1 → **K2** COIL1 → **K3** COIL1
+- [ ] **6** yellow 20 AWG: **TVS1** band end → **F2** 1
 
-#### P3.4 — Solder 3 wires (bottom side)
+#### P3.5 — Solder 6 wires (bottom side)
 
-![P3.4](build/power-P3-4.png)
+![P3.5](build/power-P3-5.png)
 
-- [ ] **1** green 22 AWG: **U1** pin 18 → **K1** COIL2
-- [ ] **2** green 22 AWG: **U1** pin 17 → **K2** COIL2
-- [ ] **3** green 22 AWG: **U1** pin 16 → **K3** COIL2
+- [ ] **1** blue 20 AWG: **F2** 2 → **J5a** (TO ON/OFF)
+- [ ] **2** yellow 20 AWG: **J5b** (FROM ON/OFF) → **U1** pin 10 → **K1** COIL1 → **K2** COIL1 → **K3** COIL1 → **DF** band end → **RK1** at col 31, row 6
+- [ ] **3** green 22 AWG: **RK1** at col 31, row 10 → **RK2** at col 33, row 6 → **CK** at col 33, row 12 → **ZK** band end → **JA** pin 25
+- [ ] **4** black 20 AWG: **J1c** (GND) → **DF** plain end → **RK2** at col 33, row 10 → **CK** at col 33, row 14 → **ZK** plain end
+- [ ] **5** green 22 AWG: **U1** pin 18 → **K1** COIL2
+- [ ] **6** green 22 AWG: **U1** pin 17 → **K2** COIL2
+
+#### P3.6 — Solder 1 wire (bottom side)
+
+![P3.6](build/power-P3-6.png)
+
+- [ ] **1** green 22 AWG: **U1** pin 16 → **K3** COIL2
 
 <!-- STEP P4 -->
 #### P4.1 — Place 6 parts
@@ -683,6 +709,7 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] A22 → **A6** (IS3 (SL current))
 - [ ] A23 → **GND** (GND)
 - [ ] A24 → **GND** (GND)
+- [ ] A25 → **A7** (COILSNS (relay power sense))
 
 **Header B** (16-way, to the logic board):
 
@@ -701,4 +728,4 @@ Push the legs through, bend them out a little underneath, solder, snip.
 - [ ] B14 → **GND** (GND)
 - [ ] B15 → **D34** (MANUAL)
 
-Pins A25, A26, B9 and B16 stay empty.
+Pins A26, B9 and B16 stay empty.

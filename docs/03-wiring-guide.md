@@ -82,7 +82,7 @@ are in the EWD. Label both ends of every wire with its W-number (heat-shrink mar
 | Orange | S1/S2/SL, **solenoid side** (W7–W9) | 18 AWG |
 | Blue | Signal taps (W10, W11, W13–W16) | 22 AWG; SPD+TAC and VTA+E2 as shielded pairs |
 | Brown | ATF probe (W17–W19) | 3-core shielded cable |
-| Green | Dash pod switches (W20) | 8-core shielded cable, 24 AWG (one core spare) |
+| Green | Dash pod switches (W20) | 8-core shielded cable, 24 AWG (C7/C8 carry the relay coils' current, about 0.1 A) |
 | Purple | Screen I²C (W21) | 4-core shielded cable, ≤ 2.5 m |
 | Grey | Shifter (W22) | 3-core shielded cable (the same cable as the ATF probe's) |
 
@@ -122,7 +122,7 @@ Ground every cable shield **at the TCU end only**.
 | 7 | W16 | Throttle ground **E2** | 10k series, 100 nF, clamp → A1 (measured, *not* tied to TCU ground) |
 | 8 | – | spare | |
 
-**X4 dash** (W20, 8-core; cut the two spare cores back and tape them)
+**X4 dash** (W20, 8-core: cores C1–C6 go to X4 on the logic board, C7–C8 go to J5 on the power board)
 
 | Pin | Core | Signal | Mega pin |
 |---|---|---|---|
@@ -132,10 +132,20 @@ Ground every cable shield **at the TCU end only**.
 | 4 | C4 | TEST button | D32 |
 | 5 | C5 | ON/OFF switch | D26 |
 | 6 | C6 | Common ground: the other side of every switch | GND |
+| J5a | C7 | ON/OFF **second pole**, in: +12 V DRV through F2 (PTC, 0.25 A) | (power board) |
+| J5b | C8 | ON/OFF **second pole**, out: +12 V to the relay coils K1–K3 and ULN2803 COM | A7 senses it (47k/10k) |
 
 Each control switches its core to C6 (ground). Closed means active. A broken wire reads as off:
 ON/OFF falls back to STOCK, and a broken ECO, SPORT or MANUAL wire leaves no mode on, which also
 means STOCK (the screen says PICK MODE). Exactly one of ECO, SPORT and MANUAL must be on.
+
+**The ON/OFF switch is a 2-pole toggle, and its second pole is a hardware cut.** Pole 1 (C5) tells
+the Mega what you want. Pole 2 (C7–C8) carries the power for the three relay coils. Flip ON/OFF to
+OFF and the relays drop out *even if the Mega has crashed or a driver transistor has failed short*:
+the factory ECU drives the solenoids again. The Mega watches both poles (D26 and A7). If they
+disagree for 0.3 s (a broken C7/C8 core, a blown F2, a welded switch contact) the screen shows
+**ON/OFF SWITCH** and the TCU stays in STOCK until the switch is fixed. A broken C7 or C8 core can
+only ever *remove* coil power, so every wiring fault in this cable ends in STOCK.
 
 **X7 shifter** (W22, 3-core): 1 = UP (upshift microswitch NO, D22), 2 = DOWN (downshift
 microswitch NO, D23), 3 = GND (both microswitches' COM).
@@ -258,7 +268,15 @@ VTA ── 10k ──┬── A0      E2 ── 10k ──┬── A1
 **ATF probe** (D33): `X6-3 DQ ── 100 Ω ── D33; 4.7k from DQ to 5 V; 5.1 V zener to GND`
 (use 2.2k if readings drop out on the long run)
 
-**Relay coils** (D6): `D6 ── ULN2803 IN1-3 (10k pull-down); OUT1-3 ── K1/K2/K3 coil (−); coil (+) ── +12 V DRV; ULN COM ── +12 V DRV`
+**Relay coils** (D6), powered through the ON/OFF switch's second pole
+```
++12 V DRV ── F2 (PTC 0.25 A) ── J5a ── C7 ── ON/OFF pole 2 ── C8 ── J5b = "+12 COIL"
++12 COIL ── K1/K2/K3 coil (+) ; coil (−) ── ULN2803 OUT1-3 ; IN1-3 ── D6 (10k pull-down)
++12 COIL ── ULN2803 COM, and UF4007 (DF, cathode on +12 COIL) to GND: flyback when the switch opens
++12 COIL ── 47k ──┬── A7 ; 10k to GND, 100 nF, 5.1 V zener   (coil power sense)
+```
+Both the Mega (D6 low) **and** the driver's switch (ON/OFF off) can drop the relays, each on its
+own. The Mega compares A7 with D26 and stops with **ON/OFF SWITCH** if they disagree.
 
 
 ## 7. Build order
@@ -267,8 +285,9 @@ This is the short version. The [build book](05-build-book.md) is the full step-b
 in order, with pictures.
 
 1. **Bench:** build the TCU on the bench with 15 Ω power resistors (plus LEDs) in place of the
-   three solenoids. Flash the firmware, calibrate `IS_AMPS_PER_VOLT`, hold TEST, and check every
-   self-test line passes.
+   three solenoids. Flash the firmware, calibrate `IS_AMPS_PER_VOLT`, turn ON/OFF **on**, hold
+   TEST, follow the prompts (the last one is TURN ON/OFF OFF), and check every self-test line
+   passes.
 2. **Power (car):** W1–W3 only, with the ON/OFF switch OFF. Key ON: the screen shows the MAIN page
    and the power-up test runs.
 3. **Signal taps:** W10–W16. Check the SENSORS page: speed 0, throttle 0 % → 100 % as you press

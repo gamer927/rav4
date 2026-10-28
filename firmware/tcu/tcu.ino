@@ -472,6 +472,7 @@ const char* faultWords(uint16_t faults) {
   if (faults & tcu::FAULT_SOLENOID) return "SOLENOID WIRE";
   if (faults & tcu::FAULT_ONOFF) return "ON/OFF SWITCH";
   if (faults & tcu::FAULT_RELAY) return "RELAY STUCK";
+  if (faults & tcu::FAULT_LEVER) return "LEVER SENSOR";
   return "";
 }
 
@@ -502,6 +503,7 @@ bool alertMessage(const tcu::Outputs& o, uint32_t now, Message& m) {
     return true;
   };
   if (o.faults & tcu::FAULT_RELAY) return say("PROBLEM", "RELAY STUCK", "STOCK SHIFTS.", "HOLD TEST TO", "RE-CHECK.");
+  if (o.faults & tcu::FAULT_LEVER) return say("PROBLEM", "LEVER SENSOR", "STUCK ON D.", "STOCK SHIFTS.", "CHECK D WIRE.");
   if (o.faults & tcu::FAULT_ONOFF) return say("PROBLEM", "ON/OFF SWITCH:", "ITS 2 HALVES", "DISAGREE.", "CHECK WIRING.");
   if (o.faults) return say("PROBLEM", faultWords(o.faults), "STOCK SHIFTS.", "ON/OFF OFF+ON", "TO TRY AGAIN.");
   if (switchOn && o.modeSelect == tcu::SEL_SEVERAL)

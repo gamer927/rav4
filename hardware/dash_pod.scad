@@ -85,7 +85,7 @@ controls = [
     [110, row_v, toggle_small_d, "SPORT",  9, 14, 32],
     [134, row_v, toggle_small_d, "MANUAL", 9, 14, 32],
     [159, row_v, button_d,       "TEST",  16, 16, 38],
-    [185, row_v, toggle_big_d,   "ON/OFF", 14, 20, 50]];   // safety cover flips up
+    [185, row_v, toggle_big_d,   "ON/OFF", 18, 22, 50]];   // 2-pole: bigger body; safety cover flips up
 ON_OFF_COVER = [22, 36, 18]; // flip cover outside the front: width, height (from 10 mm below the hole), depth (VERIFY)
 
 // Panel frame: u -> x, v -> z, outward normal -> -y (0 = outer surface).
@@ -220,7 +220,7 @@ module other_contents() {
             cylinder(h = 9, d = 17.5);
             cylinder(h = 20, d = 7);
         }
-    translate([90, 10, wall + 0.01]) cube([70, 22, 17]);           // lever-nut connectors
+    translate([90, 10, wall + 0.01]) cube([70, 38, 17]);           // 8 lever-nut connectors, 2 rows
 }
 module outside_parts() {   // the ON/OFF cover and gland heads outside the box
     c = controls[len(controls) - 1];

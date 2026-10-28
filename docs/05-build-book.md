@@ -161,8 +161,8 @@ Prints take a long time, so start them first. They print while you solder parts 
   each step is just "open the bag":
 
 - [ ] **Bag P1**: 3× 5.08 mm screw-terminal positions; 2× 1.5KE27A diode; 1× 1N5822 diode; 1× 100 µF 50 V capacitor; 1× 47k resistor (yellow-violet-black-red-brown); 1× 10k resistor (brown-black-black-red-brown); 1× 100 nF capacitor; 1× 1N4733A 5.1 V diode; 1× LM2596HV module
-- [ ] **Bag P2**: 1× 26-pin box header
-- [ ] **Bag P3**: 1× ULN2803A chip; 4× 10k resistor (brown-black-black-red-brown); 3× G2RL-2 12 V relay
+- [ ] **Bag P2**: 1× 26-pin box header; 1× P6KE6.8A diode
+- [ ] **Bag P3**: 1× ULN2803A chip; 5× 10k resistor (brown-black-black-red-brown); 3× G2RL-2 12 V relay; 2× 5.08 mm screw-terminal positions; 1× PTC 0.25 A resettable fuse; 1× UF4007 diode; 1× 47k resistor (yellow-violet-black-red-brown); 1× 100 nF capacitor; 1× 1N4733A 5.1 V diode
 - [ ] **Bag P4**: 10× 5.08 mm screw-terminal positions
 - [ ] **Bag P5**: 3× IRF4905 MOSFET; 3× 4.7k resistor (yellow-violet-black-brown-brown); 3× 10k resistor (brown-black-black-red-brown); 3× 1N4744A 15 V diode; 3× UF4007 diode; 3× 1N4749A 24 V diode; 3× ACS712-05B module
 - [ ] **Bag P6**: 7× 5.08 mm screw-terminal positions; 6× PC817 chip; 3× 2.2k resistor (red-red-black-brown-brown); 6× 1N4148 diode; 6× 10k resistor (brown-black-black-red-brown); 3× 3.3k resistor (orange-orange-black-brown-brown)
@@ -244,21 +244,23 @@ second: the buck output must read **0 V** (the protection works). Put them back.
 
 ### Step P2 — Ribbon socket
 
-#### P2.1 — Place 1 part
+#### P2.1 — Place 2 parts
 
 ![P2.1](build/power-P2-1.png)
 
 - [ ] **JA**: 26-pin box header box header → pin 1 in col 1, row 57. Notch facing the left edge; pin 1 (square pad) at the back
+- [ ] **TVS3**: P6KE6.8A diode → col 3, row 31 and col 3, row 35. Band (K) towards the back
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### P2.2 — Solder 3 wires (bottom side)
+#### P2.2 — Solder 4 wires (bottom side)
 
 ![P2.2](build/power-P2-2.png)
 
-- [ ] **1** red 22 AWG: **BUCK** OUT+ → **JA** pin 1 → **JA** pin 3
-- [ ] **2** black 22 AWG: **BUCK** OUT- → **JA** pin 2 → **JA** pin 4 → **JA** pin 16 → **JA** pin 23 → **JA** pin 24
-- [ ] **3** green 22 AWG: **Z1** band end → **JA** pin 19
+- [ ] **1** red 22 AWG: **BUCK** OUT+ → **JA** pin 1 → **JA** pin 3 → **TVS3** band end
+- [ ] **2** black 20 AWG: **TVS3** plain end → **J1c** (GND)
+- [ ] **3** black 22 AWG: **BUCK** OUT- → **JA** pin 2 → **JA** pin 4 → **JA** pin 16 → **JA** pin 23 → **JA** pin 24
+- [ ] **4** green 22 AWG: **Z1** band end → **JA** pin 19
 
 ✅ **CHECK** (bench 12 V on J1b/J1c): JA pin 1 and pin 3 read **5 V** (black probe on JA pin 2).
 
@@ -285,36 +287,67 @@ Push the legs through, bend them out a little underneath, solder, snip.
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### P3.2 — Place 2 parts
+#### P3.2 — Place 6 parts
 
 ![P3.2](build/power-P3-2.png)
 
 - [ ] **K2**: G2RL-2 12 V relay → COIL1 in col 19, row 17. Coil end at the back
 - [ ] **K3**: G2RL-2 12 V relay → COIL1 in col 25, row 17. Coil end at the back
+- [ ] **J5a**: TO ON/OFF screw terminal → col 1, row 23. X4-7 (C7): out to the ON/OFF switch
+- [ ] **J5b**: FROM ON/OFF screw terminal → col 1, row 25. X4-8 (C8): back: relay power
+- [ ] **F2**: PTC 0.25 A resettable fuse → col 2, row 28 and col 2, row 30. Resettable fuse, either way round
+- [ ] **DF**: UF4007 diode → col 31, row 21 and col 31, row 17. Band (K) towards the front
 
 Push the legs through, bend them out a little underneath, solder, snip.
 
-#### P3.3 — Solder 6 wires (bottom side)
+#### P3.3 — Place 4 parts
 
 ![P3.3](build/power-P3-3.png)
+
+- [ ] **RK1**: 47k resistor (bands: yellow-violet-black-red-brown) → col 31, row 6 and col 31, row 10. Coil supply sense, top
+- [ ] **RK2**: 10k resistor (bands: brown-black-black-red-brown) → col 33, row 6 and col 33, row 10. Coil supply sense, bottom
+- [ ] **CK**: 100 nF capacitor → col 33, row 12 and col 33, row 14
+- [ ] **ZK**: 1N4733A 5.1 V diode → col 31, row 12 and col 31, row 16. Band (K) towards the back
+
+Push the legs through, bend them out a little underneath, solder, snip.
+
+#### P3.4 — Solder 6 wires (bottom side)
+
+![P3.4](build/power-P3-4.png)
 
 - [ ] **1** blue 22 AWG: **JA** pin 7 → **RD1** at col 9, row 57 → **U1** pin 1 → **U1** pin 2 → **U1** pin 3
 - [ ] **2** blue 22 AWG: **JA** pin 8 → **RD2** at col 9, row 55 → **U1** pin 4
 - [ ] **3** blue 22 AWG: **JA** pin 9 → **RD3** at col 9, row 53 → **U1** pin 5
 - [ ] **4** blue 22 AWG: **JA** pin 10 → **RD4** at col 9, row 51 → **U1** pin 6
 - [ ] **5** black 22 AWG: **JA** pin 16 → **RD1** at col 5, row 57 → **RD2** at col 5, row 55 → **RD3** at col 5, row 53 → **RD4** at col 5, row 51 → **U1** pin 9
-- [ ] **6** yellow 20 AWG: **TVS1** band end → **U1** pin 10 → **K1** COIL1 → **K2** COIL1 → **K3** COIL1
+- [ ] **6** yellow 20 AWG: **TVS1** band end → **F2** 1
 
-#### P3.4 — Solder 3 wires (bottom side)
+#### P3.5 — Solder 6 wires (bottom side)
 
-![P3.4](build/power-P3-4.png)
+![P3.5](build/power-P3-5.png)
 
-- [ ] **1** green 22 AWG: **U1** pin 18 → **K1** COIL2
-- [ ] **2** green 22 AWG: **U1** pin 17 → **K2** COIL2
-- [ ] **3** green 22 AWG: **U1** pin 16 → **K3** COIL2
+- [ ] **1** blue 20 AWG: **F2** 2 → **J5a** (TO ON/OFF)
+- [ ] **2** yellow 20 AWG: **J5b** (FROM ON/OFF) → **U1** pin 10 → **K1** COIL1 → **K2** COIL1 → **K3** COIL1 → **DF** band end → **RK1** at col 31, row 6
+- [ ] **3** green 22 AWG: **RK1** at col 31, row 10 → **RK2** at col 33, row 6 → **CK** at col 33, row 12 → **ZK** band end → **JA** pin 25
+- [ ] **4** black 20 AWG: **J1c** (GND) → **DF** plain end → **RK2** at col 33, row 10 → **CK** at col 33, row 14 → **ZK** plain end
+- [ ] **5** green 22 AWG: **U1** pin 18 → **K1** COIL2
+- [ ] **6** green 22 AWG: **U1** pin 17 → **K2** COIL2
 
-✅ **CHECK** (12 V on J1a **and** J1b, − on J1c): touch a wire from JA pin 1 to **JA pin 7**.
-All three relays **click**. Take it away: they click off.
+#### P3.6 — Solder 1 wire (bottom side)
+
+![P3.6](build/power-P3-6.png)
+
+- [ ] **1** green 22 AWG: **U1** pin 16 → **K3** COIL2
+
+The relays' power doesn't come straight from the 12 V: it goes out through **J5a** to the dash
+pod's ON/OFF switch (its second half) and comes back on **J5b**. So turning ON/OFF off cuts the
+relays off by itself, even if the Mega has crashed. On the bench, stand in for the switch with a
+short wire from **J5a to J5b**.
+
+✅ **CHECK** (12 V on J1a **and** J1b, − on J1c, J5a–J5b jumper in): touch a wire from JA pin 1 to
+**JA pin 7**. All three relays **click**. Take it away: they click off. Now hold JA 1–7 together and
+pull the J5 jumper out: they click off too. **JA pin 25** reads about **2 V** with the jumper in and
+**0 V** with it out.
 
 ### Step P4 — Solenoid terminals
 
@@ -979,6 +1012,7 @@ The hub is the prototype shield that plugs onto the Mega. The two ribbon cables 
 - [ ] A22 → **A6** (IS3 (SL current))
 - [ ] A23 → **GND** (GND)
 - [ ] A24 → **GND** (GND)
+- [ ] A25 → **A7** (COILSNS (relay power sense))
 
 **Header B** (16-way, to the logic board):
 
@@ -997,7 +1031,7 @@ The hub is the prototype shield that plugs onto the Mega. The two ribbon cables 
 - [ ] B14 → **GND** (GND)
 - [ ] B15 → **D34** (MANUAL)
 
-Pins A25, A26, B9 and B16 stay empty.
+Pins A26, B9 and B16 stay empty.
 
 ✅ **CHECK** (meter on beep, shield plugged onto the Mega): each socket pin beeps to its Mega pin,
 and no two neighbouring socket pins beep to each other (except 5 V to 5 V and GND to GND).
@@ -1032,6 +1066,10 @@ switch) and the **shifter base** (the lever). Neither needs the box yet.
 beep and the lever **up**, find the outer pin that beeps to the middle one. Use those two pins:
 **lever up = on**. For the ON/OFF switch, closing its red cover pushes the lever down (off).
 
+**The ON/OFF switch has two halves** (6 pins: two rows of 3, or 4 pins on a DPST). Each half is
+its own switch, and both flip together. Beep-test each half the same way: lever up, find the
+outer pin that beeps to its middle pin.
+
 ### The dash pod
 
 **8.1 Inserts.** Heat-set the 4 brass inserts into the ends of the corner posts, at the open back
@@ -1049,7 +1087,7 @@ Tighten the nuts from inside. The names are engraved under each hole.
 
 **8.3 Cables.** Fit the 2 glands in the back cover: **SWITCHES** and **SCREEN**. Push the **8-core
 cable** through SWITCHES and the screen's **4-core cable** (from part 7) through SCREEN. Cut the
-8-core's eighth core short and tape it. Join each core with a lever connector:
+Join each core with a lever connector:
 
 ![Dash pod step 3](build/pod-3.png)
 
@@ -1060,7 +1098,12 @@ cable** through SWITCHES and the screen's **4-core cable** (from part 7) through
 | C3 | MANUAL switch |
 | C4 | TEST button |
 | C5 | ON/OFF switch |
-| C6 (ground) | the other pin of **every** switch and the button. Easiest: one black wire soldered from switch to switch, ECO → SPORT → MANUAL → TEST → ON/OFF, with C6 joined to its end |
+| C6 (ground) | the other pin of **every** switch and the button. Easiest: one black wire soldered from switch to switch, ECO → SPORT → MANUAL → TEST → ON/OFF (first half), with C6 joined to its end |
+| C7 | ON/OFF **second half**, middle pin |
+| C8 | ON/OFF **second half**, the outer pin that is on with the lever up |
+
+C5/C6 use the ON/OFF switch's first half, C7/C8 its second half. **Never join the two halves**:
+C7 and C8 carry the relays' 12 V, the rest carry 5 V.
 
 **8.4 Back cover.** Screw the back cover on (4 × M3 × 10 countersunk). The two hinge lugs stick
 out of the back.
@@ -1072,7 +1115,8 @@ out of the back.
 ![Dash pod step 5](build/pod-5.png)
 
 ✅ **CHECK** (meter on beep, at the 8-core's far end): C1 ↔ C6 beeps only with ECO on; C2 with
-SPORT; C3 with MANUAL; C4 with TEST pressed; C5 with ON/OFF on.
+SPORT; C3 with MANUAL; C4 with TEST pressed; C5 with ON/OFF on. **C7 ↔ C8 beeps only with
+ON/OFF on**, and C7 and C8 never beep to C1–C6.
 
 ### The shifter base
 
@@ -1122,7 +1166,7 @@ Everything is connected on the table, outside the box.
 
 - [ ] Plug the hub onto the Mega. Plug **ribbon A** (power board ↔ socket A) and **ribbon B**
   (logic board ↔ socket B). The red stripe is pin 1.
-- [ ] Shifter cable → **X7a/X7b/X7c** (UP, DOWN, GND). Dash cable C1–C6 → **X4a–X4f**. Screen
+- [ ] Shifter cable → **X7a/X7b/X7c** (UP, DOWN, GND). Dash cable C1–C6 → **X4a–X4f**, C7 → **J5a**, C8 → **J5b** (take the bench jumper out). Screen
   cable → **X5** (5V, GND, SDA, SCL). ATF probe → **X6** (red 5V, black GND, yellow DQ).
 - [ ] Dummy loads: LOAD 1/2/3/GND → **J4a/J4b/J4c/J4d**. For this test only, add three jumpers
   **J2d → J4a, J2e → J4b, J2f → J4c** (the resistors stand in for the solenoids).
@@ -1137,12 +1181,13 @@ Everything is connected on the table, outside the box.
   ECO and SPORT both on: after a second it says **MODE ERROR**. ON/OFF back off.
 - [ ] Tap TEST: the **SENSORS** page shows battery about 12 V, trans temp at room temperature,
   gas pedal 0 %, speed 0.
-- [ ] With ON/OFF **off**, hold TEST for 2 seconds: the self-test runs. When it tests the
+- [ ] With ON/OFF **on** (and only ECO on), hold TEST for 2 seconds: the self-test runs. When it tests the
   solenoids, each should read about **0.8 A** (12 V ÷ 15 Ω). If they're more than 10 % out,
   change `IS_AMPS_PER_VOLT` in `firmware/tcu/config.h`, upload again, retest.
 - [ ] Follow the prompts on the screen: **UPSHIFT THE LEVER**, **DOWNSHIFT THE LEVER**, **TURN ON
   ONLY ECO**, **TURN ON ONLY SPORT**, **TURN ON ONLY MANUAL**, then **PRESS THE BRAKE** (touch
-  12 V to J3b).
+  12 V to J3b), and last **TURN ON/OFF OFF**: it checks that the switch really cuts the relays.
+  Then the Mega resets itself on purpose (the safety-reset check) and comes back up.
 - [ ] The result says **ALL OK** ("SCREEN CHECK" is normal: it's asking you to confirm the
   screen flashed).
 
@@ -1170,7 +1215,7 @@ Everything is connected on the table, outside the box.
 | Gland | Cable | Inside, to | Plug outside |
 |---|---|---|---|
 | SHIFT | 3-core from the shifter base | X7a–X7c | (straight to the shifter base) |
-| DASH | 8-core from the dash pod | X4a–X4f (cut the 2 spare cores) | (straight to the dash pod) |
+| DASH | 8-core from the dash pod | C1–C6 → X4a–X4f; C7, C8 → J5a, J5b (along the gap at the front, then back between the boards) | (straight to the dash pod) |
 | SCREEN | 4-core from the dash pod | X5a–X5d | (straight to the dash pod) |
 | ATF | 3-core | X6a–X6c | X6, 3-way |
 | SIG | 7 thin wires: D, STP, E1, SPD, TAC, VTA, E2 | J3a–J3g | X3, 8-way |
@@ -1228,7 +1273,7 @@ over until the very last job, and only when its ON/OFF switch is on.
 - [ ] Hide all three cables under the trim, to the box. The dash pod's two cables go down behind
   the dash trim.
 
-✅ **CHECK:** hold TEST 2 s: every shifter and switch prompt passes.
+✅ **CHECK** (engine off, lever in P, ON/OFF on): hold TEST 2 s: every prompt passes.
 
 ### 12.5 ATF probe (cold engine)
 - [ ] Follow [wiring guide §9](03-wiring-guide.md#the-atf-temperature-probe): cut the **hot** hose,

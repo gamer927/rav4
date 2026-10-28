@@ -115,14 +115,14 @@ sizes vary.
 | Screen | 2.42" SSD1309 module (61.5 × 39.5 mm) in a pocket of ribs behind a 58 × 30.5 mm window, held by double-sided foam tape | — | `oled_*` |
 | ECO, SPORT, MANUAL | 6 mm mini toggles (MTS-101 / MTS-102 type). Lever up = on | 6.3 mm | `toggle_small_d` |
 | TEST | 12 mm momentary push button | 12.2 mm | `button_d` |
-| ON/OFF | 12 mm toggle (SPST) with a **flip-up safety cover** (aircraft-style "missile switch" cover). Closing the cover switches it off | 12.2 mm | `toggle_big_d` |
+| ON/OFF | 12 mm **2-pole** toggle (DPST or DPDT) with a **flip-up safety cover** (aircraft-style "missile switch" cover). Closing the cover switches it off | 12.2 mm | `toggle_big_d` |
 
 What each switch does: **ECO**, **SPORT** and **MANUAL** pick the mode, and **exactly one must be
 on**: ECO and SPORT are the TCU's two shift maps, and MANUAL means you shift with the lever
 (with SPORT's lockup and pedal response). None on, or more than one, for over a second: the
 screen says MODE ERROR or PICK MODE and the factory computer shifts until it's fixed. **ON/OFF**
 off = the factory computer drives, whatever the others say. Hold **TEST** for 2 s (parked,
-ON/OFF off) for the self-test; tap it to page through the screens. There's no status light: the
+ON/OFF on, engine off; the last prompt is TURN ON/OFF OFF) for the self-test; tap it to page through the screens. There's no status light: the
 screen shows everything, in words.
 
 The front is 3 mm thick, which suits most panel-mount switches (they usually take 1–6 mm).
@@ -220,7 +220,7 @@ templates in [`docs/build/`](../docs/build/).
 | SIG | X3: D, STP, E1, SPD, TAC, VTA, E2 | PG9 |
 | LOAD | Dummy-load heatsink: 3 feeds + ground, 18 AWG silicone wire | PG9 |
 | SHIFT | X7: shifter base, 3-core shielded | PG7 |
-| DASH | X4: dash pod switches, 8-core shielded | PG7 |
+| DASH | X4 (C1–C6) and J5 on the power board (C7–C8, ON/OFF power pole): 8-core shielded | PG7 |
 | SCREEN | X5: dash pod screen, 4-core shielded | PG7 |
 | ATF | X6: ATF probe, 3-core shielded | PG7 |
 

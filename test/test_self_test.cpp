@@ -354,12 +354,13 @@ static void test_cbit_solenoid_short() {
   in.eco = true;  // one mode switch on
   c.begin(in.nowMs, false);
   float s1On = 0.95f;
+  float s2Off = 0.0f;  // current with S2 commanded off: a shorted driver
   auto step = [&](uint32_t ms) {
     for (uint32_t x = 0; x < ms; x += 10) {
       in.nowMs += 10;
       const Outputs& o = c.outputs();
       in.solAmps[0] = o.relayCustom && o.s1 ? s1On : 0.0f;
-      in.solAmps[1] = o.relayCustom && o.s2 ? 0.95f : 0.0f;
+      in.solAmps[1] = o.relayCustom ? (o.s2 ? 0.95f : s2Off) : 0.0f;
       in.solAmps[2] = o.relayCustom && o.sl ? 0.95f : 0.0f;
       c.step(in);
     }
@@ -374,6 +375,19 @@ static void test_cbit_solenoid_short() {
   CHECK(c.outputs().control == CTRL_AUTO);
   CHECK(!(c.outputs().faults & FAULT_SOLENOID));
   s1On = 4.0f;   // shorted
+  step(cfg::SOL_FAULT_MS + 50);
+  CHECK(c.outputs().control == CTRL_STOCK);
+  CHECK(c.outputs().faults & FAULT_SOLENOID);
+
+  // S2's driver MOSFET fails shorted: current flows while it's commanded off.
+  s1On = 0.95f;
+  in.customRequested = false;  // acknowledge, then take over again
+  step(cfg::ARM_OFF_MIN_MS + 50);
+  in.customRequested = true;
+  step(500);
+  CHECK(c.outputs().control == CTRL_AUTO);
+  CHECK(!c.outputs().s2);  // 1st: S2 off
+  s2Off = 0.9f;
   step(cfg::SOL_FAULT_MS + 50);
   CHECK(c.outputs().control == CTRL_STOCK);
   CHECK(c.outputs().faults & FAULT_SOLENOID);
