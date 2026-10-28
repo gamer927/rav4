@@ -521,7 +521,7 @@ a **GND** terminal: its Mega hole drops to **0 V**.
 
 *1 part, orange in the picture; grey ones are already in. Lowest parts first.*
 
-- [ ] **The Mega's pins:** push male header strips into the Mega's sockets (cut to length: 8, 8, 8, 10, 8, 8 and an 18 × 2), lay this board on top so every pin pokes through its hole, and solder them from the top. They line up perfectly that way.
+- [ ] **The Mega's pins:** push male header strips into the Mega's sockets, **long ends down** (cut to length: 8, 8, 8, 10, 8, 8 and an 18 × 2), lay this board on top so every pin pokes through its hole, and solder them from the top. They line up perfectly that way.
 
 ✅ **CHECK** (meter on beep): no two neighbouring Mega pins beep to each other, except where both
 are labelled **5V** or both **GND**.

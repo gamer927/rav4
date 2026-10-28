@@ -21,8 +21,8 @@ housings and the docs: the things no single test sees. Run: python3 tools/system
   9. The spec's pin table lists every pin the firmware uses.
  10. Every relative link in the docs points at a file that exists.
  11. The circuit board file (hardware/pcb/) is the circuit: every pad on the
-     net the circuit says, and KiCad's design-rule check found no errors and
-     no unconnected pads. Read as text, so KiCad isn't needed here.
+     net the circuit says, KiCad's design-rule check found no errors and
+     no unconnected pads, and no copper lies under a bolted MOSFET tab. Read as text, so KiCad isn't needed here.
 """
 import glob
 import os
@@ -256,6 +256,11 @@ drc_text = read("hardware/pcb/drc.txt")
 check("** Found 0 unconnected pads **" in drc_text, "KiCad DRC: no unconnected pads")
 check("Severity: error" not in drc_text, "KiCad DRC: no errors")
 check(os.path.exists(os.path.join(ROOT, "hardware", "pcb", "rav4-tcu-gerbers.zip")), "the Gerber zip is there to upload")
+mosfets = len([r for r in circuit.parts if r.startswith("Q")])
+check(pcb_text.count("(copperpour not_allowed)") >= 2 * mosfets,
+      "no copper under each MOSFET's bolted tab (top) or its bolt (both sides)")
+check("pcb_standoff_h = 18.6;" in read("hardware/pcb_envelope.scad"),
+      "the board's posts allow for the header strips' plastic on top of the Mega's sockets")
 
 print(f"system check: {len(passed)} passed, {len(problems)} problems")
 for p in problems:

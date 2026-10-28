@@ -38,7 +38,9 @@ W, H = 200.0, 150.0      # board size, mm
 X0, Y0 = 50.0, 50.0      # where the board sits on KiCad's page
 NOTCH = (17.78, 95.25)   # back-left cut-out over the Mega's USB and power jacks: x < 17.78, y > 95.25
 MEGA_AT = (2.54, 95.25)  # the Mega's corner (its USB side, front edge) under the board
-STANDOFF_H = 16.1        # floor to the board's underside: 6 mm Mega standoff + 1.6 + 8.5 header
+# Floor to the board's underside: 6 mm Mega standoff + 1.6 Mega board + 8.5 Mega socket + 2.5 the
+# plastic strip of the male headers, which sits on top of the sockets and holds this board up.
+STANDOFF_H = 18.6
 
 COPYRIGHT = "RAV4 TCU  github.com/gamer927/rav4  CC BY-NC-SA 4.0"
 
@@ -723,6 +725,8 @@ def route(board, log=print):
                 d = max(p.GetDrillSize().x / 1e6, sx)
                 if f.GetReference().startswith("H"):
                     d = 7.0   # screw head and standoff
+                if f.GetReference().startswith("Q"):
+                    d = 2 * TAB_BOLT_R   # the tab's bolt, nut and washer: bare board on both sides
                 r.pads.append(pr.Pad(-2, x, y, "circle", d, d, keepout=True))
                 continue
             if not p.GetNetname():
@@ -734,8 +738,7 @@ def route(board, log=print):
             pad_obj.append(p)
         # A flat TO-220's metal tab lies on the top layer: keep other tracks out from under it.
         if f.GetReference().startswith("Q"):
-            x0, y0, x1, y1 = courtyard(f)
-            r.keepouts.append((0, x0 + 1.0, y0 + 3.5, x1 - 1.0, y1 - 1.0))
+            r.keepouts.append((0, *tab_area(f)))
     r.build(list(nid.values()))
     span = {}
     for n, ps in pads_of.items():
@@ -804,6 +807,56 @@ def _track(board, ni, w, a, b):
     t.SetLayer(pcbnew.F_Cu if a[0] == 0 else pcbnew.B_Cu)
     t.SetNet(ni)
     board.Add(t)
+
+
+# A flat TO-220's metal tab is its drain (switched +12 V), and the bolt through it is too. Solder
+# mask alone is no insulation against a bolted metal tab in a car that vibrates, so there's no
+# copper at all under the tab (top) or under the bolt's head, nut and washer (both sides).
+TAB_BOLT_R = 4.5
+
+
+def tab_area(fp):
+    """Board-mm rectangle under a flat TO-220's body and tab, not its legs."""
+    x0, y0, x1, y1 = courtyard(fp)
+    return x0 + 1.0, y0 + 3.5, x1 - 1.0, y1 - 1.0
+
+
+def tab_holes(board):
+    import pcbnew
+    for fp in board.GetFootprints():
+        if fp.GetReference().startswith("Q"):
+            for pd in fp.Pads():
+                if pd.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
+                    yield fp, bxy(*pd.GetPosition())
+
+
+def add_tab_keepouts(board):
+    import pcbnew
+
+    def rule_area(layers, pts):
+        z = pcbnew.ZONE(board)
+        z.SetIsRuleArea(True)
+        z.SetDoNotAllowCopperPour(True)
+        z.SetDoNotAllowTracks(True)
+        z.SetDoNotAllowVias(True)
+        z.SetDoNotAllowPads(False)
+        z.SetDoNotAllowFootprints(False)
+        ls = pcbnew.LSET()
+        for layer in layers:
+            ls.AddLayer(layer)
+        z.SetLayerSet(ls)
+        ol = z.Outline()
+        ol.NewOutline()
+        for x, y in pts:
+            ol.Append(*kxy(x, y))
+        board.Add(z)
+
+    for fp, (hx, hy) in tab_holes(board):
+        x0, y0, x1, y1 = tab_area(fp)
+        rule_area([pcbnew.F_Cu], [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+        r = TAB_BOLT_R
+        rule_area([pcbnew.F_Cu, pcbnew.B_Cu], [(hx + r * math.cos(math.radians(a)), hy + r * math.sin(math.radians(a)))
+                                              for a in range(0, 360, 15)])
 
 
 def add_ground_fill(board):
@@ -945,7 +998,7 @@ def part_line(c, ref):
     if ref == "GYRO":
         how = "Solder its 8-pin header into the board first, then the gyro onto the header, lying flat, chip side up."
     if ref == "A1":
-        return ("- [ ] **The Mega's pins:** push male header strips into the Mega's sockets (cut to length: "
+        return ("- [ ] **The Mega's pins:** push male header strips into the Mega's sockets, **long ends down** (cut to length: "
                 "8, 8, 8, 10, 8, 8 and an 18 × 2), lay this board on top so every pin pokes through its hole, "
                 "and solder them from the top. They line up perfectly that way.")
     return f"- [ ] **{ref}**: {v} {what}{extra}. {how}".replace("  ", " ").rstrip(" .") + ("." if how else "")
@@ -1120,6 +1173,7 @@ if __name__ == "__main__":
     import pcbnew
     design_rules(board)
     failed = route(board)
+    add_tab_keepouts(board)
     add_ground_fill(board)
     pcb_path = os.path.join(OUT, "rav4-tcu.kicad_pcb")
     board.Save(pcb_path)
