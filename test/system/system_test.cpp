@@ -747,6 +747,143 @@ void s_atf_overheats() {
   CHECK(controller.outputs().lockup);  // hot: lockup on, to stop converter heating
 }
 
+
+// Yaw rate for a given side force at the current speed, as the gyro reports it.
+int16_t yawRawFor(float latG, float biasDps = 0) {
+  const float dps = car.mph > 1 ? latG * 9.81f / (car.mph * 0.44704f) * 57.2958f : 0.0f;
+  return (int16_t)((dps + biasDps) * 65.5f);
+}
+
+void s_corner_hold_from_gyro() {
+  // The gyro's zero is off by 8 deg/s (an MPU-6050 may be off by up to 20).
+  // Parked at key-on, the TCU learns it. Unlearned, 8 deg/s at 37 mph reads
+  // as 0.23 g: a corner hold that would never end.
+  const float drift = 8.0f;
+  Wire.yawRaw = yawRawFor(0, drift);
+  boot();
+  startEngine();
+  run(4000);  // still, long enough to learn the zero
+  armAndDrive();
+  car.tps = 20;
+  rampTo(17, 6);
+  Wire.yawRaw = yawRawFor(0, drift);
+  run(1000);
+  const int g = engagedGear();
+  CHECK(g <= 2);
+  CHECK(!controller.outputs().cornerHold);
+  // A real corner: 0.35 g, speeding up well past the next upshift: the gear holds.
+  for (int i = 0; i < 2000; i++) {
+    car.mph = fminf(37.0f, car.mph + 0.01f);
+    Wire.yawRaw = yawRawFor(0.35f, drift);
+    tick();
+  }
+  CHECK(controller.outputs().cornerHold);
+  CHECK(engagedGear() == g);
+  CHECK(screenSays("CORNER"));
+  Wire.yawRaw = yawRawFor(0, drift);  // straight again, at 37 mph
+  run(cfg::CORNER_EXIT_MS + 1500);
+  CHECK(!controller.outputs().cornerHold);
+  CHECK(engagedGear() > g);
+  // The gyro warms up and its zero moves (8 -> 14 deg/s). The next stop
+  // re-learns it; straight on afterwards is still straight.
+  rampTo(0, 8);
+  for (int i = 0; i < 6000; i++) {
+    Wire.yawRaw = yawRawFor(0, drift + 6.0f * i / 6000.0f);
+    tick();
+  }
+  rampTo(37, 6);
+  run(2000);
+  CHECK(!controller.outputs().cornerHold);
+}
+
+void s_gyro_dead() {
+  boot();
+  startEngine();
+  run(4000);
+  armAndDrive();
+  car.tps = 20;
+  rampTo(17, 6);
+  // A few single missed readings over the drive (a loose connector) must
+  // not switch corner hold off for good.
+  for (int i = 0; i < 8; i++) {
+    Wire.gyroDead = true;
+    run(25);
+    Wire.gyroDead = false;
+    run(500);
+  }
+  Wire.yawRaw = yawRawFor(0.35f);
+  run(300);
+  CHECK(controller.outputs().cornerHold);
+  // Then it dies mid-corner: the last reading (a corner) must not hold the gear.
+  Wire.gyroDead = true;
+  run(500);
+  CHECK(!controller.outputs().cornerHold);
+  CHECK(tcuInControl());
+  rampTo(37, 6);
+  run(1500);
+  CHECK(engagedGear() >= 3);
+  CHECK(!screenSays("CORNER"));
+  Wire.gyroDead = false;
+  Wire.yawRaw = 0;
+}
+
+void s_throttle_reading() {
+  // Half pedal reads 50 %, and a shifted engine ground (E2 0.3 V above the
+  // TCU's ground, on both wires) changes nothing: VTA is read against E2.
+  boot();
+  car.tps = 50;
+  run(1000);
+  CHECK(fabsf(lastIn.tpsPct - 50.0f) < 2.0f);
+  CHECK(lastIn.tpsValid);
+  struct Shift {
+    static int analog(uint8_t p) {
+      if (p == A0) return toRaw(0.3f + cfg::TPS_CLOSED_V + car.tps / 100.0f * (cfg::TPS_WOT_V - cfg::TPS_CLOSED_V));
+      if (p == A1) return toRaw(0.3f);
+      return analogImpl(p);
+    }
+  };
+  g_analog = Shift::analog;
+  run(1000);
+  CHECK(fabsf(lastIn.tpsPct - 50.0f) < 2.0f);
+  car.tps = 0;
+  run(1000);
+  CHECK(lastIn.tpsPct < 2.0f);
+  car.tps = 100;
+  run(1000);
+  CHECK(lastIn.tpsPct > 98.0f);
+  g_analog = analogImpl;
+}
+
+void s_throttle_sensor_wire_broken() {
+  boot();
+  startEngine();
+  armAndDrive();
+  car.tps = 25;
+  rampTo(35, 6);
+  CHECK(tcuInControl());
+  struct Open { static int analog(uint8_t p) { return p == A0 ? toRaw(0.02f) : analogImpl(p); } };
+  g_analog = Open::analog;  // VTA wire broken: the input reads ~0 V
+  run(600);
+  g_analog = analogImpl;
+  CHECK(!tcuInControl());
+  CHECK(factorySafe());
+  CHECK(controller.outputs().faults & tcu::FAULT_TPS);
+  CHECK(screenSays("PEDAL SENSOR"));
+}
+
+void s_saved_table_corrupted() {
+  // The self-test's table kept in RAM over the reset: one byte changed
+  // (a power blip) must make it unusable, not restore a wrong result.
+  s_ibit_full();
+  saveBitForWatchdogTest();
+  savedBit.results[tcu::T_SOL_S1] = tcu::TR_FAIL;  // not what the test found
+  watchdogFires();
+  reboot();
+  run(500);
+  CHECK(selfTest.result(tcu::T_SOL_S1) != tcu::TR_FAIL);
+  CHECK(selfTest.result(tcu::T_WATCHDOG) != tcu::TR_PASS);
+}
+
 struct Scenario {
   const char* name;
   void (*fn)();
@@ -780,6 +917,11 @@ const Scenario kScenarios[] = {
     {"self-test (IBIT): every check passes, incl. the hardware cut", s_ibit_full},
     {"build book 13.4 (jack stands), step by step: the screen says what the book says", s_build_book_jack_stands},
     {"self-test refused with the engine running", s_ibit_refused_while_engine_runs},
+    {"corner hold from the gyro (its zero drift learned first)", s_corner_hold_from_gyro},
+    {"gyro glitches, then dies mid-corner: hold ends, still in control", s_gyro_dead},
+    {"throttle reads right, also with a shifted engine ground", s_throttle_reading},
+    {"throttle sensor wire broken: ECU back, PEDAL SENSOR", s_throttle_sensor_wire_broken},
+    {"saved self-test table corrupted over the reset: not restored", s_saved_table_corrupted},
 };
 
 // --screens DIR: capture the pictures in docs/oled-screens.png (rendered by

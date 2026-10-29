@@ -85,6 +85,8 @@ struct Car {
   bool welded[3] = {false, false, false};
   bool solenoidOpen[3] = {false, false, false};
   bool screenUnplugged = false, probeUnplugged = false, gyroDead = false;
+  int probeBadReads = 0;       // the next n readings arrive with a bad checksum (noise on the cable)
+  bool probeLostPower = false;  // the probe blinked off: its next reading is the power-on 85.0 C
   bool vssLost = false, tachLost = false;
 } car;
 
@@ -293,6 +295,7 @@ struct Ds18b20 {
   uint8_t tx[9] = {};
   int txBit = 0;
   int16_t raw = 0x0550;  // 85.0 C: the power-on value, until the first conversion
+  int conversions = 0;
   void line() { drive(PIN_ATF_PROBE_PORT, PIN_ATF_PROBE_BIT, !(masterLow || slaveLow)); }
 } probe;
 
@@ -331,12 +334,19 @@ static void probeByte(uint8_t b) {
     probe.state = b == 0xCC ? Ds18b20::FUNC : Ds18b20::IDLE;  // skip ROM
   } else if (probe.state == Ds18b20::FUNC) {
     if (b == 0x44) {  // convert: 750 ms at 12 bits
+      probe.conversions++;
       avr_cycle_timer_register_usec(avr, 750000, probeConverted, nullptr);
       probe.state = Ds18b20::IDLE;
     } else if (b == 0xBE) {  // read the scratchpad
-      const uint8_t sp[8] = {(uint8_t)probe.raw, (uint8_t)(probe.raw >> 8), 0x4B, 0x46, 0x7F, 0xFF, 0x0C, 0x10};
+      const int16_t raw = car.probeLostPower ? 0x0550 : probe.raw;
+      car.probeLostPower = false;
+      const uint8_t sp[8] = {(uint8_t)raw, (uint8_t)(raw >> 8), 0x4B, 0x46, 0x7F, 0xFF, 0x0C, 0x10};
       memcpy(probe.tx, sp, 8);
       probe.tx[8] = crc8(sp, 8);
+      if (car.probeBadReads > 0) {
+        car.probeBadReads--;
+        probe.tx[1] ^= 0x08;  // one bit flipped on the way: the checksum no longer matches
+      }
       probe.txBit = 0;
       probe.state = Ds18b20::READING;
     } else {
@@ -803,6 +813,82 @@ static void s_tach_lost() {
   CHECK(runUntilScreen("NO RPM", 3000));
 }
 
+// A one-off bad reading, the power-on value, and how often it's read.
+static void s_atf_probe_glitches() {
+  car.atfC = 60.0f;  // 140 F
+  powerOn();
+  // From power-on to the first reading, no made-up temperature on the screen.
+  for (int t = 0; t < 4000; t += 20) {
+    run(20);
+    CHECK(!screenSays("32F"));
+  }
+  // At key-on the first reading is in before the power-on checks.
+  const size_t pbit = g_log.find("# PBIT");
+  CHECK(pbit != std::string::npos && g_log.find("TEMP PROBE OK", pbit) != std::string::npos);
+  CHECK(runUntilScreen("140F", 3000));
+  // Read once a second, not more, not less.
+  const int c0 = probe.conversions;
+  run(10000);
+  CHECK(probe.conversions - c0 >= 9 && probe.conversions - c0 <= 11);
+  // Two bad readings in a row (noise): still a working probe, no warning.
+  car.probeBadReads = 2;
+  run(3000);
+  CHECK(screenSays("140F"));
+  CHECK(!screenSays("NO TEMP"));
+  // ...and the count starts over after a good one: two more are fine too.
+  car.probeBadReads = 2;
+  run(3000);
+  CHECK(!screenSays("NO TEMP"));
+  // Three in a row: a probe fault.
+  car.probeBadReads = 3;
+  CHECK(runUntilScreen("NO TEMP", 5000));
+  run(3000);  // good again: it comes back by itself
+  CHECK(runUntilScreen("140F", 3000));
+  // The probe blinks off: its 85.0 C (185 F) power-on value must not be
+  // shown, and one such reading isn't a fault.
+  for (int i = 0; i < 3; i++) {
+    car.probeLostPower = true;
+    for (int t = 0; t < 3000; t += 20) {
+      run(20);
+      CHECK(!screenSays("185F"));
+      CHECK(!screenSays("NO TEMP"));
+    }
+  }
+  CHECK(screenSays("140F"));
+  // At 85 C for real (185 F, a normal hot day's ATF), the same value is fine.
+  car.atfC = 84.0f;
+  CHECK(runUntilScreen("183F", 3000));
+  car.atfC = 85.0f;
+  CHECK(runUntilScreen("185F", 3000));
+}
+
+// Corner hold from the real gyro over I2C: its zero (off by 8 deg/s here)
+// learned while parked, then a 0.35 g corner holds the gear.
+static void s_corner_hold() {
+  car.eco = true;
+  car.yawDps = 8.0f;
+  keyOn();
+  startEngine();
+  run(4000);
+  armAndDrive();
+  car.tps = 20;
+  rampTo(17, 6);
+  run(1000);
+  const int g = engagedGear();
+  CHECK(!screenSays("CORNER"));
+  for (int i = 0; i < 200; i++) {  // speeding up through a 0.35 g corner
+    car.mph = fminf(37.0f, car.mph + 0.1f);
+    car.yawDps = 8.0f + 0.35f * 9.81f / (car.mph * 0.44704f) * 57.2958f;
+    run(10);
+  }
+  CHECK(engagedGear() == g);
+  CHECK(screenSays("CORNER"));
+  car.yawDps = 8.0f;  // straight
+  run(2500);
+  CHECK(!screenSays("CORNER"));
+  CHECK(engagedGear() > g);
+}
+
 struct Scenario {
   const char* name;
   void (*fn)();
@@ -813,11 +899,13 @@ static const Scenario kScenarios[] = {
     {"as shipped: not calibrated, never takes over", s_not_calibrated_never_takes_over, false},
     {"as shipped: the DS18B20 probe is read over 1-Wire", s_atf_probe_reads, false},
     {"as shipped: probe unplugged, TRANS --", s_atf_probe_unplugged, false},
+    {"as shipped: probe glitches: bad readings, power-on value, once a second", s_atf_probe_glitches, false},
     {"as shipped: screen cable cut and plugged back", s_screen_cable_cut_and_back, false},
     {"as shipped: health on the real chip (loop time, stack)", s_health_on_the_real_chip, false},
     {"as shipped: full self-test, SAFETY RESET through the real bootloader", s_full_self_test_with_safety_reset, false},
     {"calibrated: takes over in D and shifts 1-4", s_drive_takes_over_and_shifts, true},
     {"calibrated: MANUAL, the lever shifts up and down", s_manual_lever_shifts, true},
+    {"calibrated: corner hold from the gyro over I2C, its zero learned", s_corner_hold, true},
     {"calibrated: ON/OFF off hands back within 100 ms", s_onoff_off_hands_back, true},
     {"calibrated: solenoid wire breaks, hands back, says so", s_solenoid_wire_breaks, true},
     {"calibrated: speed signal lost, hands back, says so", s_speed_signal_lost, true},

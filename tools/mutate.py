@@ -50,9 +50,10 @@ OPERATORS = [
     (r"(?<![\w)\]!=<>])!(?!=)", "", "drop !"),
 ]
 
-# Mutants that change nothing a test could see, with the reason. Key:
-# (file, line text stripped, operator name).
-EQUIVALENT = {}
+# Surviving mutants that make no difference anything could see, each with
+# the reason: (file, operator, text in the line, text in the line before it
+# or None, why). Reviewed by hand; a survivor not listed here is a gap.
+EQUIVALENT = []
 
 
 def code_spans(line):
@@ -80,6 +81,21 @@ def skip_line(text):
             s.startswith(("template", "constexpr uint8_t kUnusedPins")))
 
 
+def prev_code(lines, ln):
+    """The nearest non-blank line before line `ln` (0-based), stripped."""
+    for i in range(ln - 1, -1, -1):
+        if lines[i].strip():
+            return lines[i].strip()
+    return ""
+
+
+def equivalent(m):
+    for f, op, text, before, why in EQUIVALENT:
+        if m["file"] == f and m["op"] == op and text in m["old"] and (before is None or before in m["prev"]):
+            return why
+    return None
+
+
 def mutants_of(fname):
     lines = open(os.path.join(FW, fname)).read().split("\n")
     out = []
@@ -102,13 +118,13 @@ def mutants_of(fname):
                     if name.startswith(("<", ">")) and re.search(r"(include|template|_cast)\s*$", seg[:m.start()]):
                         continue
                     new = text[:a + m.start()] + rep + text[a + m.end():]
-                    out.append(dict(file=fname, line=ln + 1, op=name, old=text, new=new))
+                    out.append(dict(file=fname, line=ln + 1, op=name, old=text, new=new, prev=prev_code(lines, ln)))
         # statement deletion: a plain call or assignment on its own line
         s = text.strip()
         if (s.endswith(";") and not s.startswith(("return", "const ", "static ", "uint", "int", "float", "bool",
                                                   "tcu::", "auto ", "char ", "case ", "break", "default"))
                 and re.match(r"^[\w.\[\]>()*&:-]+\s*(\(|=|\+=|-=|\|=|&=|\+\+|--)", s)):
-            out.append(dict(file=fname, line=ln + 1, op="delete statement", old=text,
+            out.append(dict(file=fname, line=ln + 1, op="delete statement", old=text, prev=prev_code(lines, ln),
                             new=text[:len(text) - len(text.lstrip())] + ";"))
     return out
 
@@ -179,6 +195,8 @@ def main():
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--fresh", action="store_true", help="forget saved results (after changing the tests)")
+    ap.add_argument("--report", action="store_true",
+                    help="no testing: write the report from the saved results (the chip pass counts too)")
     ap.add_argument("--chip", action="store_true", help="tcu.ino mutants also run the chip test (make chip first)")
     ap.add_argument("--only", help="only the mutants listed (numbers, comma-separated), e.g. the last survivors")
     args = ap.parse_args()
@@ -193,6 +211,8 @@ def main():
             print(f"{k:4d} {m['file']}:{m['line']} {m['op']}: {m['new'].strip()}")
         return
     os.makedirs(OUT, exist_ok=True)
+    if args.report:
+        return report_from_saved(ms)
     # Each result is saved as it comes (build/mutants/results.jsonl), so a run
     # that is stopped carries on where it left off: --fresh starts over.
     saved = os.path.join(OUT, "results_chip.jsonl" if CHIP else "results.jsonl")
@@ -221,13 +241,30 @@ def main():
     write_report(ms, results)
 
 
+def report_from_saved(ms):
+    """The report from build/mutants/results.jsonl, with a survivor there
+    that the chip pass (results_chip.jsonl) killed counted as killed."""
+    key = lambda m: (m["file"], m["line"], m["op"], m["new"])  # noqa: E731
+    saved = {}
+    for name in ("results.jsonl", "results_chip.jsonl"):
+        path = os.path.join(OUT, name)
+        if not os.path.exists(path):
+            continue
+        for line in open(path):
+            r = json.loads(line)
+            k = (r["file"], r["line"], r["op"], r["new"])
+            if name == "results.jsonl" or (r["result"] == "killed" and saved.get(k, ("",))[0] == "survived"):
+                saved[k] = (r["result"], ("chip test: " if name != "results.jsonl" else "") + r["why"])
+    results = {k: saved.get(key(m), ("not run", "")) for k, m in enumerate(ms)}
+    write_report(ms, results)
+
+
 def write_report(ms, results):
     rows, tally = [], {}
     for k, m in enumerate(ms):
         res, why = results[k]
-        key = (m["file"], m["old"].strip(), m["op"])
-        if res == "survived" and key in EQUIVALENT:
-            res, why = "equivalent", EQUIVALENT[key]
+        if res == "survived" and equivalent(m):
+            res, why = "equivalent", equivalent(m)
         tally.setdefault(m["file"], {}).setdefault(res, 0)
         tally[m["file"]][res] += 1
         rows.append((m, res, why))

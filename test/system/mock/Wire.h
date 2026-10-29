@@ -12,18 +12,20 @@ struct TwoWire {
   uint8_t buf[64];
   uint8_t n = 0;
   int transactions = 0, maxBytes = 0;
-  bool unplugged = false;
+  bool unplugged = false;  // the screen cable cut: the whole bus fails
+  bool gyroDead = false;   // the gyro alone stops answering
+  uint8_t addr = 0;
   void begin() {}
   void setClock(uint32_t) {}
   void setWireTimeout(uint32_t, bool) {}
-  void beginTransmission(uint8_t) { n = 0; }
+  void beginTransmission(uint8_t a) { n = 0; addr = a; }
   size_t write(uint8_t b) { buf[n++] = b; return 1; }
   size_t write(const uint8_t* d, size_t k) { for (size_t i = 0; i < k; i++) write(d[i]); return k; }
   int16_t yawRaw = 0;
   uint8_t rx[2];
   uint8_t rxPos = 2;
   uint8_t requestFrom(uint8_t addr, uint8_t n) {
-    if (unplugged || addr != 0x68 || n != 2) return 0;
+    if (unplugged || gyroDead || addr != 0x68 || n != 2) return 0;
     rx[0] = (uint8_t)((uint16_t)yawRaw >> 8);
     rx[1] = (uint8_t)(yawRaw & 0xFF);
     rxPos = 0;
@@ -33,7 +35,7 @@ struct TwoWire {
   uint8_t endTransmission(bool) { return endTransmission(); }
   uint8_t endTransmission() {
     transactions++;
-    if (unplugged) return 2;  // address NACK
+    if (unplugged || (gyroDead && addr == 0x68)) return 2;  // address NACK
     if (n > maxBytes) maxBytes = n;
     if (n == 0) return 0;
     if (buf[0] == 0x00) {
