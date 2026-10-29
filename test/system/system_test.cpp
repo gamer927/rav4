@@ -136,6 +136,26 @@ void applyCarToPins() {
   g_pin[pin::ECU_SL] = lowIf(sl && !car.ecuSenseDead);
 }
 
+// --journal FILE: every scenario's screen changes and the firmware's own
+// event lines on the USB log, in time order. `make golden` compares it with
+// test/system/golden/journal.txt: any change to what the driver sees or what
+// the log says shows up as a diff.
+FILE* g_journal = nullptr;
+void journal() {
+  static std::string lastScreen;
+  static size_t logPos = 0;
+  if (!g_journal || g_ms % 50) return;
+  for (size_t nl; (nl = Serial.out.find('\n', logPos)) != std::string::npos; logPos = nl + 1) {
+    const std::string line = Serial.out.substr(logPos, nl - logPos);
+    if (line.rfind("#", 0) == 0) fprintf(g_journal, "%7u log  %s\n", g_ms, line.c_str());
+  }
+  const std::string now = screen_text::tidy([](int page, int x) { return Wire.fb[page][x]; });
+  if (now != lastScreen) {
+    fprintf(g_journal, "%7u scr  %s\n", g_ms, now.c_str());
+    lastScreen = now;
+  }
+}
+
 void tick() {
   g_ms++;
   applyCarToPins();
@@ -153,6 +173,7 @@ void tick() {
     tach.periodUs = 0;
   }
   loop();
+  journal();
 }
 void run(uint32_t ms) { for (uint32_t i = 0; i < ms; i++) tick(); }
 void rampTo(float mph, float mphPerS = 8.0f) {
@@ -1060,6 +1081,12 @@ int main(int argc, char** argv) {
     captureScreens();
     return 0;
   }
+  const char* journalPath = nullptr;
+  if (argc > 2 && strcmp(argv[1], "--journal") == 0) {
+    journalPath = argv[2];
+    fclose(fopen(journalPath, "w"));
+    argc = 1;
+  }
   // Each scenario runs in its own process: the firmware's globals start fresh.
   int failed = 0, n = 0;
   for (const Scenario& s : kScenarios) {
@@ -1068,7 +1095,12 @@ int main(int argc, char** argv) {
     fflush(stdout);
     const pid_t pid = fork();
     if (pid == 0) {
+      if (journalPath) {
+        g_journal = fopen(journalPath, "a");
+        fprintf(g_journal, "\n## %s\n", s.name);
+      }
       s.fn();
+      if (g_journal) fclose(g_journal);
       std::printf("%s %s  (%d checks)\n", g_failures ? "FAIL" : "ok  ", s.name, g_checks);
       fflush(stdout);
       _exit(g_failures ? 1 : 0);

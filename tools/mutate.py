@@ -54,7 +54,82 @@ OPERATORS = [
 # Surviving mutants that make no difference anything could see, each with
 # the reason: (file, operator, text in the line, text in the line before it
 # or None, why). Reviewed by hand; a survivor not listed here is a gap.
-EQUIVALENT = []
+ST, TL, INO = "self_test.cpp", "tcu_logic.cpp", "tcu.ino"
+LATER = "the step ends one 10 ms control period later: no result depends on it"
+EQUIVALENT = [
+    # self_test.cpp
+    (ST, "delete statement", "out_ = TestOutputs();", "if (in.solSenseValid && !in.leverInD",
+     "runPowerOn() runs once at key-on, before anything has been driven: the outputs are already off"),
+    (ST, "delete statement", "out_ = TestOutputs();", "runPassive(in);",
+     "start() is refused while a test runs, and every way a test ends clears the outputs"),
+    (ST, "delete statement", "out_ = TestOutputs();", "void SelfTest::finish() {",
+     "finish() is only reached from endCutTest(), which has just cleared the outputs"),
+    (ST, "delete statement", "out_ = TestOutputs();", "restoreAfterWatchdog() records the pass",
+     "endCutTest() cleared the outputs before this step; the next line sets the one it needs"),
+    (ST, "delete statement", "out_ = TestOutputs();", "set(T_WATCHDOG, watchdogWorked",
+     "restoreAfterWatchdog() runs on the fresh SelfTest of a just-reset board: nothing is on"),
+    (ST, "delete statement", "aborted_ = false;", "out_ = TestOutputs();",
+     "restoreAfterWatchdog() runs on the fresh SelfTest of a just-reset board: not aborted"),
+    (ST, "delete statement", "inhibit_ = INH_NONE;", "aborted_ = false;",
+     "restoreAfterWatchdog() runs on the fresh SelfTest of a just-reset board: no inhibit"),
+    (ST, "false to true", "bool ok = false;", None, "every prompt's case sets ok"),
+    (ST, "delete statement", "current_ = T_ONOFF_CUT;", None,
+     "already T_ONOFF_CUT since the last prompt set it (it names the step on the screen)"),
+    (ST, ">= to >", "inPhase >= cfg::IBIT_", None, LATER),
+    (ST, "> to >=", "maxA = in.solAmps[i] > maxA ?", None, "the larger of two equal values is the same value"),
+    (ST, ">= to >", "return in >= cfg::IBIT_PROMPT_TIMEOUT_MS ? 0", None,
+     "at exactly the timeout both give 0 seconds left"),
+    # tcu_logic.cpp
+    (TL, "> to >=", "const float onMph = baseOn > floorOn", None, "the larger of two equal values is the same value"),
+    (TL, "> to >=", "const float offMph = baseOff > floorOff", None, "the larger of two equal values is the same value"),
+    (TL, "&& to ||", "cfg::RPM_PER_MPH[gear_ >= 1 && gear_ <= 4", None,
+     "lockup is only worked out in CUSTOM, where the gear is always 1-4"),
+    (TL, "<= to <", "cfg::RPM_PER_MPH[gear_ >= 1 && gear_ <= 4", None, "gear 4 picks RPM_PER_MPH[4] either way"),
+    (TL, ">= to >", "cfg::RPM_PER_MPH[gear_ >= 1 && gear_ <= 4", None,
+     "lockup is never allowed in 1st (LU_MIN_GEAR), so the 1st-gear ratio isn't used"),
+    (TL, "|| to &&", "} else if (!armed_ || !in.customRequested || !in.leverInD) {", None,
+     "armed_ is only ever true while ON/OFF is on, so !armed_ already covers !customRequested"),
+    (TL, "drop !", "if (!engineWasOff_) crankDip_ = false;", None,
+     "the engine-off check stays true while the engine is off, so the reset happens one step later either way"),
+    (TL, "delete statement", "pendingGear_ = 0;", "gear_ = g;",
+     "exitToStock() already cleared it, and only STOCK leads to a take-over"),
+    (TL, "delete statement", "pendingGear_ = 0;", "gear_ = 0;",
+     "tryEnterCustom() clears it again before anything reads it"),
+    (TL, "delete statement", "gear_ = 0;", "out_.control = CTRL_STOCK;",
+     "in STOCK the reported gear comes from the ECU sense, and a take-over sets gear_ first"),
+    (TL, "delete statement", "slCmd_ = false;", "pendingGear_ = 0;",
+     "in STOCK the lockup output comes from the ECU, and a take-over sets slCmd_ first"),
+    (TL, "false to true", "slCmd_ = false;", "pendingGear_ = 0;",
+     "in STOCK the lockup output comes from the ECU, and a take-over sets slCmd_ first"),
+    (TL, "true to false", "raise(EV_CUSTOM, true);", None,
+     "a take-over always follows a different event (a hand-back or a wait), so it's raised either way"),
+    (TL, "true to false", "raise(why, true);", None,
+     "a hand-back always follows the take-over's EV_CUSTOM, so it's raised either way"),
+    (TL, "true to false", "raise(want == CTRL_MANUAL ? EV_MANUAL : EV_AUTO_RESUMED, true);", None,
+     "MANUAL and AUTO alternate, so the event always differs from the last one"),
+    (TL, "true to false", "raise(EV_SHIFT, true);", None, "EV_SHIFT puts nothing on the screen"),
+    (TL, "delete statement", "setLockup(false);", "if (slCmd_) {",
+     "updateLockup() releases lockup in the same step while a shift is pending"),
+    (TL, "false to true", "setLockup(false);", "if (slCmd_) {",
+     "updateLockup() releases lockup in the same step while a shift is pending"),
+    (TL, "delete statement", "if (pendingGear_ || gear_ <= 1) return;", None,
+     "requestShift() refuses a shift while one is pending and below 1st"),
+    (TL, "<= to <", "if (pendingGear_ || gear_ <= 1) return;", None, "requestShift() refuses a shift below 1st"),
+    (TL, "delete statement", "now_ = nowMs;", None, "step() sets now_ before anything reads it"),
+    (TL, "delete statement", "upSince_ = downSince_ = nowMs;", None, "set on each press before it's read"),
+    (TL, "delete statement", "offSinceMs_ = nowMs;", None,
+     "prevCustomReq_ starts true, so the first OFF step sets it before it's read"),
+    (TL, "delete statement", "dropRefMs_ = nowMs;", None,
+     "only gives the first 100 ms speed-drop window a longer span; the check needs 15 mph to start"),
+    (TL, "delete statement", "decelRefMs_ = nowMs;", None,
+     "only stretches the first deceleration window, while parked at key-on"),
+    (TL, "delete statement", "lastStepMs_ = tpsRefMs_ = nowMs;", None,
+     "only the first step's throttle filter and tip-in windows, while parked at key-on"),
+]
+# Comparing a measured value (volts, amps, mph, rpm, a time) with a limit
+# using < instead of <= (or the reverse) only changes the result when the
+# reading lands exactly on the limit. These are reported apart.
+BOUNDARY = {"< to <=", "<= to <", "> to >=", ">= to >"}
 
 
 def code_spans(line):
@@ -165,6 +240,10 @@ def run_mutant(k, m):
                  f"{sim}/oled.cpp {sim}/ds18b20.cpp {sim}/imu.cpp && ./st")
     # The calibration helper reads the firmware's USB log: it must still work.
     steps.append(f"./st --callog cal.log > /dev/null && python3 {ROOT}/test/test_calibrate.py cal.log")
+    # What the screen shows and the log says, against the reference copies (make golden).
+    gold = f"{ROOT}/test/system/golden"
+    steps.append(f"./st --journal journal.txt > /dev/null; cmp -s {gold}/journal.txt journal.txt && "
+                 f"cmp -s {gold}/cal.log cal.log || (echo 'FAIL golden: the screen or the USB log changed'; exit 1)")
     if CHIP and m["file"] == "tcu.ino":
         # The chip test: the mutant built for the Mega, on the simulated chip.
         core = f"PREBUILT_CORE={ROOT}/build/avr/core"
@@ -266,26 +345,33 @@ def write_report(ms, results):
         res, why = results[k]
         if res == "survived" and equivalent(m):
             res, why = "equivalent", equivalent(m)
+        elif res == "survived" and m["op"] in BOUNDARY:
+            res = "boundary"
         tally.setdefault(m["file"], {}).setdefault(res, 0)
         tally[m["file"]][res] += 1
         rows.append((m, res, why))
     md = ["# Mutation test report", "", "Generated by `tools/mutate.py`. Each row is one planted bug.", "",
-          "| File | Killed | Survived | Equivalent | Doesn't compile | Score |", "|---|---|---|---|---|---|"]
+          "Score = caught / (caught + missed), leaving out the equivalent ones (proven to change nothing) "
+          "and the ones that don't compile. *At a limit only* are missed bugs that only matter when a "
+          "reading lands exactly on a limit; the second score leaves those out too.", "",
+          "| File | Caught | Missed | At a limit only | Equivalent | Doesn't compile | Score | Score without limit-only |",
+          "|---|---|---|---|---|---|---|---|"]
     for f, t in tally.items():
-        live = t.get("killed", 0) + t.get("survived", 0)
-        md.append(f"| {f} | {t.get('killed', 0)} | {t.get('survived', 0)} | {t.get('equivalent', 0)} | "
-                  f"{t.get('stillborn', 0)} | {100 * t.get('killed', 0) / max(live, 1):.0f} % |")
-    md += ["", "## Survivors", "", "| Where | Bug planted | Line after |", "|---|---|---|"]
-    for m, res, why in rows:
-        if res == "survived":
-            md.append(f"| {m['file']}:{m['line']} | {m['op']} | `{m['new'].strip().replace('|', '\\|')}` |")
+        k, sv, b = t.get("killed", 0), t.get("survived", 0), t.get("boundary", 0)
+        md.append(f"| {f} | {k} | {sv} | {b} | {t.get('equivalent', 0)} | {t.get('stillborn', 0)} | "
+                  f"{100 * k / max(k + sv + b, 1):.0f} % | {100 * k / max(k + sv, 1):.0f} % |")
+    for title, kind in (("Missed", "survived"), ("Missed, at a limit only", "boundary")):
+        md += ["", f"## {title}", "", "| Where | Bug planted | Line after |", "|---|---|---|"]
+        for m, res, why in rows:
+            if res == kind:
+                md.append(f"| {m['file']}:{m['line']} | {m['op']} | `{m['new'].strip().replace('|', '\\|')}` |")
     md += ["", "## Equivalent (no test can see them)", "", "| Where | Bug planted | Why it changes nothing |",
            "|---|---|---|"]
     for m, res, why in rows:
         if res == "equivalent":
             md.append(f"| {m['file']}:{m['line']} | {m['op']} | {why} |")
     open(os.path.join(OUT, "report.md"), "w").write("\n".join(md) + "\n")
-    print("\n".join(md[4:4 + 2 + len(tally)]))
+    print("\n".join(md[6:6 + 2 + len(tally)]))
     print(f"report: {os.path.relpath(os.path.join(OUT, 'report.md'), ROOT)}")
 
 

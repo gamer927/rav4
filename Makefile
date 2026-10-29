@@ -8,7 +8,7 @@ CXXFLAGS ?= -std=c++11 -Wall -Wextra -Werror -O1 -g $(SAN)
 LOGIC := firmware/tcu/tcu_logic.cpp firmware/tcu/self_test.cpp
 HEADERS := $(wildcard firmware/tcu/*.h)
 
-.PHONY: test system screens calibrate-test check avr chip mutate pcb clean
+.PHONY: test system screens calibrate-test golden golden-update check avr chip mutate pcb clean
 
 test: build/test_tcu_logic build/test_self_test
 	./build/test_tcu_logic
@@ -63,6 +63,25 @@ $(CHIP)/chip_test: test/chip/chip_test.cpp test/screen_text.h firmware/tcu/font5
 	python3 tools/chip_pins.py > $(CHIP)/pins.h
 	$(CXX) -std=gnu++17 -O2 -Wall -I$(CHIP) -Itest -Ifirmware/tcu -Itest/system/mock -o $@ test/chip/chip_test.cpp $$(pkg-config --libs simavr)
 
+# Reference copies of what the driver sees and what the USB log says: every
+# system scenario's screen changes and event lines (journal.txt), and the
+# calibration session's whole log (cal.log). Any difference fails, with the
+# diff. When a change is intended (new wording, a new message): look at the
+# diff, then `make golden-update` and commit the new files with the change.
+GOLDEN := test/system/golden
+golden: build/system_test
+	@mkdir -p build/golden
+	./build/system_test --journal build/golden/journal.txt > /dev/null
+	./build/system_test --callog build/golden/cal.log
+	@diff -u $(GOLDEN)/journal.txt build/golden/journal.txt && diff -u $(GOLDEN)/cal.log build/golden/cal.log \
+	  || (echo "The screen or the USB log changed (diff above). Intended? make golden-update"; exit 1)
+	@echo "golden: the screens and the USB log are as recorded"
+
+golden-update: build/system_test
+	@mkdir -p $(GOLDEN)
+	./build/system_test --journal $(GOLDEN)/journal.txt > /dev/null
+	./build/system_test --callog $(GOLDEN)/cal.log
+
 # The screen pictures in docs/oled-screens.png, from the system test's car.
 screens: build/system_test
 	@mkdir -p build/screens
@@ -76,7 +95,7 @@ calibrate-test: build/system_test
 
 # Everything: unit tests, system test, the chip test, calibration helper, and
 # the cross-checks between firmware, circuit, circuit board, housings and docs.
-check: test system chip calibrate-test
+check: test system golden chip calibrate-test
 	python3 tools/system_check.py
 
 # How good are the tests? Plants one bug at a time in the firmware and counts

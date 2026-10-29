@@ -1,0 +1,2018 @@
+
+## boots parked: key-on checks pass, factory ECU drives
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+
+## ON/OFF already ON at key-on: waits for a fresh flip
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON.
+    200 scr  [-] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3750 scr  [1] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
+
+## normal drive: takes over in D, shifts 1-4, watchdog kicked
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10100 scr  **ECO** | **TRANS 158F**
+  10150 scr  [4] | **ECO** | **TRANS 158F**
+
+## ON/OFF turned OFF while driving: ECU back within 60 ms
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10100 scr  **ECO** | **TRANS 158F**
+  10150 scr  [4] | **ECO** | **TRANS 158F**
+
+## firmware hung with relays on: ON/OFF still cuts them in hardware
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10100 scr  **ECO** | **TRANS 158F**
+  10150 scr  [4] | **ECO** | **TRANS 158F**
+
+## ON/OFF read wire shorted: power pole cuts, mismatch reported
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+   9650 scr  [3] | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+   9700 scr  [3] | **STOCK** | SOLENOID WIRE | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+   9750 scr  [3] | **STOCK** | ON/OFF SWITCH: | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
+
+## ON/OFF power pole shorted: found at key-on and reported
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    450 scr  [-] | **STOCK** | ON/OFF SWITCH: | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT BAD  0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT BAD  0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | SELF-TEST BAD: | TAP TEST: INFO | **TRANS 158F**
+   4150 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING.
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   4950 scr  [1] | **STOCK** | STOCK | SHIFTING. | **TCU OFF**
+   5250 scr  [1] | **STOCK** | ON/OFF SWITCH: | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
+
+## relay coil fuse blown: no take-over, reported
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   4250 scr  [1] | TCU IS DOING | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
+   4300 scr  [1] | **STOCK** | ON/OFF SWITCH: | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
+
+## relay welded: found at key-on, no take-over
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     BAD  0.94A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   1950 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | SELF-TEST BAD: | TAP TEST: INFO | **TRANS 158F**
+   2000 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | SELF-TEST BAD: | TAP TEST: INFO
+   2050 scr  [-] | **STOCK** | RELAY STUCK | STOCK SHIFTS. | HOLD TEST TO | RE-CHECK. | **PROBLEM**
+   4150 scr  [1] | **STOCK** | RELAY STUCK | STOCK SHIFTS. | HOLD TEST TO | RE-CHECK. | **PROBLEM**
+
+## solenoid wire breaks while driving: ECU back, reported
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  [2] | TCU IS DOING | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+   8100 scr  [2] | **STOCK** | SOLENOID WIRE | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+
+## two mode switches on: ECU after 1 s, back when fixed
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10450 scr  [3] | TURN ON ONLY | ECO, SPORT OR | MANUAL. | **MODE ERROR**
+  10500 scr  [3] | **STOCK** | TWO MODES ON. | TURN ON ONLY | ECO, SPORT OR | MANUAL. | **MODE ERROR**
+  10750 scr  [3] | TWO MODES ON. | THE SHIFTING. | **TCU ON**
+  10800 scr  [3] | **SPORT** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+
+## lever out of D: ECU back
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+
+## MANUAL at the redline: no automatic upshift, SHIFT UP on the screen
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **MANUAL** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [1] | **MANUAL** | **TRANS 158F**
+   9150 scr  [1] | **MANUAL** | ENGINE AT | THE REDLINE. | PULL THE | LEVER. | **SHIFT UP!**
+   9950 scr  [1] | **MANUAL** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10000 scr  **MANUAL** | **TRANS 158F**
+  10050 scr  [2] | **MANUAL** | **TRANS 158F**
+
+## lever-D input stuck on: found at engine start, no take-over
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [1] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [1] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          SKIP
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   3250 scr  [1] | **STOCK** | LEVER SENSOR | STUCK ON D. | STOCK SHIFTS. | CHECK D WIRE. | **PROBLEM**
+   6350 log  # ECU shift 1>2 at 12 mph, TPS 0 %, 1095 rpm
+   6400 scr  **STOCK** | LEVER SENSOR | STUCK ON D. | STOCK SHIFTS. | CHECK D WIRE. | **PROBLEM**
+   6450 scr  [2] | **STOCK** | LEVER SENSOR | STUCK ON D. | STOCK SHIFTS. | CHECK D WIRE. | **PROBLEM**
+
+## speed signal lost at 45 mph: ECU back
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10100 scr  **ECO** | **TRANS 158F**
+  10150 scr  [4] | **ECO** | **TRANS 158F**
+  11800 log  # ECU lockup ON at 22 mph, TPS 25 %, 1859 rpm
+  11850 scr  [4] | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+  11900 scr  [4] | **STOCK** | NO SPEED SIGNL | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+
+## tach lost: still in control, warned
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10100 scr  **ECO** | **TRANS 158F**
+  10150 scr  [4] | **ECO** | **TRANS 158F**
+  13050 scr  [4] | **ECO** | ENGINE SPEED | SIGNAL LOST. | STILL SAFE. | CHECK TACH. | **NO RPM**
+
+## screen cable cut: control unaffected, loop never stalls
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+
+## battery voltage collapses: ECU back
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10050 scr  [3] | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+
+## ECU sense dead, take-over on the move: waits for a stop
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3750 scr  [4] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   8900 scr  [4] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+   8950 scr  [4] | **STOCK** | TCU TAKES | OVER WHEN | STOPPED. | **STOP FIRST**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  12900 scr  **STOCK** | TCU TAKES | OVER WHEN | STOPPED. | **STOP FIRST**
+  12950 scr  **ECO** | TCU IS DOING | STOPPED. | **TCU ON**
+  13000 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+
+## reset at 50 mph: relays drop, no take-over after the reboot
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10100 scr  **ECO** | **TRANS 158F**
+  10150 scr  [4] | **ECO** | **TRANS 158F**
+  12650 log  # TCU boot, reset flags 0x8
+  12650 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+  12650 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+  12650 log  # ECU lockup ON at 50 mph, TPS 25 %, 2066 rpm
+  12700 scr  [4]
+  12750 scr  [4] | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
+  12800 scr  [4] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
+
+## reset button at 30 mph: relays drop, no RESTARTED note
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+   9300 log  # TCU boot, reset flags 0x0
+   9300 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+   9300 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+   9350 scr  [3] | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
+   9400 scr  [3] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+
+## self-test SAFETY RESET with the Mega's bootloader: passes; reset button instead: fails
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   2650 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4950 log  # IBIT start
+   4950 scr  LEVER NOT IN D | FLASH NOW
+   5000 scr  **TESTING** | THE SCREEN SHOULD | FLASH NOW
+   9800 log  # IBIT done
+   9800 log  #   BATTERY    OK   12.6V
+   9800 log  #   GAS PEDAL  OK   0%
+   9800 log  #   TEMP PROBE OK   158F
+   9800 log  #   GYRO            OK
+   9800 log  #   SHIFTER         OK
+   9800 log  #   CALIBRATED      OK
+   9800 log  #   RESTARTS        OK
+   9800 log  #   SCREEN          CHECK
+   9800 log  #   SOLENOID 1 OK   0.94A
+   9800 log  #   SOLENOID 2 OK   0.94A
+   9800 log  #   LOCKUP SOL OK   0.94A
+   9800 log  #   RELAYS     OK   0.01A
+   9800 log  #   SHIFT UP        OK
+   9800 log  #   SHIFT DOWN      OK
+   9800 log  #   ECO SWITCH      OK
+   9800 log  #   SPORT SWITCH    OK
+   9800 log  #   MANUAL SWITCH   OK
+   9800 log  #   BRAKE           OK
+   9800 log  #   ON/OFF CUT OK   0.01A
+   9800 log  #   SAFETY RESET    SKIP
+   9800 scr  **TESTING** | CHECKING ON/OFF CUT | SCREEN          CHECK
+   9850 scr  **ALL OK** | 18 OK, 0 BAD, 1 CHECK | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10300 log  # TCU boot, reset flags 0x8
+  10300 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+  10300 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+  10300 scr  18 OK, 0 BAD, 1 CHECK
+  10350 scr  **ALL OK** | 19 OK, 0 BAD, 1 CHECK | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+  10800 log  # TCU boot, reset flags 0x0
+  10800 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+  10800 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+  10800 scr  
+  10850 scr  **PROBLEM** | 18 OK, 1 BAD, 1 CHECK | SAFETY RESET    BAD | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+
+## solenoid wire shorted: over-current, ECU back
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  TCU IS DOING | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+   8100 scr  [2] | **STOCK** | SOLENOID WIRE | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+
+## ATF probe unplugged: warned, still in control
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+   9600 scr  **ECO** | **TRANS 158F**
+   9650 scr  [4] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  11050 scr  [4] | **ECO** | TEMP PROBE | NOT WORKING. | CHECK THE PLUG | **NO TEMP**
+
+## ATF overheats: warned, lockup held to cool it
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10100 scr  **ECO** | **TRANS 158F**
+  10150 scr  [4] | **ECO** | **TRANS 158F**
+  14350 scr  [4] | **ECO** | **TRANS 163F**
+  14450 scr  [4] | **ECO** | **TRANS 205F**
+  14550 scr  [4] | **ECO** | **TRANS 229F**
+  14650 scr  [4] | **ECO** | OVER 230F. | EASE OFF. | **TRANS HOT**
+  14850 scr  [4] | **ECO** | OVER 257F! | PULL OVER AND | LET IT COOL. | **TRANS HOT!**
+
+## self-test (IBIT): every check passes, incl. the hardware cut
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   2650 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4950 log  # IBIT start
+   4950 scr  LEVER NOT IN D | FLASH NOW
+   5000 scr  **TESTING** | THE SCREEN SHOULD | FLASH NOW
+   9800 log  # IBIT done
+   9800 log  #   BATTERY    OK   12.6V
+   9800 log  #   GAS PEDAL  OK   0%
+   9800 log  #   TEMP PROBE OK   158F
+   9800 log  #   GYRO            OK
+   9800 log  #   SHIFTER         OK
+   9800 log  #   CALIBRATED      OK
+   9800 log  #   RESTARTS        OK
+   9800 log  #   SCREEN          CHECK
+   9800 log  #   SOLENOID 1 OK   0.94A
+   9800 log  #   SOLENOID 2 OK   0.94A
+   9800 log  #   LOCKUP SOL OK   0.94A
+   9800 log  #   RELAYS     OK   0.01A
+   9800 log  #   SHIFT UP        OK
+   9800 log  #   SHIFT DOWN      OK
+   9800 log  #   ECO SWITCH      OK
+   9800 log  #   SPORT SWITCH    OK
+   9800 log  #   MANUAL SWITCH   OK
+   9800 log  #   BRAKE           OK
+   9800 log  #   ON/OFF CUT OK   0.01A
+   9800 log  #   SAFETY RESET    SKIP
+   9800 scr  **TESTING** | CHECKING ON/OFF CUT | SCREEN          CHECK
+   9850 scr  **ALL OK** | 18 OK, 0 BAD, 1 CHECK | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+
+## build book 13.4 (jack stands), step by step: the screen says what the book says
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3750 scr  [1] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   4200 scr  [1] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+   4250 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7400 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7450 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8200 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING.
+   8250 scr  [2] | **ECO** | **TRANS 158F**
+   9750 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  15850 scr  [2] | **ECO** | **TRANS 158F**
+  17900 scr  **ECO** | **TRANS 158F**
+  17950 scr  [1] | **ECO** | **TRANS 158F**
+  20000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  22700 scr  **ECO** | **TRANS 158F**
+  22750 scr  [2] | **ECO** | **TRANS 158F**
+  24900 scr  [2] | **ECO**
+  24950 scr  [2] | **STOCK** | STOCK | SHIFTING. | **TCU OFF**
+  25450 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  29400 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING.
+  29450 scr  [2] | **ECO** | **TRANS 158F**
+  29600 scr  **ECO** | **TRANS 158F**
+  29650 scr  [1] | **ECO** | **TRANS 158F**
+  30000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  31200 scr  [1] | **ECO**
+  31250 scr  [1] | **MANUAL** | YOU SHIFT WITH | THE LEVER. | **MANUAL**
+  35200 scr  **MANUAL** | YOU SHIFT WITH | THE LEVER. | **MANUAL**
+  35250 scr  **MANUAL** | THE LEVER. | **TRANS 158F**
+  35300 scr  [2] | **MANUAL** | **TRANS 158F**
+  37950 scr  [3] | **MANUAL** | **TRANS 158F**
+  39650 scr  [2] | **MANUAL** | **TRANS 158F**
+  40000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  43850 scr  [2] | **MANUAL** | TOO FAST FOR | THAT GEAR: THE | ENGINE WOULD | OVER-REV. | **NO SHIFT**
+
+## self-test refused with the engine running
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3750 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   6050 scr  LEVER NOT IN D | ENGINE IS RUNNING | IT NEEDS: PARKED, | ENGINE OFF, LEVER IN | P, ON/OFF ON
+   6100 scr  **CAN'T TEST** | NOT NOW, BECAUSE: | ENGINE IS RUNNING | IT NEEDS: PARKED, | ENGINE OFF, LEVER IN | P, ON/OFF ON
+
+## corner hold from the gyro (its zero drift learned first)
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   7950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   8100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   8150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   8200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  10350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  12150 scr  [2] | **ECO** | **TRANS 158F**
+  12250 scr  [2] | **ECO** | CORNER: | HOLDING GEAR | **TRANS 158F**
+  14900 scr  **ECO** | CORNER: | HOLDING GEAR | **TRANS 158F**
+  14950 scr  [3] | **ECO** | **TRANS 158F**
+  16100 scr  **ECO** | **TRANS 158F**
+  16150 scr  [4] | **ECO** | **TRANS 158F**
+  17800 scr  **ECO** | **TRANS 158F**
+  17850 scr  [3] | **ECO** | **TRANS 158F**
+  19200 scr  **ECO** | **TRANS 158F**
+  19250 scr  [2] | **ECO** | **TRANS 158F**
+  20000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  20400 scr  **ECO** | **TRANS 158F**
+  20450 scr  [1] | **ECO** | **TRANS 158F**
+  29000 scr  **ECO** | **TRANS 158F**
+  29050 scr  [2] | **ECO** | **TRANS 158F**
+  30000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  30600 scr  **ECO** | **TRANS 158F**
+  30650 scr  [3] | **ECO** | **TRANS 158F**
+  32600 scr  **ECO** | **TRANS 158F**
+  32650 scr  [4] | **ECO** | **TRANS 158F**
+
+## gyro glitches, then dies mid-corner: hold ends, still in control
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   7950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   8100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   8150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   8200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  10350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  12150 scr  [2] | **ECO** | **TRANS 158F**
+  15450 scr  [2] | **ECO** | CORNER: | HOLDING GEAR | **TRANS 158F**
+  15850 scr  [2] | **ECO** | **TRANS 158F**
+  16900 scr  **ECO** | **TRANS 158F**
+  16950 scr  [3] | **ECO** | **TRANS 158F**
+  19000 scr  **ECO** | **TRANS 158F**
+  19050 scr  [4] | **ECO** | **TRANS 158F**
+  20000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+
+## throttle reads right, also with a shifted engine ground
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+
+## throttle sensor wire broken: ECU back, PEDAL SENSOR
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
+   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   8150 scr  [3] | **ECO** | **TRANS 158F**
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10100 scr  **ECO** | **TRANS 158F**
+  10150 scr  [4] | **ECO** | **TRANS 158F**
+  10400 scr  **ECO** | **TRANS 158F**
+  10450 scr  STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+  10500 scr  [3] | **STOCK** | PEDAL SENSOR | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+
+## saved self-test table corrupted over the reset: not restored
+     50 log  # TCU boot, reset flags 0x0
+     50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+     50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
+    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+   1500 log  # PBIT
+   1500 log  #   BATTERY    OK   12.6V
+   1500 log  #   GAS PEDAL  OK   0%
+   1500 log  #   TEMP PROBE OK   158F
+   1500 log  #   GYRO            OK
+   1500 log  #   SHIFTER         OK
+   1500 log  #   CALIBRATED      OK
+   1500 log  #   RESTARTS        OK
+   1500 log  #   SCREEN          --
+   1500 log  #   SOLENOID 1      --
+   1500 log  #   SOLENOID 2      --
+   1500 log  #   LOCKUP SOL      --
+   1500 log  #   RELAYS          --
+   1500 log  #   SHIFT UP        --
+   1500 log  #   SHIFT DOWN      --
+   1500 log  #   ECO SWITCH      --
+   1500 log  #   SPORT SWITCH    --
+   1500 log  #   MANUAL SWITCH   --
+   1500 log  #   BRAKE           --
+   1500 log  #   ON/OFF CUT OK   0.00A
+   1500 log  #   SAFETY RESET    --
+   1900 log  # PBIT relay check
+   1900 log  #   BATTERY    OK   12.6V
+   1900 log  #   GAS PEDAL  OK   0%
+   1900 log  #   TEMP PROBE OK   158F
+   1900 log  #   GYRO            OK
+   1900 log  #   SHIFTER         OK
+   1900 log  #   CALIBRATED      OK
+   1900 log  #   RESTARTS        OK
+   1900 log  #   SCREEN          --
+   1900 log  #   SOLENOID 1      --
+   1900 log  #   SOLENOID 2      --
+   1900 log  #   LOCKUP SOL      --
+   1900 log  #   RELAYS     OK   0.01A
+   1900 log  #   SHIFT UP        --
+   1900 log  #   SHIFT DOWN      --
+   1900 log  #   ECO SWITCH      --
+   1900 log  #   SPORT SWITCH    --
+   1900 log  #   MANUAL SWITCH   --
+   1900 log  #   BRAKE           --
+   1900 log  #   ON/OFF CUT OK   0.00A
+   1900 log  #   SAFETY RESET    --
+   2650 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   4950 log  # IBIT start
+   4950 scr  LEVER NOT IN D | FLASH NOW
+   5000 scr  **TESTING** | THE SCREEN SHOULD | FLASH NOW
+   9800 log  # IBIT done
+   9800 log  #   BATTERY    OK   12.6V
+   9800 log  #   GAS PEDAL  OK   0%
+   9800 log  #   TEMP PROBE OK   158F
+   9800 log  #   GYRO            OK
+   9800 log  #   SHIFTER         OK
+   9800 log  #   CALIBRATED      OK
+   9800 log  #   RESTARTS        OK
+   9800 log  #   SCREEN          CHECK
+   9800 log  #   SOLENOID 1 OK   0.94A
+   9800 log  #   SOLENOID 2 OK   0.94A
+   9800 log  #   LOCKUP SOL OK   0.94A
+   9800 log  #   RELAYS     OK   0.01A
+   9800 log  #   SHIFT UP        OK
+   9800 log  #   SHIFT DOWN      OK
+   9800 log  #   ECO SWITCH      OK
+   9800 log  #   SPORT SWITCH    OK
+   9800 log  #   MANUAL SWITCH   OK
+   9800 log  #   BRAKE           OK
+   9800 log  #   ON/OFF CUT OK   0.01A
+   9800 log  #   SAFETY RESET    SKIP
+   9800 scr  **TESTING** | CHECKING ON/OFF CUT | SCREEN          CHECK
+   9850 scr  **ALL OK** | 18 OK, 0 BAD, 1 CHECK | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+  10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
+  10300 log  # TCU boot, reset flags 0x8
+  10300 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
+  10300 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
+  10300 scr  18 OK, 0 BAD, 1 CHECK
+  10350 scr  **ALL OK** | 18 OK, 0 BAD, 1 CHECK | SCREEN          CHECK | HOLD TEST 2s: AGAIN

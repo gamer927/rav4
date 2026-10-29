@@ -1802,6 +1802,26 @@ static void test_quick_reentry_shift() {
   CHECK(s.c.outputs().gear == 4);
 }
 
+
+static void test_lockup_back_at_once_after_long_off() {
+  std::printf("lockup: off for a long while (brake held), back as soon as the brake is released\n");
+  Sim s;
+  s.armManual();
+  s.cruise(18.6); s.tap(s.in.up); s.step(800);
+  s.cruise(34.2); s.tap(s.in.up); s.step(800);
+  s.cruise(49.7); s.tap(s.in.up);
+  s.in.tpsPct = 20;
+  s.cruise(49.7);
+  s.step(2000);
+  CHECK(s.c.outputs().sl);
+  s.in.brake = true;  // a long, light brake down a hill: speed held
+  s.step(5000);
+  CHECK(!s.c.outputs().sl);
+  s.in.brake = false;
+  s.step(30);
+  CHECK(s.c.outputs().sl);  // the anti-chatter time ran out long ago
+}
+
 int main() {
   test_solenoid_table();
   test_boot_requires_switch_cycle();
@@ -1864,6 +1884,7 @@ int main() {
   test_mode_grace_at_key_on();
   test_manual_auto_downshifts_announced();
   test_quick_reentry_shift();
+  test_lockup_back_at_once_after_long_off();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }

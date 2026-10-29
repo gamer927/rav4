@@ -87,4 +87,39 @@ std::string read(Px px) {
   return s;
 }
 
+// The screen as a person would read it out, row by row: a double-size line
+// (rows 0-1, 2-3, 4-5 or 6-7) where there is one, else the small text that
+// reads as real characters. Blank rows are left out; " | " separates rows.
+template <class Px>
+std::string tidy(Px px) {
+  auto trim = [](const std::string& t) {
+    const size_t a = t.find_first_not_of(' ');
+    if (a == std::string::npos) return std::string();
+    return t.substr(a, t.find_last_not_of(' ') - a + 1);
+  };
+  auto best = [&](std::initializer_list<std::string> cands) {
+    std::string b;
+    for (const std::string& c : cands) {
+      const std::string t = trim(c);
+      if (c.find('~') == std::string::npos && t.size() > b.size()) b = t;
+    }
+    return b;
+  };
+  std::string out;
+  const char g = gear(px);
+  if (g != '~' && g != ' ') out = std::string("[") + g + "]";
+  for (int p = 0; p < 8; p++) {
+    std::string row;
+    if (p % 2 == 0) row = best({big(px, p, 0, 10), big(px, p, 40, 7)});
+    if (!row.empty()) {
+      row = "**" + row + "**";  // double size
+      p++;
+    } else {
+      row = best({small(px, p, 0, 21), small(px, p, 40, 14)});
+    }
+    if (!row.empty()) out += (out.empty() ? "" : " | ") + row;
+  }
+  return out;
+}
+
 }  // namespace screen_text
