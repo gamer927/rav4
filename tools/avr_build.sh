@@ -28,7 +28,7 @@ for src in "$CORE"/cores/arduino/*.S; do
   o="$OUT/core/$(basename "$src").o"; avr-gcc "${FLAGS[@]}" -x assembler-with-cpp -c "$src" -o "$o"; objs+=("$o")
 done
 
-SK="$ROOT/firmware/tcu"
+SK="${SK:-$ROOT/firmware/tcu}"  # a copy with other settings, for the chip test
 WIRE="$CORE/libraries/Wire/src"
 # Wire library (console OLED).
 avr-g++ "${FLAGS[@]}" "${CXXFLAGS[@]}" -I"$WIRE" -w -c "$WIRE/Wire.cpp" -o "$OUT/core/Wire.o"
