@@ -30,6 +30,7 @@ FW = os.path.join(ROOT, "firmware", "tcu")
 OUT = os.path.join(ROOT, "build", "mutants")
 FILES = ["tcu_logic.cpp", "self_test.cpp", "tcu.ino"]
 CXX = os.environ.get("CXX", "g++")
+SAN = "-g -fsanitize=address,undefined -fno-sanitize-recover=all"  # as the Makefile: out-of-bounds reads fail
 CHIP = False  # --chip: tcu.ino mutants also face the chip test (slow: about 1 min each)
 
 # (pattern, replacement, name): applied to one occurrence at a time, outside
@@ -157,9 +158,9 @@ def run_mutant(k, m):
     logic = f"{fw}/tcu_logic.cpp {fw}/self_test.cpp"
     steps = []
     if m["file"] != "tcu.ino":
-        steps += [f"{CXX} -std=c++11 -O1 -w -I{fw} -o t1 {ROOT}/test/test_tcu_logic.cpp {logic} && ./t1",
-                  f"{CXX} -std=c++11 -O1 -w -I{fw} -o t2 {ROOT}/test/test_self_test.cpp {logic} && ./t2"]
-    steps.append(f"{CXX} -std=gnu++17 -O1 -w -I{ROOT}/test -I{ROOT}/test/system/mock -I{sim} -o st "
+        steps += [f"{CXX} -std=c++11 -O1 {SAN} -w -I{fw} -o t1 {ROOT}/test/test_tcu_logic.cpp {logic} && ./t1",
+                  f"{CXX} -std=c++11 -O1 {SAN} -w -I{fw} -o t2 {ROOT}/test/test_self_test.cpp {logic} && ./t2"]
+    steps.append(f"{CXX} -std=gnu++17 -O1 {SAN} -w -I{ROOT}/test -I{ROOT}/test/system/mock -I{sim} -o st "
                  f"{ROOT}/test/system/system_test.cpp {sim}/tcu_logic.cpp {sim}/self_test.cpp "
                  f"{sim}/oled.cpp {sim}/ds18b20.cpp {sim}/imu.cpp && ./st")
     # The calibration helper reads the firmware's USB log: it must still work.

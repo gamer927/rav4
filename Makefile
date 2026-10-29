@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
 # Copyright (c) 2026 gamer927. RAV4 TCU, https://github.com/gamer927/rav4
 CXX ?= g++
-CXXFLAGS ?= -std=c++11 -Wall -Wextra -Werror -O1 -g
+# The PC builds run with AddressSanitizer and UBSan: a read past an array or
+# any undefined behaviour fails the test instead of passing by luck.
+SAN := -fsanitize=address,undefined -fno-sanitize-recover=all
+CXXFLAGS ?= -std=c++11 -Wall -Wextra -Werror -O1 -g $(SAN)
 LOGIC := firmware/tcu/tcu_logic.cpp firmware/tcu/self_test.cpp
 HEADERS := $(wildcard firmware/tcu/*.h)
 
@@ -27,7 +30,7 @@ build/system_test: test/system/system_test.cpp test/screen_text.h test/system/mo
 	sed -i -e 's/^constexpr bool IBIT_WATCHDOG_TEST = true;/constexpr bool IBIT_WATCHDOG_TEST = false;/' \
 	       -e 's/^constexpr bool CALIBRATED = false;/constexpr bool CALIBRATED = true;/' \
 	       -e 's/^constexpr AtfSensor ATF_SENSOR = ATF_DS18B20;/constexpr AtfSensor ATF_SENSOR = ATF_NTC;/' $(SIM_FW)/config.h
-	$(CXX) -std=gnu++17 -O1 -w -Itest -Itest/system/mock -I$(SIM_FW) -o $@ test/system/system_test.cpp \
+	$(CXX) -std=gnu++17 -O1 -g $(SAN) -w -Itest -Itest/system/mock -I$(SIM_FW) -o $@ test/system/system_test.cpp \
 	    $(SIM_FW)/tcu_logic.cpp $(SIM_FW)/self_test.cpp $(SIM_FW)/oled.cpp $(SIM_FW)/ds18b20.cpp $(SIM_FW)/imu.cpp
 
 # Chip test: the .hex as flashed, started by the real Mega bootloader, on a

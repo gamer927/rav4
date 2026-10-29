@@ -3,6 +3,7 @@
 // Host unit tests for the built-in test (firmware/tcu/self_test.cpp) and the
 // continuous solenoid-current check in the controller. Run: make test
 #include <cstdio>
+#include <string>
 
 #include "../firmware/tcu/config.h"
 #include "../firmware/tcu/self_test.h"
@@ -35,6 +36,8 @@ struct Bench {
   bool switchOn = true;
   bool coilFuseBlown = false;   // pole 2 open: no coil power even when ON
   bool cutBroken = false;       // pole 2 shorted: coil power even when OFF
+  float onA = 0.95f;            // a solenoid's current once it's flowing
+  float leakA = 0.0f;           // through a driver whose relay is out (a leaking contact)
 
   Bench() {
     in.nowMs = 5000;
@@ -70,7 +73,7 @@ struct Bench {
       driveWas[i] = drive[i];
       const bool flowing = drive[i] && routed && !solenoidOpen[i];
       const uint32_t since = in.nowMs - (driveSince[i] > coilOnSince || relayWelded ? driveSince[i] : coilOnSince);
-      in.solAmps[i] = flowing && since >= SOLENOID_RISE_MS ? 0.95f : flowing ? 0.3f : 0.0f;
+      in.solAmps[i] = flowing && since >= SOLENOID_RISE_MS ? onA : flowing ? 0.3f : drive[i] ? leakA : 0.0f;
     }
     in.solSenseValid = senseWired;
   }
@@ -647,6 +650,121 @@ static void test_second_run_and_step_names() {
   CHECK(!idle.outputs().relay);
 }
 
+
+static void test_exact_limits() {
+  std::printf("self-test limits: exactly at a limit passes, just past it fails\n");
+  // Interlocks: at the limit, the test may start.
+  struct { void (*apply)(Inputs&); bool starts; } cases[] = {
+      {[](Inputs& i) { i.speedMph = 0.6f; }, true}, {[](Inputs& i) { i.speedMph = 0.65f; }, false},
+      {[](Inputs& i) { i.engineRpm = cfg::TEST_ENGINE_RUNNING_RPM; }, true},
+      {[](Inputs& i) { i.engineRpm = cfg::TEST_ENGINE_RUNNING_RPM + 1; }, false},
+      {[](Inputs& i) { i.batteryV = cfg::TEST_CHARGING_V; }, true},
+      {[](Inputs& i) { i.batteryV = cfg::TEST_CHARGING_V + 0.05f; }, false},
+      {[](Inputs& i) { i.batteryV = cfg::TEST_SUPPLY_MIN_V; }, true},
+      {[](Inputs& i) { i.batteryV = cfg::TEST_SUPPLY_MIN_V - 0.05f; }, false},
+  };
+  for (auto& k : cases) {
+    Bench b;
+    k.apply(b.in);
+    CHECK(b.t.start(b.in) == k.starts);
+  }
+  // PBIT battery: the supply window's ends are inside it.
+  for (float v : {cfg::SUPPLY_MIN_V, cfg::SUPPLY_MAX_V}) {
+    Bench b;
+    b.in.batteryV = v;
+    b.t.runPowerOn(b.in, false);
+    CHECK(b.t.result(T_SUPPLY) == TR_PASS);
+  }
+  for (float v : {cfg::SUPPLY_MIN_V - 0.05f, cfg::SUPPLY_MAX_V + 0.05f}) {
+    Bench b;
+    b.in.batteryV = v;
+    b.t.runPowerOn(b.in, false);
+    CHECK(b.t.result(T_SUPPLY) == TR_FAIL);
+  }
+  // The key-on relay check runs while barely rolling (0.6 mph), not faster.
+  {
+    Bench b;
+    b.in.speedMph = 0.6f;
+    b.t.runPowerOn(b.in, false);
+    CHECK(b.t.active());
+    b.step(cfg::IBIT_SOLENOID_ON_MS + 20);
+    CHECK(b.t.result(T_RELAY_RELEASE) == TR_PASS);
+    Bench c;
+    c.in.speedMph = 0.65f;
+    c.t.runPowerOn(c.in, false);
+    CHECK(!c.t.active());
+  }
+  // Relay release: a leak of exactly SOL_OFF_MAX_A is still a release; more is not.
+  for (int pbit = 0; pbit < 2; pbit++) {
+    for (int over = 0; over < 2; over++) {
+      Bench b;
+      b.leakA = cfg::SOL_OFF_MAX_A + (over ? 0.05f : 0.0f);
+      if (pbit) {
+        b.t.runPowerOn(b.in, false);
+        b.step(cfg::IBIT_SOLENOID_ON_MS + 20);
+      } else {
+        b.runAll();
+      }
+      CHECK(b.t.result(T_RELAY_RELEASE) == (over ? TR_FAIL : TR_PASS));
+    }
+  }
+  // Solenoid current: SOL_MIN_A and SOL_MAX_A themselves pass.
+  struct { float a; TestResult r; } amps[] = {{cfg::SOL_MIN_A, TR_PASS}, {cfg::SOL_MIN_A - 0.05f, TR_FAIL},
+                                              {cfg::SOL_MAX_A, TR_PASS}, {cfg::SOL_MAX_A + 0.05f, TR_FAIL}};
+  for (auto& k : amps) {
+    Bench b;
+    b.onA = k.a;
+    b.runAll();
+    CHECK(b.t.result(T_SOL_S1) == k.r);
+  }
+  // The cut: SOL_MIN_A is enough current to cut; after the cut, SOL_OFF_MAX_A
+  // left over (the leak through a released relay) still counts as cut.
+  {
+    Bench b;
+    b.onA = cfg::SOL_MIN_A;
+    b.runAll();
+    CHECK(b.t.result(T_ONOFF_CUT) == TR_PASS);
+    Bench c;
+    c.leakA = cfg::SOL_OFF_MAX_A;
+    c.runAll();
+    CHECK(c.t.result(T_ONOFF_CUT) == TR_PASS);
+  }
+  CHECK(std::string(testName(T_COUNT)) == "?");
+  CHECK(std::string(testName(T_ONOFF_CUT)) == "ON/OFF CUT");
+}
+
+static void test_prompts_strict_and_restart() {
+  std::printf("IBIT prompts: MANUAL means only MANUAL; a restarted test starts at the first prompt\n");
+  Bench b;
+  CHECK(b.t.start(b.in));
+  while (b.t.prompt() != PR_MANUAL) {
+    if (b.t.phase() == PH_PROMPT) b.step(20, true);  // skip ahead
+    else b.step(10);
+  }
+  b.in.eco = b.in.sport = b.in.manual = false;
+  b.step(200);
+  CHECK(b.t.result(T_SW_MANUAL) == TR_NONE);  // nothing on: not a pass
+  b.in.manual = b.in.eco = true;
+  b.step(200);
+  CHECK(b.t.result(T_SW_MANUAL) == TR_NONE);  // MANUAL and ECO on one core: not a pass
+  b.in.sport = true;
+  b.in.eco = false;
+  b.step(200);
+  CHECK(b.t.result(T_SW_MANUAL) == TR_NONE);
+  // Engine started at this prompt: aborted. Start again: from the top.
+  b.in.manual = b.in.sport = false;
+  b.in.engineRpm = 600;
+  b.step(10);
+  CHECK(b.t.aborted());
+  b.in.engineRpm = 0;
+  CHECK(b.t.start(b.in));
+  while (b.t.active() && b.t.phase() != PH_PROMPT) b.step(10);
+  CHECK(b.t.prompt() == PR_UP);
+  CHECK(b.t.result(T_SOL_S1) == TR_PASS);  // the solenoid steps ran again, all three
+  CHECK(b.t.result(T_SOL_S2) == TR_PASS);
+  CHECK(b.t.result(T_SOL_SL) == TR_PASS);
+}
+
 int main() {
   test_pbit();
   test_interlocks();
@@ -663,6 +781,8 @@ int main() {
   test_prompt_countdown();
   test_pbit_details();
   test_second_run_and_step_names();
+  test_exact_limits();
+  test_prompts_strict_and_restart();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }

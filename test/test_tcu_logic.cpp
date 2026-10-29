@@ -1619,6 +1619,189 @@ static void test_brake_downshift_rpm_limit() {
   CHECK(sawDownshift);
 }
 
+
+// ---------------------------------------------------------------------------
+// Third batch from the mutation survivors.
+
+static void test_eco_stab_never_downshifts() {
+  std::printf("ECO: a quick pedal stab never downshifts, not even for a moment\n");
+  Sim s;
+  s.arm();
+  s.in.tpsPct = 15;
+  s.cruise(43.5);
+  s.step(3000);
+  CHECK(s.c.outputs().gear == 4);
+  s.in.tpsPct = 60;
+  for (int i = 0; i < 30; i++) { s.step(10); CHECK(s.c.outputs().gear == 4); }
+  s.in.tpsPct = 15;
+  for (int i = 0; i < 200; i++) { s.step(10); CHECK(s.c.outputs().gear == 4); }
+}
+
+static void test_cold_state_cleared_when_probe_lost() {
+  std::printf("cold start, then the ATF probe is lost: lockup works by the normal rules\n");
+  Sim s;
+  s.in.atfC = 20;  // cold: no lockup until it warms up
+  s.arm();
+  s.in.tpsPct = 15;
+  s.cruise(55.9);
+  s.step(5000);
+  CHECK(s.c.outputs().gear == 4);
+  CHECK(!s.c.outputs().sl);
+  s.in.atfValid = false;  // probe gone: temperature unknown, not "still cold"
+  s.step(5000);
+  CHECK(s.c.outputs().sl);
+}
+
+static void test_weak_battery_idle_is_not_a_start() {
+  std::printf("idling in D on a weak battery (under 11.5 V): not taken for an engine start\n");
+  Sim s;
+  s.arm();
+  s.autoRpm = false;
+  s.in.engineRpm = 700;
+  s.in.batteryV = 11.2f;  // lights on, tired alternator, stopped at a light
+  s.step(5000);
+  s.in.engineRpm = 900;
+  s.step(1000);
+  CHECK(!(s.c.outputs().faults & FAULT_LEVER));
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+}
+
+static void test_brake_downshift_needs_real_braking() {
+  std::printf("SPORT brake downshift: only with the brake, and only braking hard\n");
+  auto at62 = [](Sim& s) {
+    s.select(false, true, false);
+    s.arm();
+    s.in.tpsPct = 20;
+    s.cruise(62.1);
+    s.step(1500);
+    s.in.tpsPct = 0;
+  };
+  Sim g;  // gentle braking: 1 mph/s
+  at62(g);
+  g.in.brake = true;
+  g.rampTo(53, 1.0f);
+  CHECK(g.c.outputs().gear == 4);
+  Sim e;  // slowing hard on a climb, no brake
+  at62(e);
+  e.rampTo(53, 6.0f);
+  CHECK(e.c.outputs().gear == 4);
+}
+
+static void test_lift_hold_ends_on_throttle() {
+  std::printf("SPORT lift-off hold ends as soon as the throttle comes back\n");
+  Sim t;
+  t.select(false, true, false);
+  t.arm();
+  t.in.tpsPct = 70;
+  t.rampTo(46.6, 5.0f);
+  t.in.tpsPct = 0;
+  t.step(100);
+  CHECK(t.c.outputs().gearHold);
+  t.in.tpsPct = 25;
+  t.step(20);
+  CHECK(!t.c.outputs().gearHold);
+}
+
+static void test_automatic_refusals_are_silent() {
+  std::printf("a kickdown the over-rev guard refuses doesn't put NO SHIFT on the screen\n");
+  Sim s;
+  s.arm();
+  s.in.tpsPct = 15;
+  s.cruise(40);
+  s.step(2000);
+  s.in.tpsPct = 100;  // floored at 40 mph: 2nd fits, 1st would over-rev
+  for (int i = 0; i < 300; i++) {
+    s.step(10);
+    CHECK(s.c.outputs().event != EV_DENY_OVERREV && s.c.outputs().event != EV_DENY_BUSY &&
+          s.c.outputs().event != EV_DENY_LIMIT);
+  }
+  CHECK(s.c.outputs().gear == 2);
+}
+
+static void test_stock_gear_only_in_d() {
+  std::printf("STOCK: the ECU's gear is only shown with the lever in D\n");
+  Sim s;
+  s.in.leverInD = false;  // P, with the ECU's solenoids saying "1st"
+  s.step(100);
+  CHECK(s.c.outputs().control == CTRL_STOCK);
+  CHECK(s.c.outputs().gear == 0);
+  s.in.leverInD = true;
+  s.step(100);
+  CHECK(s.c.outputs().gear == 1);
+}
+
+static void test_second_corner_waits_again() {
+  std::printf("corner hold: after a second corner, straight again waits the full time again\n");
+  Sim s;
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(24.9);
+  s.in.latValid = true;
+  s.in.latG = 0.35f;
+  s.step(500);
+  s.in.latG = 0.0f;  // short straight
+  s.step(cfg::CORNER_EXIT_MS + 200);
+  CHECK(!s.c.outputs().cornerHold);
+  s.in.latG = -0.35f;  // the next corner
+  s.step(500);
+  CHECK(s.c.outputs().cornerHold);
+  s.in.latG = 0.0f;
+  s.step(cfg::CORNER_EXIT_MS - 200);
+  CHECK(s.c.outputs().cornerHold);  // not straight long enough yet
+  s.step(400);
+  CHECK(!s.c.outputs().cornerHold);
+}
+
+static void test_mode_grace_at_key_on() {
+  std::printf("key-on with no mode switch on: a second's grace, then MODE ERROR\n");
+  Sim s;
+  s.select(false, false, false);
+  s.step(cfg::MODE_SWITCH_GRACE_MS - 200);
+  CHECK(s.c.outputs().modeSelect == SEL_OK);
+  s.step(400);
+  CHECK(s.c.outputs().modeSelect == SEL_NONE);
+}
+
+static void test_manual_auto_downshifts_announced() {
+  std::printf("MANUAL slowing down: every automatic downshift is announced again\n");
+  Sim s;
+  s.armManual();
+  s.cruise(18.6); s.tap(s.in.up); s.step(800);
+  s.cruise(37.3); s.tap(s.in.up); s.step(800);
+  s.cruise(55.9); s.tap(s.in.up); s.step(800);
+  CHECK(s.c.outputs().gear == 4);
+  int announced = 0;
+  uint8_t seq = s.c.outputs().eventSeq;
+  s.in.brake = true;
+  for (float v = 56; v > 0; v -= 0.08f) {
+    s.in.speedMph = v;
+    s.step(10);
+    if (s.c.outputs().eventSeq != seq) {
+      seq = s.c.outputs().eventSeq;
+      if (s.c.outputs().event == EV_AUTO_DOWNSHIFT) announced++;
+    }
+  }
+  CHECK(announced == 3);  // 4->3, 3->2, 2->1
+}
+
+static void test_quick_reentry_shift() {
+  std::printf("ON/OFF off and on again quickly: the first shift isn't held up by the last one\n");
+  Sim s;
+  s.select(false, false, true);
+  enterMoving(s, 3, 43.5f, false);
+  s.tap(s.in.up);
+  CHECK(s.c.outputs().gear == 4);
+  s.in.customRequested = false;  // 150 ms off, on again
+  s.step(150);
+  s.setEcuGear(3);
+  s.in.customRequested = true;
+  s.step(20);
+  CHECK(s.c.outputs().control == CTRL_MANUAL);
+  CHECK(s.c.outputs().gear == 3);
+  s.tap(s.in.up);  // within 700 ms of the earlier shift, but a new take-over
+  CHECK(s.c.outputs().gear == 4);
+}
+
 int main() {
   test_solenoid_table();
   test_boot_requires_switch_cycle();
@@ -1670,6 +1853,17 @@ int main() {
   test_reentry_starts_fresh();
   test_corner_hold_ends_when_gyro_lost();
   test_brake_downshift_rpm_limit();
+  test_eco_stab_never_downshifts();
+  test_cold_state_cleared_when_probe_lost();
+  test_weak_battery_idle_is_not_a_start();
+  test_brake_downshift_needs_real_braking();
+  test_lift_hold_ends_on_throttle();
+  test_automatic_refusals_are_silent();
+  test_stock_gear_only_in_d();
+  test_second_corner_waits_again();
+  test_mode_grace_at_key_on();
+  test_manual_auto_downshifts_announced();
+  test_quick_reentry_shift();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }
