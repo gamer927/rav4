@@ -31,7 +31,6 @@ class Oled {
   void setLine(uint8_t row, const char* text);   // row 0-7, normal size
   void setInvert(bool on);  // lamp test
   void service(uint32_t nowMs);
-  const char* debugLine(uint8_t row) const { return row < 8 ? line_[row] : ""; }  // for the system test
 
  private:
   bool probe();

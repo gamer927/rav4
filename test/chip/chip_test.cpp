@@ -42,7 +42,7 @@
 #include <simavr/sim_time.h>
 
 #include "pins.h"
-#include "font5x7.h"  // (avr/pgmspace.h: the system test's PC version)
+#include "screen_text.h"  // (avr/pgmspace.h for the font: the system test's PC version)
 
 static const uint32_t F_CPU = 16000000;
 static const uint64_t CYCLES_PER_MS = F_CPU / 1000;
@@ -275,68 +275,10 @@ static void twiOut(avr_irq_t*, uint32_t value, void*) {
   }
 }
 
-// What the screen shows, as text: every character cell matched pixel for
-// pixel against the font, in the three sizes the firmware draws (small 6 px
-// cells, double 12 px cells, the 6x gear digit). Unreadable cells become '~'.
-static char matchGlyph(const uint8_t cols[5]) {
-  for (int c = FONT_FIRST; c <= FONT_LAST; c++) {
-    if (!memcmp(cols, &FONT5X7[(c - FONT_FIRST) * 5], 5)) return (char)c;
-  }
-  return '~';
-}
-static std::string decodeSmall(int page, int x0, int n) {
-  std::string s;
-  for (int i = 0; i < n; i++) {
-    const int x = x0 + 6 * i;
-    if (x + 5 >= 128) break;
-    uint8_t cols[5];
-    memcpy(cols, &screen.fb[page][x], 5);
-    s += screen.fb[page][x + 5] ? '~' : matchGlyph(cols);
-  }
-  return s;
-}
-static std::string decodeBig(int page, int x0, int n) {
-  std::string s;
-  for (int i = 0; i < n; i++) {
-    uint8_t cols[5];
-    bool ok = true;
-    for (int c = 0; c < 5; c++) {
-      const int x = x0 + 12 * i + 2 * c;
-      if (x + 1 >= 128) return s;
-      const uint8_t top = screen.fb[page][x], bot = screen.fb[page + 1][x];
-      ok = ok && top == screen.fb[page][x + 1] && bot == screen.fb[page + 1][x + 1];
-      uint8_t g = 0;
-      for (int b = 0; b < 4; b++) {
-        if ((top >> (2 * b)) & 1) g |= 1 << b;
-        if ((bot >> (2 * b)) & 1) g |= 1 << (b + 4);
-      }
-      cols[c] = g;
-    }
-    s += ok ? matchGlyph(cols) : '~';
-  }
-  return s;
-}
-static char decodeHero() {
-  uint8_t cols[5] = {};
-  for (int c = 0; c < 5; c++) {
-    for (int r = 0; r < 7; r++) {
-      const int x = 2 + 6 * c + 3, y = 3 + 6 * r + 3;
-      if ((screen.fb[y / 8][x] >> (y % 8)) & 1) cols[c] |= 1 << r;
-    }
-  }
-  return matchGlyph(cols);
-}
+// What the screen shows, as text (test/screen_text.h).
 static std::string screenText() {
   if (!screen.on) return "(screen off)";
-  std::string s;
-  s += "[gear ";
-  s += decodeHero();
-  s += "] ";
-  for (int p = 0; p < 8; p++) {
-    s += decodeSmall(p, 0, 21) + "|" + decodeSmall(p, 40, 14) + "|";
-    if (p % 2 == 0) s += decodeBig(p, 0, 10) + "|" + decodeBig(p, 40, 7) + "|";
-  }
-  return s;
+  return screen_text::read([](int page, int x) { return screen.fb[page][x]; });
 }
 static bool screenSays(const char* words) { return screenText().find(words) != std::string::npos; }
 

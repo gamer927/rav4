@@ -29,6 +29,7 @@ FW = os.path.join(ROOT, "firmware", "tcu")
 OUT = os.path.join(ROOT, "build", "mutants")
 FILES = ["tcu_logic.cpp", "self_test.cpp", "tcu.ino"]
 CXX = os.environ.get("CXX", "g++")
+CHIP = False  # --chip: tcu.ino mutants also face the chip test (slow: about 1 min each)
 
 # (pattern, replacement, name): applied to one occurrence at a time, outside
 # comments and string literals.
@@ -141,18 +142,26 @@ def run_mutant(k, m):
     if m["file"] != "tcu.ino":
         steps += [f"{CXX} -std=c++11 -O1 -w -I{fw} -o t1 {ROOT}/test/test_tcu_logic.cpp {logic} && ./t1",
                   f"{CXX} -std=c++11 -O1 -w -I{fw} -o t2 {ROOT}/test/test_self_test.cpp {logic} && ./t2"]
-    steps.append(f"{CXX} -std=gnu++17 -O1 -w -I{ROOT}/test/system/mock -I{sim} -o st "
+    steps.append(f"{CXX} -std=gnu++17 -O1 -w -I{ROOT}/test -I{ROOT}/test/system/mock -I{sim} -o st "
                  f"{ROOT}/test/system/system_test.cpp {sim}/tcu_logic.cpp {sim}/self_test.cpp "
                  f"{sim}/oled.cpp {sim}/ds18b20.cpp {sim}/imu.cpp && ./st")
+    # The calibration helper reads the firmware's USB log: it must still work.
+    steps.append(f"./st --callog cal.log > /dev/null && python3 {ROOT}/test/test_calibrate.py cal.log")
+    if CHIP and m["file"] == "tcu.ino":
+        # The chip test: the mutant built for the Mega, on the simulated chip.
+        steps.append(f"OUT={d}/avr SK={fw} {ROOT}/tools/avr_build.sh > /dev/null && "
+                     f"cp -r {fw} calsrc && sed -i 's/^constexpr bool CALIBRATED = false;/constexpr bool CALIBRATED = true;/' "
+                     f"calsrc/config.h && OUT={d}/cal SK={d}/calsrc {ROOT}/tools/avr_build.sh > /dev/null && "
+                     f"{ROOT}/build/chip/chip_test {d}/avr/tcu.hex {d}/cal/tcu.hex {ROOT}/build/chip/bootloader.hex")
     result, why = "survived", ""
     for i, cmd in enumerate(steps):
-        code, text = sh(cmd, d)
+        code, text = sh(cmd, d, timeout=600 if "chip_test" in cmd else 120)
         if code == "timeout":
             result, why = "killed", "timed out (hung)"
             break
         if code != 0:
-            if "error:" in text and not os.path.exists(os.path.join(d, ["t1", "t2", "st"][i] if
-                                                                      m["file"] != "tcu.ino" else "st")):
+            built = {"t1", "t2", "st"} & set(os.listdir(d))
+            if "error:" in text and i < 3 and not built:
                 result, why = "stillborn", "doesn't compile"
             else:
                 fails = [ln.strip() for ln in text.splitlines() if "FAIL" in ln][:2]
@@ -167,8 +176,15 @@ def main():
     ap.add_argument("--file", action="append", help="only this firmware file (repeatable)")
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--chip", action="store_true", help="tcu.ino mutants also run the chip test (make chip first)")
+    ap.add_argument("--only", help="only the mutants listed (numbers, comma-separated), e.g. the last survivors")
     args = ap.parse_args()
+    global CHIP
+    CHIP = args.chip
     ms = [m for f in (args.file or FILES) for m in mutants_of(f)]
+    if args.only:
+        keep = {int(k) for k in args.only.split(",")}
+        ms = [m for k, m in enumerate(ms) if k in keep]
     if args.list:
         for k, m in enumerate(ms):
             print(f"{k:4d} {m['file']}:{m['line']} {m['op']}: {m['new'].strip()}")

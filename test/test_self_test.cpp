@@ -50,13 +50,28 @@ struct Bench {
     in.coilPowered = true;
     in.solSenseValid = true;
   }
+  // Real parts take time: a G2RL relay's contact closes up to 15 ms after
+  // its coil is powered, and a solenoid's current takes about 20 ms to come
+  // up (its inductance). A check made too early sees no current.
+  static constexpr uint32_t RELAY_OPERATE_MS = 15, SOLENOID_RISE_MS = 20;
+  uint32_t coilOnSince = 0, driveSince[3] = {0, 0, 0};
+  bool coilWasOn = false, driveWas[3] = {false, false, false};
   void physics() {
     const TestOutputs& o = t.outputs();
     const bool drive[3] = {o.s1, o.s2, o.sl};
     in.switchOn = switchOn;
     in.coilPowered = (switchOn || cutBroken) && !coilFuseBlown;
-    const bool routed = (o.relay && in.coilPowered) || relayWelded;
-    for (int i = 0; i < 3; i++) in.solAmps[i] = (drive[i] && routed && !solenoidOpen[i]) ? 0.95f : 0.0f;
+    const bool coil = o.relay && in.coilPowered;
+    if (coil && !coilWasOn) coilOnSince = in.nowMs;
+    coilWasOn = coil;
+    const bool routed = (coil && in.nowMs - coilOnSince >= RELAY_OPERATE_MS) || relayWelded;
+    for (int i = 0; i < 3; i++) {
+      if (drive[i] && !driveWas[i]) driveSince[i] = in.nowMs;
+      driveWas[i] = drive[i];
+      const bool flowing = drive[i] && routed && !solenoidOpen[i];
+      const uint32_t since = in.nowMs - (driveSince[i] > coilOnSince || relayWelded ? driveSince[i] : coilOnSince);
+      in.solAmps[i] = flowing && since >= SOLENOID_RISE_MS ? 0.95f : flowing ? 0.3f : 0.0f;
+    }
     in.solSenseValid = senseWired;
   }
   void step(uint32_t ms, bool edge = false) {
@@ -395,6 +410,193 @@ static void test_cbit_solenoid_short() {
   CHECK(c.outputs().faults & FAULT_SOLENOID);
 }
 
+
+// ---------------------------------------------------------------------------
+// Tests added after mutation testing (tools/mutate.py) showed bugs planted in
+// these paths went unnoticed. Each says what it pins down.
+
+// Runs IBIT up to the ON/OFF prompt, answering every earlier prompt.
+static void toCutPrompt(Bench& b) {
+  if (!b.t.active()) CHECK(b.t.start(b.in));
+  while (b.t.active() && b.t.phase() != PH_PROMPT) b.step(10);
+  for (int p = 0; p < 6 && b.t.phase() == PH_PROMPT; p++) {
+    const TestPrompt pr = b.t.prompt();
+    b.in.up = pr == PR_UP;
+    b.in.down = pr == PR_DOWN;
+    b.in.eco = pr == PR_ECO;
+    b.in.sport = pr == PR_SPORT;
+    b.in.manual = pr == PR_MANUAL;
+    b.in.brake = pr == PR_BRAKE;
+    b.step(20);
+  }
+  b.in.up = b.in.down = b.in.eco = b.in.sport = b.in.manual = b.in.brake = false;
+  while (b.t.active() && b.t.phase() == PH_CUT_ARM) b.step(10);
+}
+
+static void test_cut_failure_paths() {
+  std::printf("IBIT ON/OFF CUT: every way the hardware cut can fail is a FAIL\n");
+  // A welded relay: turning ON/OFF off drops the coils, but the contact
+  // stays closed and the solenoid keeps drawing current.
+  Bench w;
+  w.relayWelded = true;
+  w.runAll();
+  CHECK(w.t.result(T_ONOFF_CUT) == TR_FAIL);
+  CHECK(w.t.value(T_ONOFF_CUT) > 0.9f);
+  // No current sensors wired: the coil sense alone must still catch a power
+  // pole that doesn't cut...
+  Bench n;
+  n.senseWired = false;
+  n.cutBroken = true;
+  n.runAll();
+  CHECK(n.t.result(T_ONOFF_CUT) == TR_FAIL);
+  // ...and pass a good one.
+  Bench g;
+  g.senseWired = false;
+  g.runAll();
+  CHECK(g.t.result(T_ONOFF_CUT) == TR_PASS);
+  // No current to cut (S1's wire broken): it can't prove anything, FAIL at once.
+  Bench o;
+  o.solenoidOpen[0] = true;
+  toCutPrompt(o);
+  CHECK(o.t.result(T_ONOFF_CUT) == TR_FAIL);
+  CHECK(o.t.value(T_ONOFF_CUT) < 0.1f);
+  CHECK(o.t.phase() == PH_WATCHDOG);
+  CHECK(!o.t.outputs().relay && !o.t.outputs().s1);
+  // Nobody turns ON/OFF off: FAIL after the prompt's 8 s, everything off.
+  Bench t;
+  toCutPrompt(t);
+  CHECK(t.t.prompt() == PR_ONOFF_OFF);
+  CHECK(t.t.outputs().relay && t.t.outputs().s1);  // current flowing, waiting for the cut
+  t.step(cfg::IBIT_PROMPT_TIMEOUT_MS - 100);
+  CHECK(t.t.result(T_ONOFF_CUT) == TR_NONE);
+  t.step(200);
+  CHECK(t.t.result(T_ONOFF_CUT) == TR_FAIL);
+  CHECK(t.t.phase() == PH_WATCHDOG);
+  CHECK(!t.t.outputs().relay && !t.t.outputs().s1);
+  // TEST pressed at the prompt: SKIP, and on to the last step.
+  Bench k;
+  toCutPrompt(k);
+  k.step(20, true);
+  CHECK(k.t.result(T_ONOFF_CUT) == TR_SKIP);
+  CHECK(k.t.phase() == PH_WATCHDOG);
+  // Turned off, the verdict waits for the relay to drop out.
+  Bench d;
+  toCutPrompt(d);
+  d.switchOn = false;
+  d.step(cfg::IBIT_RELAY_SETTLE_MS - 20);
+  CHECK(d.t.result(T_ONOFF_CUT) == TR_NONE);
+  d.step(40);
+  CHECK(d.t.result(T_ONOFF_CUT) == TR_PASS);
+  CHECK(d.t.currentTest() == T_WATCHDOG);
+}
+
+static void test_outputs_between_steps() {
+  std::printf("IBIT: nothing left on between steps; the screen flash ends\n");
+  Bench b;
+  CHECK(b.t.start(b.in));
+  while (b.t.phase() == PH_LAMPS) b.step(10);
+  CHECK(!b.t.outputs().lamps);  // the flash is over once the relay step starts
+  int solPhases = 0;
+  TestPhase was = b.t.phase();
+  while (b.t.active() && b.t.phase() != PH_PROMPT) {
+    b.step(10);
+    if (b.t.phase() == PH_SOL_ON && was != PH_SOL_ON) solPhases++;
+    was = b.t.phase();
+  }
+  CHECK(solPhases == 3);  // S1, S2, SL: no fourth
+  // The prompts only read switches: relay and drivers off throughout.
+  while (b.t.phase() == PH_PROMPT) {
+    const TestOutputs& o = b.t.outputs();
+    CHECK(!o.relay && !o.s1 && !o.s2 && !o.sl && !o.lamps);
+    b.step(cfg::IBIT_PROMPT_TIMEOUT_MS / 2, true);
+  }
+}
+
+static void test_rerun_and_restore() {
+  std::printf("IBIT: a second run starts clean; the watchdog restore keeps values\n");
+  Bench b;
+  b.solenoidOpen[1] = true;
+  CHECK(b.t.start(b.in));
+  while (b.t.phase() != PH_SOL_GAP || b.t.currentTest() != T_SOL_S2) b.step(10);
+  CHECK(b.t.result(T_SOL_S2) == TR_FAIL);
+  b.in.engineRpm = 500;  // engine started: aborted
+  b.step(10);
+  CHECK(b.t.aborted());
+  b.in.engineRpm = 0;
+  b.solenoidOpen[1] = false;  // wire fixed
+  CHECK(b.t.start(b.in));
+  CHECK(!b.t.aborted());
+  CHECK(b.t.result(T_SOL_S2) == TR_NONE);  // the old FAIL is gone
+  CHECK(b.t.result(T_ONOFF_CUT) == TR_NONE);
+  b.runAll();
+  CHECK(b.t.result(T_SOL_S2) == TR_PASS);
+
+  SelfTest after;
+  after.restoreAfterWatchdog(b.t.results(), b.t.values(), true);
+  for (uint8_t i = 0; i < T_COUNT; i++) {
+    if (i != T_WATCHDOG) CHECK(after.result((TestId)i) == b.t.result((TestId)i));
+  }
+  CHECK(after.value(T_SOL_S2) > 0.9f);  // the amps on the table survive the reset
+  CHECK(!after.aborted());
+  CHECK(after.inhibit() == INH_NONE);
+  CHECK(!after.outputs().relay && !after.outputs().s1);
+  // Garbage in the saved table (RAM after a power cut) becomes "not run".
+  uint8_t junk[T_COUNT];
+  float vals[T_COUNT] = {};
+  for (uint8_t i = 0; i < T_COUNT; i++) junk[i] = i % 2 ? TR_SKIP : 200;
+  SelfTest j;
+  j.restoreAfterWatchdog(junk, vals, false);
+  CHECK(j.result(T_SUPPLY) == TR_NONE);
+  CHECK(j.result(T_TPS) == TR_SKIP);
+  CHECK(j.result(T_WATCHDOG) == TR_FAIL);
+}
+
+static void test_prompt_countdown() {
+  std::printf("IBIT: the prompt's countdown on the screen\n");
+  Bench b;
+  CHECK(b.t.start(b.in));
+  CHECK(b.t.promptRemainingMs(b.in.nowMs) == 0);  // not a prompt
+  while (b.t.phase() != PH_PROMPT) b.step(10);
+  const uint32_t t0 = b.in.nowMs;
+  CHECK(b.t.promptRemainingMs(t0) == cfg::IBIT_PROMPT_TIMEOUT_MS);
+  CHECK(b.t.promptRemainingMs(t0 + 3000) == cfg::IBIT_PROMPT_TIMEOUT_MS - 3000);
+  CHECK(b.t.promptRemainingMs(t0 + cfg::IBIT_PROMPT_TIMEOUT_MS + 500) == 0);
+  toCutPrompt(b);
+  const uint32_t t1 = b.in.nowMs;
+  CHECK(b.t.promptRemainingMs(t1) > cfg::IBIT_PROMPT_TIMEOUT_MS - 100);
+}
+
+static void test_pbit_details() {
+  std::printf("PBIT: gyro, moving off during the key-on relay check\n");
+  Bench b;
+  CHECK(!b.t.hasRun());
+  b.in.imuPresent = false;
+  b.t.runPowerOn(b.in, false);
+  CHECK(b.t.hasRun());
+  CHECK(b.t.result(T_IMU) == (cfg::IMU_INSTALLED ? TR_FAIL : TR_SKIP));
+  Bench g;
+  g.t.runPowerOn(g.in, false);
+  CHECK(g.t.result(T_IMU) == (cfg::IMU_INSTALLED ? TR_PASS : TR_SKIP));
+  // Lever into D during the 0.4 s check: drop it, drivers off at once.
+  Bench m;
+  m.t.runPowerOn(m.in, false);
+  CHECK(m.t.outputs().s1);
+  m.step(100);
+  m.in.leverInD = true;
+  m.step(10);
+  CHECK(!m.t.active());
+  CHECK(m.t.result(T_RELAY_RELEASE) == TR_SKIP);
+  CHECK(!m.t.outputs().s1 && !m.t.outputs().s2 && !m.t.outputs().sl);
+  // Rolling: the same.
+  Bench r;
+  r.t.runPowerOn(r.in, false);
+  r.in.speedMph = 2;
+  r.step(10);
+  CHECK(!r.t.active());
+  CHECK(r.t.result(T_RELAY_RELEASE) == TR_SKIP);
+  CHECK(!r.t.outputs().s1);
+}
+
 int main() {
   test_pbit();
   test_interlocks();
@@ -405,6 +607,11 @@ int main() {
   test_abort();
   test_cbit_solenoid_fault();
   test_cbit_solenoid_short();
+  test_cut_failure_paths();
+  test_outputs_between_steps();
+  test_rerun_and_restore();
+  test_prompt_countdown();
+  test_pbit_details();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }

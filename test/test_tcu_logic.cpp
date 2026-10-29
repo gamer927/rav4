@@ -1276,6 +1276,228 @@ static void test_maps_are_sane() {
   }
 }
 
+
+// ---------------------------------------------------------------------------
+// Tests added after mutation testing (tools/mutate.py) showed bugs planted in
+// these paths went unnoticed. Each says what it pins down.
+
+// Enter CUSTOM on the move, the ECU holding `gear` (and lockup if `sl`).
+static void enterMoving(Sim& s, uint8_t gear, float mph, bool sl) {
+  s.setEcuGear(gear);
+  s.in.ecuSL = sl;
+  s.in.speedMph = mph;
+  s.in.customRequested = false;
+  s.step(cfg::ARM_OFF_MIN_MS + 50);
+  s.in.customRequested = true;
+  s.step(10);
+}
+
+static void test_arming_glitch_after_drive() {
+  std::printf("arming: an OFF glitch while driving disarms; ON again needs a real OFF\n");
+  Sim s;
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(30);
+  s.step(60000);  // a minute of driving: the OFF that armed it is long ago
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  s.in.customRequested = false;  // 30 ms OFF (a bouncing contact, a bad crimp)
+  s.step(30);
+  CHECK(s.c.outputs().control == CTRL_STOCK);
+  CHECK(!s.c.outputs().armed);
+  s.in.customRequested = true;
+  s.step(1000);
+  CHECK(s.c.outputs().control == CTRL_STOCK);  // not re-armed by the glitch
+  CHECK(!s.c.outputs().armed);
+  s.in.customRequested = false;  // a real flip: OFF for longer than ARM_OFF_MIN_MS
+  s.step(cfg::ARM_OFF_MIN_MS + 50);
+  s.in.customRequested = true;
+  s.step(20);
+  CHECK(s.c.outputs().armed);
+}
+
+static void test_stock_outputs() {
+  std::printf("STOCK: TCU drivers off, the ECU's gear and lockup reported\n");
+  Sim s;
+  enterMoving(s, 3, 43.5f, true);
+  CHECK(s.c.outputs().control != CTRL_STOCK);
+  CHECK(s.c.outputs().s2 && s.c.outputs().sl);
+  s.in.customRequested = false;
+  const Outputs& o = s.step(10);
+  CHECK(o.control == CTRL_STOCK);
+  CHECK(!o.relayCustom);
+  CHECK(!o.s1 && !o.s2 && !o.sl);
+  CHECK(o.gear == 3);    // what the ECU is doing (sensed)
+  CHECK(o.lockup);       // the ECU's lockup, for the log
+  s.in.ecuSL = false;
+  CHECK(!s.step(10).lockup);
+}
+
+static void test_entry_never_overrevs() {
+  std::printf("entry on the move: a sensed gear that would over-rev is refused, even if rpm agrees\n");
+  Sim s;
+  s.autoRpm = false;
+  const float mph = 50.0f;
+  s.in.engineRpm = mph * cfg::RPM_PER_MPH[1];  // the sense says 1st and the rpm "agrees"
+  enterMoving(s, 1, mph, false);
+  CHECK(s.c.outputs().control == CTRL_STOCK);
+  CHECK(s.c.outputs().event == EV_NEED_SYNC);
+}
+
+static void test_lockup_released_before_shift() {
+  std::printf("a shift with lockup on: release first, shift 200 ms later\n");
+  Sim s;
+  s.select(false, false, true);
+  enterMoving(s, 3, 43.5f, true);
+  CHECK(s.c.outputs().control == CTRL_MANUAL);
+  CHECK(s.c.outputs().sl && s.c.outputs().gear == 3);
+  s.in.up = true;
+  s.step(20);
+  s.in.up = false;
+  s.step(20);
+  CHECK(!s.c.outputs().sl);          // converter clutch let go at once...
+  CHECK(s.c.outputs().gear == 3);    // ...the gear waits for it
+  s.step(cfg::LOCKUP_RELEASE_BEFORE_SHIFT_MS);
+  CHECK(s.c.outputs().gear == 4);
+}
+
+static void test_first_shift_right_after_takeover() {
+  std::printf("the first shift after a take-over isn't held up by the shift interval\n");
+  Sim s;
+  s.select(false, false, true);
+  enterMoving(s, 3, 43.5f, false);
+  CHECK(s.c.outputs().gear == 3);
+  s.tap(s.in.up);
+  CHECK(s.c.outputs().gear == 4);
+  CHECK(s.c.outputs().event == EV_SHIFT);
+}
+
+static void test_events_repeat() {
+  std::printf("the same message twice in a row is shown twice (event counter)\n");
+  // Two refused downshifts: each one must reach the screen.
+  Sim s;
+  s.select(false, false, true);
+  enterMoving(s, 3, 43.5f, false);
+  s.step(800);
+  uint8_t seq = s.c.outputs().eventSeq;
+  s.in.down = true; s.step(30); s.in.down = false; s.step(30);  // 3 -> 2 at 43.5 mph: fine
+  CHECK(s.c.outputs().gear == 2);
+  s.step(800);
+  seq = s.c.outputs().eventSeq;
+  s.tap(s.in.down);  // 2 -> 1 at 43.5 mph: refused
+  CHECK(s.c.outputs().event == EV_DENY_OVERREV);
+  CHECK(s.c.outputs().eventSeq == (uint8_t)(seq + 1));
+  s.step(800);
+  s.tap(s.in.down);  // again: refused again, and said again
+  CHECK(s.c.outputs().eventSeq == (uint8_t)(seq + 2));
+  // Shifter clicked twice with MANUAL off.
+  Sim a;
+  enterMoving(a, 3, 43.5f, false);
+  a.tap(a.in.up);
+  CHECK(a.c.outputs().event == EV_DENY_NOT_MANUAL);
+  const uint8_t q = a.c.outputs().eventSeq;
+  a.tap(a.in.up);
+  CHECK(a.c.outputs().eventSeq == (uint8_t)(q + 1));
+  // Waiting for a stop: one NEED_SYNC, not a new one every 10 ms.
+  Sim w;
+  w.in.ecuSenseValid = false;
+  w.in.speedMph = 37.3f;
+  w.arm();
+  CHECK(w.c.outputs().event == EV_NEED_SYNC);
+  const uint8_t n = w.c.outputs().eventSeq;
+  w.step(1000);
+  CHECK(w.c.outputs().eventSeq == n);
+  // Two automatic upshifts at the redline in a row (ECO): both announced.
+  Sim r;
+  r.arm();
+  r.autoRpm = false;
+  r.in.speedMph = 10;
+  r.in.engineRpm = cfg::REV_LIMIT_UPSHIFT_RPM + 200;
+  r.step(cfg::REV_LIMIT_HOLD_MS + 50);
+  CHECK(r.c.outputs().gear == 2 && r.c.outputs().event == EV_REV_LIMIT_UPSHIFT);
+  const uint8_t u = r.c.outputs().eventSeq;
+  r.in.speedMph = 30;
+  r.step(cfg::MIN_SHIFT_INTERVAL_MS + cfg::REV_LIMIT_HOLD_MS + 50);
+  CHECK(r.c.outputs().gear == 3);
+  CHECK(r.c.outputs().eventSeq == (uint8_t)(u + 1));
+}
+
+static void test_stall_in_d_is_not_a_stuck_lever() {
+  std::printf("engine stalls in D and catches again: no LEVER SENSOR fault\n");
+  Sim s;
+  s.autoRpm = false;
+  // A normal start in P: the battery dips under the starter.
+  s.in.leverInD = false;
+  s.in.engineRpm = 0;
+  s.in.batteryV = 12.4f;
+  s.step(cfg::ENGINE_OFF_MS + 500);
+  s.in.engineRpm = 250;
+  s.in.batteryV = 10.2f;
+  s.step(600);
+  s.in.engineRpm = 800;
+  s.in.batteryV = 14.2f;
+  s.step(500);
+  // Into D; the engine stalls at a light...
+  s.in.leverInD = true;
+  s.step(500);
+  s.in.engineRpm = 0;
+  s.in.batteryV = 12.6f;
+  s.step(cfg::ENGINE_OFF_MS + 500);
+  // ...and catches again on its own (no starter, no dip).
+  s.in.engineRpm = 800;
+  s.in.batteryV = 14.0f;
+  s.step(500);
+  CHECK(!(s.c.outputs().faults & FAULT_LEVER));
+}
+
+static void test_millis_rollover() {
+  std::printf("49.7 days of power: the millisecond clock wraps mid-drive, nothing notices\n");
+  Sim s;
+  s.in.nowMs = 0xFFFFFFFFu - 2000u;  // 2 s before the wrap
+  s.c = Controller();
+  s.c.begin(s.in.nowMs, false);
+  s.step(500);
+  CHECK(s.c.outputs().warnings == 0);
+  CHECK(s.c.outputs().faults == 0);
+  s.arm();
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  s.in.tpsPct = 25;
+  s.cruise(45);  // takes us through the wrap
+  CHECK(s.in.nowMs < 100000u);
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(s.c.outputs().gear == 4);
+  CHECK(s.c.outputs().faults == 0);
+  CHECK(!(s.c.outputs().warnings & WARN_BUTTON_STUCK));
+}
+
+static void test_fault_thresholds_exact() {
+  std::printf("fault limits: exactly at the limit is still fine, past it is a fault\n");
+  struct { float v; bool fault; } supply[] = {
+      {cfg::SUPPLY_MIN_V, false}, {cfg::SUPPLY_MIN_V - 0.05f, true},
+      {cfg::SUPPLY_MAX_V, false}, {cfg::SUPPLY_MAX_V + 0.05f, true}};
+  for (auto& k : supply) {
+    Sim s;
+    s.in.batteryV = k.v;
+    s.step(cfg::SUPPLY_FAULT_MS + 100);
+    CHECK(((s.c.outputs().faults & FAULT_SUPPLY) != 0) == k.fault);
+  }
+  // Solenoid current, commanded on (1st: S1 on), and off (S2).
+  struct { float on, off; bool fault; } amps[] = {
+      {cfg::SOL_MIN_A, 0, false}, {cfg::SOL_MIN_A - 0.05f, 0, true},
+      {cfg::SOL_OVER_A, 0, false}, {cfg::SOL_OVER_A + 0.05f, 0, true},
+      {0.95f, cfg::SOL_OFF_MAX_A, false}, {0.95f, cfg::SOL_OFF_MAX_A + 0.05f, true}};
+  for (auto& k : amps) {
+    Sim s;
+    s.in.solSenseValid = true;
+    s.arm();
+    CHECK(s.c.outputs().gear == 1 && s.c.outputs().s1 && !s.c.outputs().s2);
+    s.in.solAmps[0] = k.on;
+    s.in.solAmps[1] = k.off;
+    s.in.solAmps[2] = 0;
+    s.step(cfg::SOL_FAULT_MS + 100);
+    CHECK(((s.c.outputs().faults & FAULT_SOLENOID) != 0) == k.fault);
+  }
+}
+
 int main() {
   test_solenoid_table();
   test_boot_requires_switch_cycle();
@@ -1312,6 +1534,15 @@ int main() {
   test_debouncer();
   test_ds18b20_decode();
   test_maps_are_sane();
+  test_arming_glitch_after_drive();
+  test_stock_outputs();
+  test_entry_never_overrevs();
+  test_lockup_released_before_shift();
+  test_first_shift_right_after_takeover();
+  test_events_repeat();
+  test_stall_in_d_is_not_a_stuck_lever();
+  test_millis_rollover();
+  test_fault_thresholds_exact();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }

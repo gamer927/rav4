@@ -40,6 +40,7 @@ int analogImpl(uint8_t p);
 int (*g_analog)(uint8_t) = analogImpl;
 
 #include "tcu.ino"
+#include "screen_text.h"
 
 static int g_failures = 0;
 static int g_checks = 0;
@@ -224,12 +225,18 @@ float tcuDriverAmps() {
 }
 // Safe state: the ECU drives every solenoid (no relay in), no current
 // through the TCU's drivers.
-bool factorySafe() { return !relayIn(0) && !relayIn(1) && !relayIn(2) && tcuDriverAmps() < 0.1f; }
+// Outside the self-test, the TCU's own drivers are off too: handing back
+// means relays out AND drivers off (firmware: "hand back first, then switch
+// our drivers off").
+bool factorySafe() {
+  const bool driversOff = selfTest.active() || (!g_out[pin::S1] && !g_out[pin::S2] && !g_out[pin::SL]);
+  return !relayIn(0) && !relayIn(1) && !relayIn(2) && tcuDriverAmps() < 0.1f && driversOff;
+}
+// What is on the glass: the pixels the firmware sent over I2C, read back as
+// text (test/screen_text.h), not the text the firmware meant to draw.
 const char* screenWords() {
   static std::string s;
-  s.clear();
-  // The text the OLED driver currently holds (what's on the glass).
-  for (int r = 0; r < 8; r++) { s += oled.debugLine(r); s += "|"; }
+  s = screen_text::read([](int page, int x) { return Wire.fb[page][x]; });
   return s.c_str();
 }
 bool screenSays(const char* words) { return strstr(screenWords(), words) != nullptr; }
@@ -629,6 +636,7 @@ void s_ibit_full() {
   }
   CHECK(screenSays("ALL OK"));
   CHECK(factorySafe());
+  CHECK(selfTest.result(tcu::T_WATCHDOG) == (cfg::IBIT_WATCHDOG_TEST ? tcu::TR_NONE : tcu::TR_SKIP));
 }
 
 void s_ibit_refused_while_engine_runs() {
