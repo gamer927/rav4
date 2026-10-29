@@ -18,6 +18,7 @@ Writes build/mutants/report.md.
 """
 import argparse
 import concurrent.futures as cf
+import json
 import os
 import re
 import shutil
@@ -127,7 +128,7 @@ SIM_SED = (r"sed -i -e 's/^constexpr bool IBIT_WATCHDOG_TEST = true;/constexpr b
 
 
 def run_mutant(k, m):
-    d = os.path.join(OUT, f"m{k:04d}")
+    d = os.path.join(OUT, "work", f"m{k:04d}")
     shutil.rmtree(d, ignore_errors=True)
     fw, sim = os.path.join(d, "fw"), os.path.join(d, "sim")
     shutil.copytree(FW, fw)
@@ -176,6 +177,7 @@ def main():
     ap.add_argument("--file", action="append", help="only this firmware file (repeatable)")
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--fresh", action="store_true", help="forget saved results (after changing the tests)")
     ap.add_argument("--chip", action="store_true", help="tcu.ino mutants also run the chip test (make chip first)")
     ap.add_argument("--only", help="only the mutants listed (numbers, comma-separated), e.g. the last survivors")
     args = ap.parse_args()
@@ -190,14 +192,31 @@ def main():
             print(f"{k:4d} {m['file']}:{m['line']} {m['op']}: {m['new'].strip()}")
         return
     os.makedirs(OUT, exist_ok=True)
-    results = {}
-    with cf.ThreadPoolExecutor(args.jobs) as ex:
-        futs = [ex.submit(run_mutant, k, m) for k, m in enumerate(ms)]
+    # Each result is saved as it comes (build/mutants/results.jsonl), so a run
+    # that is stopped carries on where it left off: --fresh starts over.
+    saved = os.path.join(OUT, "results.jsonl")
+    if args.fresh and os.path.exists(saved):
+        os.remove(saved)
+    done = {}
+    if os.path.exists(saved):
+        for line in open(saved):
+            r = json.loads(line)
+            done[(r["file"], r["line"], r["op"], r["new"])] = (r["result"], r["why"])
+    key = lambda m: (m["file"], m["line"], m["op"], m["new"])  # noqa: E731
+    results = {k: done[key(m)] for k, m in enumerate(ms) if key(m) in done}
+    todo = [(k, m) for k, m in enumerate(ms) if k not in results]
+    print(f"{len(ms)} mutants, {len(results)} already done, {len(todo)} to run", flush=True)
+    with cf.ThreadPoolExecutor(args.jobs) as ex, open(saved, "a") as out:
+        futs = [ex.submit(run_mutant, k, m) for k, m in todo]
         for n, f in enumerate(cf.as_completed(futs), 1):
             k, res, why = f.result()
             results[k] = (res, why)
-            if n % 25 == 0 or n == len(ms):
-                print(f"  {n}/{len(ms)} done", flush=True)
+            m = ms[k]
+            out.write(json.dumps(dict(file=m["file"], line=m["line"], op=m["op"], new=m["new"],
+                                      result=res, why=why)) + "\n")
+            out.flush()
+            if n % 25 == 0 or n == len(todo):
+                print(f"  {n}/{len(todo)} done", flush=True)
     write_report(ms, results)
 
 
