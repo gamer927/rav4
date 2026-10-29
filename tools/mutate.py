@@ -150,9 +150,10 @@ def run_mutant(k, m):
     steps.append(f"./st --callog cal.log > /dev/null && python3 {ROOT}/test/test_calibrate.py cal.log")
     if CHIP and m["file"] == "tcu.ino":
         # The chip test: the mutant built for the Mega, on the simulated chip.
-        steps.append(f"OUT={d}/avr SK={fw} {ROOT}/tools/avr_build.sh > /dev/null && "
+        core = f"PREBUILT_CORE={ROOT}/build/avr/core"
+        steps.append(f"{core} OUT={d}/avr SK={fw} {ROOT}/tools/avr_build.sh > /dev/null && "
                      f"cp -r {fw} calsrc && sed -i 's/^constexpr bool CALIBRATED = false;/constexpr bool CALIBRATED = true;/' "
-                     f"calsrc/config.h && OUT={d}/cal SK={d}/calsrc {ROOT}/tools/avr_build.sh > /dev/null && "
+                     f"calsrc/config.h && {core} OUT={d}/cal SK={d}/calsrc {ROOT}/tools/avr_build.sh > /dev/null && "
                      f"{ROOT}/build/chip/chip_test {d}/avr/tcu.hex {d}/cal/tcu.hex {ROOT}/build/chip/bootloader.hex")
     result, why = "survived", ""
     for i, cmd in enumerate(steps):
@@ -194,7 +195,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     # Each result is saved as it comes (build/mutants/results.jsonl), so a run
     # that is stopped carries on where it left off: --fresh starts over.
-    saved = os.path.join(OUT, "results.jsonl")
+    saved = os.path.join(OUT, "results_chip.jsonl" if CHIP else "results.jsonl")
     if args.fresh and os.path.exists(saved):
         os.remove(saved)
     done = {}

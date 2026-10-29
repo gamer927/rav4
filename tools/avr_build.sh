@@ -17,6 +17,12 @@ FLAGS=(-mmcu=atmega2560 -DF_CPU=16000000L -DARDUINO=10819 -DARDUINO_AVR_MEGA2560
 CXXFLAGS=(-std=gnu++11 -fno-exceptions -fno-threadsafe-statics -fpermissive)
 
 objs=()
+WIRE="$CORE/libraries/Wire/src"
+if [ -n "${PREBUILT_CORE:-}" ] && [ -d "$PREBUILT_CORE" ]; then
+  # The Arduino core and Wire, already compiled (tools/mutate.py builds many
+  # sketches in a row; the core never changes).
+  mapfile -t objs < "$PREBUILT_CORE/link-order"  # the same order as a full build: the same .hex
+else
 for src in "$CORE"/cores/arduino/*.c; do
   o="$OUT/core/$(basename "$src").o"; avr-gcc "${FLAGS[@]}" -w -c "$src" -o "$o"; objs+=("$o")
 done
@@ -28,12 +34,14 @@ for src in "$CORE"/cores/arduino/*.S; do
   o="$OUT/core/$(basename "$src").o"; avr-gcc "${FLAGS[@]}" -x assembler-with-cpp -c "$src" -o "$o"; objs+=("$o")
 done
 
-SK="${SK:-$ROOT/firmware/tcu}"  # a copy with other settings, for the chip test
-WIRE="$CORE/libraries/Wire/src"
 # Wire library (console OLED).
 avr-g++ "${FLAGS[@]}" "${CXXFLAGS[@]}" -I"$WIRE" -w -c "$WIRE/Wire.cpp" -o "$OUT/core/Wire.o"
 avr-gcc "${FLAGS[@]}" -I"$WIRE" -w -c "$WIRE/utility/twi.c" -o "$OUT/core/twi.o"
 objs+=("$OUT/core/Wire.o" "$OUT/core/twi.o")
+printf '%s\n' "${objs[@]}" > "$OUT/core/link-order"
+fi
+
+SK="${SK:-$ROOT/firmware/tcu}"  # a copy with other settings, for the chip test
 
 sk_objs=()
 for src in "$SK/tcu.ino" "$SK"/*.cpp; do
