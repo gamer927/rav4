@@ -597,6 +597,56 @@ static void test_pbit_details() {
   CHECK(!r.t.outputs().s1);
 }
 
+
+static void test_second_run_and_step_names() {
+  std::printf("IBIT: a second full run tests everything again; the screen names each step\n");
+  Bench b;
+  b.in.batteryV = 10.2f;  // weak battery at key-on: PBIT says BAD...
+  b.t.runPowerOn(b.in, false);
+  b.step(cfg::IBIT_SOLENOID_ON_MS + 20);
+  CHECK(b.t.result(T_SUPPLY) == TR_FAIL);
+  b.in.batteryV = 12.5f;  // ...charged: IBIT checks it again
+  CHECK(b.t.start(b.in));
+  CHECK(b.t.result(T_SUPPLY) == TR_PASS);
+  // The step names the screen shows ("CHECKING ...").
+  bool sawLamps = false, sawSol[3] = {false, false, false}, sawRelease = false, sawCut = false;
+  while (b.t.active() && b.t.phase() != PH_PROMPT) {
+    const TestPhase ph = b.t.phase();
+    b.step(10);
+    if (ph == PH_LAMPS) sawLamps |= b.t.currentTest() == T_LAMPS;
+    for (int i = 0; i < 3; i++) sawSol[i] |= b.t.phase() == PH_SOL_ON && b.t.currentTest() == T_SOL_S1 + i;
+    if (b.t.phase() == PH_RELEASE_CHECK) sawRelease |= b.t.currentTest() == T_RELAY_RELEASE;
+  }
+  toCutPrompt(b);
+  sawCut = b.t.currentTest() == T_ONOFF_CUT;
+  b.switchOn = false;
+  b.step(20);
+  CHECK(b.t.currentTest() == T_ONOFF_CUT);
+  CHECK(sawLamps && sawSol[0] && sawSol[1] && sawSol[2] && sawRelease && sawCut);
+  b.step(cfg::IBIT_RELAY_SETTLE_MS + 50);
+  CHECK(b.t.result(T_ONOFF_CUT) == TR_PASS);
+  // Run it again (as after the watchdog step, from a fresh start).
+  b.switchOn = true;
+  b.step(50);
+  Bench c = b;
+  c.t = SelfTest();
+  c.t.restoreAfterWatchdog(b.t.results(), b.t.values(), true);
+  CHECK(c.t.start(c.in));
+  c.runAll();
+  for (uint8_t i = T_SOL_S1; i <= T_ONOFF_CUT; i++) {
+    if (c.t.result((TestId)i) != TR_PASS) std::printf("    second run: %s\n", testName((TestId)i));
+    CHECK(c.t.result((TestId)i) == TR_PASS);
+  }
+  // A step() when nothing is running does nothing (no abort, no outputs).
+  SelfTest idle;
+  Inputs in = b.in;
+  in.engineRpm = 900;  // would abort a running test
+  idle.step(in, false);
+  CHECK(!idle.aborted());
+  CHECK(!idle.active());
+  CHECK(!idle.outputs().relay);
+}
+
 int main() {
   test_pbit();
   test_interlocks();
@@ -612,6 +662,7 @@ int main() {
   test_rerun_and_restore();
   test_prompt_countdown();
   test_pbit_details();
+  test_second_run_and_step_names();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }

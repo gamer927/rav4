@@ -1498,6 +1498,127 @@ static void test_fault_thresholds_exact() {
   }
 }
 
+
+static void test_stuck_button_timing() {
+  std::printf("stuck shifter switch: timed from the press, either one, after any drive\n");
+  for (int which = 0; which < 2; which++) {
+    Sim s;
+    s.step(30000);  // half a minute after key-on
+    bool& b = which ? s.in.down : s.in.up;
+    b = true;
+    s.step(500);
+    CHECK(!(s.c.outputs().warnings & WARN_BUTTON_STUCK));  // a press, not a stuck switch
+    s.step(cfg::STUCK_BUTTON_MS - 1000);
+    CHECK(!(s.c.outputs().warnings & WARN_BUTTON_STUCK));
+    s.step(1000);
+    CHECK(s.c.outputs().warnings & WARN_BUTTON_STUCK);
+    b = false;
+    s.step(50);
+    CHECK(!(s.c.outputs().warnings & WARN_BUTTON_STUCK));
+  }
+}
+
+static void test_map_edges() {
+  std::printf("shift maps at their edges: full throttle, past it, and gears with no shift\n");
+  for (int m = 0; m < 2; m++) {
+    for (int g = 1; g <= 3; g++) {
+      const float wot = cfg::UPSHIFT_MPH[m][g - 1][cfg::TPS_POINTS - 1];
+      CHECK(upshiftMph((DriveMode)m, g, 100.0f) == wot);
+      CHECK(upshiftMph((DriveMode)m, g, 150.0f) == wot);
+      CHECK(upshiftMph((DriveMode)m, g, 0.0f) == cfg::UPSHIFT_MPH[m][g - 1][0]);
+    }
+    CHECK(upshiftMph((DriveMode)m, 4, 50.0f) > 1e8f);   // no 5th
+    CHECK(upshiftMph((DriveMode)m, 0, 50.0f) > 1e8f);
+    CHECK(downshiftMph((DriveMode)m, 1, 50.0f) < 0.0f);  // nothing below 1st
+    CHECK(downshiftMph((DriveMode)m, 5, 50.0f) < 0.0f);
+  }
+}
+
+static void test_atf_probe_lost_while_hot() {
+  std::printf("ATF probe lost while hot: the hot state clears, the probe warning shows\n");
+  Sim s;
+  s.arm();
+  s.in.atfC = cfg::ATF_HOT_C + 5;
+  s.step(100);
+  CHECK(s.c.outputs().warnings & WARN_ATF_HOT);
+  s.in.atfValid = false;
+  s.in.atfC = 0;
+  s.step(100);
+  CHECK(!(s.c.outputs().warnings & WARN_ATF_HOT));
+  CHECK(s.c.outputs().warnings & WARN_ATF_SENSOR);
+  s.in.atfValid = true;  // back, and cool: no stale hot state
+  s.in.atfC = 80;
+  s.step(100);
+  CHECK(!(s.c.outputs().warnings & WARN_ATF_HOT));
+}
+
+static void test_reentry_starts_fresh() {
+  std::printf("take-over again after a hand-back: no leftover gear hold\n");
+  Sim s;
+  s.select(false, true, false);
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(62.1);
+  s.step(1500);
+  s.in.tpsPct = 0;
+  s.in.brake = true;
+  s.rampTo(37.3, 9.3f);
+  s.in.brake = false;
+  s.step(200);
+  CHECK(s.c.outputs().gearHold);  // SPORT holding 2nd after braking
+  s.in.customRequested = false;   // ON/OFF off...
+  s.step(cfg::ARM_OFF_MIN_MS + 50);
+  s.setEcuGear(2);
+  s.in.customRequested = true;    // ...and on again, rolling in 2nd
+  s.step(20);
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  CHECK(!s.c.outputs().gearHold);
+}
+
+static void test_corner_hold_ends_when_gyro_lost() {
+  std::printf("corner hold ends at once if the gyro reading is lost mid-corner\n");
+  Sim s;
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(24.9);
+  s.in.latValid = true;
+  s.in.latG = 0.4f;
+  s.step(50);
+  CHECK(s.c.outputs().cornerHold);
+  s.in.latValid = false;
+  s.step(20);
+  CHECK(!s.c.outputs().cornerHold);
+  s.in.latValid = true;  // back, straight: no stale corner
+  s.in.latG = 0.0f;
+  s.step(20);
+  CHECK(!s.c.outputs().cornerHold);
+}
+
+static void test_brake_downshift_rpm_limit() {
+  std::printf("SPORT brake downshift never lands above its rpm limit\n");
+  Sim s;
+  s.select(false, true, false);
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(62.1);
+  s.step(1500);
+  s.in.tpsPct = 0;
+  s.in.brake = true;
+  uint8_t was = s.c.outputs().gear;
+  bool sawDownshift = false;
+  for (float v = 62.1f; v > 30.0f; v -= 0.093f) {  // 9.3 mph/s
+    s.in.speedMph = v;
+    s.step(10);
+    const uint8_t g = s.c.outputs().gear;
+    if (g < was) {
+      sawDownshift = true;
+      CHECK(v * cfg::RPM_PER_MPH[g] <= cfg::BRAKE_DOWNSHIFT_RPM[MODE_SPORT] + 1.0f);
+    }
+    was = g;
+  }
+  CHECK(sawDownshift);
+}
+
 int main() {
   test_solenoid_table();
   test_boot_requires_switch_cycle();
@@ -1543,6 +1664,12 @@ int main() {
   test_stall_in_d_is_not_a_stuck_lever();
   test_millis_rollover();
   test_fault_thresholds_exact();
+  test_stuck_button_timing();
+  test_map_edges();
+  test_atf_probe_lost_while_hot();
+  test_reentry_starts_fresh();
+  test_corner_hold_ends_when_gyro_lost();
+  test_brake_downshift_rpm_limit();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }
