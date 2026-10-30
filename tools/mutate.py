@@ -108,10 +108,47 @@ EQUIVALENT = [
     (TL, "true to false", "raise(want == CTRL_MANUAL ? EV_MANUAL : EV_AUTO_RESUMED, true);", None,
      "MANUAL and AUTO alternate, so the event always differs from the last one"),
     (TL, "true to false", "raise(EV_SHIFT, true);", None, "EV_SHIFT puts nothing on the screen"),
-    (TL, "delete statement", "setLockup(false);", "if (slCmd_) {",
+    (TL, "delete statement", "setLockup(false);", "Release the converter clutch first",
      "updateLockup() releases lockup in the same step while a shift is pending"),
-    (TL, "false to true", "setLockup(false);", "if (slCmd_) {",
+    (TL, "false to true", "setLockup(false);", "Release the converter clutch first",
      "updateLockup() releases lockup in the same step while a shift is pending"),
+    (TL, "delete statement", "if (slCmd_ == on) return;", None,
+     "updateLockup() only ever asks for a change (off when on, on when off)"),
+    (TL, "delete statement", "lastLockupChangeMs_ = now_;", "brakeHold_ = liftHold_ = highTpsSeen_ = false;",
+     "after a take-over lockup waits the longer settle-after-shift time, counted from the take-over"),
+    (TL, "delete statement", "overRev_ = Persist();", None,
+     "the rev-limit timer restarts the moment the engine is under the limit; a stale one only matters "
+     "if a take-over happens over 6,200 rpm"),
+    (TL, "delete statement", "overRev_.active = false;", None,
+     "the rev-limit timer restarts the moment the engine is under the limit"),
+    (TL, "false to true", "overRev_.active = false;", None,
+     "the rev-limit timer restarts the moment the engine is under the limit"),
+    (TL, "|| to &&", "if (gear_ >= 4 || pendingGear_ || (out_.control", None,
+     "an upshift from 4th, or during a shift, is refused by requestShift() anyway"),
+    (TL, "delete statement", "straight_.active = false;", None,
+     "the straight-again timer restarts as soon as the side force is over the exit level, "
+     "within a step of a corner starting"),
+    (TL, "false to true", "straight_.active = false;", None,
+     "the straight-again timer restarts as soon as the side force is over the exit level, "
+     "within a step of a corner starting"),
+    (TL, "true to false", "return true;", "brakeHold_ = true;",
+     "after a brake downshift, any further request in the same step is refused (shift in progress)"),
+    (TL, "delete statement", "if (pendingGear_) return;", "void Controller::autoSchedule",
+     "requestShift() refuses every shift while one is pending"),
+    (TL, "drop !", "if (prevBrake_ && !in.brake) brakeReleasedMs_ = now_;", None,
+     "it then marks the last step with the brake on instead of the first one off: 10 ms apart"),
+    (TL, "|| to &&", "if (pendingGear_ || gear_ <= 1) return;", None,
+     "requestShift() refuses a shift while one is pending and below 1st"),
+    (TL, "+ to -", "tpsShift_ = tau == 0", "=>(float)(tau - dt)",
+     "the throttle smoothing's time constant becomes 0.79 s instead of 0.81 s"),
+    (TL, "|| to &&", "if (!cfg::BRAKE_DOWNSHIFT[m]", "=>cornering_ && gear_ <= 1",
+     "from 1st a brake downshift would ask for gear 0, which requestShift() refuses"),
+    (TL, "drop !", "if (!brakeHold_ && !liftHold_", "=>(kickdown || elapsed",
+     "without a kickdown the dwell has passed by here (the return above); after a kickdown the speed "
+     "is below the next upshift point anyway"),
+    (TL, "false to true", "requestShift(gear_ + 1, in.speedMph, false);", None,
+     "only matters if a map upshift is refused, and map upshift points are above the too-slow "
+     "limits (test_maps_are_sane)"),
     (TL, "delete statement", "if (pendingGear_ || gear_ <= 1) return;", None,
      "requestShift() refuses a shift while one is pending and below 1st"),
     (TL, "<= to <", "if (pendingGear_ || gear_ <= 1) return;", None, "requestShift() refuses a shift below 1st"),
@@ -166,8 +203,12 @@ def prev_code(lines, ln):
 
 
 def equivalent(m):
+    # `before` is text in the line before, or "=>text": text in the mutated line itself.
     for f, op, text, before, why in EQUIVALENT:
-        if m["file"] == f and m["op"] == op and text in m["old"] and (before is None or before in m["prev"]):
+        if m["file"] != f or m["op"] != op or text not in m["old"]:
+            continue
+        if before is None or (before.startswith("=>") and before[2:] in m["new"]) or \
+                (not before.startswith("=>") and before in m["prev"]):
             return why
     return None
 

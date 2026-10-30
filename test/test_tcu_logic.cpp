@@ -1676,15 +1676,31 @@ static void test_brake_downshift_needs_real_braking() {
     s.step(1500);
     s.in.tpsPct = 0;
   };
+  // Checked at every step: a downshift and straight back up would hide.
+  auto slowTo53 = [](Sim& s, float mphPerS) {
+    bool stayed = true;
+    while (s.in.speedMph > 53.0f) {
+      s.in.speedMph -= mphPerS / 100.0f;
+      s.step(10);
+      stayed = stayed && s.c.outputs().gear == 4;
+    }
+    return stayed;
+  };
   Sim g;  // gentle braking: 1 mph/s
   at62(g);
   g.in.brake = true;
-  g.rampTo(53, 1.0f);
-  CHECK(g.c.outputs().gear == 4);
+  CHECK(slowTo53(g, 1.0f));
   Sim e;  // slowing hard on a climb, no brake
   at62(e);
-  e.rampTo(53, 6.0f);
-  CHECK(e.c.outputs().gear == 4);
+  CHECK(slowTo53(e, 6.0f));
+  Sim n;  // ECO braking hard: ECO doesn't brake-downshift
+  n.arm();
+  n.in.tpsPct = 20;
+  n.cruise(62.1);
+  n.step(1500);
+  n.in.tpsPct = 0;
+  n.in.brake = true;
+  CHECK(slowTo53(n, 9.3f));
 }
 
 static void test_lift_hold_ends_on_throttle() {
@@ -1822,6 +1838,85 @@ static void test_lockup_back_at_once_after_long_off() {
   CHECK(s.c.outputs().sl);  // the anti-chatter time ran out long ago
 }
 
+
+static void test_floored_upshift_at_map_point() {
+  std::printf("floored from a stop: 1->2 at the map's full-throttle point, not the rev limiter\n");
+  Sim s;
+  s.arm();
+  s.in.tpsPct = 100;
+  float at = 0;
+  while (s.in.speedMph < 45 && !at) {
+    s.in.speedMph += 0.06f;  // 6 mph/s
+    s.step(10);
+    if (s.c.outputs().gear == 2) at = s.in.speedMph;
+  }
+  const float wot = cfg::UPSHIFT_MPH[MODE_ECO][0][cfg::TPS_POINTS - 1];
+  CHECK(at > wot - 0.5f && at < wot + 1.0f);
+  CHECK(at * cfg::RPM_PER_MPH[1] < cfg::REV_LIMIT_UPSHIFT_RPM - 500);
+}
+
+static void test_eco_shift_point_at_steady_throttle() {
+  std::printf("ECO at a steady half throttle: 1->2 where the map says for 50 %%\n");
+  Sim s;
+  s.arm();
+  s.in.tpsPct = 50;
+  s.step(3000);  // the smoothed throttle settles while still stopped
+  float at = 0;
+  while (s.in.speedMph < 30 && !at) {
+    s.in.speedMph += 0.02f;  // 2 mph/s
+    s.step(10);
+    if (s.c.outputs().gear == 2) at = s.in.speedMph;
+  }
+  const float want = cfg::UPSHIFT_MPH[MODE_ECO][0][2];
+  CHECK(at > want - 0.5f && at < want + 0.5f);
+}
+
+static void test_highway_lockup_comes_back_under_load() {
+  std::printf("highway: lockup comes back under heavy throttle after a dab of the brake\n");
+  Sim e;
+  e.arm();
+  e.in.tpsPct = 20;
+  e.cruise(90);
+  e.step(3000);
+  CHECK(e.c.outputs().sl);
+  e.in.brake = true;
+  e.step(100);
+  CHECK(!e.c.outputs().sl);
+  e.in.brake = false;
+  e.in.tpsPct = 80;  // climbing at 90: above the normal lockup limit, under the highway one
+  e.step(cfg::LOCKUP_MIN_OFF_MS + 300);
+  CHECK(e.c.outputs().sl);
+}
+
+static void test_lockup_waits_after_takeover() {
+  std::printf("take-over with the ECU's lockup off: lockup waits the settle time, as after a shift\n");
+  Sim s;
+  enterMoving(s, 4, 55.9f, false);
+  s.in.tpsPct = 15;
+  CHECK(s.c.outputs().control == CTRL_AUTO);
+  s.step(cfg::LOCKUP_SETTLE_AFTER_SHIFT_MS - 300);
+  CHECK(!s.c.outputs().sl);  // no lockup change straight after the handover
+  s.step(600);
+  CHECK(s.c.outputs().sl);
+}
+
+static void test_sport_gentle_braking_still_downshifts() {
+  std::printf("SPORT, braking gently: no brake downshift, but the map's downshifts still come\n");
+  Sim s;
+  s.select(false, true, false);
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(62.1);
+  s.step(1500);
+  s.in.tpsPct = 0;
+  s.in.brake = true;
+  while (s.in.speedMph > 20) {
+    s.in.speedMph -= 0.01f;  // 1 mph/s
+    s.step(10);
+  }
+  CHECK(s.c.outputs().gear <= 2);
+}
+
 int main() {
   test_solenoid_table();
   test_boot_requires_switch_cycle();
@@ -1885,6 +1980,11 @@ int main() {
   test_manual_auto_downshifts_announced();
   test_quick_reentry_shift();
   test_lockup_back_at_once_after_long_off();
+  test_floored_upshift_at_map_point();
+  test_eco_shift_point_at_steady_throttle();
+  test_highway_lockup_comes_back_under_load();
+  test_lockup_waits_after_takeover();
+  test_sport_gentle_braking_still_downshifts();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }
