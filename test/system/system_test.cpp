@@ -185,7 +185,7 @@ void rampTo(float mph, float mphPerS = 8.0f) {
 }
 void press(uint8_t p, uint32_t holdMs) {
   g_pin[p] = LOW;
-  for (uint32_t i = 0; i < holdMs; i++) { g_ms++; loop(); g_pin[p] = LOW; }
+  for (uint32_t i = 0; i < holdMs; i++) { g_ms++; loop(); journal(); g_pin[p] = LOW; }
   g_pin[p] = HIGH;
   run(150);
 }
@@ -618,6 +618,7 @@ void runIbitAnsweringPrompts() {
     if (pr == tcu::PR_UP) g_pin[pin::UP] = LOW;
     if (pr == tcu::PR_DOWN) g_pin[pin::DOWN] = LOW;
     loop();
+    journal();
     g_pin[pin::UP] = g_pin[pin::DOWN] = HIGH;
   }
   car.eco = true;
@@ -905,6 +906,55 @@ void s_saved_table_corrupted() {
   CHECK(selfTest.result(tcu::T_WATCHDOG) != tcu::TR_PASS);
 }
 
+
+// Every page under conditions the other scenarios don't reach: a winter
+// morning below zero, the SENSORS page's values, and a self-test with more
+// failures than fit on the screen. Its screens go into the golden journal.
+void s_screen_tour() {
+  car.atfC = -20;  // -4 F (the PC's analog sender reads it to about a degree)
+  boot();
+  CHECK(screenSays("TRANS -"));
+  car.atfC = -17.8f;  // 0 F
+  run(4000);
+  CHECK(screenSays("TRANS 0F"));
+  startEngine();
+  press(pin::TEST, 200);  // SENSORS
+  car.tps = 37;
+  car.atfC = 120;  // 248 F
+  run(2000);
+  CHECK(screenSays("SENSORS"));
+  CHECK(screenSays("37 %"));
+  CHECK(screenSays("248 F"));
+  CHECK(screenSays("14.2 V"));
+  car.leverInD = true;
+  car.brake = true;
+  run(500);
+  CHECK(screenSays("BRAKE ON"));
+  CHECK(screenSays("LEVER IN D"));
+  car.brake = false;
+  car.leverInD = false;
+  car.tps = 0;
+  car.atfC = 60;
+  press(pin::TEST, 200);  // TEST page
+  run(500);
+  CHECK(screenSays("HOLD TEST 2s: AGAIN"));  // the key-on checks have run
+  press(pin::TEST, 200);  // MAIN again
+  // A self-test where much is wrong, and nobody answers the prompts.
+  car.engineRunning = false;
+  car.battV = 12.4f;
+  run(3000);
+  car.solenoidOpen[0] = car.solenoidOpen[1] = car.solenoidOpen[2] = true;
+  car.switchOn = true;
+  run(300);
+  press(pin::TEST, 2100);
+  for (int i = 0; i < 80000 && selfTest.active(); i++) tick();
+  run(1000);
+  CHECK(screenSays("PROBLEM"));
+  CHECK(screenSays("MORE ON LAPTOP LOG"));
+  press(pin::TEST, 200);  // to MAIN: the self-test result shows there too
+  run(500);
+  CHECK(screenSays("SELF-TEST BAD"));
+}
 struct Scenario {
   const char* name;
   void (*fn)();
@@ -943,6 +993,7 @@ const Scenario kScenarios[] = {
     {"throttle reads right, also with a shifted engine ground", s_throttle_reading},
     {"throttle sensor wire broken: ECU back, PEDAL SENSOR", s_throttle_sensor_wire_broken},
     {"saved self-test table corrupted over the reset: not restored", s_saved_table_corrupted},
+    {"screen tour: below zero, the SENSORS page, a self-test with many failures", s_screen_tour},
 };
 
 // --screens DIR: capture the pictures in docs/oled-screens.png (rendered by
