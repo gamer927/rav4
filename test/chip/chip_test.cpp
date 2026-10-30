@@ -70,7 +70,8 @@ static const float CAR_TACH_PER_REV = 2.0f;        // 4 cylinders: 2 sparks per 
 static const float CAR_RPM_PER_MPH[5] = {0, 151.0f, 83.2f, 53.8f, 39.4f};
 static const float SOLENOID_OHMS = 12.5f;          // 11-15 ohm shift solenoids
 static const float DIVIDER = 10.0f / (47.0f + 10.0f);  // RB1/RB2 and RK1/RK2 on the board
-static const float ACS_V_PER_A = 0.185f, ACS_ZERO_V = 2.5f;
+static const float ACS_V_PER_A = 0.185f;
+static const float ACS_ZERO_V[3] = {2.54f, 2.47f, 2.52f};  // never exactly 2.50 V on a real part
 static const float TPS_CLOSED_V = 0.60f, TPS_WOT_V = 4.00f;
 
 struct Car {
@@ -162,9 +163,9 @@ static void applyCar() {
   adc(PIN_TPS_E2_ADC, 0.0f);
   adc(PIN_VBAT_ADC, car.battV * DIVIDER);
   adc(PIN_COIL_SENSE_ADC, coilPowered() ? car.battV * DIVIDER : 0.0f);
-  adc(PIN_IS_S1_ADC, ACS_ZERO_V + ACS_V_PER_A * solenoidAmps(0));
-  adc(PIN_IS_S2_ADC, ACS_ZERO_V + ACS_V_PER_A * solenoidAmps(1));
-  adc(PIN_IS_SL_ADC, ACS_ZERO_V + ACS_V_PER_A * solenoidAmps(2));
+  adc(PIN_IS_S1_ADC, ACS_ZERO_V[0] + ACS_V_PER_A * solenoidAmps(0));
+  adc(PIN_IS_S2_ADC, ACS_ZERO_V[1] + ACS_V_PER_A * solenoidAmps(1));
+  adc(PIN_IS_SL_ADC, ACS_ZERO_V[2] + ACS_V_PER_A * solenoidAmps(2));
 }
 
 // Speed and tach: square waves on D2 / D3, timed in CPU cycles.

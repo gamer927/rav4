@@ -30,6 +30,7 @@
 uint32_t g_ms = 0;
 int g_pin[100];
 int g_out[100];
+uint8_t g_mode[100];
 uint8_t MCUSR = 0, WDTCSR = 0;
 uint32_t g_wdtLastKick = 0, g_wdtMaxGap = 0;
 bool g_wdtEnabled = false;
@@ -75,6 +76,10 @@ struct Car {
   float vssScale = 1.0f;
   bool odOff = false;
   bool tachLost = false, vssLost = false;
+  // Each ACS712's output at zero amps: never exactly 2.50 V on a real part.
+  // The firmware learns each one while parked; unlearned, 2.54 V would read
+  // as 0.22 A, over the 0.2 A "off" limit.
+  float acsZeroV[3] = {2.54f, 2.47f, 2.52f};
 } car;
 
 bool coilPowered() { return (car.switchOn || car.cutBroken) && !car.coilFuseBlown; }
@@ -115,7 +120,7 @@ int analogImpl(uint8_t p) {
     const int i = p - A4;
     const uint8_t drv[3] = {pin::S1, pin::S2, pin::SL};
     const bool flows = g_out[drv[i]] && relayIn(i) && !car.solenoidOpen[i];
-    return toRaw(cfg::IS_ZERO_V + (flows ? 0.95f : 0.0f) / cfg::IS_AMPS_PER_VOLT);
+    return toRaw(car.acsZeroV[i] + (flows ? 0.95f : 0.0f) / cfg::IS_AMPS_PER_VOLT);
   }
   return 0;
 }
@@ -220,7 +225,7 @@ void armAndDrive() {
 // The chip resets: every pin an input again. The Mega's bootloader
 // (stk500v2) then clears MCUSR before the sketch runs, whatever the cause.
 void reboot() {
-  for (int i = 0; i < 100; i++) g_out[i] = 0;
+  for (int i = 0; i < 100; i++) g_out[i] = g_mode[i] = 0;
   MCUSR = 0;
   captureResetFlags();  // what the chip runs before main()
   setup();
@@ -236,12 +241,12 @@ void watchdogFires() {
     reset = true;
   }
   CHECK(reset);
-  for (int i = 0; i < 100; i++) g_out[i] = 0;
+  for (int i = 0; i < 100; i++) g_out[i] = g_mode[i] = 0;
 }
 bool tcuInControl() { return g_out[pin::RELAY] && coilPowered(); }
 float tcuDriverAmps() {
   float a = 0;
-  for (int i = 0; i < 3; i++) a += (analogImpl(A4 + i) - toRaw(cfg::IS_ZERO_V)) * 5.0f / 1023.0f * cfg::IS_AMPS_PER_VOLT;
+  for (int i = 0; i < 3; i++) a += (analogImpl(A4 + i) - toRaw(car.acsZeroV[i])) * 5.0f / 1023.0f * cfg::IS_AMPS_PER_VOLT;
   return a;
 }
 // Safe state: the ECU drives every solenoid (no relay in), no current
@@ -284,12 +289,23 @@ void s_switch_on_at_key_on_does_not_arm() {
   CHECK(screenSays("WAITING"));
 }
 
+// The firmware's solenoid currents, against what really flows.
+void checkCurrentsReadRight() {
+  for (int i = 0; i < 3; i++) {
+    const uint8_t drv[3] = {pin::S1, pin::S2, pin::SL};
+    const bool flows = g_out[drv[i]] && relayIn(i) && !car.solenoidOpen[i];
+    CHECK(fabsf(lastIn.solAmps[i] - (flows ? 0.95f : 0.0f)) < 0.08f);
+  }
+}
+
 void s_normal_drive() {
   boot();
   startEngine();
   armAndDrive();
   CHECK(tcuInControl());
   CHECK(controller.outputs().gear == 1);
+  run(500);
+  checkCurrentsReadRight();  // S1 on: 0.95 A, the others 0, each sensor's own zero learned
   car.tps = 25;
   rampTo(60, 6);
   run(3000);
@@ -297,6 +313,7 @@ void s_normal_drive() {
   CHECK(controller.outputs().gear == 4);
   CHECK(engagedGear() == 4);
   CHECK(!controller.outputs().faults);
+  checkCurrentsReadRight();
   CHECK(g_wdtMaxGap <= 20);  // the loop kicks the watchdog every few ms
   CHECK(screenSays("ECO"));
 }
@@ -736,7 +753,7 @@ void s_solenoid_wire_shorted() {
   CHECK(tcuInControl());
   // Model a short as far more current than a solenoid draws.
   CHECK(g_out[pin::S2]);  // S2 is on in both 2nd and 3rd
-  struct Short { static int analog(uint8_t p) { return p == A5 && g_out[pin::S2] ? toRaw(cfg::IS_ZERO_V + 4.0f / cfg::IS_AMPS_PER_VOLT) : analogImpl(p); } };
+  struct Short { static int analog(uint8_t p) { return p == A5 && g_out[pin::S2] ? toRaw(car.acsZeroV[1] + 4.0f / cfg::IS_AMPS_PER_VOLT) : analogImpl(p); } };
   g_analog = Short::analog;
   run(500);
   g_analog = analogImpl;
@@ -793,6 +810,14 @@ void s_corner_hold_from_gyro() {
   const int g = engagedGear();
   CHECK(g <= 2);
   CHECK(!controller.outputs().cornerHold);
+  // Half a minute round a long, gentle bend (0.15 g, no hold): the gyro's zero
+  // must only be learned when stopped, or this bend becomes its new "zero".
+  for (int i = 0; i < 30000; i++) {
+    Wire.yawRaw = yawRawFor(0.15f, drift);
+    tick();
+  }
+  CHECK(!controller.outputs().cornerHold);
+  CHECK(engagedGear() == g);
   // A real corner: 0.35 g, speeding up well past the next upshift: the gear holds.
   for (int i = 0; i < 2000; i++) {
     car.mph = fminf(37.0f, car.mph + 0.01f);

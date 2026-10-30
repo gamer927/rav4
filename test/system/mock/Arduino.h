@@ -36,9 +36,12 @@ static uint8_t g_port = 0xFF;
 #define portInputRegister(p) (&g_port)
 #define portModeRegister(p) (&g_port)
 #define portOutputRegister(p) (&g_port)
+// As on the chip: reading a pin set as an output gives back the level the
+// sketch wrote (the PIN register follows PORT), an input reads the wire.
+extern uint8_t g_mode[100];
 inline void digitalWrite(uint8_t p, uint8_t v) { g_out[p] = v; }
-inline int digitalRead(uint8_t p) { return g_pin[p]; }
-inline void pinMode(uint8_t, uint8_t) {}
+inline int digitalRead(uint8_t p) { return g_mode[p] == OUTPUT ? g_out[p] : g_pin[p]; }
+inline void pinMode(uint8_t p, uint8_t m) { g_mode[p] = m; }
 inline int analogRead(uint8_t p) { return g_analog(p); }
 inline void noInterrupts() {}
 inline void interrupts() {}
