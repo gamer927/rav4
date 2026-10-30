@@ -197,15 +197,89 @@ All three pass.
 
 | Suite | What | Result |
 |---|---|---|
-| `make test` | Unit tests: every control rule, fault, interlock and self-test step (`test/test_tcu_logic.cpp`, `test/test_self_test.cpp`) | **1,144 + 122 checks, 0 failures** |
-| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that follow coil power, welded contacts, broken wires), one failure per scenario | **28 scenarios, 0 failures** |
+| `make test` | Unit tests: every control rule, fault, interlock and self-test step, every limit exactly at its value (`test/test_tcu_logic.cpp`, `test/test_self_test.cpp`). Built with AddressSanitizer and UBSan: a read past an array fails | **1,821 + 274 checks, 0 failures** |
+| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that pull in 15 ms after their coil is powered, current sensors with their own zero offsets, a gyro that drifts, welded contacts, broken wires), one failure per scenario. The screen is read back from the pixels sent over I2C | **34 scenarios, 0 failures** |
+| `make golden` | Every system scenario's screen changes and USB event lines, and the calibration session's whole log, against reference copies (`test/system/golden/`) | **identical** |
+| `make chip` | The `.hex` exactly as flashed, started by the Mega's real bootloader, on a simulated ATmega2560 (simavr): see §6.1 | **18 scenarios, 0 failures** |
 | `make calibrate-test` | The calibration helper on a simulated parked session and drive, with a speed sensor 6 % off and an engine 5 % off: it must find both, write a `config.h` that compiles, and refuse bad recordings | **32 checks, 0 failures** |
-| `python3 tools/system_check.py` | Cross-checks (§5) | **all pass, 0 problems** |
+| `python3 tools/system_check.py` | Cross-checks (§5) | **864 pass, 0 problems** |
 | `tools/build_stl.sh` | Fit checks (§5), STLs, renders | **all pass** |
 | `make avr` | Compile for the Mega 2560, warnings as errors | **OK**: 15 % flash, 47 % RAM (the core linked as the Arduino IDE does it); the self-test's saved results are clear of the bootloader's stack |
+| `make mutate` | How good the tests are: §6.2 | see §6.2 |
 
-`make check` runs the unit tests, system test, calibration test and cross-checks together. Run it
-after any change.
+`make check` runs all of these but the fit checks and `make mutate`. Run it after any change.
+
+### 6.1 The chip test: the firmware as flashed
+
+The PC tests replace the Arduino core, the chip and its bootloader with stand-ins written for the
+tests. A wrong assumption about the hardware then sits in the stand-in too, and the test passes:
+the bootloader clearing the reset-cause register (§6.4) was found only once the real bootloader
+ran. `make chip` (`test/chip/chip_test.cpp`) removes that layer: the `.hex` the Arduino build
+makes, the real stk500v2 bootloader at its real address, every instruction, timer, interrupt, the
+watchdog, the ADC, the UART and the I2C hardware simulated by simavr. Around the chip, the board
+and the car come from the circuit, not from `config.h`: the pins are read from the Arduino core's
+own Mega pin table; the screen is an SSD1309 whose pixels are read back as text; the temperature
+probe is a DS18B20 answering bit by bit on the 1-Wire line, with its checksum written from the
+datasheet; the gyro is an MPU-6050. The firmware is judged only by its pins, its USB log and its
+screen.
+
+It covers, on the shipped build: the boot through the bootloader; never taking over before
+calibration; the probe (read once a second, bad readings and its power-on value handled, nothing
+made up before the first reading); the screen cable cut and back; the **full self-test answered
+from the screen, ending in the deliberate watchdog reset through the real bootloader**. And on the
+calibrated build: taking over and shifting 1-4, MANUAL shifting with the lever, corner hold from
+the gyro over I2C, ON/OFF, a broken solenoid wire, a lost speed signal, a battery collapse, the
+reset button mid-drive, a welded relay at key-on, a lost tach.
+
+Measured on the chip: the slowest loop while driving is **7.6 ms** (the control period is 10 ms;
+the watchdog allows 250 ms); 46 ms once at power-up, parked, while it prints the self-test table;
+**3,740 bytes** of stack never touched.
+
+### 6.2 Do the tests catch bugs? Mutation testing
+
+A test suite that passes says nothing until you know it would fail on a bug. `tools/mutate.py`
+plants one small bug at a time in the firmware (a `<` becomes `<=`, `&&` becomes `||`, `true`
+becomes `false`, a statement disappears; 1,397 in all), rebuilds, and runs the unit tests, the
+system test, the calibration helper and the golden comparison against it; for the hardware-side
+code, also the chip test. A planted bug the tests catch is *caught*. One they don't is either a
+gap, or a change that makes no difference anywhere (listed in `mutate.py` with the reason, e.g.
+"the Mega's bootloader already disables the watchdog"), or one that only matters when a reading
+lands exactly on a limit (`<` vs `<=` on a voltage or a time).
+
+| Code | When this started | Now | Without the exactly-at-a-limit cases |
+|---|---|---|---|
+| `self_test.cpp` (the self-test's verdicts) | 60 % | **100 %** | 100 % |
+| `tcu_logic.cpp` (every driving and safety decision) | 68 % | **86 %** | **98 %** |
+| `tcu.ino` (pins, sensors, screen, log) | 29 % | **73 %** | **79 %** |
+
+What's left, honestly:
+- `tcu_logic.cpp`: a few SPORT brake-downshift edge cases (in 2nd at 50 mph with the brake on,
+  for example) and when a NO SHIFT message shows; and 62 exactly-at-a-limit cases.
+- `tcu.ino`: mostly how the screen's pages and the log are formatted in cases no scenario reaches,
+  the health line's own arithmetic, and a few that no simulation can show: the interrupt guard
+  around the speed reading (a race an interrupt wins about once in a million reads). The chip
+  pass covered 65 of the 114 hardware-side survivors so far: it caught 45.
+- The full list is in `build/mutants/report.md` after `make mutate` (`python3 tools/mutate.py
+  --report` rewrites it from the saved results).
+
+### 6.3 What only the real car can prove
+
+Everything above is simulation. These can't be simulated with any confidence and are checked by
+the build book's meter checks, the bench test and the staged car test (spec §9): the solenoids'
+real resistance and the hydraulics' response time; the real gear ratios, speed-sensor pulses and
+throttle voltages (calibration, spec §8); electrical noise in the car; the relays' and MOSFETs'
+real switching; the screen's I2C over the real 2.5 m cable; heat.
+
+### 6.4 Found by the deeper testing
+
+| Found | Fix |
+|---|---|
+| **Bug (real hardware only):** the Mega's bootloader clears the reset-cause register, so SAFETY RESET would always fail and a hang never showed TCU RESTARTED | A mark left by the watchdog's interrupt; the PC simulator now models the bootloader too, and the chip test runs the real one |
+| The PC tests read the screen from the firmware's own text buffer: deleting the call that draws the screen passed | The screen is read from the pixels sent over I2C |
+| The PC stand-in returned the wire's level when the firmware read back one of its own outputs; the chip returns the level written. So on the PC the current sensors' zeros were never learned, hidden by a perfect 2.50 V zero | Fixed, and every sensor now has a real-world zero offset (2.47-2.54 V) |
+| Relays and solenoids reacted instantly in the tests, so a self-test step that measured too early still passed | A relay takes 15 ms to close, a solenoid's current 20 ms to come up |
+| A broken ON/OFF hardware cut, a welded relay during the cut, or the cut with no current sensors could all have shown OK in the self-test without a test noticing | Each has its own test now |
+| No test ran the gyro from end to end; a stuck lever-D, the throttle sensor's open wire, a corrupted saved self-test table, the probe's bad readings | Scenarios for each, on the PC and on the chip |
 
 **System scenarios** (each in its own process, from a cold boot):
 
@@ -239,6 +313,12 @@ after any change.
 | self-test (IBIT) | every check passes, including the hardware cut |
 | self-test refused with the engine running | refused |
 | build book 13.4 (jack stands), step by step | the screen says what the book says at each step |
+| corner hold from the gyro | an 8 deg/s zero drift learned at a stop and re-learned as it warms up; a long gentle bend doesn't spoil it; a real corner holds the gear |
+| gyro glitches, then dies mid-corner | the hold ends, still in control |
+| throttle reading | 0/50/100 % right, also with a shifted engine ground |
+| throttle sensor wire broken | ECU back, PEDAL SENSOR |
+| saved self-test table corrupted over the reset | not restored |
+| screen tour | below zero, the SENSORS page's values, a self-test with more failures than fit on the screen |
 
 ### What this review found and fixed
 

@@ -212,12 +212,18 @@ outside on a finned heatsink. Print settings, hardware and assembly:
 ## Status
 
 - **Done:** full design, firmware and documentation.
-  - `make check` runs it all: 1,266 unit-test checks, 26 whole-system scenarios (the real
-    firmware in a simulated car, with faults injected, plus the build book's jack-stand test step
-    by step), the calibration helper on a simulated drive, and about 800 cross-checks that the
-    circuit, the circuit board (pad by pad), pin map, firmware, screen text and 3D models agree. All pass
-    ([system review](docs/06-system-review.md)).
-  - The firmware compiles for the Arduino Mega 2560 without warnings (15 % flash, 51 % RAM).
+  - `make check` runs it all: 2,095 unit-test checks (with memory checkers on), 34 whole-system
+    scenarios (the real firmware in a simulated car, with faults injected), a comparison of every
+    screen and log line against recorded copies, 18 scenarios of the **exact .hex you flash,
+    started by the Mega's real bootloader, on a simulated ATmega2560**, the calibration helper on
+    a simulated drive, and 864 cross-checks that the circuit, the board (pad by pad), pin map,
+    firmware, screen text and 3D models agree. All pass.
+  - The tests are themselves tested: bugs planted one at a time in the firmware are caught 100 %
+    of the time in the self-test, 98 % in the driving logic and 79 % in the hardware layer
+    (leaving out ones that only matter exactly at a limit). See the
+    [system review §6](docs/06-system-review.md#6-test-results), including what only the real
+    car can prove.
+  - The firmware compiles for the Arduino Mega 2560 without warnings (15 % flash, 47 % RAM).
   - The screens above come from the real firmware running in a simulator.
 - **Not done yet:** nothing has been built or run on real hardware or in the car. The gear
   ratios, speed-sensor scaling and throttle-sensor voltages are best estimates until you
@@ -346,7 +352,9 @@ LICENSE                     CC BY-NC-SA 4.0: free to build, not to sell (see the
 ## Build and flash
 
 ```sh
-make check  # everything: unit tests, system simulation, cross-checks
+make check  # everything: unit tests, system simulation, golden screens, chip test, cross-checks
+            # (the chip test needs: apt install simavr libsimavr-dev)
+make mutate # how good the tests are: plants bugs one at a time (a few hours)
 make test   # just the unit tests on a PC (g++)
 make avr    # compile for the Mega 2560 (needs: apt install gcc-avr avr-libc arduino-core-avr)
 ```
