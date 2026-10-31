@@ -188,7 +188,7 @@ EQUIVALENT += [
     (INO, "delete statement", "pinMode(pin::STATUS_LED, OUTPUT);", None, LED),
     (INO, "delete statement", "if (!cfg::OLED_INSTALLED) return;", None, "OLED_INSTALLED is true in this build"),
     (INO, "delete statement", "if (!USB_LOG_ENABLED) return;", None, "USB_LOG_ENABLED is true in this build"),
-    (INO, "delete statement", "digitalWrite(pin::RELAY, LOW);", "void setup() {",
+    (INO, "delete statement", "digitalWrite(pin::RELAY, LOW);", "pull-downs hold them off until this point",
      "every PORT register is 0 after a reset: the pin is already low"),
     (INO, "delete statement", "digitalWrite(pin::S1, LOW);", "digitalWrite(pin::RELAY, LOW);",
      "every PORT register is 0 after a reset: the pin is already low"),
@@ -231,10 +231,19 @@ EQUIVALENT += [
      "this fault has its own message, shown before the generic one (alertMessage)"),
     (INO, "delete statement", "applyTestOutputs(tcu::TestOutputs());", "void runWatchdogTest() {",
      "the self-test has switched everything off before its last step"),
-    (INO, "delete statement", "watchdogOn();", "for (uint8_t i = 0; i < 40 && oled.present(); i++)",
+    (INO, "delete statement", "watchdogOn();", "}",
      "the watchdog is already running, in interrupt-then-reset mode, since setup()"),
     (INO, "delete statement", "wdt_reset();", "for (uint8_t i = 0; i < 40 && oled.present(); i++) {",
      "the 40 screen writes take well under 250 ms"),
+    (INO, "delete statement", "Serial.flush();", "expecting a reset",
+     "the 250 ms before the reset are plenty for the UART to send the line (64 bytes take 6 ms)"),
+    (INO, "delete statement", "oled.setHero('\\0');", "if (cfg::OLED_INSTALLED) {",
+     "the self-test page, showing at that moment, has no gear digit already"),
+    (INO, "delete statement", "for (uint8_t i = 0; i < sizeof(dbPins); i++) *dbs[i] = tcu::Debouncer(", None,
+     "starting the switch filters at OFF makes them 25 ms late, and the controller needs 100 ms of "
+     "OFF before an ON arms it; at power-up the bootloader's wait has settled them first"),
+    (INO, "- to +", "atfProbe.startMs = millis() - cfg::DS18B20_PERIOD_MS;", None,
+     "in unsigned arithmetic the first reading still starts at once (now - start wraps past the period)"),
 ]
 # Mutants no simulation can show either way (a race with an interrupt, a
 # floating pin): real protections, reported apart, never counted as caught.

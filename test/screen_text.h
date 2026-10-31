@@ -117,7 +117,8 @@ std::string tidy(Px px) {
     } else {
       row = best({small(px, p, 0, 21), small(px, p, 40, 14)});
     }
-    if (!row.empty()) out += (out.empty() ? "" : " | ") + row;
+    // The row number keeps the layout: a line moved up or down a row shows.
+    if (!row.empty()) out += (out.empty() ? "" : " | ") + std::to_string(p - (row[0] == '*' ? 1 : 0)) + ":" + row;
   }
   return out;
 }

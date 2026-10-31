@@ -212,15 +212,15 @@ outside on a finned heatsink. Print settings, hardware and assembly:
 ## Status
 
 - **Done:** full design, firmware and documentation.
-  - `make check` runs it all: 2,095 unit-test checks (with memory checkers on), 34 whole-system
+  - `make check` runs it all: 2,495 unit-test checks (with memory checkers on), 38 whole-system
     scenarios (the real firmware in a simulated car, with faults injected), a comparison of every
     screen and log line against recorded copies, 18 scenarios of the **exact .hex you flash,
     started by the Mega's real bootloader, on a simulated ATmega2560**, the calibration helper on
     a simulated drive, and 864 cross-checks that the circuit, the board (pad by pad), pin map,
     firmware, screen text and 3D models agree. All pass.
-  - The tests are themselves tested: bugs planted one at a time in the firmware are caught 100 %
-    of the time in the self-test, 98 % in the driving logic and 79 % in the hardware layer
-    (leaving out ones that only matter exactly at a limit). See the
+  - The tests are themselves tested: of 1,397 bugs planted one at a time in the firmware, they
+    catch 100 % in the self-test, 100 % in the driving logic and 98 % in the hardware layer
+    (leaving out ones that only matter exactly at a limit, and ones proven to change nothing). See the
     [system review §6](docs/06-system-review.md#6-test-results), including what only the real
     car can prove.
   - The firmware compiles for the Arduino Mega 2560 without warnings (15 % flash, 47 % RAM).

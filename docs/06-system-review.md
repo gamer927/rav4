@@ -197,9 +197,9 @@ All three pass.
 
 | Suite | What | Result |
 |---|---|---|
-| `make test` | Unit tests: every control rule, fault, interlock and self-test step, every limit exactly at its value (`test/test_tcu_logic.cpp`, `test/test_self_test.cpp`). Built with AddressSanitizer and UBSan: a read past an array fails | **1,821 + 274 checks, 0 failures** |
-| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that pull in 15 ms after their coil is powered, current sensors with their own zero offsets, a gyro that drifts, welded contacts, broken wires), one failure per scenario. The screen is read back from the pixels sent over I2C | **34 scenarios, 0 failures** |
-| `make golden` | Every system scenario's screen changes and USB event lines, and the calibration session's whole log, against reference copies (`test/system/golden/`) | **identical** |
+| `make test` | Unit tests: every control rule, fault, interlock and self-test step, every limit exactly at its value (`test/test_tcu_logic.cpp`, `test/test_self_test.cpp`). Built with AddressSanitizer and UBSan: a read past an array fails | **2,221 + 274 checks, 0 failures** |
+| `make system` | The real `tcu.ino`, compiled for a PC, wired to a simulated car (engine, gears that follow the solenoids, relays that pull in 15 ms after their coil is powered, current sensors with their own zero offsets, a gyro that drifts, welded contacts, broken wires), one failure per scenario. The screen is read back from the pixels sent over I2C; 250 ms without a watchdog kick fails | **38 scenarios, 0 failures** |
+| `make golden` | Every system scenario's screen changes (row by row, flashes included) and USB event lines, and the calibration session's whole log, against reference copies (`test/system/golden/`) | **identical** |
 | `make chip` | The `.hex` exactly as flashed, started by the Mega's real bootloader, on a simulated ATmega2560 (simavr): see §6.1 | **18 scenarios, 0 failures** |
 | `make calibrate-test` | The calibration helper on a simulated parked session and drive, with a speed sensor 6 % off and an engine 5 % off: it must find both, write a `config.h` that compiles, and refuse bad recordings | **32 checks, 0 failures** |
 | `python3 tools/system_check.py` | Cross-checks (§5) | **864 pass, 0 problems** |
@@ -240,27 +240,34 @@ the watchdog allows 250 ms); 46 ms once at power-up, parked, while it prints the
 A test suite that passes says nothing until you know it would fail on a bug. `tools/mutate.py`
 plants one small bug at a time in the firmware (a `<` becomes `<=`, `&&` becomes `||`, `true`
 becomes `false`, a statement disappears; 1,397 in all), rebuilds, and runs the unit tests, the
-system test, the calibration helper and the golden comparison against it; for the hardware-side
-code, also the chip test. A planted bug the tests catch is *caught*. One they don't is either a
-gap, or a change that makes no difference anywhere (listed in `mutate.py` with the reason, e.g.
-"the Mega's bootloader already disables the watchdog"), or one that only matters when a reading
-lands exactly on a limit (`<` vs `<=` on a voltage or a time).
+system test, the calibration helper and the golden comparison against it; the hardware-side ones
+that get past those also face the chip test. Each planted bug ends up in one of these:
 
-| Code | When this started | Now | Without the exactly-at-a-limit cases |
-|---|---|---|---|
-| `self_test.cpp` (the self-test's verdicts) | 60 % | **100 %** | 100 % |
-| `tcu_logic.cpp` (every driving and safety decision) | 68 % | **86 %** | **98 %** |
-| `tcu.ino` (pins, sensors, screen, log) | 29 % | **73 %** | **79 %** |
+- **caught**: some test fails;
+- **missed**: a gap;
+- **at a limit only**: it only matters when a reading lands exactly on a limit (`<` vs `<=` on a
+  voltage, a speed or a time). The safety limits have their own exactly-at-the-limit tests;
+- **can't simulate**: real, but no simulation can show it (an interrupt landing between two
+  reads, a floating pin). Counted against the score, never as caught;
+- **equivalent**: provably changes nothing, each listed in `mutate.py` with the reason (e.g.
+  "the Mega's bootloader already disables the watchdog", "the Mega's own LED is under the board").
 
-What's left, honestly:
-- `tcu_logic.cpp`: a few SPORT brake-downshift edge cases (in 2nd at 50 mph with the brake on,
-  for example) and when a NO SHIFT message shows; and 62 exactly-at-a-limit cases.
-- `tcu.ino`: mostly how the screen's pages and the log are formatted in cases no scenario reaches,
-  the health line's own arithmetic, and a few that no simulation can show: the interrupt guard
-  around the speed reading (a race an interrupt wins about once in a million reads). The chip
-  pass covered 65 of the 114 hardware-side survivors so far: it caught 45.
-- The full list is in `build/mutants/report.md` after `make mutate` (`python3 tools/mutate.py
-  --report` rewrites it from the saved results).
+| Code | Caught | Missed | At a limit only | Can't simulate | Equivalent | Score (all) | Score without the at-a-limit ones |
+|---|---|---|---|---|---|---|---|
+| `self_test.cpp` (the self-test's verdicts) | 208 | 0 | 0 | 0 | 15 | **100 %** | **100 %** |
+| `tcu_logic.cpp` (every driving and safety decision) | 443 | 0 | 62 | 0 | 44 | 88 % | **100 %** |
+| `tcu.ino` (pins, sensors, screen, log, the watchdog step) | 522 | 5 | 37 | 6 | 44 | 92 % | **98 %** |
+
+When this started the scores were 60 %, 68 % and 29 %: passing tests were far weaker than they
+looked. The five still missed, all minor:
+
+- the temperature reading could come one second later than it does;
+- two in the health line's stack-margin arithmetic (a diagnostic);
+- "LEVER NOT IN D" could also show in one rare STOCK state;
+- a refused self-test's CAN'T TEST could linger for a second into a new one.
+
+The full list, with every equivalent's reason, is in `build/mutants/report.md` after
+`make mutate` (`python3 tools/mutate.py --report` rewrites it from the saved results).
 
 ### 6.3 What only the real car can prove
 
@@ -318,7 +325,11 @@ real switching; the screen's I2C over the real 2.5 m cable; heat.
 | throttle reading | 0/50/100 % right, also with a shifted engine ground |
 | throttle sensor wire broken | ECU back, PEDAL SENSOR |
 | saved self-test table corrupted over the reset | not restored |
-| screen tour | below zero, the SENSORS page's values, a self-test with more failures than fit on the screen |
+| screen tour | below zero, the SENSORS page's values, the TEST page before the key-on checks, a self-test stopped by the engine starting, one TEST press skipping one prompt, a self-test with more failures than fit on the screen |
+| wrong gear engaged (S1/S2 swapped) | ECU back, WRONG GEAR |
+| shifter switch stuck closed | one shift, SHIFTER? |
+| SPORT brake hold | HOLDING GEAR on the screen |
+| 40 mph round a long gentle bend | not learned as the gyro's zero |
 
 ### What this review found and fixed
 

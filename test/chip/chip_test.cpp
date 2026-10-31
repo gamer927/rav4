@@ -635,7 +635,8 @@ static void s_full_self_test_with_safety_reset() {
   bool sawRestartScreen = false;
   for (int t = 0; t < 120000 && g_log.find("# TCU boot", ibitAt) == std::string::npos; t += 50) {
     // Between "expecting a reset" and the reset: the screen says what's happening.
-    if (g_log.find("expecting a reset", ibitAt) != std::string::npos && screenSays("RESTART NOW")) {
+    if (g_log.find("expecting a reset", ibitAt) != std::string::npos && screenSays("RESTART NOW") &&
+        screenSays("SAFETY RESET TEST:") && screenSays("THE TCU SHOULD") && screenSays("RESTART   |")) {
       sawRestartScreen = true;
     }
     car.up = screenSays("UPSHIFT THE LEVER");

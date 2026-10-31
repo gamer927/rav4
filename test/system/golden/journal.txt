@@ -3,8 +3,8 @@
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -52,8 +52,8 @@
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON.
-    200 scr  [-] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
+    150 scr  [-] | 0:**STOCK** | 2:ON/OFF WAS ON | 3:AT KEY-ON. | 4:FLIP IT OFF, | 5:THEN ON.
+    200 scr  [-] | 0:**STOCK** | 2:ON/OFF WAS ON | 3:AT KEY-ON. | 4:FLIP IT OFF, | 5:THEN ON. | 6:**WAITING**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -96,14 +96,14 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3750 scr  [1] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
+   3750 scr  [1] | 0:**STOCK** | 2:ON/OFF WAS ON | 3:AT KEY-ON. | 4:FLIP IT OFF, | 5:THEN ON. | 6:**WAITING**
 
 ## normal drive: takes over in D, shifts 1-4, watchdog kicked
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -146,25 +146,25 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6800 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6850 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [2] | **ECO** | **TRANS 158F**
-   8500 scr  **ECO** | **TRANS 158F**
-   8550 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6800 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6850 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
+   8500 scr  0:**ECO** | 6:**TRANS 158F**
+   8550 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10600 scr  **ECO** | **TRANS 158F**
-  10650 scr  [4] | **ECO** | **TRANS 158F**
+  10600 scr  0:**ECO** | 6:**TRANS 158F**
+  10650 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
 
 ## ON/OFF turned OFF while driving: ECU back within 60 ms
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -207,25 +207,25 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8000 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8050 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10100 scr  **ECO** | **TRANS 158F**
-  10150 scr  [4] | **ECO** | **TRANS 158F**
+  10100 scr  0:**ECO** | 6:**TRANS 158F**
+  10150 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
 
 ## firmware hung with relays on: ON/OFF still cuts them in hardware
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -268,25 +268,25 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8000 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8050 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10100 scr  **ECO** | **TRANS 158F**
-  10150 scr  [4] | **ECO** | **TRANS 158F**
+  10100 scr  0:**ECO** | 6:**TRANS 158F**
+  10150 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
 
 ## ON/OFF read wire shorted: power pole cuts, mismatch reported
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -329,26 +329,26 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
-   9650 scr  [3] | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
-   9700 scr  [3] | **STOCK** | SOLENOID WIRE | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
-   9750 scr  [3] | **STOCK** | ON/OFF SWITCH: | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6200 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6250 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7500 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7550 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
+   9650 scr  [3] | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
+   9700 scr  [3] | 0:**STOCK** | 2:SOLENOID WIRE | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
+   9750 scr  [3] | 0:**STOCK** | 2:ON/OFF SWITCH: | 3:ITS 2 HALVES | 4:DISAGREE. | 5:CHECK WIRING. | 6:**PROBLEM**
 
 ## ON/OFF power pole shorted: found at key-on and reported
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
-    450 scr  [-] | **STOCK** | ON/OFF SWITCH: | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
+    450 scr  [-] | 0:**STOCK** | 2:ON/OFF SWITCH: | 3:ITS 2 HALVES | 4:DISAGREE. | 5:CHECK WIRING. | 6:**PROBLEM**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -391,18 +391,18 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT BAD  0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | SELF-TEST BAD: | TAP TEST: INFO | **TRANS 158F**
-   4150 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING.
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   4950 scr  [1] | **STOCK** | STOCK | SHIFTING. | **TCU OFF**
-   5250 scr  [1] | **STOCK** | ON/OFF SWITCH: | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 4:SELF-TEST BAD: | 5:TAP TEST: INFO | 6:**TRANS 158F**
+   4150 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING.
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   4950 scr  [1] | 0:**STOCK** | 2:STOCK | 3:SHIFTING. | 6:**TCU OFF**
+   5250 scr  [1] | 0:**STOCK** | 2:ON/OFF SWITCH: | 3:ITS 2 HALVES | 4:DISAGREE. | 5:CHECK WIRING. | 6:**PROBLEM**
 
 ## relay coil fuse blown: no take-over, reported
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -445,19 +445,19 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   4250 scr  [1] | TCU IS DOING | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
-   4300 scr  [1] | **STOCK** | ON/OFF SWITCH: | ITS 2 HALVES | DISAGREE. | CHECK WIRING. | **PROBLEM**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   4250 scr  [1] | 2:TCU IS DOING | 3:ITS 2 HALVES | 4:DISAGREE. | 5:CHECK WIRING. | 6:**PROBLEM**
+   4300 scr  [1] | 0:**STOCK** | 2:ON/OFF SWITCH: | 3:ITS 2 HALVES | 4:DISAGREE. | 5:CHECK WIRING. | 6:**PROBLEM**
 
 ## relay welded: found at key-on, no take-over
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -500,17 +500,17 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   1950 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | SELF-TEST BAD: | TAP TEST: INFO | **TRANS 158F**
-   2000 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | SELF-TEST BAD: | TAP TEST: INFO
-   2050 scr  [-] | **STOCK** | RELAY STUCK | STOCK SHIFTS. | HOLD TEST TO | RE-CHECK. | **PROBLEM**
-   4150 scr  [1] | **STOCK** | RELAY STUCK | STOCK SHIFTS. | HOLD TEST TO | RE-CHECK. | **PROBLEM**
+   1950 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 4:SELF-TEST BAD: | 5:TAP TEST: INFO | 6:**TRANS 158F**
+   2000 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 4:SELF-TEST BAD: | 5:TAP TEST: INFO
+   2050 scr  [-] | 0:**STOCK** | 2:RELAY STUCK | 3:STOCK SHIFTS. | 4:HOLD TEST TO | 5:RE-CHECK. | 6:**PROBLEM**
+   4150 scr  [1] | 0:**STOCK** | 2:RELAY STUCK | 3:STOCK SHIFTS. | 4:HOLD TEST TO | 5:RE-CHECK. | 6:**PROBLEM**
 
 ## solenoid wire breaks while driving: ECU back, reported
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -553,21 +553,21 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8050 scr  [2] | TCU IS DOING | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
-   8100 scr  [2] | **STOCK** | SOLENOID WIRE | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8050 scr  [2] | 2:TCU IS DOING | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
+   8100 scr  [2] | 0:**STOCK** | 2:SOLENOID WIRE | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
 
 ## two mode switches on: ECU after 1 s, back when fixed
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -610,27 +610,27 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6200 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6250 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7500 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7550 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10450 scr  [3] | TURN ON ONLY | ECO, SPORT OR | MANUAL. | **MODE ERROR**
-  10500 scr  [3] | **STOCK** | TWO MODES ON. | TURN ON ONLY | ECO, SPORT OR | MANUAL. | **MODE ERROR**
-  10750 scr  [3] | TWO MODES ON. | THE SHIFTING. | **TCU ON**
-  10800 scr  [3] | **SPORT** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  10450 scr  [3] | 3:TURN ON ONLY | 4:ECO, SPORT OR | 5:MANUAL. | 6:**MODE ERROR**
+  10500 scr  [3] | 0:**STOCK** | 2:TWO MODES ON. | 3:TURN ON ONLY | 4:ECO, SPORT OR | 5:MANUAL. | 6:**MODE ERROR**
+  10750 scr  [3] | 2:TWO MODES ON. | 3:THE SHIFTING. | 6:**TCU ON**
+  10800 scr  [3] | 0:**SPORT** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
 
 ## lever out of D: ECU back
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -673,17 +673,17 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
 
 ## MANUAL at the redline: no automatic upshift, SHIFT UP on the screen
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -726,23 +726,23 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **MANUAL** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [1] | **MANUAL** | **TRANS 158F**
-   9150 scr  [1] | **MANUAL** | ENGINE AT | THE REDLINE. | PULL THE | LEVER. | **SHIFT UP!**
-   9950 scr  [1] | **MANUAL** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**MANUAL** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [1] | 0:**MANUAL** | 6:**TRANS 158F**
+   9150 scr  [1] | 0:**MANUAL** | 2:ENGINE AT | 3:THE REDLINE. | 4:PULL THE | 5:LEVER. | 6:**SHIFT UP!**
+   9950 scr  [1] | 0:**MANUAL** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10000 scr  **MANUAL** | **TRANS 158F**
-  10050 scr  [2] | **MANUAL** | **TRANS 158F**
+  10000 scr  0:**MANUAL** | 6:**TRANS 158F**
+  10050 scr  [2] | 0:**MANUAL** | 6:**TRANS 158F**
 
 ## lever-D input stuck on: found at engine start, no take-over
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [1] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [1] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [1] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [1] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -764,17 +764,17 @@
    1500 log  #   BRAKE           --
    1500 log  #   ON/OFF CUT OK   0.00A
    1500 log  #   SAFETY RESET    --
-   3250 scr  [1] | **STOCK** | LEVER SENSOR | STUCK ON D. | STOCK SHIFTS. | CHECK D WIRE. | **PROBLEM**
+   3250 scr  [1] | 0:**STOCK** | 2:LEVER SENSOR | 3:STUCK ON D. | 4:STOCK SHIFTS. | 5:CHECK D WIRE. | 6:**PROBLEM**
    6350 log  # ECU shift 1>2 at 12 mph, TPS 0 %, 1095 rpm
-   6400 scr  **STOCK** | LEVER SENSOR | STUCK ON D. | STOCK SHIFTS. | CHECK D WIRE. | **PROBLEM**
-   6450 scr  [2] | **STOCK** | LEVER SENSOR | STUCK ON D. | STOCK SHIFTS. | CHECK D WIRE. | **PROBLEM**
+   6400 scr  0:**STOCK** | 2:LEVER SENSOR | 3:STUCK ON D. | 4:STOCK SHIFTS. | 5:CHECK D WIRE. | 6:**PROBLEM**
+   6450 scr  [2] | 0:**STOCK** | 2:LEVER SENSOR | 3:STUCK ON D. | 4:STOCK SHIFTS. | 5:CHECK D WIRE. | 6:**PROBLEM**
 
 ## speed signal lost at 45 mph: ECU back
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -817,28 +817,28 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8000 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8050 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10100 scr  **ECO** | **TRANS 158F**
-  10150 scr  [4] | **ECO** | **TRANS 158F**
+  10100 scr  0:**ECO** | 6:**TRANS 158F**
+  10150 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
   11800 log  # ECU lockup ON at 22 mph, TPS 25 %, 1859 rpm
-  11850 scr  [4] | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
-  11900 scr  [4] | **STOCK** | NO SPEED SIGNL | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+  11850 scr  [4] | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
+  11900 scr  [4] | 0:**STOCK** | 2:NO SPEED SIGNL | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
 
 ## tach lost: still in control, warned
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -881,26 +881,26 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8000 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8050 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10100 scr  **ECO** | **TRANS 158F**
-  10150 scr  [4] | **ECO** | **TRANS 158F**
-  13050 scr  [4] | **ECO** | ENGINE SPEED | SIGNAL LOST. | STILL SAFE. | CHECK TACH. | **NO RPM**
+  10100 scr  0:**ECO** | 6:**TRANS 158F**
+  10150 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
+  13050 scr  [4] | 0:**ECO** | 2:ENGINE SPEED | 3:SIGNAL LOST. | 4:STILL SAFE. | 5:CHECK TACH. | 6:**NO RPM**
 
 ## screen cable cut: control unaffected, loop never stalls
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -943,18 +943,18 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
 
 ## battery voltage collapses: ECU back
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -997,24 +997,24 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6200 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6250 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7500 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7550 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10050 scr  [3] | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+  10050 scr  [3] | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
 
 ## ECU sense dead, take-over on the move: waits for a stop
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1057,20 +1057,20 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3750 scr  [4] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
-   8900 scr  [4] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-   8950 scr  [4] | **STOCK** | TCU TAKES | OVER WHEN | STOPPED. | **STOP FIRST**
+   3750 scr  [4] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   8900 scr  [4] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+   8950 scr  [4] | 0:**STOCK** | 2:TCU TAKES | 3:OVER WHEN | 4:STOPPED. | 6:**STOP FIRST**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  12900 scr  **STOCK** | TCU TAKES | OVER WHEN | STOPPED. | **STOP FIRST**
-  12950 scr  **ECO** | TCU IS DOING | STOPPED. | **TCU ON**
-  13000 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  12900 scr  0:**STOCK** | 2:TCU TAKES | 3:OVER WHEN | 4:STOPPED. | 6:**STOP FIRST**
+  12950 scr  0:**ECO** | 2:TCU IS DOING | 4:STOPPED. | 6:**TCU ON**
+  13000 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
 
 ## reset at 50 mph: relays drop, no take-over after the reboot
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1113,37 +1113,37 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8000 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8050 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10100 scr  **ECO** | **TRANS 158F**
-  10150 scr  [4] | **ECO** | **TRANS 158F**
+  10100 scr  0:**ECO** | 6:**TRANS 158F**
+  10150 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
   12650 log  # TCU boot, reset flags 0x8
   12650 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
   12650 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
   12650 log  # ECU lockup ON at 50 mph, TPS 25 %, 2066 rpm
   12700 scr  [4]
-  12750 scr  [4] | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
-  12800 scr  [4] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
-  15750 scr  [4] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | TCU RESTARTED | **TRANS 158F**
-  16050 scr  [4] | **ECO** | TCU IS OFF: | THE SHIFTING. | **TCU ON**
-  16100 scr  [4] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+  12750 scr  [4] | 3:AT KEY-ON. | 4:FLIP IT OFF, | 5:THEN ON. | 6:**WAITING**
+  12800 scr  [4] | 0:**STOCK** | 2:ON/OFF WAS ON | 3:AT KEY-ON. | 4:FLIP IT OFF, | 5:THEN ON. | 6:**WAITING**
+  15750 scr  [4] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 4:TCU RESTARTED | 6:**TRANS 158F**
+  16050 scr  [4] | 0:**ECO** | 2:TCU IS OFF: | 3:THE SHIFTING. | 6:**TCU ON**
+  16100 scr  [4] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
   20000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  20050 scr  [4] | **ECO** | TCU RESTARTED | **TRANS 158F**
+  20050 scr  [4] | 0:**ECO** | 4:TCU RESTARTED | 6:**TRANS 158F**
 
 ## reset button at 30 mph: relays drop, no RESTARTED note
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1186,28 +1186,28 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6200 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6250 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7500 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7550 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
    9300 log  # TCU boot, reset flags 0x0
    9300 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
    9300 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-   9350 scr  [3] | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
-   9400 scr  [3] | **STOCK** | ON/OFF WAS ON | AT KEY-ON. | FLIP IT OFF, | THEN ON. | **WAITING**
+   9350 scr  [3] | 3:AT KEY-ON. | 4:FLIP IT OFF, | 5:THEN ON. | 6:**WAITING**
+   9400 scr  [3] | 0:**STOCK** | 2:ON/OFF WAS ON | 3:AT KEY-ON. | 4:FLIP IT OFF, | 5:THEN ON. | 6:**WAITING**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
 
 ## self-test SAFETY RESET with the Mega's bootloader: passes; reset button instead: fails
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1250,12 +1250,12 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   2650 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   2650 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
    4850 log  # IBIT start
-   4850 scr  (flash) [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4900 scr  (flash) **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4950 scr  (flash) LEVER NOT IN D | FLASH NOW
-   5000 scr  (flash) **TESTING** | THE SCREEN SHOULD | FLASH NOW
+   4850 scr  (flash) [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4900 scr  (flash) 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4950 scr  (flash) 2:LEVER NOT IN D | 3:FLASH NOW
+   5000 scr  (flash) 0:**TESTING** | 2:THE SCREEN SHOULD | 3:FLASH NOW
    9800 log  # IBIT done
    9800 log  #   BATTERY    OK   12.6V
    9800 log  #   GAS PEDAL  OK   0%
@@ -1277,26 +1277,26 @@
    9800 log  #   BRAKE           OK
    9800 log  #   ON/OFF CUT OK   0.00A
    9800 log  #   SAFETY RESET    SKIP
-   9800 scr  **TESTING** | CHECKING ON/OFF CUT | SCREEN          CHECK
-   9850 scr  **ALL OK** | 18 OK, 0 BAD, 1 CHECK | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+   9800 scr  0:**TESTING** | 2:CHECKING ON/OFF CUT | 4:SCREEN          CHECK
+   9850 scr  0:**ALL OK** | 2:18 OK, 0 BAD, 1 CHECK | 3:SCREEN          CHECK | 4:HOLD TEST 2s: AGAIN
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
   10300 log  # TCU boot, reset flags 0x8
   10300 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
   10300 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-  10300 scr  18 OK, 0 BAD, 1 CHECK
-  10350 scr  **ALL OK** | 19 OK, 0 BAD, 1 CHECK | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+  10300 scr  2:18 OK, 0 BAD, 1 CHECK
+  10350 scr  0:**ALL OK** | 2:19 OK, 0 BAD, 1 CHECK | 3:SCREEN          CHECK | 4:HOLD TEST 2s: AGAIN
   10800 log  # TCU boot, reset flags 0x0
   10800 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
   10800 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
   10800 scr  
-  10850 scr  **PROBLEM** | 18 OK, 1 BAD, 1 CHECK | SAFETY RESET    BAD | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+  10850 scr  0:**PROBLEM** | 2:18 OK, 1 BAD, 1 CHECK | 3:SAFETY RESET    BAD | 4:SCREEN          CHECK | 5:HOLD TEST 2s: AGAIN
 
 ## solenoid wire shorted: over-current, ECU back
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1339,24 +1339,24 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8050 scr  TCU IS DOING | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
-   8100 scr  [2] | **STOCK** | SOLENOID WIRE | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6200 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6250 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7500 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7550 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8000 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8050 scr  2:TCU IS DOING | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
+   8100 scr  [2] | 0:**STOCK** | 2:SOLENOID WIRE | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
 
 ## ATF probe unplugged: warned, still in control
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1399,26 +1399,26 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6200 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6250 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7500 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7550 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
-   9600 scr  **ECO** | **TRANS 158F**
-   9650 scr  [4] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6200 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6250 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7500 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7550 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
+   9600 scr  0:**ECO** | 6:**TRANS 158F**
+   9650 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  11050 scr  [4] | **ECO** | TEMP PROBE | NOT WORKING. | CHECK THE PLUG | **NO TEMP**
+  11050 scr  [4] | 0:**ECO** | 2:TEMP PROBE | 3:NOT WORKING. | 4:CHECK THE PLUG | 6:**NO TEMP**
 
 ## ATF overheats: warned, lockup held to cool it
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1461,30 +1461,30 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8000 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8050 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10100 scr  **ECO** | **TRANS 158F**
-  10150 scr  [4] | **ECO** | **TRANS 158F**
-  14350 scr  [4] | **ECO** | **TRANS 163F**
-  14450 scr  [4] | **ECO** | **TRANS 205F**
-  14550 scr  [4] | **ECO** | **TRANS 229F**
-  14650 scr  [4] | **ECO** | OVER 230F. | EASE OFF. | **TRANS HOT**
-  14850 scr  [4] | **ECO** | OVER 257F! | PULL OVER AND | LET IT COOL. | **TRANS HOT!**
+  10100 scr  0:**ECO** | 6:**TRANS 158F**
+  10150 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
+  14350 scr  [4] | 0:**ECO** | 6:**TRANS 163F**
+  14450 scr  [4] | 0:**ECO** | 6:**TRANS 205F**
+  14550 scr  [4] | 0:**ECO** | 6:**TRANS 229F**
+  14650 scr  [4] | 0:**ECO** | 2:OVER 230F. | 3:EASE OFF. | 6:**TRANS HOT**
+  14850 scr  [4] | 0:**ECO** | 2:OVER 257F! | 3:PULL OVER AND | 4:LET IT COOL. | 6:**TRANS HOT!**
 
 ## self-test (IBIT): every check passes, incl. the hardware cut
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1527,12 +1527,12 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   2650 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   2650 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
    4850 log  # IBIT start
-   4850 scr  (flash) [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4900 scr  (flash) **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4950 scr  (flash) LEVER NOT IN D | FLASH NOW
-   5000 scr  (flash) **TESTING** | THE SCREEN SHOULD | FLASH NOW
+   4850 scr  (flash) [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4900 scr  (flash) 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4950 scr  (flash) 2:LEVER NOT IN D | 3:FLASH NOW
+   5000 scr  (flash) 0:**TESTING** | 2:THE SCREEN SHOULD | 3:FLASH NOW
    9800 log  # IBIT done
    9800 log  #   BATTERY    OK   12.6V
    9800 log  #   GAS PEDAL  OK   0%
@@ -1554,16 +1554,16 @@
    9800 log  #   BRAKE           OK
    9800 log  #   ON/OFF CUT OK   0.00A
    9800 log  #   SAFETY RESET    SKIP
-   9800 scr  **TESTING** | CHECKING ON/OFF CUT | SCREEN          CHECK
-   9850 scr  **ALL OK** | 18 OK, 0 BAD, 1 CHECK | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+   9800 scr  0:**TESTING** | 2:CHECKING ON/OFF CUT | 4:SCREEN          CHECK
+   9850 scr  0:**ALL OK** | 2:18 OK, 0 BAD, 1 CHECK | 3:SCREEN          CHECK | 4:HOLD TEST 2s: AGAIN
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
 
 ## build book 13.4 (jack stands), step by step: the screen says what the book says
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1606,45 +1606,45 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3750 scr  [1] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
-   4200 scr  [1] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-   4250 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7400 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7450 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8200 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING.
-   8250 scr  [2] | **ECO** | **TRANS 158F**
-   9750 scr  [3] | **ECO** | **TRANS 158F**
+   3750 scr  [1] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4200 scr  [1] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+   4250 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7400 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7450 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8200 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING.
+   8250 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
+   9750 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  15850 scr  [2] | **ECO** | **TRANS 158F**
-  17900 scr  **ECO** | **TRANS 158F**
-  17950 scr  [1] | **ECO** | **TRANS 158F**
+  15850 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
+  17900 scr  0:**ECO** | 6:**TRANS 158F**
+  17950 scr  [1] | 0:**ECO** | 6:**TRANS 158F**
   20000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  22700 scr  **ECO** | **TRANS 158F**
-  22750 scr  [2] | **ECO** | **TRANS 158F**
-  24900 scr  [2] | **ECO**
-  24950 scr  [2] | **STOCK** | STOCK | SHIFTING. | **TCU OFF**
-  25450 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-  29400 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING.
-  29450 scr  [2] | **ECO** | **TRANS 158F**
-  29600 scr  **ECO** | **TRANS 158F**
-  29650 scr  [1] | **ECO** | **TRANS 158F**
+  22700 scr  0:**ECO** | 6:**TRANS 158F**
+  22750 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
+  24900 scr  [2] | 0:**ECO**
+  24950 scr  [2] | 0:**STOCK** | 2:STOCK | 3:SHIFTING. | 6:**TCU OFF**
+  25450 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+  29400 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING.
+  29450 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
+  29600 scr  0:**ECO** | 6:**TRANS 158F**
+  29650 scr  [1] | 0:**ECO** | 6:**TRANS 158F**
   30000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  31200 scr  [1] | **ECO**
-  31250 scr  [1] | **MANUAL** | YOU SHIFT WITH | THE LEVER. | **MANUAL**
-  35200 scr  **MANUAL** | YOU SHIFT WITH | THE LEVER. | **MANUAL**
-  35250 scr  **MANUAL** | THE LEVER. | **TRANS 158F**
-  35300 scr  [2] | **MANUAL** | **TRANS 158F**
-  37950 scr  [3] | **MANUAL** | **TRANS 158F**
-  39650 scr  [2] | **MANUAL** | **TRANS 158F**
+  31200 scr  [1] | 0:**ECO**
+  31250 scr  [1] | 0:**MANUAL** | 2:YOU SHIFT WITH | 3:THE LEVER. | 6:**MANUAL**
+  35200 scr  0:**MANUAL** | 2:YOU SHIFT WITH | 3:THE LEVER. | 6:**MANUAL**
+  35250 scr  0:**MANUAL** | 3:THE LEVER. | 6:**TRANS 158F**
+  35300 scr  [2] | 0:**MANUAL** | 6:**TRANS 158F**
+  37950 scr  [3] | 0:**MANUAL** | 6:**TRANS 158F**
+  39650 scr  [2] | 0:**MANUAL** | 6:**TRANS 158F**
   40000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  43850 scr  [2] | **MANUAL** | TOO FAST FOR | THAT GEAR: THE | ENGINE WOULD | OVER-REV. | **NO SHIFT**
+  43850 scr  [2] | 0:**MANUAL** | 2:TOO FAST FOR | 3:THAT GEAR: THE | 4:ENGINE WOULD | 5:OVER-REV. | 6:**NO SHIFT**
 
 ## self-test refused with the engine running
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1687,17 +1687,17 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3750 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   6000 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   6050 scr  LEVER NOT IN D | ENGINE IS RUNNING | IT NEEDS: PARKED, | ENGINE OFF, LEVER IN | P, ON/OFF ON
-   6100 scr  **CAN'T TEST** | NOT NOW, BECAUSE: | ENGINE IS RUNNING | IT NEEDS: PARKED, | ENGINE OFF, LEVER IN | P, ON/OFF ON
+   3750 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   6000 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   6050 scr  2:LEVER NOT IN D | 3:ENGINE IS RUNNING | 5:IT NEEDS: PARKED, | 6:ENGINE OFF, LEVER IN | 7:P, ON/OFF ON
+   6100 scr  0:**CAN'T TEST** | 2:NOT NOW, BECAUSE: | 3:ENGINE IS RUNNING | 5:IT NEEDS: PARKED, | 6:ENGINE OFF, LEVER IN | 7:P, ON/OFF ON
 
 ## corner hold from the gyro (its zero drift learned first)
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1740,43 +1740,43 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   7950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   8100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   8150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   8200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   8100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   8150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   8200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-  10350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-  12150 scr  [2] | **ECO** | **TRANS 158F**
+  10300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+  10350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+  12150 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
   20000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
   30000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
   40000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  42250 scr  [2] | **ECO** | CORNER: | HOLDING GEAR | **TRANS 158F**
-  44900 scr  **ECO** | CORNER: | HOLDING GEAR | **TRANS 158F**
-  44950 scr  [3] | **ECO** | **TRANS 158F**
-  46100 scr  **ECO** | **TRANS 158F**
-  46150 scr  [4] | **ECO** | **TRANS 158F**
-  47800 scr  **ECO** | **TRANS 158F**
-  47850 scr  [3] | **ECO** | **TRANS 158F**
-  49200 scr  **ECO** | **TRANS 158F**
-  49250 scr  [2] | **ECO** | **TRANS 158F**
+  42250 scr  [2] | 0:**ECO** | 2:CORNER: | 3:HOLDING GEAR | 6:**TRANS 158F**
+  44900 scr  0:**ECO** | 2:CORNER: | 3:HOLDING GEAR | 6:**TRANS 158F**
+  44950 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
+  46100 scr  0:**ECO** | 6:**TRANS 158F**
+  46150 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
+  47800 scr  0:**ECO** | 6:**TRANS 158F**
+  47850 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
+  49200 scr  0:**ECO** | 6:**TRANS 158F**
+  49250 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
   50000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  50400 scr  **ECO** | **TRANS 158F**
-  50450 scr  [1] | **ECO** | **TRANS 158F**
-  59000 scr  **ECO** | **TRANS 158F**
-  59050 scr  [2] | **ECO** | **TRANS 158F**
+  50400 scr  0:**ECO** | 6:**TRANS 158F**
+  50450 scr  [1] | 0:**ECO** | 6:**TRANS 158F**
+  59000 scr  0:**ECO** | 6:**TRANS 158F**
+  59050 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
   60000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  60600 scr  **ECO** | **TRANS 158F**
-  60650 scr  [3] | **ECO** | **TRANS 158F**
-  62600 scr  **ECO** | **TRANS 158F**
-  62650 scr  [4] | **ECO** | **TRANS 158F**
+  60600 scr  0:**ECO** | 6:**TRANS 158F**
+  60650 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
+  62600 scr  0:**ECO** | 6:**TRANS 158F**
+  62650 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
 
 ## gyro glitches, then dies mid-corner: hold ends, still in control
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1819,28 +1819,28 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   7950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   8100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   8150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   8200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   8100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   8150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   8200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-  10350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-  12150 scr  [2] | **ECO** | **TRANS 158F**
-  15450 scr  [2] | **ECO** | CORNER: | HOLDING GEAR | **TRANS 158F**
-  15850 scr  [2] | **ECO** | **TRANS 158F**
-  16900 scr  **ECO** | **TRANS 158F**
-  16950 scr  [3] | **ECO** | **TRANS 158F**
-  19000 scr  **ECO** | **TRANS 158F**
-  19050 scr  [4] | **ECO** | **TRANS 158F**
+  10300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+  10350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+  12150 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
+  15450 scr  [2] | 0:**ECO** | 2:CORNER: | 3:HOLDING GEAR | 6:**TRANS 158F**
+  15850 scr  [2] | 0:**ECO** | 6:**TRANS 158F**
+  16900 scr  0:**ECO** | 6:**TRANS 158F**
+  16950 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
+  19000 scr  0:**ECO** | 6:**TRANS 158F**
+  19050 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
   20000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
 
 ## throttle reads right, also with a shifted engine ground
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1888,8 +1888,8 @@
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1932,28 +1932,28 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8000 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8050 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8000 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8050 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10100 scr  **ECO** | **TRANS 158F**
-  10150 scr  [4] | **ECO** | **TRANS 158F**
-  10400 scr  **ECO** | **TRANS 158F**
-  10450 scr  STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
-  10500 scr  [3] | **STOCK** | PEDAL SENSOR | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+  10100 scr  0:**ECO** | 6:**TRANS 158F**
+  10150 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
+  10400 scr  0:**ECO** | 6:**TRANS 158F**
+  10450 scr  3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
+  10500 scr  [3] | 0:**STOCK** | 2:PEDAL SENSOR | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
 
 ## saved self-test table corrupted over the reset: not restored
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -1996,12 +1996,12 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   2650 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
+   2650 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
    4850 log  # IBIT start
-   4850 scr  (flash) [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4900 scr  (flash) **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4950 scr  (flash) LEVER NOT IN D | FLASH NOW
-   5000 scr  (flash) **TESTING** | THE SCREEN SHOULD | FLASH NOW
+   4850 scr  (flash) [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4900 scr  (flash) 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4950 scr  (flash) 2:LEVER NOT IN D | 3:FLASH NOW
+   5000 scr  (flash) 0:**TESTING** | 2:THE SCREEN SHOULD | 3:FLASH NOW
    9800 log  # IBIT done
    9800 log  #   BATTERY    OK   12.6V
    9800 log  #   GAS PEDAL  OK   0%
@@ -2023,29 +2023,29 @@
    9800 log  #   BRAKE           OK
    9800 log  #   ON/OFF CUT OK   0.00A
    9800 log  #   SAFETY RESET    SKIP
-   9800 scr  **TESTING** | CHECKING ON/OFF CUT | SCREEN          CHECK
-   9850 scr  **ALL OK** | 18 OK, 0 BAD, 1 CHECK | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+   9800 scr  0:**TESTING** | 2:CHECKING ON/OFF CUT | 4:SCREEN          CHECK
+   9850 scr  0:**ALL OK** | 2:18 OK, 0 BAD, 1 CHECK | 3:SCREEN          CHECK | 4:HOLD TEST 2s: AGAIN
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
   10300 log  # TCU boot, reset flags 0x8
   10300 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
   10300 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-  10300 scr  18 OK, 0 BAD, 1 CHECK
-  10350 scr  **SELF-TEST** | HOLD TEST 2 SECONDS | TO RUN IT
+  10300 scr  2:18 OK, 0 BAD, 1 CHECK
+  10350 scr  0:**SELF-TEST** | 2:HOLD TEST 2 SECONDS | 3:TO RUN IT
 
 ## screen tour: below zero, the SENSORS page, a self-test with many failures
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS -3F**
-    550 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      0 RPM | GAS PEDAL   0 % | TRANS TEMP  -3 F | BATTERY     12.6 V
-    600 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      0 RPM | GAS PEDAL   0 % | TRANS TEMP  -3 F | BATTERY     12.6 V | SIDE FORCE  -- | BRAKE OFF  NOT IN D
-    700 scr  SPEED       0 MPH | ENGINE      0 RPM | GAS PEDAL   0 % | TRANS TEMP  -3 F | BATTERY     12.6 V | SIDE FORCE  -- | BRAKE OFF  NOT IN D
-    750 scr  **SELF-TEST** | HOLD TEST 2 SECONDS | TO RUN IT | CE  -- | BRAKE OFF  NOT IN D
-    800 scr  **SELF-TEST** | HOLD TEST 2 SECONDS | TO RUN IT
-   1000 scr  HOLD TEST 2 SECONDS | TO RUN IT
-   1050 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-   1100 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS -3F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS -3F**
+    550 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      0 RPM | 3:GAS PEDAL   0 % | 4:TRANS TEMP  -3 F | 5:BATTERY     12.6 V
+    600 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      0 RPM | 3:GAS PEDAL   0 % | 4:TRANS TEMP  -3 F | 5:BATTERY     12.6 V | 6:SIDE FORCE  -- | 7:BRAKE OFF  NOT IN D
+    700 scr  1:SPEED       0 MPH | 2:ENGINE      0 RPM | 3:GAS PEDAL   0 % | 4:TRANS TEMP  -3 F | 5:BATTERY     12.6 V | 6:SIDE FORCE  -- | 7:BRAKE OFF  NOT IN D
+    750 scr  0:**SELF-TEST** | 2:HOLD TEST 2 SECONDS | 3:TO RUN IT | 6:CE  -- | 7:BRAKE OFF  NOT IN D
+    800 scr  0:**SELF-TEST** | 2:HOLD TEST 2 SECONDS | 3:TO RUN IT
+   1000 scr  2:HOLD TEST 2 SECONDS | 3:TO RUN IT
+   1050 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+   1100 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS -3F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -2088,51 +2088,51 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS -2F**
-   3250 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS -1F**
-   3450 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 0F**
-   8450 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      731 RPM | GAS PEDAL   0 % | TRANS TEMP  0 F | BATTERY     14.2 V
-   8500 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      731 RPM | GAS PEDAL   0 % | TRANS TEMP  0 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   8550 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      749 RPM | GAS PEDAL   0 % | TRANS TEMP  0 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   8650 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  100 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   8750 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  159 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   8850 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  195 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   8950 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  216 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   9050 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  229 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   9150 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  237 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   9250 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  241 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   9350 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  244 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   9450 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  246 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   9550 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  247 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
-   9850 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  248 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE OFF  NOT IN D
+   3150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS -2F**
+   3250 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS -1F**
+   3450 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 0F**
+   8450 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      731 RPM | 3:GAS PEDAL   0 % | 4:TRANS TEMP  0 F | 5:BATTERY     14.2 V
+   8500 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      731 RPM | 3:GAS PEDAL   0 % | 4:TRANS TEMP  0 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   8550 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      749 RPM | 3:GAS PEDAL   0 % | 4:TRANS TEMP  0 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   8650 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  100 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   8750 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  159 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   8850 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  195 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   8950 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  216 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   9050 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  229 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   9150 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  237 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   9250 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  241 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   9350 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  244 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   9450 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  246 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   9550 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  247 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
+   9850 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  248 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE OFF  NOT IN D
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10650 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  248 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE ON   LEVER IN D
+  10650 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  248 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE ON   LEVER IN D
   11050 log  # ECU shift 1>3 at 36 mph, TPS 37 %, 2081 rpm
-  11150 scr  SENSORS   (TAP: NEXT) | SPEED       38 MPH | ENGINE      2122 RPM | GAS PEDAL   37 % | TRANS TEMP  248 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE ON   LEVER IN D
-  11250 scr  SENSORS   (TAP: NEXT) | SPEED       38 MPH | ENGINE      2124 RPM | GAS PEDAL   37 % | TRANS TEMP  248 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE ON   LEVER IN D
+  11150 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       38 MPH | 2:ENGINE      2122 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  248 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE ON   LEVER IN D
+  11250 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       38 MPH | 2:ENGINE      2124 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  248 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE ON   LEVER IN D
   12050 log  # ECU shift 3>1 at 1 mph, TPS 37 %, 792 rpm
-  12150 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      751 RPM | GAS PEDAL   37 % | TRANS TEMP  248 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE ON   LEVER IN D
-  12250 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      750 RPM | GAS PEDAL   37 % | TRANS TEMP  248 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE ON   LEVER IN D
-  13150 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      343 RPM | GAS PEDAL   0 % | TRANS TEMP  205 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE ON   LEVER IN D
-  13250 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      158 RPM | GAS PEDAL   0 % | TRANS TEMP  179 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE ON   LEVER IN D
-  13300 scr  SENSORS   (TAP: NEXT) | SPEED       0 MPH | ENGINE      158 RPM | TRANS TEMP  179 F | BATTERY     14.2 V | SIDE FORCE  0.00 G | BRAKE ON   LEVER IN D
-  13350 scr  ENGINE      158 RPM | EVERY CHECK PASSED | HOLD TEST 2s: AGAIN
-  13400 scr  **ALL OK** | 9 OK, 0 BAD, 0 CHECK | EVERY CHECK PASSED | HOLD TEST 2s: AGAIN
-  14100 scr  **ALL OK** | 9 OK, 0 BAD, 0 CHECK | HOLD TEST 2s: AGAIN
-  14150 scr  [-] | 9 OK, 0 BAD, 0 CHECK | STOCK SHIFTING | **TRANS 140F**
-  14200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 140F**
-  14350 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 140F**
+  12150 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      751 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  248 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE ON   LEVER IN D
+  12250 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      750 RPM | 3:GAS PEDAL   37 % | 4:TRANS TEMP  248 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE ON   LEVER IN D
+  13150 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      343 RPM | 3:GAS PEDAL   0 % | 4:TRANS TEMP  205 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE ON   LEVER IN D
+  13250 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      158 RPM | 3:GAS PEDAL   0 % | 4:TRANS TEMP  179 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE ON   LEVER IN D
+  13300 scr  0:SENSORS   (TAP: NEXT) | 1:SPEED       0 MPH | 2:ENGINE      158 RPM | 4:TRANS TEMP  179 F | 5:BATTERY     14.2 V | 6:SIDE FORCE  0.00 G | 7:BRAKE ON   LEVER IN D
+  13350 scr  2:ENGINE      158 RPM | 3:EVERY CHECK PASSED | 4:HOLD TEST 2s: AGAIN
+  13400 scr  0:**ALL OK** | 2:9 OK, 0 BAD, 0 CHECK | 3:EVERY CHECK PASSED | 4:HOLD TEST 2s: AGAIN
+  14100 scr  0:**ALL OK** | 2:9 OK, 0 BAD, 0 CHECK | 4:HOLD TEST 2s: AGAIN
+  14150 scr  [-] | 2:9 OK, 0 BAD, 0 CHECK | 3:STOCK SHIFTING | 6:**TRANS 140F**
+  14200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 140F**
+  14350 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 140F**
   19250 log  # IBIT start
-  19250 scr  (flash) [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 140F**
-  19300 scr  (flash) **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 140F**
-  19350 scr  (flash) LEVER NOT IN D | FLASH NOW
-  19400 scr  (flash) **TESTING** | THE SCREEN SHOULD | FLASH NOW
+  19250 scr  (flash) [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 140F**
+  19300 scr  (flash) 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 140F**
+  19350 scr  (flash) 2:LEVER NOT IN D | 3:FLASH NOW
+  19400 scr  (flash) 0:**TESTING** | 2:THE SCREEN SHOULD | 3:FLASH NOW
   20000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  20750 scr  **TESTING** | THE SCREEN SHOULD | FLASH NOW
-  20800 scr  **TESTING** | THE SCREEN SHOULD
-  20850 scr  **TESTING** | CHECKING SCREEN | SCREEN          CHECK
-  20950 scr  **TESTING** | CHECKING SOLENOID 1 | SCREEN          CHECK
-  21550 scr  **TESTING** | CHECKING SOLENOID 2 | SCREEN          CHECK
+  20750 scr  0:**TESTING** | 2:THE SCREEN SHOULD | 3:FLASH NOW
+  20800 scr  0:**TESTING** | 2:THE SCREEN SHOULD
+  20850 scr  0:**TESTING** | 2:CHECKING SCREEN | 4:SCREEN          CHECK
+  20950 scr  0:**TESTING** | 2:CHECKING SOLENOID 1 | 4:SCREEN          CHECK
+  21550 scr  0:**TESTING** | 2:CHECKING SOLENOID 2 | 4:SCREEN          CHECK
   22000 log  # IBIT aborted
   22000 log  #   BATTERY    OK   12.4V
   22000 log  #   GAS PEDAL  OK   0%
@@ -2154,69 +2154,69 @@
   22000 log  #   BRAKE           --
   22000 log  #   ON/OFF CUT      --
   22000 log  #   SAFETY RESET    --
-  22050 scr  **STOPPED** | STOPPED BECAUSE | ENGINE IS RUNNING | SCREEN          CHECK | HOLD TEST 2s: AGAIN
+  22050 scr  0:**STOPPED** | 2:STOPPED BECAUSE | 3:ENGINE IS RUNNING | 4:SCREEN          CHECK | 5:HOLD TEST 2s: AGAIN
   27800 log  # IBIT start
-  27800 scr  (flash) **STOPPED** | STOPPED BECAUSE | SCREEN          CHECK | HOLD TEST 2s: AGAIN
-  27850 scr  (flash) **TESTING** | THE SCREEN SHOULD | FLASH NOW
-  29300 scr  **TESTING** | THE SCREEN SHOULD
-  29350 scr  **TESTING** | CHECKING SCREEN | SCREEN          CHECK
-  29550 scr  **TESTING** | CHECKING SOLENOID 1 | SCREEN          CHECK
+  27800 scr  (flash) 0:**STOPPED** | 2:STOPPED BECAUSE | 4:SCREEN          CHECK | 5:HOLD TEST 2s: AGAIN
+  27850 scr  (flash) 0:**TESTING** | 2:THE SCREEN SHOULD | 3:FLASH NOW
+  29300 scr  0:**TESTING** | 2:THE SCREEN SHOULD
+  29350 scr  0:**TESTING** | 2:CHECKING SCREEN | 4:SCREEN          CHECK
+  29550 scr  0:**TESTING** | 2:CHECKING SOLENOID 1 | 4:SCREEN          CHECK
   30000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  30150 scr  **TESTING** | CHECKING SOLENOID 2 | SCREEN          CHECK
-  30750 scr  **TESTING** | CHECKING LOCKUP SOL | SCREEN          CHECK
-  31450 scr  **TESTING** | CHECKING RELAYS | SCREEN          CHECK
-  31800 scr  **TESTING** | CHECKING RELAYS | 8s | SCREEN          CHECK
-  31850 scr  **TESTING** | DOWNSHIFT THE LEVER | 8s LEFT. TEST = SKIP | SCREEN          CHECK
-  32800 scr  **TESTING** | DOWNSHIFT THE LEVER | 7s LEFT. TEST = SKIP | SCREEN          CHECK
-  33800 scr  **TESTING** | DOWNSHIFT THE LEVER | 6s LEFT. TEST = SKIP | SCREEN          CHECK
-  34800 scr  **TESTING** | DOWNSHIFT THE LEVER | 5s LEFT. TEST = SKIP | SCREEN          CHECK
-  35800 scr  **TESTING** | DOWNSHIFT THE LEVER | 4s LEFT. TEST = SKIP | SCREEN          CHECK
-  36800 scr  **TESTING** | DOWNSHIFT THE LEVER | 3s LEFT. TEST = SKIP | SCREEN          CHECK
-  37800 scr  **TESTING** | DOWNSHIFT THE LEVER | 2s LEFT. TEST = SKIP | SCREEN          CHECK
-  38800 scr  **TESTING** | DOWNSHIFT THE LEVER | 1s LEFT. TEST = SKIP | SCREEN          CHECK
-  39800 scr  **TESTING** | DOWNSHIFT THE LEVER | 1s LEFT. TEST = SKIP
-  39850 scr  **TESTING** | TURN ON ONLY ECO | 8s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SCREEN          CHECK
-  39950 scr  **TESTING** | TURN ON ONLY SPORT | 8s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SCREEN          CHECK
+  30150 scr  0:**TESTING** | 2:CHECKING SOLENOID 2 | 4:SCREEN          CHECK
+  30750 scr  0:**TESTING** | 2:CHECKING LOCKUP SOL | 4:SCREEN          CHECK
+  31450 scr  0:**TESTING** | 2:CHECKING RELAYS | 4:SCREEN          CHECK
+  31800 scr  0:**TESTING** | 2:CHECKING RELAYS | 3:8s | 4:SCREEN          CHECK
+  31850 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:8s LEFT. TEST = SKIP | 4:SCREEN          CHECK
+  32800 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:7s LEFT. TEST = SKIP | 4:SCREEN          CHECK
+  33800 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:6s LEFT. TEST = SKIP | 4:SCREEN          CHECK
+  34800 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:5s LEFT. TEST = SKIP | 4:SCREEN          CHECK
+  35800 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:4s LEFT. TEST = SKIP | 4:SCREEN          CHECK
+  36800 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:3s LEFT. TEST = SKIP | 4:SCREEN          CHECK
+  37800 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:2s LEFT. TEST = SKIP | 4:SCREEN          CHECK
+  38800 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:1s LEFT. TEST = SKIP | 4:SCREEN          CHECK
+  39800 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:1s LEFT. TEST = SKIP
+  39850 scr  0:**TESTING** | 2:TURN ON ONLY ECO | 3:8s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SCREEN          CHECK
+  39950 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:8s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SCREEN          CHECK
   40000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  40900 scr  **TESTING** | TURN ON ONLY SPORT | 7s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SCREEN          CHECK
-  41900 scr  **TESTING** | TURN ON ONLY SPORT | 6s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SCREEN          CHECK
-  42900 scr  **TESTING** | TURN ON ONLY SPORT | 5s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SCREEN          CHECK
-  43900 scr  **TESTING** | TURN ON ONLY SPORT | 4s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SCREEN          CHECK
-  44900 scr  **TESTING** | TURN ON ONLY SPORT | 3s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SCREEN          CHECK
-  45900 scr  **TESTING** | TURN ON ONLY SPORT | 2s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SCREEN          CHECK
-  46900 scr  **TESTING** | TURN ON ONLY SPORT | 1s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SCREEN          CHECK
-  47900 scr  **TESTING** | TURN ON ONLY SPORT | 1s LEFT. TEST = SKIP | SHIFT DOWN      BAD
-  47950 scr  **TESTING** | TURN ON ONLY MANUAL | 8s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | SCREEN          CHECK
-  48900 scr  **TESTING** | TURN ON ONLY MANUAL | 7s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | SCREEN          CHECK
-  49900 scr  **TESTING** | TURN ON ONLY MANUAL | 6s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | SCREEN          CHECK
+  40900 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:7s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SCREEN          CHECK
+  41900 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:6s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SCREEN          CHECK
+  42900 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:5s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SCREEN          CHECK
+  43900 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:4s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SCREEN          CHECK
+  44900 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:3s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SCREEN          CHECK
+  45900 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:2s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SCREEN          CHECK
+  46900 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:1s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SCREEN          CHECK
+  47900 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:1s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD
+  47950 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:8s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:SCREEN          CHECK
+  48900 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:7s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:SCREEN          CHECK
+  49900 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:6s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:SCREEN          CHECK
   50000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  50900 scr  **TESTING** | TURN ON ONLY MANUAL | 5s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | SCREEN          CHECK
-  51900 scr  **TESTING** | TURN ON ONLY MANUAL | 4s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | SCREEN          CHECK
-  52900 scr  **TESTING** | TURN ON ONLY MANUAL | 3s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | SCREEN          CHECK
-  53900 scr  **TESTING** | TURN ON ONLY MANUAL | 2s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | SCREEN          CHECK
-  54900 scr  **TESTING** | TURN ON ONLY MANUAL | 1s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | SCREEN          CHECK
-  55900 scr  **TESTING** | TURN ON ONLY MANUAL | 1s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD
-  55950 scr  **TESTING** | PRESS THE BRAKE | 8s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | SCREEN          CHECK
-  56900 scr  **TESTING** | PRESS THE BRAKE | 7s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | SCREEN          CHECK
-  57900 scr  **TESTING** | PRESS THE BRAKE | 6s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | SCREEN          CHECK
-  58900 scr  **TESTING** | PRESS THE BRAKE | 5s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | SCREEN          CHECK
-  59900 scr  **TESTING** | PRESS THE BRAKE | 4s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | SCREEN          CHECK
+  50900 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:5s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:SCREEN          CHECK
+  51900 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:4s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:SCREEN          CHECK
+  52900 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:3s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:SCREEN          CHECK
+  53900 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:2s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:SCREEN          CHECK
+  54900 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:1s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:SCREEN          CHECK
+  55900 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:1s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD
+  55950 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:8s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:SCREEN          CHECK
+  56900 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:7s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:SCREEN          CHECK
+  57900 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:6s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:SCREEN          CHECK
+  58900 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:5s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:SCREEN          CHECK
+  59900 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:4s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:SCREEN          CHECK
   60000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  60900 scr  **TESTING** | PRESS THE BRAKE | 3s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | SCREEN          CHECK
-  61900 scr  **TESTING** | PRESS THE BRAKE | 2s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | SCREEN          CHECK
-  62900 scr  **TESTING** | PRESS THE BRAKE | 1s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | SCREEN          CHECK
-  63900 scr  **TESTING** | PRESS THE BRAKE | 1s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD
-  63950 scr  **TESTING** | CHECKING ON/OFF CUT | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
-  64400 scr  **TESTING** | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
-  64450 scr  **TESTING** | TURN ON/OFF OFF | 8s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
-  65400 scr  **TESTING** | TURN ON/OFF OFF | 7s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
-  66400 scr  **TESTING** | TURN ON/OFF OFF | 6s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
-  67400 scr  **TESTING** | TURN ON/OFF OFF | 5s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
-  68400 scr  **TESTING** | TURN ON/OFF OFF | 4s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
-  69400 scr  **TESTING** | TURN ON/OFF OFF | 3s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
+  60900 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:3s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:SCREEN          CHECK
+  61900 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:2s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:SCREEN          CHECK
+  62900 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:1s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:SCREEN          CHECK
+  63900 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:1s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD
+  63950 scr  0:**TESTING** | 2:CHECKING ON/OFF CUT | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
+  64400 scr  0:**TESTING** | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
+  64450 scr  0:**TESTING** | 2:TURN ON/OFF OFF | 3:8s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
+  65400 scr  0:**TESTING** | 2:TURN ON/OFF OFF | 3:7s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
+  66400 scr  0:**TESTING** | 2:TURN ON/OFF OFF | 3:6s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
+  67400 scr  0:**TESTING** | 2:TURN ON/OFF OFF | 3:5s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
+  68400 scr  0:**TESTING** | 2:TURN ON/OFF OFF | 3:4s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
+  69400 scr  0:**TESTING** | 2:TURN ON/OFF OFF | 3:3s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
   70000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  70400 scr  **TESTING** | TURN ON/OFF OFF | 2s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
-  71400 scr  **TESTING** | TURN ON/OFF OFF | 1s LEFT. TEST = SKIP | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
+  70400 scr  0:**TESTING** | 2:TURN ON/OFF OFF | 3:2s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
+  71400 scr  0:**TESTING** | 2:TURN ON/OFF OFF | 3:1s LEFT. TEST = SKIP | 4:SHIFT DOWN      BAD | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
   72400 log  # IBIT done
   72400 log  #   BATTERY    OK   12.4V
   72400 log  #   GAS PEDAL  OK   0%
@@ -2238,77 +2238,77 @@
   72400 log  #   BRAKE           BAD
   72400 log  #   ON/OFF CUT BAD  0.95A
   72400 log  #   SAFETY RESET    SKIP
-  72400 scr  **TESTING** | TURN ON/OFF OFF | 1s LEFT. TEST = SKIP | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | +2 MORE ON LAPTOP LOG
-  72450 scr  **PROBLEM** | 12 OK, 5 BAD, 1 CHECK | SHIFT DO TEST = SKIP | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | BRAKE           BAD | +2 MORE ON LAPTOP LOG
-  72500 scr  **PROBLEM** | 12 OK, 5 BAD, 1 CHECK | SHIFT DOWN      BAD | SPORT SWITCH    BAD | MANUAL SWITCH   BAD | BRAKE           BAD | +2 MORE ON LAPTOP LOG
+  72400 scr  0:**TESTING** | 2:TURN ON/OFF OFF | 3:1s LEFT. TEST = SKIP | 5:SPORT SWITCH    BAD | 6:MANUAL SWITCH   BAD | 7:+2 MORE ON LAPTOP LOG
+  72450 scr  0:**PROBLEM** | 2:12 OK, 5 BAD, 1 CHECK | 3:SHIFT DO TEST = SKIP | 4:SPORT SWITCH    BAD | 5:MANUAL SWITCH   BAD | 6:BRAKE           BAD | 7:+2 MORE ON LAPTOP LOG
+  72500 scr  0:**PROBLEM** | 2:12 OK, 5 BAD, 1 CHECK | 3:SHIFT DOWN      BAD | 4:SPORT SWITCH    BAD | 5:MANUAL SWITCH   BAD | 6:BRAKE           BAD | 7:+2 MORE ON LAPTOP LOG
   77700 log  # IBIT start
-  77700 scr  (flash) **PROBLEM** | 12 OK, 5 BAD, 1 CHECK | SHIFT DOWN      BAD | MANUAL SWITCH   BAD | BRAKE           BAD | +2 MORE ON LAPTOP LOG
-  77750 scr  (flash) **TESTING** | THE SCRE BAD, 1 CHECK | SHIFT DOWN      BAD
-  77800 scr  (flash) **TESTING** | THE SCREEN SHOULD | FLASH NOW
-  79200 scr  **TESTING** | THE SCREEN SHOULD | FLASH NOW
-  79250 scr  **TESTING** | CHECKING SCREEN | SCREEN          CHECK
-  79450 scr  **TESTING** | CHECKING SOLENOID 1 | SCREEN          CHECK
-  79800 scr  **TESTING** | CHECKING SOLENOID 1
-  79850 scr  **TESTING** | CHECKING SOLENOID 1 | SOLENOID 1 BAD  0.00A | SCREEN          CHECK
+  77700 scr  (flash) 0:**PROBLEM** | 2:12 OK, 5 BAD, 1 CHECK | 3:SHIFT DOWN      BAD | 5:MANUAL SWITCH   BAD | 6:BRAKE           BAD | 7:+2 MORE ON LAPTOP LOG
+  77750 scr  (flash) 0:**TESTING** | 2:THE SCRE BAD, 1 CHECK | 3:SHIFT DOWN      BAD
+  77800 scr  (flash) 0:**TESTING** | 2:THE SCREEN SHOULD | 3:FLASH NOW
+  79200 scr  0:**TESTING** | 2:THE SCREEN SHOULD | 3:FLASH NOW
+  79250 scr  0:**TESTING** | 2:CHECKING SCREEN | 4:SCREEN          CHECK
+  79450 scr  0:**TESTING** | 2:CHECKING SOLENOID 1 | 4:SCREEN          CHECK
+  79800 scr  0:**TESTING** | 2:CHECKING SOLENOID 1
+  79850 scr  0:**TESTING** | 2:CHECKING SOLENOID 1 | 4:SOLENOID 1 BAD  0.00A | 5:SCREEN          CHECK
   80000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  80050 scr  **TESTING** | CHECKING SOLENOID 2 | SOLENOID 1 BAD  0.00A | SCREEN          CHECK
-  80400 scr  **TESTING** | CHECKING SOLENOID 2 | SOLENOID 1 BAD  0.00A
-  80450 scr  **TESTING** | CHECKING SOLENOID 2 | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | SCREEN          CHECK
-  80650 scr  **TESTING** | CHECKING LOCKUP SOL | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | SCREEN          CHECK
-  81000 scr  **TESTING** | CHECKING LOCKUP SOL | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A
-  81050 scr  **TESTING** | CHECKING LOCKUP SOL | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  81350 scr  **TESTING** | CHECKING RELAYS | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  81700 scr  **TESTING** | CHECKING RELAYS | 8s | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  81750 scr  **TESTING** | UPSHIFT THE LEVER | 8s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  82700 scr  **TESTING** | UPSHIFT THE LEVER | 7s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  83700 scr  **TESTING** | UPSHIFT THE LEVER | 6s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  84700 scr  **TESTING** | UPSHIFT THE LEVER | 5s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  85700 scr  **TESTING** | UPSHIFT THE LEVER | 4s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  86700 scr  **TESTING** | UPSHIFT THE LEVER | 3s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  87700 scr  **TESTING** | UPSHIFT THE LEVER | 2s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  88700 scr  **TESTING** | UPSHIFT THE LEVER | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SCREEN          CHECK
-  89700 scr  **TESTING** | UPSHIFT THE LEVER | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A
-  89750 scr  **TESTING** | DOWNSHIFT THE LEVER | 8s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +2 MORE ON LAPTOP LOG
+  80050 scr  0:**TESTING** | 2:CHECKING SOLENOID 2 | 4:SOLENOID 1 BAD  0.00A | 5:SCREEN          CHECK
+  80400 scr  0:**TESTING** | 2:CHECKING SOLENOID 2 | 4:SOLENOID 1 BAD  0.00A
+  80450 scr  0:**TESTING** | 2:CHECKING SOLENOID 2 | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:SCREEN          CHECK
+  80650 scr  0:**TESTING** | 2:CHECKING LOCKUP SOL | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:SCREEN          CHECK
+  81000 scr  0:**TESTING** | 2:CHECKING LOCKUP SOL | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A
+  81050 scr  0:**TESTING** | 2:CHECKING LOCKUP SOL | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  81350 scr  0:**TESTING** | 2:CHECKING RELAYS | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  81700 scr  0:**TESTING** | 2:CHECKING RELAYS | 3:8s | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  81750 scr  0:**TESTING** | 2:UPSHIFT THE LEVER | 3:8s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  82700 scr  0:**TESTING** | 2:UPSHIFT THE LEVER | 3:7s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  83700 scr  0:**TESTING** | 2:UPSHIFT THE LEVER | 3:6s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  84700 scr  0:**TESTING** | 2:UPSHIFT THE LEVER | 3:5s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  85700 scr  0:**TESTING** | 2:UPSHIFT THE LEVER | 3:4s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  86700 scr  0:**TESTING** | 2:UPSHIFT THE LEVER | 3:3s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  87700 scr  0:**TESTING** | 2:UPSHIFT THE LEVER | 3:2s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  88700 scr  0:**TESTING** | 2:UPSHIFT THE LEVER | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:SCREEN          CHECK
+  89700 scr  0:**TESTING** | 2:UPSHIFT THE LEVER | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A
+  89750 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:8s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+2 MORE ON LAPTOP LOG
   90000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  90700 scr  **TESTING** | DOWNSHIFT THE LEVER | 7s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +2 MORE ON LAPTOP LOG
-  91700 scr  **TESTING** | DOWNSHIFT THE LEVER | 6s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +2 MORE ON LAPTOP LOG
-  92700 scr  **TESTING** | DOWNSHIFT THE LEVER | 5s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +2 MORE ON LAPTOP LOG
-  93700 scr  **TESTING** | DOWNSHIFT THE LEVER | 4s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +2 MORE ON LAPTOP LOG
-  94700 scr  **TESTING** | DOWNSHIFT THE LEVER | 3s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +2 MORE ON LAPTOP LOG
-  95700 scr  **TESTING** | DOWNSHIFT THE LEVER | 2s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +2 MORE ON LAPTOP LOG
-  96700 scr  **TESTING** | DOWNSHIFT THE LEVER | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +2 MORE ON LAPTOP LOG
-  97700 scr  **TESTING** | DOWNSHIFT THE LEVER | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +3 MORE ON LAPTOP LOG
-  97750 scr  **TESTING** | TURN ON ONLY SPORT | 8s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +3 MORE ON LAPTOP LOG
-  98700 scr  **TESTING** | TURN ON ONLY SPORT | 7s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +3 MORE ON LAPTOP LOG
-  99700 scr  **TESTING** | TURN ON ONLY SPORT | 6s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +3 MORE ON LAPTOP LOG
+  90700 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:7s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+2 MORE ON LAPTOP LOG
+  91700 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:6s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+2 MORE ON LAPTOP LOG
+  92700 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:5s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+2 MORE ON LAPTOP LOG
+  93700 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:4s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+2 MORE ON LAPTOP LOG
+  94700 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:3s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+2 MORE ON LAPTOP LOG
+  95700 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:2s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+2 MORE ON LAPTOP LOG
+  96700 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+2 MORE ON LAPTOP LOG
+  97700 scr  0:**TESTING** | 2:DOWNSHIFT THE LEVER | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+3 MORE ON LAPTOP LOG
+  97750 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:8s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+3 MORE ON LAPTOP LOG
+  98700 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:7s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+3 MORE ON LAPTOP LOG
+  99700 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:6s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+3 MORE ON LAPTOP LOG
  100000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
- 100700 scr  **TESTING** | TURN ON ONLY SPORT | 5s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +3 MORE ON LAPTOP LOG
- 101700 scr  **TESTING** | TURN ON ONLY SPORT | 4s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +3 MORE ON LAPTOP LOG
- 102700 scr  **TESTING** | TURN ON ONLY SPORT | 3s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +3 MORE ON LAPTOP LOG
- 103700 scr  **TESTING** | TURN ON ONLY SPORT | 2s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +3 MORE ON LAPTOP LOG
- 104700 scr  **TESTING** | TURN ON ONLY SPORT | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +3 MORE ON LAPTOP LOG
- 105700 scr  **TESTING** | TURN ON ONLY SPORT | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +4 MORE ON LAPTOP LOG
- 105750 scr  **TESTING** | TURN ON ONLY MANUAL | 8s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +4 MORE ON LAPTOP LOG
- 106700 scr  **TESTING** | TURN ON ONLY MANUAL | 7s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +4 MORE ON LAPTOP LOG
- 107700 scr  **TESTING** | TURN ON ONLY MANUAL | 6s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +4 MORE ON LAPTOP LOG
- 108700 scr  **TESTING** | TURN ON ONLY MANUAL | 5s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +4 MORE ON LAPTOP LOG
- 109700 scr  **TESTING** | TURN ON ONLY MANUAL | 4s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +4 MORE ON LAPTOP LOG
+ 100700 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:5s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+3 MORE ON LAPTOP LOG
+ 101700 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:4s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+3 MORE ON LAPTOP LOG
+ 102700 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:3s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+3 MORE ON LAPTOP LOG
+ 103700 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:2s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+3 MORE ON LAPTOP LOG
+ 104700 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+3 MORE ON LAPTOP LOG
+ 105700 scr  0:**TESTING** | 2:TURN ON ONLY SPORT | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+4 MORE ON LAPTOP LOG
+ 105750 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:8s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+4 MORE ON LAPTOP LOG
+ 106700 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:7s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+4 MORE ON LAPTOP LOG
+ 107700 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:6s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+4 MORE ON LAPTOP LOG
+ 108700 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:5s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+4 MORE ON LAPTOP LOG
+ 109700 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:4s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+4 MORE ON LAPTOP LOG
  110000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
- 110700 scr  **TESTING** | TURN ON ONLY MANUAL | 3s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +4 MORE ON LAPTOP LOG
- 111700 scr  **TESTING** | TURN ON ONLY MANUAL | 2s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +4 MORE ON LAPTOP LOG
- 112700 scr  **TESTING** | TURN ON ONLY MANUAL | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +4 MORE ON LAPTOP LOG
- 113700 scr  **TESTING** | TURN ON ONLY MANUAL | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +5 MORE ON LAPTOP LOG
- 113750 scr  **TESTING** | PRESS THE BRAKE | 8s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +5 MORE ON LAPTOP LOG
- 114700 scr  **TESTING** | PRESS THE BRAKE | 7s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +5 MORE ON LAPTOP LOG
- 115700 scr  **TESTING** | PRESS THE BRAKE | 6s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +5 MORE ON LAPTOP LOG
- 116700 scr  **TESTING** | PRESS THE BRAKE | 5s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +5 MORE ON LAPTOP LOG
- 117700 scr  **TESTING** | PRESS THE BRAKE | 4s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +5 MORE ON LAPTOP LOG
- 118700 scr  **TESTING** | PRESS THE BRAKE | 3s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +5 MORE ON LAPTOP LOG
- 119700 scr  **TESTING** | PRESS THE BRAKE | 2s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +5 MORE ON LAPTOP LOG
+ 110700 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:3s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+4 MORE ON LAPTOP LOG
+ 111700 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:2s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+4 MORE ON LAPTOP LOG
+ 112700 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+4 MORE ON LAPTOP LOG
+ 113700 scr  0:**TESTING** | 2:TURN ON ONLY MANUAL | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+5 MORE ON LAPTOP LOG
+ 113750 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:8s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+5 MORE ON LAPTOP LOG
+ 114700 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:7s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+5 MORE ON LAPTOP LOG
+ 115700 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:6s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+5 MORE ON LAPTOP LOG
+ 116700 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:5s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+5 MORE ON LAPTOP LOG
+ 117700 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:4s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+5 MORE ON LAPTOP LOG
+ 118700 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:3s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+5 MORE ON LAPTOP LOG
+ 119700 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:2s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+5 MORE ON LAPTOP LOG
  120000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
- 120700 scr  **TESTING** | PRESS THE BRAKE | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +5 MORE ON LAPTOP LOG
- 121700 scr  **TESTING** | PRESS THE BRAKE | 1s LEFT. TEST = SKIP | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +6 MORE ON LAPTOP LOG
- 121750 scr  **TESTING** | CHECKING ON/OFF CUT | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | +6 MORE ON LAPTOP LOG
+ 120700 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+5 MORE ON LAPTOP LOG
+ 121700 scr  0:**TESTING** | 2:PRESS THE BRAKE | 3:1s LEFT. TEST = SKIP | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+6 MORE ON LAPTOP LOG
+ 121750 scr  0:**TESTING** | 2:CHECKING ON/OFF CUT | 4:SOLENOID 1 BAD  0.00A | 5:SOLENOID 2 BAD  0.00A | 6:LOCKUP SOL BAD  0.00A | 7:+6 MORE ON LAPTOP LOG
  122250 log  # IBIT done
  122250 log  #   BATTERY    OK   12.4V
  122250 log  #   GAS PEDAL  OK   0%
@@ -2330,18 +2330,18 @@
  122250 log  #   BRAKE           BAD
  122250 log  #   ON/OFF CUT BAD  0.00A
  122250 log  #   SAFETY RESET    SKIP
- 122350 scr  **PROBLEM** | 9 OK, 9 BAD, 1 CHECK | SOLENOID | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SHIFT UP        BAD | +6 MORE ON LAPTOP LOG
- 122400 scr  **PROBLEM** | 9 OK, 9 BAD, 1 CHECK | SOLENOID 1 BAD  0.00A | SOLENOID 2 BAD  0.00A | LOCKUP SOL BAD  0.00A | SHIFT UP        BAD | +6 MORE ON LAPTOP LOG
- 123500 scr  **PROBLEM** | 9 OK, 9 BAD, 1 CHECK | SOLENOID 1 BAD  0.00A | LOCKUP SOL BAD  0.00A | SHIFT UP        BAD | +6 MORE ON LAPTOP LOG
- 123550 scr  **STOCK** | SOLENOID 1 BAD  0.00A | SELF-TEST BAD: | TAP TEST: INFO | **TRANS 140F**
- 123600 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | SELF-TEST BAD: | TAP TEST: INFO | **TRANS 140F**
+ 122350 scr  0:**PROBLEM** | 2:9 OK, 9 BAD, 1 CHECK | 3:SOLENOID | 4:SOLENOID 2 BAD  0.00A | 5:LOCKUP SOL BAD  0.00A | 6:SHIFT UP        BAD | 7:+6 MORE ON LAPTOP LOG
+ 122400 scr  0:**PROBLEM** | 2:9 OK, 9 BAD, 1 CHECK | 3:SOLENOID 1 BAD  0.00A | 4:SOLENOID 2 BAD  0.00A | 5:LOCKUP SOL BAD  0.00A | 6:SHIFT UP        BAD | 7:+6 MORE ON LAPTOP LOG
+ 123500 scr  0:**PROBLEM** | 2:9 OK, 9 BAD, 1 CHECK | 3:SOLENOID 1 BAD  0.00A | 5:LOCKUP SOL BAD  0.00A | 6:SHIFT UP        BAD | 7:+6 MORE ON LAPTOP LOG
+ 123550 scr  0:**STOCK** | 3:SOLENOID 1 BAD  0.00A | 4:SELF-TEST BAD: | 5:TAP TEST: INFO | 6:**TRANS 140F**
+ 123600 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 4:SELF-TEST BAD: | 5:TAP TEST: INFO | 6:**TRANS 140F**
 
 ## wrong gear engaged (S1/S2 swapped): ECU back, WRONG GEAR
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -2384,25 +2384,25 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   6350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7800 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7850 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [3] | **ECO** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   6350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7800 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7850 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  14850 scr  [3] | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
-  14900 scr  [3] | **STOCK** | WRONG GEAR | STOCK SHIFTS. | ON/OFF OFF+ON | TO TRY AGAIN. | **PROBLEM**
+  14850 scr  [3] | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
+  14900 scr  [3] | 0:**STOCK** | 2:WRONG GEAR | 3:STOCK SHIFTS. | 4:ON/OFF OFF+ON | 5:TO TRY AGAIN. | 6:**PROBLEM**
 
 ## shifter switch stuck closed: one shift, SHIFTER?
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -2445,22 +2445,22 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **MANUAL** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7700 scr  **MANUAL** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7750 scr  **MANUAL** | TCU IS DOING | **TRANS 158F**
-   7800 scr  [2] | **MANUAL** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**MANUAL** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7700 scr  0:**MANUAL** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7750 scr  0:**MANUAL** | 2:TCU IS DOING | 6:**TRANS 158F**
+   7800 scr  [2] | 0:**MANUAL** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  17750 scr  [2] | **MANUAL** | A LEVER SWITCH | IS STUCK ON. | CHECK THE | SHIFTER. | **SHIFTER?**
+  17750 scr  [2] | 0:**MANUAL** | 2:A LEVER SWITCH | 3:IS STUCK ON. | 4:CHECK THE | 5:SHIFTER. | 6:**SHIFTER?**
 
 ## SPORT brake hold: HOLDING GEAR on the screen
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -2503,29 +2503,29 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   3950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   4150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   4200 scr  [1] | **SPORT** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7600 scr  **SPORT** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   7650 scr  [2] | **SPORT** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-   8150 scr  [2] | **SPORT** | **TRANS 158F**
+   3950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   4150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   4200 scr  [1] | 0:**SPORT** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7600 scr  0:**SPORT** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   7650 scr  [2] | 0:**SPORT** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+   8150 scr  [2] | 0:**SPORT** | 6:**TRANS 158F**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10200 scr  **SPORT** | **TRANS 158F**
-  10250 scr  [3] | **SPORT** | **TRANS 158F**
-  12900 scr  **SPORT** | **TRANS 158F**
-  12950 scr  [4] | **SPORT** | **TRANS 158F**
-  16800 scr  **SPORT** | **TRANS 158F**
-  16850 scr  [3] | **SPORT** | HOLDING GEAR | **TRANS 158F**
-  17900 scr  **SPORT** | HOLDING GEAR | **TRANS 158F**
-  17950 scr  [2] | **SPORT** | HOLDING GEAR | **TRANS 158F**
+  10200 scr  0:**SPORT** | 6:**TRANS 158F**
+  10250 scr  [3] | 0:**SPORT** | 6:**TRANS 158F**
+  12900 scr  0:**SPORT** | 6:**TRANS 158F**
+  12950 scr  [4] | 0:**SPORT** | 6:**TRANS 158F**
+  16800 scr  0:**SPORT** | 6:**TRANS 158F**
+  16850 scr  [3] | 0:**SPORT** | 2:HOLDING GEAR | 6:**TRANS 158F**
+  17900 scr  0:**SPORT** | 2:HOLDING GEAR | 6:**TRANS 158F**
+  17950 scr  [2] | 0:**SPORT** | 2:HOLDING GEAR | 6:**TRANS 158F**
 
 ## 40 mph round a long gentle bend: not learned as the gyro's zero
      50 log  # TCU boot, reset flags 0x0
      50 log  # cal VSS_PULSES_PER_MILE=4101.0 TPS_CLOSED_V=0.60 TPS_WOT_V=4.00 VBAT_DIVIDER=5.700 IS_AMPS_PER_VOLT=5.405 CALIBRATED=1
      50 log  # cols ms,ctrl,mode,gear,lockup,mph,rpm,rpm_per_mph,tps,atf,volts,faults,warnings,tps_v
-    150 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING
-    200 scr  [-] | **STOCK** | TCU IS OFF: | STOCK SHIFTING | **TRANS 158F**
+    150 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING
+    200 scr  [-] | 0:**STOCK** | 2:TCU IS OFF: | 3:STOCK SHIFTING | 6:**TRANS 158F**
    1500 log  # PBIT
    1500 log  #   BATTERY    OK   12.6V
    1500 log  #   GAS PEDAL  OK   0%
@@ -2568,19 +2568,19 @@
    1900 log  #   BRAKE           --
    1900 log  #   ON/OFF CUT OK   0.00A
    1900 log  #   SAFETY RESET    --
-   7950 scr  [-] | **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   8100 scr  **STOCK** | LEVER NOT IN D | STOCK SHIFTING | **TRANS 158F**
-   8150 scr  LEVER NOT IN D | THE SHIFTING. | **TCU ON**
-   8200 scr  [1] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
+   7950 scr  [-] | 0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   8100 scr  0:**STOCK** | 2:LEVER NOT IN D | 3:STOCK SHIFTING | 6:**TRANS 158F**
+   8150 scr  2:LEVER NOT IN D | 3:THE SHIFTING. | 6:**TCU ON**
+   8200 scr  [1] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
   10000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  10300 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-  10350 scr  [2] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-  11900 scr  **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-  11950 scr  [3] | **ECO** | TCU IS DOING | THE SHIFTING. | **TCU ON**
-  12150 scr  [3] | **ECO** | **TRANS 158F**
-  14000 scr  **ECO** | **TRANS 158F**
-  14050 scr  [4] | **ECO** | **TRANS 158F**
+  10300 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+  10350 scr  [2] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+  11900 scr  0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+  11950 scr  [3] | 0:**ECO** | 2:TCU IS DOING | 3:THE SHIFTING. | 6:**TCU ON**
+  12150 scr  [3] | 0:**ECO** | 6:**TRANS 158F**
+  14000 scr  0:**ECO** | 6:**TRANS 158F**
+  14050 scr  [4] | 0:**ECO** | 6:**TRANS 158F**
   20000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
   30000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
   40000 log  # health slowest_loop_us=1000 stack_margin_bytes=65535
-  45050 scr  [4] | **ECO** | CORNER: | HOLDING GEAR | **TRANS 158F**
+  45050 scr  [4] | 0:**ECO** | 2:CORNER: | 3:HOLDING GEAR | 6:**TRANS 158F**
