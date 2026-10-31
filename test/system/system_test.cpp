@@ -71,6 +71,7 @@ struct Car {
   bool solenoidOpen[3] = {false, false, false};
   bool ecuSenseDead = false;
   bool leverStuckD = false;       // the lever-D input shorted: always reads D
+  bool swapS1S2 = false;          // S1 and S2 wired the wrong way round (TCU side)
   // Calibration: this car's real speed-sensor pulses per mile vs. the
   // firmware's setting, and the O/D OFF button (the ECU stops at 3rd).
   float vssScale = 1.0f;
@@ -97,7 +98,7 @@ uint8_t engagedGear() {
   tcu::solenoidsForGear(ecuGear(), ecuS1, ecuS2);
   const bool s1 = relayIn(0) ? (g_out[pin::S1] && !car.solenoidOpen[0]) : ecuS1;
   const bool s2 = relayIn(1) ? (g_out[pin::S2] && !car.solenoidOpen[1]) : ecuS2;
-  return tcu::gearFromSolenoids(s1, s2);
+  return car.swapS1S2 && relayIn(0) ? tcu::gearFromSolenoids(s2, s1) : tcu::gearFromSolenoids(s1, s2);
 }
 float engineRpm() {
   if (car.cranking) return 250;
@@ -154,7 +155,8 @@ void journal() {
     const std::string line = Serial.out.substr(logPos, nl - logPos);
     if (line.rfind("#", 0) == 0) fprintf(g_journal, "%7u log  %s\n", g_ms, line.c_str());
   }
-  const std::string now = screen_text::tidy([](int page, int x) { return Wire.fb[page][x]; });
+  const std::string now = std::string(Wire.inverted ? "(flash) " : "") +
+                          screen_text::tidy([](int page, int x) { return Wire.fb[page][x]; });
   if (now != lastScreen) {
     fprintf(g_journal, "%7u scr  %s\n", g_ms, now.c_str());
     lastScreen = now;
@@ -179,6 +181,11 @@ void tick() {
   }
   loop();
   journal();
+  // The watchdog: 250 ms without a kick resets the real chip. Here that's a failure.
+  if (g_wdtEnabled && g_ms - g_wdtLastKick > 250) {
+    CHECK(!"the loop went 250 ms without kicking the watchdog");
+    g_wdtLastKick = g_ms;
+  }
 }
 void run(uint32_t ms) { for (uint32_t i = 0; i < ms; i++) tick(); }
 void rampTo(float mph, float mphPerS = 8.0f) {
@@ -225,6 +232,12 @@ void armAndDrive() {
 // The chip resets: every pin an input again. The Mega's bootloader
 // (stk500v2) then clears MCUSR before the sketch runs, whatever the cause.
 void reboot() {
+  // A reset clears RAM (.bss), except .noinit: the firmware's objects start
+  // fresh. (Static locals inside functions can't be reset here: the chip
+  // test, which really resets, is the authority on resets.)
+  selfTest = tcu::SelfTest();
+  controller = tcu::Controller();
+  lastIn = tcu::Inputs();
   for (int i = 0; i < 100; i++) g_out[i] = g_mode[i] = 0;
   MCUSR = 0;
   captureResetFlags();  // what the chip runs before main()
@@ -510,6 +523,7 @@ void s_battery_drops() {
   run(800);
   CHECK(factorySafe());
   CHECK(controller.outputs().faults & tcu::FAULT_SUPPLY);
+  CHECK(screenSays("BATTERY VOLTS"));
 }
 
 void s_ecu_sense_dead_take_over_moving() {
@@ -707,6 +721,12 @@ void s_reset_mid_drive() {
   CHECK(factorySafe());
   CHECK(controller.outputs().warnings & tcu::WARN_WDT_RESET);
   CHECK(screenSays("WAITING"));  // needs a fresh OFF -> ON flip
+  car.switchOn = false;  // flipped OFF and ON: back in control, the restart still noted
+  run(300);
+  car.switchOn = true;
+  run(5000);
+  CHECK(tcuInControl());
+  CHECK(screenSays("TCU RESTARTED"));
 }
 
 void s_reset_button_mid_drive() {
@@ -932,12 +952,95 @@ void s_saved_table_corrupted() {
 }
 
 
+
+void s_wrong_gear() {
+  // A hydraulic fault (or S1/S2 wired the wrong way round): the engaged gear
+  // isn't the one commanded. With lockup on, rpm gives it away.
+  boot();
+  startEngine();
+  armAndDrive();
+  car.tps = 15;
+  rampTo(30, 6);  // 3rd (S2 only): swapped, it's 1st
+  run(4000);
+  CHECK(tcuInControl());
+  CHECK(engagedGear() == 3);
+  CHECK(controller.outputs().lockup);
+  car.swapS1S2 = true;
+  run(2000);
+  CHECK(!tcuInControl());
+  CHECK(controller.outputs().faults & tcu::FAULT_RATIO);
+  CHECK(screenSays("WRONG GEAR"));
+}
+
+void s_shifter_switch_stuck() {
+  boot();
+  startEngine();
+  car.eco = false;
+  car.manual = true;
+  armAndDrive();
+  rampTo(20, 6);
+  g_pin[pin::UP] = LOW;  // the upshift microswitch sticks closed
+  run(11000);
+  CHECK(screenSays("SHIFTER?"));
+  CHECK(engagedGear() == 2);  // one shift, not a run of them
+}
+
+void s_sport_brake_hold_on_screen() {
+  boot();
+  startEngine();
+  car.eco = false;
+  car.sport = true;
+  armAndDrive();
+  car.tps = 20;
+  rampTo(62, 6);
+  run(2000);
+  car.tps = 0;
+  car.brake = true;
+  rampTo(37, 9.3f);
+  car.brake = false;
+  run(300);
+  CHECK(controller.outputs().gearHold);
+  CHECK(screenSays("HOLDING GEAR"));
+}
+
+void s_gentle_bend_at_speed() {
+  // 40 mph round a long 0.15 g bend for half a minute: the yaw (about 5
+  // deg/s) is close to the gyro's zero, but it's a bend, not drift: only a
+  // stop teaches the zero. Then a real corner must still be seen.
+  Wire.yawRaw = yawRawFor(0, 8.0f);
+  boot();
+  startEngine();
+  run(4000);
+  armAndDrive();
+  car.tps = 20;
+  rampTo(40, 6);
+  for (int i = 0; i < 30000; i++) {
+    Wire.yawRaw = yawRawFor(0.15f, 8.0f);
+    tick();
+  }
+  for (int i = 0; i < 300; i++) {
+    Wire.yawRaw = yawRawFor(0.35f, 8.0f);
+    tick();
+  }
+  CHECK(controller.outputs().cornerHold);
+  Wire.yawRaw = 0;
+}
+
 // Every page under conditions the other scenarios don't reach: a winter
 // morning below zero, the SENSORS page's values, and a self-test with more
 // failures than fit on the screen. Its screens go into the golden journal.
 void s_screen_tour() {
   car.atfC = -20;  // -4 F (the PC's analog sender reads it to about a degree)
-  boot();
+  for (int i = 0; i < 100; i++) g_pin[i] = HIGH;
+  applyCarToPins();
+  setup();
+  run(300);
+  press(pin::TEST, 100);  // straight to the TEST page, before the key-on checks have run
+  press(pin::TEST, 100);
+  CHECK(screenSays("HOLD TEST 2 SECONDS"));
+  CHECK(screenSays("TO RUN IT"));
+  press(pin::TEST, 100);  // back to MAIN
+  run(2000);
   CHECK(screenSays("TRANS -"));
   car.atfC = -17.8f;  // 0 F
   run(4000);
@@ -956,6 +1059,11 @@ void s_screen_tour() {
   run(500);
   CHECK(screenSays("BRAKE ON"));
   CHECK(screenSays("LEVER IN D"));
+  car.mph = 37.6f;  // rounds to 38
+  run(1000);
+  CHECK(screenSays("38 MPH"));
+  car.mph = 0;
+  run(1000);
   car.brake = false;
   car.leverInD = false;
   car.tps = 0;
@@ -964,6 +1072,32 @@ void s_screen_tour() {
   run(500);
   CHECK(screenSays("HOLD TEST 2s: AGAIN"));  // the key-on checks have run
   press(pin::TEST, 200);  // MAIN again
+  // A self-test stopped halfway: the engine is started.
+  car.engineRunning = false;
+  car.battV = 12.4f;
+  car.switchOn = true;
+  run(3000);
+  press(pin::TEST, 2100);
+  run(2500);  // into the solenoid checks
+  car.cranking = true;
+  run(300);
+  car.cranking = false;
+  run(500);
+  CHECK(screenSays("STOPPED"));
+  CHECK(screenSays("STOPPED BECAUSE"));
+  CHECK(screenSays("ENGINE IS RUNNING"));
+  // A TEST press at a prompt skips that one prompt, not the ones after it.
+  run(3000);
+  press(pin::TEST, 2100);
+  while (selfTest.active() && selfTest.prompt() != tcu::PR_UP) tick();
+  press(pin::TEST, 100);
+  run(300);
+  CHECK(selfTest.result(tcu::T_BTN_UP) == tcu::TR_SKIP);
+  CHECK(selfTest.prompt() == tcu::PR_DOWN);
+  run(3000);
+  CHECK(selfTest.prompt() == tcu::PR_DOWN);  // still waiting for this one
+  CHECK(selfTest.result(tcu::T_BTN_DOWN) == tcu::TR_NONE);
+  for (int i = 0; i < 60000 && selfTest.active(); i++) tick();
   // A self-test where much is wrong, and nobody answers the prompts.
   car.engineRunning = false;
   car.battV = 12.4f;
@@ -1019,6 +1153,10 @@ const Scenario kScenarios[] = {
     {"throttle sensor wire broken: ECU back, PEDAL SENSOR", s_throttle_sensor_wire_broken},
     {"saved self-test table corrupted over the reset: not restored", s_saved_table_corrupted},
     {"screen tour: below zero, the SENSORS page, a self-test with many failures", s_screen_tour},
+    {"wrong gear engaged (S1/S2 swapped): ECU back, WRONG GEAR", s_wrong_gear},
+    {"shifter switch stuck closed: one shift, SHIFTER?", s_shifter_switch_stuck},
+    {"SPORT brake hold: HOLDING GEAR on the screen", s_sport_brake_hold_on_screen},
+    {"40 mph round a long gentle bend: not learned as the gyro's zero", s_gentle_bend_at_speed},
 };
 
 // --screens DIR: capture the pictures in docs/oled-screens.png (rendered by

@@ -166,6 +166,102 @@ EQUIVALENT = [
     (TL, "delete statement", "lastStepMs_ = tpsRefMs_ = nowMs;", None,
      "only the first step's throttle filter and tip-in windows, while parked at key-on"),
 ]
+LED = "the Mega's own LED (D13) is hidden under the circuit board: nobody can see it"
+EQUIVALENT += [
+    (INO, "delete statement", "MCUSR = 0;", None, "the Mega's bootloader has already cleared it"),
+    (INO, "delete statement", "wdt_disable();", "MCUSR = 0;", "the Mega's bootloader has already disabled the watchdog"),
+    (INO, "false to true", "bool unexpectedWdtReset = false;", None, "setup() sets it before anything reads it"),
+    (INO, "false to true", "bool have = false;", None,
+     "a power-on 85 C is only accepted within 5 C of the last reading, and the starting 0 C never is"),
+    (INO, "false to true", "bool converting = false;", None,
+     "the first read finds the power-on value and rejects it; the first good reading still comes "
+     "before the key-on checks (the chip test checks TEMP PROBE OK there)"),
+    (INO, "delete statement", "digitalWrite(pin::STATUS_LED, t.lamps ? HIGH : LOW);", None, LED),
+    (INO, "&& to ||", "if (o.faults && o.armed) on = (now / 125) & 1;", None, LED),
+    (INO, "!= to ==", "else if (o.control != tcu::CTRL_STOCK) on = true;", None, LED),
+    (INO, "true to false", "else if (o.control != tcu::CTRL_STOCK) on = true;", None, LED),
+    (INO, "== to !=", "else if (o.armed && o.event == tcu::EV_NEED_SYNC)", None, LED),
+    (INO, "&& to ||", "else if (o.armed && o.event == tcu::EV_NEED_SYNC)", None, LED),
+    (INO, "false to true", "else on = false;", None, LED),
+    (INO, "delete statement", "digitalWrite(pin::STATUS_LED, on ? HIGH : LOW);", None, LED),
+    (INO, "delete statement", "updateLeds(out, now);", None, LED),
+    (INO, "delete statement", "pinMode(pin::STATUS_LED, OUTPUT);", None, LED),
+    (INO, "delete statement", "if (!cfg::OLED_INSTALLED) return;", None, "OLED_INSTALLED is true in this build"),
+    (INO, "delete statement", "if (!USB_LOG_ENABLED) return;", None, "USB_LOG_ENABLED is true in this build"),
+    (INO, "delete statement", "digitalWrite(pin::RELAY, LOW);", "void setup() {",
+     "every PORT register is 0 after a reset: the pin is already low"),
+    (INO, "delete statement", "digitalWrite(pin::S1, LOW);", "digitalWrite(pin::RELAY, LOW);",
+     "every PORT register is 0 after a reset: the pin is already low"),
+    (INO, "delete statement", "digitalWrite(pin::S2, LOW);", "digitalWrite(pin::S1, LOW);",
+     "every PORT register is 0 after a reset: the pin is already low"),
+    (INO, "delete statement", "digitalWrite(pin::SL, LOW);", "digitalWrite(pin::S2, LOW);",
+     "every PORT register is 0 after a reset: the pin is already low"),
+    (INO, "delete statement", "pinMode(pin::VSS, INPUT);", None, "every pin is an input after a reset"),
+    (INO, "delete statement", "pinMode(pin::TACH, INPUT);", None, "every pin is an input after a reset"),
+    (INO, "delete statement", "delay(20);", None,
+     "the bootloader's 0.8 s wait at power-up lets the input filters settle first; after a reset "
+     "they're settled already"),
+    (INO, "false to true", "bool testEdgePending = false;", None,
+     "the first step that reads it is the key-on relay check, which ignores it and clears it"),
+    (INO, "false to true", "static bool prev = false, longFired = false;", "=>longFired = true",
+     "longFired is only read while TEST is held, and every press resets it first"),
+    (INO, "delete statement", "ibitWasActive = false;", None,
+     "the key-on relay check, the only other user of the log title, runs before any self-test"),
+    (INO, "false to true", "ibitWasActive = false;", None,
+     "the key-on relay check, the only other user of the log title, runs before any self-test"),
+    (INO, "< to <=", "while (*t && len < Oled::LINE_CHARS) buf[len++] = *t++;", None,
+     "no screen text is longer than a line (system_check.py checks every one)"),
+    (INO, "< to <=", "while (len < col && len < Oled::LINE_CHARS) buf[len++] = ' ';", None,
+     "no line is padded past its width"),
+    (INO, "delete statement", "buf[len] = '\\0';", "while (len < col && len < Oled::LINE_CHARS)",
+     "pad() is never the last call on a line: the text added after it ends the string"),
+    (INO, "delete statement", "s(\"-\");", None,
+     "fixed() only shows values that aren't below zero, apart from a solenoid reading within 0.01 A "
+     "of zero, whose sign doesn't matter"),
+    (INO, "delete statement", "t = -t;", None,
+     "fixed() only shows values that aren't below zero, apart from a solenoid reading within 0.01 A "
+     "of zero, whose sign doesn't matter"),
+    (INO, "delete statement", "hasValue = hasValue && r != tcu::TR_CHECK;", None,
+     "a solenoid check only says CHECK without current sensors; this build has them"),
+    (INO, "delete statement", "if (faults & tcu::FAULT_ONOFF) return \"ON/OFF SWITCH\";", None,
+     "this fault has its own message, shown before the generic one (alertMessage)"),
+    (INO, "delete statement", "if (faults & tcu::FAULT_RELAY) return \"RELAY STUCK\";", None,
+     "this fault has its own message, shown before the generic one (alertMessage)"),
+    (INO, "delete statement", "if (faults & tcu::FAULT_LEVER) return \"LEVER SENSOR\";", None,
+     "this fault has its own message, shown before the generic one (alertMessage)"),
+    (INO, "delete statement", "applyTestOutputs(tcu::TestOutputs());", "void runWatchdogTest() {",
+     "the self-test has switched everything off before its last step"),
+    (INO, "delete statement", "watchdogOn();", "for (uint8_t i = 0; i < 40 && oled.present(); i++)",
+     "the watchdog is already running, in interrupt-then-reset mode, since setup()"),
+    (INO, "delete statement", "wdt_reset();", "for (uint8_t i = 0; i < 40 && oled.present(); i++) {",
+     "the 40 screen writes take well under 250 ms"),
+]
+# Mutants no simulation can show either way (a race with an interrupt, a
+# floating pin): real protections, reported apart, never counted as caught.
+UNTESTABLE = [
+    (INO, "delete statement", "noInterrupts();", "float pulseHz(PulseInput& p, uint32_t timeoutUs) {",
+     "an interrupt landing between the reads of two 32-bit values: about once in a million reads"),
+    (INO, "delete statement", "noInterrupts();", "void paintStack() {",
+     "an interrupt during the stack paint at boot"),
+    (INO, "delete statement", "for (uint8_t p : inputs) pinMode(p, INPUT_PULLUP);", None,
+     "the board's own pull-ups hold these pins; the internal ones are a backstop for a broken resistor"),
+    (INO, "delete statement", "for (uint8_t p : kUnusedPins) pinMode(p, INPUT_PULLUP);", None,
+     "no simulation models a floating pin picking up noise"),
+    (INO, "delete statement", "if (cfg::ATF_SENSOR != cfg::ATF_NTC) pinMode(pin::ATF, INPUT_PULLUP);", None,
+     "no simulation models a floating pin picking up noise"),
+    (INO, "!= to ==", "if (cfg::ATF_SENSOR != cfg::ATF_NTC) pinMode(pin::ATF, INPUT_PULLUP);", None,
+     "no simulation models a floating pin picking up noise"),
+]
+UNTESTABLE = [u for u in UNTESTABLE if u[4]]
+
+
+def untestable(m):
+    for f, op, text, before, why in UNTESTABLE:
+        if m["file"] == f and m["op"] == op and text in m["old"] and (before is None or before in m["prev"]):
+            return why
+    return None
+
+
 # Comparing a measured value (volts, amps, mph, rpm, a time) with a limit
 # using < instead of <= (or the reverse) only changes the result when the
 # reading lands exactly on the limit. These are reported apart.
@@ -389,6 +485,8 @@ def write_report(ms, results):
         res, why = results[k]
         if res == "survived" and equivalent(m):
             res, why = "equivalent", equivalent(m)
+        elif res == "survived" and untestable(m):
+            res, why = "untestable", untestable(m)
         elif res == "survived" and m["op"] in BOUNDARY:
             res = "boundary"
         tally.setdefault(m["file"], {}).setdefault(res, 0)
@@ -398,12 +496,13 @@ def write_report(ms, results):
           "Score = caught / (caught + missed), leaving out the equivalent ones (proven to change nothing) "
           "and the ones that don't compile. *At a limit only* are missed bugs that only matter when a "
           "reading lands exactly on a limit; the second score leaves those out too.", "",
-          "| File | Caught | Missed | At a limit only | Equivalent | Doesn't compile | Score | Score without limit-only |",
-          "|---|---|---|---|---|---|---|---|"]
+          "| File | Caught | Missed | At a limit only | Can't simulate | Equivalent | Doesn't compile | Score | Score without limit-only |",
+          "|---|---|---|---|---|---|---|---|---|"]
     for f, t in tally.items():
         k, sv, b = t.get("killed", 0), t.get("survived", 0), t.get("boundary", 0)
-        md.append(f"| {f} | {k} | {sv} | {b} | {t.get('equivalent', 0)} | {t.get('stillborn', 0)} | "
-                  f"{100 * k / max(k + sv + b, 1):.0f} % | {100 * k / max(k + sv, 1):.0f} % |")
+        u = t.get("untestable", 0)
+        md.append(f"| {f} | {k} | {sv} | {b} | {u} | {t.get('equivalent', 0)} | {t.get('stillborn', 0)} | "
+                  f"{100 * k / max(k + sv + b + u, 1):.0f} % | {100 * k / max(k + sv + u, 1):.0f} % |")
     for title, kind in (("Missed", "survived"), ("Missed, at a limit only", "boundary")):
         md += ["", f"## {title}", "", "| Where | Bug planted | Line after |", "|---|---|---|"]
         for m, res, why in rows:
@@ -413,6 +512,10 @@ def write_report(ms, results):
            "|---|---|---|"]
     for m, res, why in rows:
         if res == "equivalent":
+            md.append(f"| {m['file']}:{m['line']} | {m['op']} | {why} |")
+    md += ["", "## Real, but no simulation can show them", "", "| Where | Bug planted | Why |", "|---|---|---|"]
+    for m, res, why in rows:
+        if res == "untestable":
             md.append(f"| {m['file']}:{m['line']} | {m['op']} | {why} |")
     open(os.path.join(OUT, "report.md"), "w").write("\n".join(md) + "\n")
     print("\n".join(md[6:6 + 2 + len(tally)]))

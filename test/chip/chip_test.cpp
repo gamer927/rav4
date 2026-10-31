@@ -632,7 +632,12 @@ static void s_full_self_test_with_safety_reset() {
   run(300);
   CHECK(g_log.find("# IBIT start") != std::string::npos);
   const size_t ibitAt = g_log.find("# IBIT start");
+  bool sawRestartScreen = false;
   for (int t = 0; t < 120000 && g_log.find("# TCU boot", ibitAt) == std::string::npos; t += 50) {
+    // Between "expecting a reset" and the reset: the screen says what's happening.
+    if (g_log.find("expecting a reset", ibitAt) != std::string::npos && screenSays("RESTART NOW")) {
+      sawRestartScreen = true;
+    }
     car.up = screenSays("UPSHIFT THE LEVER");
     car.down = screenSays("DOWNSHIFT THE LEVER");
     if (screenSays("TURN ON ONLY ECO")) car.eco = true, car.sport = car.manual = false;
@@ -640,8 +645,13 @@ static void s_full_self_test_with_safety_reset() {
     if (screenSays("TURN ON ONLY MANUAL")) car.manual = true, car.eco = car.sport = false;
     car.brake = screenSays("PRESS THE BRAKE");
     if (screenSays("TURN ON/OFF OFF")) car.switchOn = false;
+    if (g_log.find("expecting a reset", ibitAt) != std::string::npos) {
+      run(5);  // the screen is up for well under 250 ms: look often
+      continue;
+    }
     run(50);
   }
+  CHECK(sawRestartScreen);
   CHECK(g_log.find("# IBIT watchdog test: expecting a reset", ibitAt) != std::string::npos);
   const size_t bootAt = g_log.find("# TCU boot", ibitAt);
   CHECK(bootAt != std::string::npos);  // the watchdog really reset the chip
@@ -660,6 +670,16 @@ static void s_full_self_test_with_safety_reset() {
   CHECK(after.find(" BAD") == std::string::npos);
   CHECK(after.find("RESTARTED") == std::string::npos);
   CHECK(!screenSays("PROBLEM"));
+  // The table came back whole: its amps too, and the screen shows the result.
+  CHECK(after.find("SOLENOID 1 OK   1.00A") != std::string::npos);  // 12.6 V into 12.5 ohms
+  CHECK(screenSays("ALL OK"));
+  // A later reset (the reset button) must not bring the old table back again.
+  const size_t again = g_log.size();
+  avr_reset(avr);
+  CHECK(runUntilLog("# TCU boot", 10000, again));
+  run(3000);
+  CHECK(bitResult(g_log.substr(again), "SAFETY RESET") == "--");
+  CHECK(bitResult(g_log.substr(again), "SOLENOID 1") == "--");
 }
 
 // ------------------------------------------------------------------ scenarios: calibrated
