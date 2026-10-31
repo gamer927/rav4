@@ -139,6 +139,9 @@ EQUIVALENT = [
      "it then marks the last step with the brake on instead of the first one off: 10 ms apart"),
     (TL, "|| to &&", "if (pendingGear_ || gear_ <= 1) return;", None,
      "requestShift() refuses a shift while one is pending and below 1st"),
+    (TL, "false to true", "if (!requestShift(gear_ - 1, in.speedMph, false)) return false;", "=>return true;",
+     "a brake downshift is only refused while a shift is in progress, when the map's own request "
+     "would be refused too"),
     (TL, "+ to -", "tpsShift_ = tau == 0", "=>(float)(tau - dt)",
      "the throttle smoothing's time constant becomes 0.79 s instead of 0.81 s"),
     (TL, "|| to &&", "if (!cfg::BRAKE_DOWNSHIFT[m]", "=>cornering_ && gear_ <= 1",

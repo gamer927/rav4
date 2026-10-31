@@ -1917,6 +1917,93 @@ static void test_sport_gentle_braking_still_downshifts() {
   CHECK(s.c.outputs().gear <= 2);
 }
 
+
+// ---------------------------------------------------------------------------
+// Fourth batch: the last gaps in the SPORT brake-downshift and message logic.
+
+static void test_braking_in_a_low_gear_still_upshifts() {
+  std::printf("SPORT: off the throttle onto the brake in 2nd at 50 mph: 1st would over-rev, so no\n"
+              "  brake downshift, and once the lift-off hold ends the map's upshift still comes\n");
+  Sim s;
+  s.select(false, true, false);
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(50);
+  s.step(2000);
+  s.in.tpsPct = 100;  // kickdown
+  s.step(1500);
+  CHECK(s.c.outputs().gear == 2);
+  s.in.tpsPct = 0;  // straight off the throttle and onto the brake
+  s.in.brake = true;
+  bool up = false;
+  for (int i = 0; i < (int)(cfg::LIFT_HOLD_MS + 1500) / 10 && !up; i++) {
+    s.in.speedMph -= 0.03f;  // 3 mph/s
+    s.step(10);
+    up = s.c.outputs().gear >= 3;
+  }
+  CHECK(up);
+}
+
+static void test_refusals_while_braking_are_silent() {
+  std::printf("refused automatic downshifts while braking: no NO SHIFT on the screen\n");
+  // SPORT, hard braking: brake downshifts come one after another, and one
+  // asked for within 0.7 s of the last is refused, quietly.
+  Sim s;
+  s.select(false, true, false);
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(62.1);
+  s.step(1500);
+  s.in.tpsPct = 0;
+  s.in.brake = true;
+  for (float v = 62.1f; v > 15; v -= 0.15f) {  // 15 mph/s: an emergency stop
+    s.in.speedMph = v;
+    s.step(10);
+    const Event e = s.c.outputs().event;
+    CHECK(e != EV_DENY_BUSY && e != EV_DENY_OVERREV && e != EV_DENY_LIMIT && e != EV_DENY_TOO_SLOW);
+  }
+  // MANUAL: a downshift by the driver, then an emergency stop straight
+  // after: the forced downshift waits for the first to finish, quietly.
+  Sim m;
+  m.select(false, false, true);
+  enterMoving(m, 3, 43.5f, false);
+  m.in.brake = true;
+  m.rampTo(12, 15);
+  m.step(200);
+  m.tap(m.in.down);  // 3 -> 2 at 12 mph
+  CHECK(m.c.outputs().gear == 2);
+  for (float v = 12; v > 0; v -= 0.15f) {
+    m.in.speedMph = v;
+    m.step(10);
+    const Event e = m.c.outputs().event;
+    CHECK(e != EV_DENY_BUSY && e != EV_DENY_OVERREV);
+  }
+  m.step(1000);
+  CHECK(m.c.outputs().gear == 1);
+}
+
+static void test_no_brake_downshift_in_a_long_corner() {
+  std::printf("SPORT: no brake downshift mid-corner, even past the corner hold's time limit\n");
+  Sim s;
+  s.select(false, true, false);
+  s.arm();
+  s.in.tpsPct = 20;
+  s.cruise(62.1);
+  s.step(1500);
+  s.in.latValid = true;
+  s.in.latG = 0.3f;  // a long sweeper
+  s.step(cfg::CORNER_HOLD_MAX_MS + 500);
+  s.in.tpsPct = 0;
+  s.in.brake = true;
+  bool stayed = true;
+  for (float v = 62.1f; v > 50; v -= 0.093f) {
+    s.in.speedMph = v;
+    s.step(10);
+    stayed = stayed && s.c.outputs().gear == 4;
+  }
+  CHECK(stayed);
+}
+
 int main() {
   test_solenoid_table();
   test_boot_requires_switch_cycle();
@@ -1985,6 +2072,9 @@ int main() {
   test_highway_lockup_comes_back_under_load();
   test_lockup_waits_after_takeover();
   test_sport_gentle_braking_still_downshifts();
+  test_braking_in_a_low_gear_still_upshifts();
+  test_refusals_while_braking_are_silent();
+  test_no_brake_downshift_in_a_long_corner();
   std::printf("\n%d checks, %d failures\n", g_checks, g_failures);
   return g_failures ? 1 : 0;
 }
